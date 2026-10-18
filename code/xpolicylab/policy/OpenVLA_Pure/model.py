@@ -2,6 +2,15 @@
 
 Variant B: 3 cameras + proprio projector, LoRA r=32 all-linear on OpenVLA-7B.
 Actions are decoded autoregressively as 256-bin discrete tokens (open-loop chunk = 1).
+
+------------------------------------------------------------------------------
+第二轮审查的最小修复（仅诊断/正确性，未改算法、未重训、未改旧检查点）
+  [R2-1] 动作离散化统一走 action_codec（原来是本文件里手写的 BIN_CENTERS 查表，
+         与训练脚本各写一份，存在 1 个 token 的偏移与 PAD 边界缺陷）。
+  [R2-3] 任务指令改为显式契约：固定使用 config 的训练指令，
+         观测里的 instruction 若不同则打印一次警告并记入动作日志，
+         非 push_T 任务启动时打印“不具备跨任务泛化证据”的声明。
+------------------------------------------------------------------------------
 """
 import json
 import os
@@ -25,6 +34,21 @@ from prismatic.models.projectors import ProprioProjector
 from prismatic.vla.constants import ACTION_DIM, ACTION_TOKEN_BEGIN_IDX
 
 from XPolicyLab.model_template import ModelTemplate
+from XPolicyLab.policy.OpenVLA_Pure.action_codec import (
+    LEGAL_TOKEN_MAX,
+    LEGAL_TOKEN_MIN,
+    MODE_LEGACY,
+    N_BINS,
+    decode_indices,
+    denormalize,
+    token_ids,
+    validate_token_ids,
+)
+from XPolicyLab.policy.OpenVLA_Pure.deploy_contract import (
+    TRAINED_TASKS,
+    prompt_text,
+    resolve_instruction,
+)
 from XPolicyLab.policy.OpenVLA_OFT.model import ensure_hwc_uint8, extract_image, extract_prompt
 from XPolicyLab.utils.process_data import (
     get_robot_action_dim_info,
@@ -41,8 +65,12 @@ except TypeError:
     AutoImageProcessor.register("openvla", PrismaticImageProcessor)
     AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
 
-BINS = 256
-BIN_CENTERS = np.linspace(-1.0, 1.0, BINS).astype(np.float32)
+BINS = N_BINS
+# [R2-1] 说明：现有 6000 步检查点的标签是用旧编码（MODE_LEGACY）烧进权重的，
+# 因此解码必须沿用同一栅格 LEVELS[idx]；action_codec.decode_indices 正是这一栅格。
+# 编码侧（训练标签）已修正为 MODE_FIXED，见 training/train_pushT_pure2.py。
+TRAIN_CODEC_MODE = MODE_LEGACY
+DEFAULT_INSTRUCTION = "Push the T-shaped block to align it precisely with the gray T-shaped pad."
 
 # KV-cache decoding: one multimodal forward for the prefix, then one token per step.
 # Set PURE_NO_KV=1 to fall back to the (slow) full-recompute loop for equivalence checks.
@@ -123,15 +151,39 @@ class Model(ModelTemplate):
         )
         self.proprio_projector = self.proprio_projector.to(self.device).eval()
 
-        self.instr = model_cfg.get("prompt") or "Push the T-shaped block to align it precisely with the gray T-shaped pad."
         self.task_name = model_cfg.get("task_name")
         self.action_type = model_cfg.get("action_type", "joint")
         env_cfg = model_cfg.get("env_cfg") or model_cfg.get("env_cfg_type")
         self.robot_action_dim_info = get_robot_action_dim_info(env_cfg) if env_cfg is not None else None
+
+        # [R2-3] 指令来源显式化：默认 config（= 训练指令），观测指令被忽略并告警。
+        self.instruction_source = model_cfg.get("instruction_source", "config")
+        _res = resolve_instruction(
+            config_prompt=model_cfg.get("prompt"),
+            task_name=self.task_name,
+            obs_instruction=None,
+            instruction_source=self.instruction_source,
+        )
+        self.instr = _res["instruction"]
         self.default_prompt = model_cfg.get("prompt", self.task_name)
+        self._warned = set()
+        for w in _res["warnings"]:
+            self._warn(w)
+        print("[OpenVLA_Pure] instruction pinned from %s (task=%s): %r"
+              % (self.instruction_source, self.task_name, self.instr), flush=True)
+        if self.task_name not in TRAINED_TASKS:
+            print("[OpenVLA_Pure][WARN] checkpoint trained on %s only; task=%s results are "
+                  "NOT cross-task generalisation evidence" % (list(TRAINED_TASKS), self.task_name),
+                  flush=True)
+
         self.observation_window = None
         self._latest_env_idx_list = [0]
         self._pids = None
+        self.last_decode = None   # [R2] 最近一次推理的 token / 概率轨迹（诊断用）
+
+    @staticmethod
+    def _warn(msg):
+        print("[OpenVLA_Pure][WARN] %s" % msg, flush=True)
 
     # ------------------------------------------------------------------ obs
     def update_obs(self, obs):
@@ -148,12 +200,24 @@ class Model(ModelTemplate):
     def _prompt_ids(self):
         if self._pids is None:
             builder = PurePromptBuilder("openvla")
-            builder.add_turn("human", "What action should the robot take to " + self.instr + "?")
+            builder.add_turn("human", prompt_text(self.instr))
             ids = self.processor.tokenizer(builder.get_prompt(), return_tensors="pt").input_ids.to(self.device)
             if int(ids[0, -1].item()) != 29871:
                 ids = torch.cat([ids, torch.tensor([[29871]], dtype=ids.dtype, device=self.device)], dim=1)
             self._pids = ids
         return self._pids
+
+    def _note_instruction(self, obs_instruction):
+        """[R2-3] 观测指令只做核对与告警，不参与推理。"""
+        res = resolve_instruction(
+            config_prompt=self.instr,
+            task_name=self.task_name,
+            obs_instruction=obs_instruction,
+            instruction_source=self.instruction_source,
+        )
+        for w in res["warnings"]:
+            self._warn(w)
+        return res
 
     @torch.no_grad()
     def infer(self, observation):
@@ -169,12 +233,21 @@ class Model(ModelTemplate):
         ).astype(np.float32)
         proprio = torch.from_numpy(proprio_np).unsqueeze(0).to(self.device)
 
+        instr_info = self._note_instruction(observation.get("instruction"))
         prompt_ids = self._prompt_ids()
         tokens = []
+        probs = []   # [R2] 每步 256 个窗口 token 的 softmax 最大值与其下标
+
+        win = ACTION_TOKEN_BEGIN_IDX + 1   # 解码窗口起点 = 合法动作 token 最小值 31744
 
         def _pick(logits):
-            cand = logits[ACTION_TOKEN_BEGIN_IDX + 1: ACTION_TOKEN_BEGIN_IDX + 1 + BINS]
-            return int(torch.argmax(cand).item())
+            cand = logits[win: win + BINS]
+            p = torch.softmax(cand.float(), dim=-1)
+            top = int(torch.argmax(p).item())
+            probs.append({"idx": top, "p": float(p[top].item()),
+                          "top3": [[int(j), float(p[j].item())]
+                                   for j in torch.topk(p, 3).indices.tolist()]})
+            return top
 
         if _USE_KV:
             # Prefix (images + prompt + proprio) once, then 13 cached single-token steps.
@@ -223,9 +296,22 @@ class Model(ModelTemplate):
                 logits = out.logits[0, -1]
                 tokens.append(_pick(logits))
 
-        centers = BIN_CENTERS[np.clip(np.asarray(tokens), 0, BINS - 1)]
-        action = (centers + 1.0) / 2.0 * (self.q99 - self.q01 + 1e-8) + self.q01
-        action = action.reshape(1, -1).astype(np.float32)
+        # [R2-1] 统一解码：tokens 是解码窗口下标（0..255），token id = 31744+idx。
+        tok_ids = token_ids(np.asarray(tokens, dtype=np.int64))
+        validate_token_ids(tok_ids)          # 越界 / PAD 会直接抛异常，不静默
+        action_norm = decode_indices(np.asarray(tokens, dtype=np.int64))
+        action = denormalize(action_norm, self.q01, self.q99)
+        action = np.asarray(action, dtype=np.float32).reshape(1, -1)
+
+        self.last_decode = {
+            "tokens": [int(t) for t in tokens],
+            "token_ids": [int(t) for t in tok_ids],
+            "probs": probs,
+            "action_codec_mode": TRAIN_CODEC_MODE,
+            "instruction_used": instr_info["instruction"],
+            "instruction_source": instr_info["source"],
+        }
+
         _CALL_IDX["n"] += 1
         _log_call({
             "call": _CALL_IDX["n"],
@@ -233,8 +319,13 @@ class Model(ModelTemplate):
             "state": [round(float(v), 5) for v in np.asarray(state).reshape(-1)[:14]],
             "proprio_norm": [round(float(v), 4) for v in np.asarray(proprio_np).reshape(-1)[:14]],
             "tokens": [int(t) for t in tokens],
+            "token_ids": [int(t) for t in tok_ids],
             "action": [round(float(v), 5) for v in action[0]],
             "delta_action_minus_state": [round(float(a - b), 5) for a, b in zip(action[0], np.asarray(state).reshape(-1)[:14])],
+            "instruction_used": instr_info["instruction"],
+            "instruction_source": instr_info["source"],
+            "obs_instruction": instr_info["obs_instruction"],
+            "obs_instruction_ignored": bool(instr_info["obs_ignored"]),
         })
         return action
 

@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """Pure OpenVLA (autoregressive action tokens) with configurable INPUTS.
 --cams 1|3 and --proprio 0|1 let us isolate the contribution of the action-output
-METHOD (autoregressive discrete tokens) from the OBSERVATION INPUTS (1 cam vs 3 cams + proprio)."""
+METHOD (autoregressive discrete tokens) from the OBSERVATION INPUTS (1 cam vs 3 cams + proprio).
+
+[R2-1] 修复说明（第二轮审查）：
+  编码侧改为统一走 action_codec（MODE_FIXED）：idx = clip(digitize(v)-1, 0, 255)，
+  token = ACTION_TOKEN_BEGIN_IDX + idx + 1 ∈ 31744..31999，永不产生 PAD(32000)。
+  修复前是 idx = digitize(v) ∈ 1..256 再 +1，导致标签落在 31745..32000：
+    * 整体比部署解码窗口多偏移 1 个 token；
+    * v >= q99 时产出 token 32000 == pad_token_id（实测 12.23% 的标签）。
+  注意：已发布的 6000 步检查点是用修复前的编码训练出来的（对应 action_codec.MODE_LEGACY），
+  本轮未重新训练、也未改动旧检查点；本脚本的修复只对后续训练生效。"""
 import os, sys, json, time, random, argparse
 import numpy as np, torch, h5py, cv2
 from PIL import Image
@@ -32,22 +41,25 @@ from prismatic.models.projectors import ProprioProjector
 from prismatic.vla.constants import ACTION_TOKEN_BEGIN_IDX, STOP_INDEX, ACTION_DIM, NUM_ACTIONS_CHUNK, IGNORE_INDEX
 
 sys.argv = ["pure2"] + _REAL_ARGV
+# [R2-1] 统一的动作编解码实现（纯 numpy，训练/评测/部署共用）
+sys.path.insert(0, os.environ.get("PUSHT_CODEC_DIR", os.path.dirname(os.path.abspath(__file__))))
+import action_codec as AC
+
 CAMS3 = ["cam_head", "cam_left_wrist", "cam_right_wrist"]
 INSTR = "Push the T-shaped block to align it precisely with the gray T-shaped pad."
-BINS = 256
-BIN_CENTERS = np.linspace(-1.0, 1.0, BINS).astype(np.float32)
+BINS = AC.N_BINS
+CODEC_MODE = AC.MODE_FIXED          # 修复后的编码：0..255，满射，绝不产生 PAD
+BIN_CENTERS = AC.LEVELS
 
 def log(m): print("[%s] %s" % (time.strftime("%H:%M:%S"), m), flush=True)
 def c14(h, g):
     return np.concatenate([h[g+"/left_arm_joint_states"][:], h[g+"/left_ee_joint_states"][:],
                            h[g+"/right_arm_joint_states"][:], h[g+"/right_ee_joint_states"][:]], axis=1).astype(np.float32)
 def decode(buf): return cv2.imdecode(np.frombuffer(bytes(buf), np.uint8), cv2.IMREAD_COLOR)[..., ::-1].copy()
-def norm_a(a, q01, q99): return np.clip(2.0*(a-q01)/(q99-q01+1e-8)-1.0, -1, 1).astype(np.float32)
+def norm_a(a, q01, q99): return AC.normalize(a, q01, q99)
 def norm_pr(s, pmin, pmax): return np.clip(2.0*(s-pmin)/(pmax-pmin+1e-8)-1.0, -1, 1).astype(np.float32)
-def detok(tokens, q01, q99):
-    c = BIN_CENTERS[np.clip(tokens, 0, BINS-1)]
-    return (c + 1.0)/2.0*(q99-q01+1e-8) + q01
-def tok(a_norm): return np.digitize(np.clip(a_norm, -1, 1), BIN_CENTERS).astype(np.int64)
+def detok(tokens, q01, q99): return AC.denormalize(AC.decode_indices(tokens, mode=CODEC_MODE), q01, q99)
+def tok(a_norm): return AC.encode_indices(a_norm, mode=CODEC_MODE).astype(np.int64)
 
 def action_stats(eps):
     A = []
@@ -176,6 +188,8 @@ def main():
             T = h["action/left_arm_joint_states"].shape[0]; t = random.randrange(0, max(1, T-1))
             pv, pr = obs(h, t, proc, args.cams, bool(args.proprio), pmin, pmax)
             gt_tok = tok(norm_a(c14(h, "action")[t], q01, q99))
+            # [R2-1] 训练目标必须落在合法动作 token 窗口内（不得出现 PAD / 越界）
+            AC.assert_legal_token_ids(AC.token_ids(gt_tok))
         inp, lab = make_ids(proc, gt_tok)
         inp = inp.to("cuda"); lab = lab.to("cuda")
         opt.zero_grad(set_to_none=True)
@@ -203,6 +217,7 @@ def main():
     if pp is not None: torch.save(pp.state_dict(), d + "/proprio_projector--pure.pt")
     json.dump({"variant": "pure_openvla", "cams": args.cams, "proprio": args.proprio, "steps": args.steps,
                "lr": args.lr, "lora_r": 32, "target_modules": "all-linear", "num_bins": BINS,
+               "codec_mode": CODEC_MODE,
                "heldout_autoreg_L1": l1, "q01": q01.tolist(), "q99": q99.tolist()},
               open(OUT + "/run_meta.json", "w"), indent=1)
     log("PURE2_TRAIN_DONE steps=%d" % step)
