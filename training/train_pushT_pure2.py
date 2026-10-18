@@ -40,7 +40,9 @@ from peft import LoraConfig, get_peft_model
 # The training script runs outside the package; reuse the identical deployment helper.
 _CODE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "code", "xpolicylab", "policy", "OpenVLA_Pure"))
 if not os.path.isfile(os.path.join(_CODE, "pure_autoreg_mode.py")):
-    _CODE = os.path.join(RT, "OpenVLA_Pure")
+    _CODE = os.environ.get("PUSHT_PURE_POLICY_DIR", "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_Pure")
+if not os.path.isfile(os.path.join(_CODE, "pure_autoreg_mode.py")):
+    raise FileNotFoundError("pure_autoreg_mode.py not installed; set PUSHT_PURE_POLICY_DIR to deployed OpenVLA_Pure directory")
 if _CODE not in sys.path:
     sys.path.insert(0, _CODE)
 from pure_autoreg_mode import enable_pure_autoreg
