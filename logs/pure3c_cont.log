@@ -1,0 +1,47 @@
+Using ARX constants:
+  NUM_ACTIONS_CHUNK = 1
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[15:43:19] train=80 val=20 | cams=3 proprio=1 | chunk=1 dim=14 | FIXED_SAMPLES=20
+09/17 [15:43:20] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:02,  1.44s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:02<00:01,  1.07s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:02<00:00,  1.41it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:02<00:00,  1.19it/s]
+[15:44:41] cams=3 proprio=True | LoRA trainable=110.8M | proprio projector=16.8M
+[15:44:46] loaded LoRA from /home/dgut/pusht_runtime/run_pure3c/checkpoints/final (879 tensors)
+[15:44:46] loaded proprio projector from /home/dgut/pusht_runtime/run_pure3c/checkpoints/final/proprio_projector--pure.pt
+[15:45:00] step=1 loss=1.4637 lr=1.00e-04 gnorm=4.06 mem=22.2GB 14.3s
+[15:49:23] step=200 loss=1.5676 lr=1.00e-04 gnorm=1.79 mem=23.1GB 277.4s
+[15:53:51] step=400 loss=2.4136 lr=1.00e-04 gnorm=4.50 mem=23.1GB 545.4s
+[15:58:19] step=600 loss=1.7143 lr=1.00e-04 gnorm=2.84 mem=23.1GB 812.7s
+[16:02:51] step=800 loss=1.8584 lr=1.00e-04 gnorm=2.56 mem=23.1GB 1084.7s
+[16:07:51] step=1000 loss=1.6965 lr=1.00e-04 gnorm=3.73 mem=23.1GB 1384.6s
+/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/peft/utils/save_and_load.py:180: UserWarning: Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.
+  warnings.warn("Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.")
+[16:07:53] saved /home/dgut/pusht_runtime/run_pure3c_cont/checkpoints/step1000
+[16:09:49] EVAL step=1000 autoreg_L1=0.0811 pred_std=0.5152 gt_std=0.5036 ratio=1.023 uniq=20/20
+[16:14:36] step=1200 loss=1.6491 lr=1.00e-04 gnorm=2.85 mem=23.1GB 1790.1s
+[16:19:22] step=1400 loss=1.3612 lr=1.00e-04 gnorm=2.59 mem=23.1GB 2075.9s
+[16:24:01] step=1600 loss=1.6806 lr=1.00e-04 gnorm=3.90 mem=23.1GB 2354.8s
+[16:28:49] step=1800 loss=1.9292 lr=1.00e-04 gnorm=3.38 mem=23.1GB 2642.7s
+[16:33:39] step=2000 loss=1.3740 lr=1.00e-05 gnorm=2.96 mem=23.1GB 2932.8s
+[16:33:41] saved /home/dgut/pusht_runtime/run_pure3c_cont/checkpoints/step2000
+[16:35:32] EVAL step=2000 autoreg_L1=0.0647 pred_std=0.4698 gt_std=0.5036 ratio=0.933 uniq=20/20
+[16:40:05] step=2200 loss=1.3664 lr=1.00e-05 gnorm=1.97 mem=23.1GB 3319.3s
+[16:44:13] step=2400 loss=1.0392 lr=1.00e-05 gnorm=1.91 mem=23.1GB 3567.1s
+[16:48:25] step=2600 loss=1.5531 lr=1.00e-05 gnorm=3.55 mem=23.1GB 3818.9s
+[16:52:21] step=2800 loss=1.4886 lr=1.00e-05 gnorm=1.70 mem=23.1GB 4055.0s
+[16:56:23] step=3000 loss=1.1598 lr=1.00e-05 gnorm=2.69 mem=23.1GB 4296.8s
+[16:56:24] saved /home/dgut/pusht_runtime/run_pure3c_cont/checkpoints/step3000
+[16:58:09] EVAL step=3000 autoreg_L1=0.0586 pred_std=0.4782 gt_std=0.5036 ratio=0.950 uniq=20/20
+[16:59:54] FINAL_EVAL autoreg_L1=0.0586 pred_std=0.4782 gt_std=0.5036 ratio=0.950 uniq=20/20
+[16:59:55] PURE2_TRAIN_DONE steps=3000
