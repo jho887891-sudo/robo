@@ -13,5 +13,6 @@
 | 上游依赖源码 | 未复制 | `XPolicyLab/utils/process_data.py`、`prismatic/*`（openvla_oft 内的 OpenVLA 实现）、`scripts/robodojo.sh` 均属上游仓库，通过 `patches/` 与 `code/` 说明其调用关系；不重复搬运 |
 | 实际运行的 trust_remote_code 动态模块 | **已关闭** | 已原样收录到 `code/openvla_dynamic_modules/`（modeling / configuration / processing 三份，附 SHA-256）；实测与 `openvla_oft_src/prismatic/extern/hf/` 同名文件字节一致 |
 | 修复后的动作编码器的训练验证 | **未执行（本轮禁止重训）** | `action_codec.MODE_FIXED` 已通过 20 项单元测试与真实标签合法性测试，但**没有任何模型是用它训练出来的**；它是否能改善闭环执行，本轮无法回答 |
+| keep 机制下的训练效果/小样本过拟合实验 | **未执行（等待批准）** | 第三轮只做机制修复与验证；重训方案见 `report/AUDIT_R3_AUTOREGRESSIVE_MASK.md` 第 9 节 |
 | 修复后策略的闭环/仿真验证 | **未执行** | 本轮只改诊断代码与最小的部署指令/编解码逻辑，未启动 RoboDojo 仿真，也没有任何成功率数据 |
 | 部署侧重跑（新代码下的 1 个回合） | **未执行** | 旧检查点在修复后的解码路径下行为应与之前一致（解码数学未变），但这一点未经闭环实测确认 |

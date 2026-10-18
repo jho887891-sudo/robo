@@ -1,0 +1,79 @@
+START 2026年 10月 18日 星期日 16:55:21 UTC
+2026-10-18 16:55:29.301601: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-18 16:55:29.429773: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+Using ALOHA constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+Using ALOHA constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[OpenVLA_Pure] loading base /home/dgut/pusht_runtime/model_cache/openvla-7b
+10/18 [16:55:36] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.51it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.83it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  3.06it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.95it/s]
+[OpenVLA_Pure] LoRA merged (cameras=3)
+[OpenVLA_Pure] instruction pinned from config (task=push_T): 'Push the T-shaped block to align it precisely with the gray T-shaped pad.'
+[probe] sample = episode_0000066.hdf5 t=221 ; prompt_len=36
+[probe] legacy idx (checkpoint encoding) = [218, 185, 146, 44, 92, 140, 1, 106, 1, 1, 256, 185, 189, 256]
+[probe] labels containing PAD(32000): True
+LlamaModel is using LlamaSdpaAttention, but `torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True`. Falling back to the manual attention implementation, but specifying the manual implementation will be required from Transformers version v5.0.0 onwards. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.
+
+[1] all_actions_mask at the 14 action positions:
+    [True, True, True, True, True, True, True, True, True, True, True, True, True, True]   (n_true=14)
+    prompt positions masked=0, STOP position masked=False
+[2] masked max|emb| at 14 action positions = 0.000000   norms[0:4] = [0.0, 0.0, 0.0, 0.0]
+[2] kept   max|emb| at 14 action positions = 0.096680   norms[0:4] = [1.4651, 1.2338, 1.0597, 1.4613]
+    reference: vision row norm = 107.0172, prompt row norm = 213.1200
+
+[3] full-sequence: masked (training) vs kept (autoregressive)
+    dim              idxM   idxK       pM       pK       actM       actK
+    left_arm_j0       212    212   0.1406   0.1406    0.22826    0.22826
+    left_arm_j1       187    187   0.0993   0.0874    1.63265    1.63265
+    left_arm_j2       146    146   0.1703   0.1568    1.06247    1.06247
+    left_arm_j3        44     44   0.0708   0.0813   -0.96804   -0.96804
+    left_arm_j4        81     81   0.0721   0.0878   -0.12675   -0.12675
+    left_arm_j5       143    143   0.1459   0.1545   -0.14719   -0.14719
+    left_gripper        1      1   0.9944   0.9954    0.00392    0.00392
+    right_arm_j0      106    106   0.9994   0.9995    0.00063    0.00063
+    right_arm_j1        1      1   0.9999   0.9999    0.00896    0.00896
+    right_arm_j2        1      1   1.0000   1.0000    0.00737    0.00737
+    right_arm_j3      255    255   0.8304   0.8426    0.00000    0.00000
+    right_arm_j4      185    185   0.9986   0.9980    0.00046    0.00046
+    right_arm_j5      189    189   0.9986   0.9988    0.00167    0.00167
+    right_gripper     255    255   0.8966   0.9084    1.00000    1.00000
+    tokens equal 14/14 ; |action| L1 = 0.000000 (max 0.000000) ; A vs gt L1 = 0.008844 ; B vs gt L1 = 0.008844
+
+[4] deployment (KV cache, model.Model.infer) tokens = [212, 187, 144, 44, 81, 143, 1, 106, 1, 1, 255, 185, 189, 255]
+    free-running kept-mechanism tokens          = [212, 187, 144, 44, 81, 143, 1, 106, 1, 1, 255, 185, 189, 255] (equal 13/14 vs masked-mechanism)
+    deployment tokens vs full-seq(GT-prefix) equal: 13/14 (masked) / 13/14 (kept)
+    deployment == free-running(kept)?           True
+
+[5] causality: attention shape [32, 50, 50] ; max|attn| strictly above diagonal = 1.000e+00 ; strictly causal = False
+    perturb future action token #10 -> earlier prediction positions unchanged: False
+    logit maxdiff per prediction position: [4.8359, 3.2031, 3.6172, 2.0938, 0.9375, 1.8203, 2.25, 4.2188, 3.8125, 3.4688, 3.0312, 2.4688, 3.25, 5.5625]
+R3_MASK_PROBE_DONE
+PROBE_RC=0
+ALLDONE 2026年 10月 18日 星期日 16:59:35 UTC

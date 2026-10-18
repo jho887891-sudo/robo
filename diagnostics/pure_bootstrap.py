@@ -33,8 +33,10 @@ def bootstrap():
     for p in (OFT, ROBO):
         if p not in sys.path:
             sys.path.insert(0, p)
+    # 注意：只追加，不要重建 sys.argv —— 重建会把调用方自己的命令行参数吃掉
+    # （第三轮实测踩过这个坑：--out/--n 等参数被静默丢弃）。
     if "--aloha" not in sys.argv:
-        sys.argv = [sys.argv[0], "--aloha"]
+        sys.argv.append("--aloha")
 
 
 def deploy_cfg(task="push_T", env_cfg_type="arx_x5", action_type="joint", **over):

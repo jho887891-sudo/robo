@@ -130,7 +130,8 @@ def evaluate(vla, pp, proc, cams, use_proprio, pmin, pmax, q01, q99, eps, n):
                 inp = pids.to("cuda")
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 out = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
-                          labels=inp.clone(), proprio=pr, proprio_projector=pp)
+                          labels=inp.clone(), proprio=pr, proprio_projector=pp,
+                          mask_action_inputs=False)  # [R3] 与部署机制一致
             lg = out.logits[0, -1]
             cand = lg[ACTION_TOKEN_BEGIN_IDX+1: ACTION_TOKEN_BEGIN_IDX+1+BINS]
             toks.append(int(torch.argmax(cand).item()))
@@ -179,6 +180,12 @@ def main():
     ps = trainable_list(vla, pp)
     opt = torch.optim.AdamW(ps, lr=args.lr, weight_decay=0.0)
     sched = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=[args.lr_milestone], gamma=0.1)
+    # [R3] 自回归训练必须保留前序动作标记的正常输入嵌入（修复前被 all_actions_mask 置零）
+    if hasattr(vla, "set_action_input_masking"):
+        vla.set_action_input_masking("keep")
+        log("action_input_masking=keep (autoregressive: previous action tokens kept)")
+    else:
+        log("WARNING: model has no set_action_input_masking(); action inputs may be zeroed")
     vla.train()
     if pp is not None: pp.train()
     t0 = time.time(); step = 0
@@ -195,7 +202,7 @@ def main():
         opt.zero_grad(set_to_none=True)
         with torch.autocast("cuda", dtype=torch.bfloat16):
             out = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv, labels=lab,
-                      proprio=pr, proprio_projector=pp)
+                      proprio=pr, proprio_projector=pp, mask_action_inputs=False)  # [R3] 保留前序动作嵌入
             loss = out.loss
         loss.backward()
         gn = torch.nn.utils.clip_grad_norm_(ps, 1.0)
@@ -218,6 +225,7 @@ def main():
     json.dump({"variant": "pure_openvla", "cams": args.cams, "proprio": args.proprio, "steps": args.steps,
                "lr": args.lr, "lora_r": 32, "target_modules": "all-linear", "num_bins": BINS,
                "codec_mode": CODEC_MODE,
+               "action_input_masking": "keep",  # [R3] 自回归：保留前序动作标记嵌入
                "heldout_autoreg_L1": l1, "q01": q01.tolist(), "q99": q99.tolist()},
               open(OUT + "/run_meta.json", "w"), indent=1)
     log("PURE2_TRAIN_DONE steps=%d" % step)

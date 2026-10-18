@@ -4,6 +4,8 @@
 - `audit/pure-openvla-collapse` — 第一轮审查包（诊断：为什么闭环里机器人几乎不动）
 - `audit/r2-action-codec-fix` — 第二轮：针对第一轮意见的**最小修复 + 可复现性整理**
   （修复动作离散化边界、统一离线评测、部署指令契约、本体消融、SHA 核对、动态模块收录、学习率取证）
+- `audit/r3-autoregressive-mask` — 第三轮：**自回归动作输入掩码**
+  （训练时 14 个动作输入位置被置零 → 训练/部署机制不一致；已加开关并验证，详见 report/AUDIT_R3_AUTOREGRESSIVE_MASK.md）
 
 目标：让审查者能从**训练数据 → 动作目标 → 损失 → 解码 → 仿真控制接口**完整追踪，
 并复现"闭环中机器人几乎不动"这一现象的诊断。**本包不修改算法、不重训、不含权重与数据集。**
@@ -36,11 +38,11 @@ README.md                     本文件
 CHECKPOINT_IDENTITY.md        检查点路径/大小/SHA-256/步数/超参 + 部署侧加载核对（不含权重）
 ENVIRONMENT.md                驱动、容器、Python 依赖版本与自检命令
 MISSING.md                    未纳入或缺失项（如实标注）
-report/                       完整诊断报告 + 第二轮修复报告 AUDIT_R2_FIXES.md
+report/                       完整诊断报告 + 第二轮 AUDIT_R2_FIXES.md + 第三轮 AUDIT_R3_AUTOREGRESSIVE_MASK.md
 training/                     真实训练脚本 + run_meta + README（命令重建说明、学习率调度更正）
 logs/                         两个阶段的原始训练日志
 data/                         数据与动作表示说明 + 归一化统计量（npz、split.json；不含数据集）
-tests/                        动作编解码与部署指令契约的单元测试（纯 CPU）
+tests/                        动作编解码 / 部署指令契约 / 动作输入掩码契约的单元测试（纯 CPU）
 diagnostics/                  离线评测 / 单元基线 / 本体消融 / 解码校验 / 学习率取证 / 身份核对
 deploy/                       start_ps_pure.sh（策略服务启动）
 code/robodojo/                push_T_progress.py、_run_client.sh

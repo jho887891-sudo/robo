@@ -435,6 +435,27 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
         all_actions_mask = current_action_mask | next_actions_mask  # (B, seq_len)
         return all_actions_mask
 
+    # === [R3] Action-Input Masking Control ===
+    def set_action_input_masking(self, mode="zero"):
+        """选择动作 token 位置输入嵌入的处理方式。
+
+        "zero" : 把动作位置的输入嵌入置零（OFT 并行/扩散解码的原有机制；默认，向后兼容）
+        "keep" : 保留前序真实动作标记的嵌入（纯 OpenVLA 自回归训练/离线评测必须用这个）
+
+        修复前该行为是硬编码的：只要传了 labels 就把动作位置置零，于是自回归训练无法
+        条件于前序动作标记，而部署侧缓存式生成（labels=None）喂的却是真实标记。
+        """
+        if mode not in ("zero", "keep"):
+            raise ValueError("action_input_masking must be 'zero' or 'keep', got %r" % (mode,))
+        self.action_input_masking = mode
+        return self.action_input_masking
+
+    def _resolve_action_input_masking(self, flag=None):
+        """forward 的 mask_action_inputs 优先；否则回落到实例属性；默认 zero（旧行为）。"""
+        if flag is not None:
+            return bool(flag)
+        return getattr(self, "action_input_masking", "zero") != "keep"
+
     def _process_vision_features(self, pixel_values, language_embeddings=None, use_film=False):
         """Process vision features with optional FiLM conditioning"""
         if use_film:
@@ -514,6 +535,7 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
         noisy_actions=None,
         noisy_action_projector=None,
         diffusion_timestep_embeddings=None,
+        mask_action_inputs: Optional[bool] = None,
         use_film: bool = False,
     ) -> Union[Tuple, PrismaticCausalLMOutputWithPast]:
         """Run a forward pass through the VLM, returning a PrismaticCausalLMOutputWithPast instance."""
@@ -615,10 +637,14 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
                     input_embeddings, all_actions_mask, noisy_action_features
                 )
             else:
-                # Replace the embeddings of the action tokens with zeros
-                # (Later on, the positional embeddings will be added to them)
-                all_actions_mask = all_actions_mask.unsqueeze(-1)  # (B, seq_len, 1)
-                input_embeddings = input_embeddings * ~all_actions_mask
+                # [R3] 动作位置的输入嵌入处理方式由 mask_action_inputs / self.action_input_masking 决定：
+                #   zero（默认，OFT 并行/扩散解码）：置零 => 各动作位置互不可见
+                #   keep（纯 OpenVLA 自回归）：保留前序真实动作标记嵌入 => 按因果注意力条件于前序动作
+                if self._resolve_action_input_masking(mask_action_inputs):
+                    # Replace the embeddings of the action tokens with zeros
+                    # (Later on, the positional embeddings will be added to them)
+                    all_actions_mask = all_actions_mask.unsqueeze(-1)  # (B, seq_len, 1)
+                    input_embeddings = input_embeddings * ~all_actions_mask
 
             # Build multimodal embeddings & attention mask
             multimodal_embeddings, multimodal_attention_mask = self._build_multimodal_attention(

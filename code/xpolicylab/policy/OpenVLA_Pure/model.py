@@ -260,6 +260,7 @@ class Model(ModelTemplate):
                     proprio=proprio,
                     proprio_projector=self.proprio_projector,
                     use_cache=True,
+                    mask_action_inputs=False,   # [R3] 前缀不置零动作位置（与训练/评测机制一致）
                 )
             past = out.past_key_values
             logits = out.logits[0, -1]
@@ -292,6 +293,7 @@ class Model(ModelTemplate):
                         labels=model_input.clone(),
                         proprio=proprio,
                         proprio_projector=self.proprio_projector,
+                        mask_action_inputs=False,   # [R3] 自回归：保留前序动作标记嵌入
                     )
                 logits = out.logits[0, -1]
                 tokens.append(_pick(logits))
@@ -304,6 +306,7 @@ class Model(ModelTemplate):
         action = np.asarray(action, dtype=np.float32).reshape(1, -1)
 
         self.last_decode = {
+            "action_input_masking": "keep",   # [R3] 部署侧逐 token 生成：不置零
             "tokens": [int(t) for t in tokens],
             "token_ids": [int(t) for t in tok_ids],
             "probs": probs,

@@ -1,0 +1,131 @@
+diff --git a/code/openvla_dynamic_modules/modeling_prismatic.py b/code/openvla_dynamic_modules/modeling_prismatic.py
+index 19ddca8..5e6448d 100644
+--- a/code/openvla_dynamic_modules/modeling_prismatic.py
++++ b/code/openvla_dynamic_modules/modeling_prismatic.py
+@@ -435,6 +435,27 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
+         all_actions_mask = current_action_mask | next_actions_mask  # (B, seq_len)
+         return all_actions_mask
+ 
++    # === [R3] Action-Input Masking Control ===
++    def set_action_input_masking(self, mode="zero"):
++        """选择动作 token 位置输入嵌入的处理方式。
++
++        "zero" : 把动作位置的输入嵌入置零（OFT 并行/扩散解码的原有机制；默认，向后兼容）
++        "keep" : 保留前序真实动作标记的嵌入（纯 OpenVLA 自回归训练/离线评测必须用这个）
++
++        修复前该行为是硬编码的：只要传了 labels 就把动作位置置零，于是自回归训练无法
++        条件于前序动作标记，而部署侧缓存式生成（labels=None）喂的却是真实标记。
++        """
++        if mode not in ("zero", "keep"):
++            raise ValueError("action_input_masking must be 'zero' or 'keep', got %r" % (mode,))
++        self.action_input_masking = mode
++        return self.action_input_masking
++
++    def _resolve_action_input_masking(self, flag=None):
++        """forward 的 mask_action_inputs 优先；否则回落到实例属性；默认 zero（旧行为）。"""
++        if flag is not None:
++            return bool(flag)
++        return getattr(self, "action_input_masking", "zero") != "keep"
++
+     def _process_vision_features(self, pixel_values, language_embeddings=None, use_film=False):
+         """Process vision features with optional FiLM conditioning"""
+         if use_film:
+@@ -514,6 +535,7 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
+         noisy_actions=None,
+         noisy_action_projector=None,
+         diffusion_timestep_embeddings=None,
++        mask_action_inputs: Optional[bool] = None,
+         use_film: bool = False,
+     ) -> Union[Tuple, PrismaticCausalLMOutputWithPast]:
+         """Run a forward pass through the VLM, returning a PrismaticCausalLMOutputWithPast instance."""
+@@ -615,10 +637,14 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
+                     input_embeddings, all_actions_mask, noisy_action_features
+                 )
+             else:
+-                # Replace the embeddings of the action tokens with zeros
+-                # (Later on, the positional embeddings will be added to them)
+-                all_actions_mask = all_actions_mask.unsqueeze(-1)  # (B, seq_len, 1)
+-                input_embeddings = input_embeddings * ~all_actions_mask
++                # [R3] 动作位置的输入嵌入处理方式由 mask_action_inputs / self.action_input_masking 决定：
++                #   zero（默认，OFT 并行/扩散解码）：置零 => 各动作位置互不可见
++                #   keep（纯 OpenVLA 自回归）：保留前序真实动作标记嵌入 => 按因果注意力条件于前序动作
++                if self._resolve_action_input_masking(mask_action_inputs):
++                    # Replace the embeddings of the action tokens with zeros
++                    # (Later on, the positional embeddings will be added to them)
++                    all_actions_mask = all_actions_mask.unsqueeze(-1)  # (B, seq_len, 1)
++                    input_embeddings = input_embeddings * ~all_actions_mask
+ 
+             # Build multimodal embeddings & attention mask
+             multimodal_embeddings, multimodal_attention_mask = self._build_multimodal_attention(
+diff --git a/code/xpolicylab/policy/OpenVLA_Pure/model.py b/code/xpolicylab/policy/OpenVLA_Pure/model.py
+index b32c70b..8bd7dad 100644
+--- a/code/xpolicylab/policy/OpenVLA_Pure/model.py
++++ b/code/xpolicylab/policy/OpenVLA_Pure/model.py
+@@ -260,6 +260,7 @@ class Model(ModelTemplate):
+                     proprio=proprio,
+                     proprio_projector=self.proprio_projector,
+                     use_cache=True,
++                    mask_action_inputs=False,   # [R3] 前缀不置零动作位置（与训练/评测机制一致）
+                 )
+             past = out.past_key_values
+             logits = out.logits[0, -1]
+@@ -292,6 +293,7 @@ class Model(ModelTemplate):
+                         labels=model_input.clone(),
+                         proprio=proprio,
+                         proprio_projector=self.proprio_projector,
++                        mask_action_inputs=False,   # [R3] 自回归：保留前序动作标记嵌入
+                     )
+                 logits = out.logits[0, -1]
+                 tokens.append(_pick(logits))
+@@ -304,6 +306,7 @@ class Model(ModelTemplate):
+         action = np.asarray(action, dtype=np.float32).reshape(1, -1)
+ 
+         self.last_decode = {
++            "action_input_masking": "keep",   # [R3] 部署侧逐 token 生成：不置零
+             "tokens": [int(t) for t in tokens],
+             "token_ids": [int(t) for t in tok_ids],
+             "probs": probs,
+diff --git a/training/train_pushT_pure2.py b/training/train_pushT_pure2.py
+index 2849c07..465d056 100644
+--- a/training/train_pushT_pure2.py
++++ b/training/train_pushT_pure2.py
+@@ -130,7 +130,8 @@ def evaluate(vla, pp, proc, cams, use_proprio, pmin, pmax, q01, q99, eps, n):
+                 inp = pids.to("cuda")
+             with torch.autocast("cuda", dtype=torch.bfloat16):
+                 out = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
+-                          labels=inp.clone(), proprio=pr, proprio_projector=pp)
++                          labels=inp.clone(), proprio=pr, proprio_projector=pp,
++                          mask_action_inputs=False)  # [R3] 与部署机制一致
+             lg = out.logits[0, -1]
+             cand = lg[ACTION_TOKEN_BEGIN_IDX+1: ACTION_TOKEN_BEGIN_IDX+1+BINS]
+             toks.append(int(torch.argmax(cand).item()))
+@@ -179,6 +180,12 @@ def main():
+     ps = trainable_list(vla, pp)
+     opt = torch.optim.AdamW(ps, lr=args.lr, weight_decay=0.0)
+     sched = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=[args.lr_milestone], gamma=0.1)
++    # [R3] 自回归训练必须保留前序动作标记的正常输入嵌入（修复前被 all_actions_mask 置零）
++    if hasattr(vla, "set_action_input_masking"):
++        vla.set_action_input_masking("keep")
++        log("action_input_masking=keep (autoregressive: previous action tokens kept)")
++    else:
++        log("WARNING: model has no set_action_input_masking(); action inputs may be zeroed")
+     vla.train()
+     if pp is not None: pp.train()
+     t0 = time.time(); step = 0
+@@ -195,7 +202,7 @@ def main():
+         opt.zero_grad(set_to_none=True)
+         with torch.autocast("cuda", dtype=torch.bfloat16):
+             out = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv, labels=lab,
+-                      proprio=pr, proprio_projector=pp)
++                      proprio=pr, proprio_projector=pp, mask_action_inputs=False)  # [R3] 保留前序动作嵌入
+             loss = out.loss
+         loss.backward()
+         gn = torch.nn.utils.clip_grad_norm_(ps, 1.0)
+@@ -218,6 +225,7 @@ def main():
+     json.dump({"variant": "pure_openvla", "cams": args.cams, "proprio": args.proprio, "steps": args.steps,
+                "lr": args.lr, "lora_r": 32, "target_modules": "all-linear", "num_bins": BINS,
+                "codec_mode": CODEC_MODE,
++               "action_input_masking": "keep",  # [R3] 自回归：保留前序动作标记嵌入
+                "heldout_autoreg_L1": l1, "q01": q01.tolist(), "q99": q99.tolist()},
+               open(OUT + "/run_meta.json", "w"), indent=1)
+     log("PURE2_TRAIN_DONE steps=%d" % step)

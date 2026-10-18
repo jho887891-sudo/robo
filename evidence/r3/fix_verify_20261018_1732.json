@@ -1,0 +1,135 @@
+{
+ "T1": {
+  "resolve_default_zero": true,
+  "attr": "keep"
+ },
+ "T2_T3": {
+  "idx_mask_true": [
+   212,
+   187,
+   146,
+   44,
+   81,
+   143,
+   1,
+   106,
+   1,
+   1,
+   255,
+   185,
+   189,
+   255
+  ],
+  "idx_mask_false": [
+   212,
+   187,
+   146,
+   44,
+   81,
+   143,
+   1,
+   106,
+   1,
+   1,
+   255,
+   185,
+   189,
+   255
+  ]
+ },
+ "T4": {
+  "zero": 0.0,
+  "keep": 0.0966796875
+ },
+ "T5": {
+  "free_run_keep": [
+   212,
+   187,
+   144,
+   44,
+   81,
+   143,
+   1,
+   106,
+   1,
+   1,
+   255,
+   185,
+   189,
+   255
+  ],
+  "deployment_kv": [
+   212,
+   187,
+   144,
+   44,
+   81,
+   143,
+   1,
+   106,
+   1,
+   1,
+   255,
+   185,
+   189,
+   255
+  ],
+  "deployment_action_masking": null
+ },
+ "T6": {
+  "determinism_maxdiff": 0.0,
+  "perturb_future_maxdiff": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.30859375,
+   0.1309814453125,
+   0.09375
+  ],
+  "perturb_past_maxdiff": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.453125,
+   1.4453125,
+   0.625,
+   0.375,
+   1.203125,
+   0.734375,
+   0.90625,
+   0.9375,
+   0.6875,
+   0.9375
+  ]
+ },
+ "INFO_sdpa_attn_artifact": {
+  "attn_implementation": "sdpa",
+  "layer0_upper_max": 1.0
+ },
+ "T7": {
+  "tokens_equal_gt_vs_swapped": 11,
+  "action_l1": 0.010943472385406494,
+  "action_max_abs_diff": 0.07857668399810791
+ },
+ "checks": {
+  "T1_default_zero": true,
+  "T2_oft_regression": true,
+  "T3_fix_effective": true,
+  "T4_zero_when_true": true,
+  "T4_nonzero_when_false": true,
+  "T5_deploy_matches_free_run": true,
+  "T6_deterministic": true,
+  "T6_no_future_leak": true,
+  "T6_past_does_matter": true
+ },
+ "passed": true
+}
