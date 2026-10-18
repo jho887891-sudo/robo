@@ -1,0 +1,24 @@
+[18:03:24] out=/home/dgut/pusht_runtime/r3_overfit/keep_run1 masking=keep steps=300 n=32 lr=0.0005
+[18:03:24] snapshot hashes: {"action_codec.py": "d7c81a37945b87f820cc24fb5e1a13ecad542104be765dc07c9884c3aa456f98", "modeling_prismatic.py": "8d89d5f09d483651dee57ba2d672c2a901396e9a7ea5bb3e2e66e2d743eeefff", "overfit_r3.py": "b73c907bb9be9c60d0821a65a46df138375a816af456a377756af5949a9e9494", "train_pushT_pure2.py": "d5716aef18bcfc71a560b4472dc14f70e5ec03794962cfb6973f802fef58b9a9"}
+[18:04:20] GPU free=7.1GB total=50.9GB ; masking=keep(mask_action_inputs=False)
+[18:04:20] gradient checkpointing = ON（显存保护，不改变数学行为）
+[18:04:20] trainable=127.7M
+[18:06:05] EVAL step=0 | gen L1(phys)=0.44788 identity=0.00834 ratio=53.702 | gen bounds L1=0.5724 identity=0.0111 | pred_delta=0.44708 gt_delta=0.00834 | tf_tok_acc=0.022 uniq=32/32
+[18:06:07] step=1 loss=16.2211 tok_acc=0.000 gnorm=47.12 mem=17.6GB 3s
+[18:06:41] step=25 loss=3.4356 tok_acc=0.214 gnorm=5.84 mem=18.2GB 36s
+[18:07:14] step=50 loss=3.1418 tok_acc=0.286 gnorm=6.95 mem=18.2GB 69s
+[18:07:47] step=75 loss=0.5210 tok_acc=0.857 gnorm=4.80 mem=18.2GB 102s
+[18:08:21] step=100 loss=0.2281 tok_acc=0.929 gnorm=4.75 mem=18.2GB 136s
+[18:09:25] EVAL step=100 | gen L1(phys)=0.08943 identity=0.00834 ratio=10.723 | gen bounds L1=0.1235 identity=0.0111 | pred_delta=0.09304 gt_delta=0.00834 | tf_tok_acc=0.908 uniq=24/32
+[18:10:00] step=125 loss=0.6287 tok_acc=0.857 gnorm=16.07 mem=18.2GB 236s
+[18:10:33] step=150 loss=0.3611 tok_acc=0.857 gnorm=4.45 mem=18.2GB 268s
+[18:11:07] step=175 loss=0.2843 tok_acc=0.929 gnorm=3.07 mem=18.2GB 302s
+[18:11:41] step=200 loss=0.0860 tok_acc=0.929 gnorm=1.35 mem=18.2GB 336s
+[18:12:46] EVAL step=200 | gen L1(phys)=0.02488 identity=0.00834 ratio=2.983 | gen bounds L1=0.0360 identity=0.0111 | pred_delta=0.03140 gt_delta=0.00834 | tf_tok_acc=0.980 uniq=31/32
+[18:13:21] step=225 loss=0.1548 tok_acc=0.929 gnorm=2.79 mem=18.2GB 437s
+[18:13:55] step=250 loss=0.0001 tok_acc=1.000 gnorm=0.01 mem=18.2GB 470s
+[18:14:28] step=275 loss=0.0047 tok_acc=1.000 gnorm=0.24 mem=18.2GB 504s
+[18:15:02] step=300 loss=0.5010 tok_acc=0.929 gnorm=12.20 mem=18.2GB 538s
+[18:16:08] EVAL step=300 | gen L1(phys)=0.02328 identity=0.00834 ratio=2.791 | gen bounds L1=0.0301 identity=0.0111 | pred_delta=0.02777 gt_delta=0.00834 | tf_tok_acc=0.984 uniq=28/32
+[18:17:13] EVAL step=300 | gen L1(phys)=0.02328 identity=0.00834 ratio=2.791 | gen bounds L1=0.0301 identity=0.0111 | pred_delta=0.02777 gt_delta=0.00834 | tf_tok_acc=0.984 uniq=28/32
+[18:17:16] saved /home/dgut/pusht_runtime/r3_overfit/keep_run1/checkpoints/final

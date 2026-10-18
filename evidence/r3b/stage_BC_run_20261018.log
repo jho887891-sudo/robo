@@ -1,0 +1,108 @@
+START_B 2026年 10月 18日 星期日 17:52:35 UTC
+2026-10-18 17:52:48.225927: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-18 17:52:48.323217: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+Using ALOHA constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+Using ALOHA constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[OpenVLA_Pure] loading base /home/dgut/pusht_runtime/model_cache/openvla-7b
+10/18 [17:53:06] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:01,  1.95it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.05it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.14it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.11it/s]
+[OpenVLA_Pure] LoRA merged (cameras=3)
+[OpenVLA_Pure] instruction pinned from config (task=push_T): 'Push the T-shaped block to align it precisely with the gray T-shaped pad.'
+LlamaModel is using LlamaSdpaAttention, but `torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True`. Falling back to the manual attention implementation, but specifying the manual implementation will be required from Transformers version v5.0.0 onwards. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.
+[B1] train() vs eval() logits maxdiff = 0.000e+00  (769 vision tokens)
+      actions identical = True ; |logit| max ~ 26.2 (bf16 ulp at that scale = 0.125)
+[B2a] full-seq vs KV teacher-forced: logit maxdiff=1.250e-01 prob maxdiff=1.24e-02 tokens equal=True
+      full=[212, 187, 146, 44, 81, 143, 1, 106, 1, 1, 255, 185, 189, 255]
+      step=[212, 187, 146, 44, 81, 143, 1, 106, 1, 1, 255, 185, 189, 255]
+[B2b] full-seq vs no-cache step-by-step (same kernels): logit maxdiff = 0.000e+00
+[B3] cached greedy  = [212, 187, 144, 44, 81, 143, 1, 106, 1, 1, 255, 185, 189, 255]
+     full recompute = [212, 187, 144, 44, 81, 143, 1, 106, 1, 1, 255, 185, 189, 255]  equal=True
+[B4] eager multimodal attention: shape [32, 820, 820], strict upper-triangle max = 0.000e+00
+[B5] train() mode, perturb future action#11 -> maxdiff at 14 positions = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.125, 0.125]
+
+=== B RESULT ===
+  B1_train_eval_identical            PASS
+  B2a_tokens_identical_kv            PASS
+  B2a_actions_identical_kv           PASS
+  B2b_nocache_bitwise_identical      PASS
+  B3_cached_equals_full              PASS
+  B4_attn_strictly_causal            PASS
+  B5_train_mode_no_future_leak       PASS
+R3_B_STAGE: ALL_PASS
+wrote /tmp/r3_B.json
+B_RC=0
+START_C 2026年 10月 18日 星期日 17:55:14 UTC
+2026-10-18 17:55:23.891358: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-18 17:55:23.951754: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+Using ALOHA constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+10/18 [17:55:47] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:01,  1.74it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.10it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.36it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.23it/s]
+[env] free=9.3GB total=50.9GB
+[env] gradient checkpointing enabled
+`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+
+[keep] loss=18.3680 finite=True | LoRA grads: tensors=852 norm=4.589e+01 nonzero_frac=0.495 | proprio norm=2.000e+01
+[keep] d(loss)/d(action token embedding row) per dim: [5.805079, 4.93694, 7.871703, 4.251399, 3.91402, 13.869596, 7.691677, 3.678326, 4.22835, 4.846494, 7.756412, 2.389499, 2.052472, 7e-06]
+[zero] loss=20.9951 finite=True | LoRA grads: tensors=852 norm=9.783e+01 nonzero_frac=0.495 | proprio norm=2.512e+01
+[zero] d(loss)/d(action token embedding row) per dim: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+=== C RESULT ===
+  C1_loss_finite_both                  PASS
+  C1_lora_receives_grad                PASS
+  C1_proprio_receives_grad             PASS
+  C1_no_nonfinite_grad                 PASS
+  C2_keep_action_emb_grad_nonzero      PASS
+  C3_zero_action_emb_grad_is_zero      PASS
+R3_C_STAGE: ALL_PASS
+wrote /tmp/r3_C.json
+C_RC=0
+ALLDONE 2026年 10月 18日 星期日 17:56:43 UTC

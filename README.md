@@ -5,6 +5,8 @@
 - `audit/r2-action-codec-fix` — 第二轮：针对第一轮意见的**最小修复 + 可复现性整理**
   （修复动作离散化边界、统一离线评测、部署指令契约、本体消融、SHA 核对、动态模块收录、学习率取证）
 - `audit/r3-autoregressive-mask` — 第三轮：**自回归动作输入掩码**
+- `audit/r3-autoreg-training-fix` — 第三轮（正式交付分支）：自回归动作输入掩码的根因取证 + 最小修复 + A/B/C/D 四阶段验证
+  （B 训练/推理一致性、C 梯度检查、D 32 样本受限过拟合；报告 report/AUDIT_R3_AUTOREG_RESULTS.md 与 report/MORNING_SUMMARY.md）
   （训练时 14 个动作输入位置被置零 → 训练/部署机制不一致；已加开关并验证，详见 report/AUDIT_R3_AUTOREGRESSIVE_MASK.md）
 
 目标：让审查者能从**训练数据 → 动作目标 → 损失 → 解码 → 仿真控制接口**完整追踪，

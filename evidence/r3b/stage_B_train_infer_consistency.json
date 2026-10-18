@@ -1,0 +1,109 @@
+{
+ "sample": {
+  "episode": "episode_0000066.hdf5",
+  "frame": 221
+ },
+ "gt_legacy_pad_for_teacher_forcing": 2,
+ "B1_train_vs_eval_maxdiff": 0.0,
+ "B2a_kv_stepwise": {
+  "logit_maxdiff": 0.125,
+  "prob_maxdiff": 0.012394100427627563,
+  "tokens_full": [
+   212,
+   187,
+   146,
+   44,
+   81,
+   143,
+   1,
+   106,
+   1,
+   1,
+   255,
+   185,
+   189,
+   255
+  ],
+  "tokens_stepwise": [
+   212,
+   187,
+   146,
+   44,
+   81,
+   143,
+   1,
+   106,
+   1,
+   1,
+   255,
+   185,
+   189,
+   255
+  ]
+ },
+ "B2b_nocache_stepwise_maxdiff": 0.0,
+ "B3_cached": [
+  212,
+  187,
+  144,
+  44,
+  81,
+  143,
+  1,
+  106,
+  1,
+  1,
+  255,
+  185,
+  189,
+  255
+ ],
+ "B3_full_recompute": [
+  212,
+  187,
+  144,
+  44,
+  81,
+  143,
+  1,
+  106,
+  1,
+  1,
+  255,
+  185,
+  189,
+  255
+ ],
+ "B4_eager_attn_upper_max": 0.0,
+ "B4_eager_attn_shape": [
+  32,
+  820,
+  820
+ ],
+ "B5_train_mode_perturb_future": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.25,
+  0.125,
+  0.125
+ ],
+ "checks": {
+  "B1_train_eval_identical": true,
+  "B2a_tokens_identical_kv": true,
+  "B2a_actions_identical_kv": true,
+  "B2b_nocache_bitwise_identical": true,
+  "B3_cached_equals_full": true,
+  "B4_attn_strictly_causal": true,
+  "B5_train_mode_no_future_leak": true
+ },
+ "passed": true
+}

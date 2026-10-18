@@ -1,0 +1,161 @@
+{
+ "created": "2026-10-18 18:17:54",
+ "args": {
+  "masking": "zero",
+  "steps": 300,
+  "n": 32,
+  "lr": 0.0005,
+  "log_every": 25,
+  "eval_every": 100,
+  "grad_checkpoint": "auto",
+  "out": "/home/dgut/pusht_runtime/r3_overfit/zero_run1"
+ },
+ "max_steps_cap": 300,
+ "n_samples": 32,
+ "samples": [
+  [
+   "episode_0000001.hdf5",
+   20
+  ],
+  [
+   "episode_0000001.hdf5",
+   60
+  ],
+  [
+   "episode_0000001.hdf5",
+   100
+  ],
+  [
+   "episode_0000001.hdf5",
+   140
+  ],
+  [
+   "episode_0000001.hdf5",
+   180
+  ],
+  [
+   "episode_0000001.hdf5",
+   220
+  ],
+  [
+   "episode_0000001.hdf5",
+   260
+  ],
+  [
+   "episode_0000001.hdf5",
+   300
+  ],
+  [
+   "episode_0000001.hdf5",
+   340
+  ],
+  [
+   "episode_0000001.hdf5",
+   380
+  ],
+  [
+   "episode_0000001.hdf5",
+   420
+  ],
+  [
+   "episode_0000001.hdf5",
+   460
+  ],
+  [
+   "episode_0000001.hdf5",
+   500
+  ],
+  [
+   "episode_0000002.hdf5",
+   20
+  ],
+  [
+   "episode_0000002.hdf5",
+   60
+  ],
+  [
+   "episode_0000002.hdf5",
+   100
+  ],
+  [
+   "episode_0000002.hdf5",
+   140
+  ],
+  [
+   "episode_0000002.hdf5",
+   180
+  ],
+  [
+   "episode_0000002.hdf5",
+   220
+  ],
+  [
+   "episode_0000002.hdf5",
+   260
+  ],
+  [
+   "episode_0000002.hdf5",
+   300
+  ],
+  [
+   "episode_0000002.hdf5",
+   340
+  ],
+  [
+   "episode_0000002.hdf5",
+   380
+  ],
+  [
+   "episode_0000007.hdf5",
+   20
+  ],
+  [
+   "episode_0000007.hdf5",
+   60
+  ],
+  [
+   "episode_0000007.hdf5",
+   100
+  ],
+  [
+   "episode_0000007.hdf5",
+   140
+  ],
+  [
+   "episode_0000007.hdf5",
+   180
+  ],
+  [
+   "episode_0000007.hdf5",
+   220
+  ],
+  [
+   "episode_0000008.hdf5",
+   20
+  ],
+  [
+   "episode_0000008.hdf5",
+   60
+  ],
+  [
+   "episode_0000008.hdf5",
+   100
+  ]
+ ],
+ "codec": {
+  "mode": "fixed",
+  "legal_window": [
+   31744,
+   31999
+  ],
+  "n_bins": 256,
+  "max_quant_error": 0.00784313725490196
+ },
+ "torch": "2.4.1+cu121",
+ "hashes": {
+  "action_codec.py": "d7c81a37945b87f820cc24fb5e1a13ecad542104be765dc07c9884c3aa456f98",
+  "modeling_prismatic.py": "8d89d5f09d483651dee57ba2d672c2a901396e9a7ea5bb3e2e66e2d743eeefff",
+  "overfit_r3.py": "b73c907bb9be9c60d0821a65a46df138375a816af456a377756af5949a9e9494",
+  "train_pushT_pure2.py": "d5716aef18bcfc71a560b4472dc14f70e5ec03794962cfb6973f802fef58b9a9"
+ }
+}

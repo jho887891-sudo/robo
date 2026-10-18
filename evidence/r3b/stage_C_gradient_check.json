@@ -1,0 +1,75 @@
+{
+ "sample": {
+  "episode": "episode_0000066.hdf5",
+  "frame": 221
+ },
+ "checks": {
+  "C1_loss_finite_both": true,
+  "C1_lora_receives_grad": true,
+  "C1_proprio_receives_grad": true,
+  "C1_no_nonfinite_grad": true,
+  "C2_keep_action_emb_grad_nonzero": true,
+  "C3_zero_action_emb_grad_is_zero": true
+ },
+ "keep": {
+  "loss": 18.367958068847656,
+  "loss_finite": true,
+  "lora_trainable_tensors": 852,
+  "lora_grad_norm": 45.890621185302734,
+  "lora_grad_nonzero_frac": 0.49455378668933686,
+  "proprio_grad_norm": 19.996095657348633,
+  "action_token_embedding_grad_norms": [
+   5.805078983306885,
+   4.936939716339111,
+   7.871702671051025,
+   4.251399040222168,
+   3.91402006149292,
+   13.869596481323242,
+   7.691676616668701,
+   3.678325891494751,
+   4.2283501625061035,
+   4.846494197845459,
+   7.756411552429199,
+   2.3894989490509033,
+   2.0524723529815674,
+   6.5396216086810455e-06
+  ],
+  "action_token_embedding_grad_max": 13.869596481323242,
+  "action_token_embedding_grad_debug": "captured",
+  "grad_has_nonfinite": false,
+  "embedding_grad_captured": true,
+  "pids_len": 36,
+  "any_grad": true
+ },
+ "zero": {
+  "loss": 20.995134353637695,
+  "loss_finite": true,
+  "lora_trainable_tensors": 852,
+  "lora_grad_norm": 97.8294448852539,
+  "lora_grad_nonzero_frac": 0.49455854477701894,
+  "proprio_grad_norm": 25.119165420532227,
+  "action_token_embedding_grad_norms": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "action_token_embedding_grad_max": 0.0,
+  "action_token_embedding_grad_debug": "captured",
+  "grad_has_nonfinite": false,
+  "embedding_grad_captured": true,
+  "pids_len": 36,
+  "any_grad": true
+ },
+ "passed": true
+}
