@@ -157,6 +157,9 @@ class Model(ModelTemplate):
             low_cpu_mem_usage=True,
             trust_remote_code=True,
         )
+        # Source identity must match the real dynamic module used at training.
+        # This also prevents silently mixing the two independent R3 masking forks.
+        AT.verify_runtime_modeling(meta, vla, self.action_target_mode)
         vla.vision_backbone.set_num_images_in_input(self.num_images)
         enable_pure_autoreg(vla)
         vla = PeftModel.from_pretrained(vla, model_cfg["adapter_dir"], is_trainable=False)
