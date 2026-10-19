@@ -207,6 +207,31 @@ So the affine map is essentially `0.94·V` with zero bias and is **slightly wors
 the trivial rule. **Verified:** there is no extra history signal to extract beyond
 "copy the last velocity"; the interesting question is only whether a VLA can learn that.
 
+
+### 3.5 Non-parametric ceiling: nothing beats copying `V_t`
+
+`diagnostics/r6_history_ceiling.py` (`evidence/.../history_ceiling.json`) fits history-only
+predictors on **25,393 TRAIN frames** and evaluates on a deterministic 2,000-frame VAL
+subsample (the fitted models are also scored on all 6,711 frames):
+
+| predictor | val L1 | × copy-`V` |
+|---|---:|---:|
+| copy `V_t` (no fitting) | **0.001855** | 1.000 |
+| per-dimension linear | 0.001855 | 1.000 |
+| quadratic-feature ridge | 0.001989 | 1.072 |
+| joint 14×14 linear | 0.002020 | 1.089 |
+| kNN k=10 | 0.002170 | 1.170 |
+| kNN k=5 / 25 / 1 | 0.002206 / 0.002229 / 0.002795 | 1.19 / 1.20 / 1.51 |
+
+On the motion-rich 39.5% of validation frames (`mean|Δ| ≥ 5e-3`): hold 0.013958,
+copy-`V` 0.003282, kNN-10 0.003883.
+
+**Verified:** the history information ceiling is exactly the constant-velocity rule. No
+non-parametric or quadratic model extracts anything more, so any model that consumes
+history can at best reach 0.001828 (0.002119 through the 256-bin codec). This is why the
+pilot's L1 figures must be compared against `copy-V`, not against zero.
+
+
 ---
 
 ## 4. Task C — 256-bin quantization oracle

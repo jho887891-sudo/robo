@@ -93,3 +93,27 @@ GPU had 66 MiB free and allocation failed at model load
 Fix: wait for exclusive GPU use and run the repetition alone in a fresh directory
 (`duplicate_residual_rep2b`). No foreign process was killed or touched, and the failed directory is
 kept as evidence rather than deleted.
+
+## F9 — kNN history-ceiling analysis: chunk too large, first run never finished
+
+The first `r6_history_ceiling.py` used a 2,048-frame kNN chunk, which materialises a
+2048 x 25,393 x 14 temporary (2.9 GB) inside the distance computation. The process made
+no progress for 18 minutes, wrote an empty log, and was killed with the terminal session
+(it also produced a follow-up "1 frame" that never appeared).
+
+Fix: `CHUNK = 32` and kNN evaluated on a deterministic 2,000-frame subsample of the
+6,711 validation frames (the fitted models are still scored on all 6,711). The analysis
+then finished in about 40 s. Log: `history_ceiling.log`. No result from the failed run
+was ever reported.
+
+## F10 — the third repetition removed the step-150 separation
+
+With two runs per arm the treatment was below the control at both evaluation points
+("complete separation"). The third repetition of each arm (identical configuration)
+gives control 0.01961 / 0.01403 / 0.01182 and treatment 0.01244 / 0.01256 / 0.01794 at
+step 150: the ranges now overlap and the mean difference is only 5.5%. At step 300 the
+ranges stay separated with a 15.5% mean difference.
+
+Consequence recorded in the report: the earlier "complete separation" was an artefact of
+n = 2, and any A/B claim at 300 updates must be based on the token-level analysis (which
+shows the L1 difference is a displacement-magnitude artefact), not on the L1 ranking.
