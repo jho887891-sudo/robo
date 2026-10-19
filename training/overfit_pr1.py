@@ -33,7 +33,7 @@ REPO = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 RT = os.environ.setdefault("PUSHT_RUNTIME", "/home/dgut/pusht_runtime")
-os.environ.setdefault("PUSHT_MODEL", RT + "/model_cache/openvla-7b")
+os.environ.setdefault("PUSHT_MODEL", RT + "/model_cache/openvla-7b-pristine")
 os.environ.setdefault("PUSHT_HDF5", "/home/T7/ojh/robot_actual/data/data/hdf5/push_T/arx_x5/data")
 os.environ.setdefault("PUSHT_SPLIT", RT + "/split80.json")
 os.environ.setdefault("PUSHT_BOUNDS", RT + "/push_T_bounds.npz")
@@ -145,6 +145,8 @@ def main():
         log("samples=%d  train_eps=%d  q01/q99 computed from train split" % (len(samples), len(train_eps)), logf)
 
         proc, vla, pp = T.build(3, True)          # ← 真实训练代码（含 PR 的 enable_pure_autoreg）
+        import inspect
+        model_sha = AT.file_sha256(inspect.getfile(type(vla.base_model.model)))
         core = vla.base_model.model if hasattr(vla, "base_model") else vla
         log("pure_autoreg flag = %s ; has attr = %s" % (
             getattr(core, "_pure_autoreg_input_mode", False), hasattr(core, "_pure_autoreg_input_mode")), logf)
@@ -303,7 +305,7 @@ def main():
              "action_input_masking": args.mechanism,
              "codec_mode": T.CODEC_MODE,
              "samples_from": "train", "steps": args.steps,
-             "variant": "pure_openvla"},
+             "modeling_sha256": model_sha, "variant": "pure_openvla"},
             os.path.join(d, "lora_adapter"), os.path.join(d, "proprio_projector--pure.pt"))
         with open(os.path.join(out, "run_meta.json"), "w") as fh:
             json.dump(checkpoint_meta, fh, indent=1)
