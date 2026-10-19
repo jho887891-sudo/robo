@@ -22,6 +22,8 @@ jobs:
           python-version: '3.10'
       - name: Install numpy
         run: python -m pip install numpy==1.26.4
+      - name: Validate opt-in remote runner shell syntax
+        run: bash -n scripts/run_r4_ab.sh
       - name: Compile Python source
         run: |
           python -m py_compile training/train_pushT_pure2.py training/overfit_pr1.py training/overfit_protocol.py
