@@ -297,13 +297,16 @@ def main():
         d = os.path.join(out, "checkpoints", "final"); os.makedirs(d, exist_ok=True)
         vla.save_pretrained(os.path.join(d, "lora_adapter"))
         torch.save(pp.state_dict(), os.path.join(d, "proprio_projector--pure.pt"))
-        json.dump({"q01": q01.tolist(), "q99": q99.tolist(),
-                   "action_target_mode": args.target_mode,
-                   "action_input_masking": args.mechanism,
-                   "codec_mode": T.CODEC_MODE,
-                   "samples_from": "train", "steps": args.steps,
-                   "variant": "pure_openvla"},
-                  open(os.path.join(out, "run_meta.json"), "w"), indent=1)
+        checkpoint_meta = AT.record_checkpoint_hashes(
+            {"q01": q01.tolist(), "q99": q99.tolist(),
+             "action_target_mode": args.target_mode,
+             "action_input_masking": args.mechanism,
+             "codec_mode": T.CODEC_MODE,
+             "samples_from": "train", "steps": args.steps,
+             "variant": "pure_openvla"},
+            os.path.join(d, "lora_adapter"), os.path.join(d, "proprio_projector--pure.pt"))
+        with open(os.path.join(out, "run_meta.json"), "w") as fh:
+            json.dump(checkpoint_meta, fh, indent=1)
         status["final_eval"] = final
         status["final_val_eval"] = final_val
         log("saved %s" % d, logf)
