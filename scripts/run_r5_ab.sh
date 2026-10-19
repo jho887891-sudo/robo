@@ -8,8 +8,8 @@ if [[ "$mode" != "--check" && "$mode" != "--execute" ]]; then
 fi
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
-if [[ "$(git branch --show-current)" != "audit/r5-unified-action-target-ab" ]]; then
-  echo "[STOP] Use a worktree on audit/r5-unified-action-target-ab" >&2; exit 3
+if [[ "$(git branch --show-current)" != "audit/r5-distribution-and-baseline-audit" ]]; then
+  echo "[STOP] Use a worktree on audit/r5-distribution-and-baseline-audit" >&2; exit 3
 fi
 if ! git diff --quiet || ! git diff --cached --quiet; then
   echo "[STOP] Dirty tracked working tree; use a clean worktree" >&2; exit 3
@@ -63,6 +63,8 @@ PY
 "$py" tests/test_target_ab_compare.py
 "$py" tests/test_overfit_protocol.py
 "$py" tests/test_action_codec.py
+"$py" tests/test_r5_distribution_metrics.py
+"$py" diagnostics/audit_r4_evidence.py
 echo "[preflight] CPU tests passed"
 if [[ "$mode" == "--check" ]]; then
   echo "[DONE] Preflight only: GPU training NOT started."
