@@ -16,7 +16,7 @@ import numpy as np, torch, h5py, cv2
 from PIL import Image
 
 RT = os.environ.get("PUSHT_RUNTIME", "/home/dgut/pusht_runtime")
-MODEL = os.environ.get("PUSHT_MODEL", RT + "/models_openvla-7b")
+MODEL = os.environ.get("PUSHT_MODEL", RT + "/model_cache/openvla-7b-pristine")
 HDF5_DIR = os.environ.get("PUSHT_HDF5", RT + "/hdf5_push_T/arx_x5/data")
 OFT = os.environ.get("PUSHT_OFT", RT + "/openvla_oft_src")
 BOUNDS_FILE = os.environ.get("PUSHT_BOUNDS", RT + "/push_T_bounds.npz")
@@ -87,6 +87,20 @@ def build(cams, use_proprio):
     proc = AutoProcessor.from_pretrained(MODEL, trust_remote_code=True)
     vla = AutoModelForVision2Seq.from_pretrained(MODEL, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True,
                                                 trust_remote_code=True).to("cuda")
+    # Refuse another R3 dynamic-module fork: this branch uses the tested pristine
+    # module plus instance-level enable_pure_autoreg only.
+    import hashlib, inspect
+    reference = os.environ.get("PUSHT_PRISTINE_MODELING_REF",
+                               os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "code",
+                                                            "openvla_dynamic_modules", "modeling_prismatic.py")))
+    def digest(path):
+        with open(path, "rb") as fh:
+            return hashlib.sha256(fh.read()).hexdigest()
+    active_path = inspect.getfile(type(vla))
+    if not os.path.isfile(reference) or digest(active_path) != digest(reference):
+        raise RuntimeError("R4 requires pristine dynamic model source: %s (reference %s)"
+                           % (active_path, reference))
+    log("pristine modeling sha256=%s" % digest(active_path))
     vla.vision_backbone.set_num_images_in_input(cams)
     enable_pure_autoreg(vla)  # ensure previous action tokens are not zeroed during training
     cfg = LoraConfig(r=32, lora_alpha=16, lora_dropout=0.0, target_modules="all-linear", init_lora_weights="gaussian")
@@ -203,6 +217,10 @@ def main():
         json.dump(meta, fh, indent=1)
     nb = np.load(BOUNDS_FILE); pmin, pmax = nb["pmin"], nb["pmax"]
     proc, vla, pp = build(args.cams, bool(args.proprio))
+    import inspect
+    meta["modeling_sha256"] = AT.file_sha256(inspect.getfile(type(vla.base_model.model)))
+    with open(os.path.join(OUT, "run_meta.json"), "w") as fh:
+        json.dump(meta, fh, indent=1)
     if args.init_ckpt:
         from safetensors.torch import load_file
         from peft.utils.save_and_load import set_peft_model_state_dict
