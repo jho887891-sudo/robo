@@ -56,12 +56,25 @@ def direction_report(config, val_eval, threshold=0.002):
     good = [x for x in corr if x is not None]
     if not good:
         raise ValueError("all dimensions constant; no Pearson correlation is defined")
-    active = np.abs(g) > threshold
-    matched_sign = np.sign(p) == np.sign(g)
-    active_count = int(active.sum())
-    if not active_count:
-        raise ValueError("no active quantized targets at chosen threshold")
-    pred_confident = np.abs(p) > threshold
+    # Directional sign is meaningful only for DELTA targets. Signs of
+    # absolute joint positions measure position sign, not motion direction.
+    if mode == "residual":
+        active = np.abs(g) > threshold
+        matched_sign = np.sign(p) == np.sign(g)
+        active_count = int(active.sum())
+        if not active_count:
+            raise ValueError("no active quantized residual targets at chosen threshold")
+        pred_confident = np.abs(p) > threshold
+        active_fraction = active_count / g.size
+        sign_accuracy = float(np.mean(matched_sign[active]))
+        confident_accuracy = float(np.mean((matched_sign & pred_confident)[active]))
+        near_zero_pred = int(np.sum(active & ~pred_confident))
+    else:
+        active_count = None
+        active_fraction = None
+        sign_accuracy = None
+        confident_accuracy = None
+        near_zero_pred = None
     return {
         "target_mode": mode,
         "correlation_quantity": "absolute_position" if mode == "absolute" else "quantized_residual_increment",
@@ -72,10 +85,10 @@ def direction_report(config, val_eval, threshold=0.002):
         "sign_threshold_physical_units": threshold,
         "all_dim_frames": int(g.size),
         "active_gt_dim_frames": active_count,
-        "active_gt_fraction": active_count / g.size,
-        "active_gt_sign_accuracy": float(np.mean(matched_sign[active])),
-        "active_gt_sign_accuracy_confident_prediction": float(np.mean((matched_sign & pred_confident)[active])),
-        "active_gt_predicted_near_zero_count": int(np.sum(active & ~pred_confident)),
+        "active_gt_fraction": active_fraction,
+        "active_gt_sign_accuracy": sign_accuracy,
+        "active_gt_sign_accuracy_confident_prediction": confident_accuracy,
+        "active_gt_predicted_near_zero_count": near_zero_pred,
         "n_val_frames": int(len(p)),
         "notes": [
             "quantized labels are an approximation to physical ground-truth targets",
