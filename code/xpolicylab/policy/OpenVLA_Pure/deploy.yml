@@ -11,7 +11,7 @@ num_open_loop_steps: 1
 result_dir: "./results/openvla-pure/"
 obs_transform_pipeline: "xspark-v1.0"
 
-base_model_path: /home/dgut/pusht_runtime/model_cache/openvla-7b
+base_model_path: /home/dgut/pusht_runtime/model_cache/openvla-7b-pristine
 adapter_dir: /home/dgut/pusht_runtime/model_cache/pure3c/lora_adapter
 proprio_projector_path: /home/dgut/pusht_runtime/model_cache/pure3c/proprio_projector--pure.pt
 stats_path: /home/dgut/pusht_runtime/model_cache/pure3c/run_meta.json
