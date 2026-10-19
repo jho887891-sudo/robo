@@ -31,6 +31,14 @@ def compare(absolute_dir, residual_dir):
             raise ValueError("unmatched A/B experimental configuration: " + key)
     if a["mechanism"] != "keep":
         raise ValueError("A/B requires the proven causal autoregressive mechanism")
+    if a.get("sample_source") != "train" or r.get("sample_source") != "train":
+        raise ValueError("A/B must fit train-only samples, never held-out samples")
+    train_episodes = {e for e, _ in a["samples"]}
+    val_episodes = {e for e, _ in a["val_samples"]}
+    if train_episodes & val_episodes:
+        raise ValueError("train/validation episode leakage in A/B manifest")
+    if a.get("hashes") and a.get("hashes") != r.get("hashes"):
+        raise ValueError("A/B source snapshots differ")
     for split_key in ("final_eval", "final_val_eval"):
         x, y = sa[split_key], sr[split_key]
         if x.get("n") != y.get("n"):
