@@ -1,0 +1,182 @@
+{
+ "runs": {
+  "duplicate": {
+   "duplicate": {
+    "path": "/home/dgut/pusht_runtime/r6_pilot_runs/20261019T161033Z/duplicate_residual",
+    "curve": {
+     "0": 0.020861374214291573,
+     "150": 0.01961095817387104,
+     "300": 0.026053987443447113
+    },
+    "final": {
+     "val_L1": 0.026053987443447113,
+     "identity_L1": 0.004800586029887199,
+     "corr_delta": 0.08402457503466697,
+     "sign_at_1e-3": 0.5194029850746269,
+     "magnitude_ratio": 5.266378908301755,
+     "unique_token_rows": 22,
+     "n": 60,
+     "tf_tok_acc": 0.49047619047619045
+    }
+   },
+   "duplicate2": {
+    "path": "/home/dgut/pusht_runtime/r6_pilot_runs/20261019T161033Z/duplicate_residual_rep2b",
+    "curve": {
+     "0": 0.020861374214291573,
+     "150": 0.014026927761733532,
+     "300": 0.023121625185012817
+    },
+    "final": {
+     "val_L1": 0.023121625185012817,
+     "identity_L1": 0.004800586029887199,
+     "corr_delta": -0.02199168802812596,
+     "sign_at_1e-3": 0.4835820895522388,
+     "magnitude_ratio": 4.507046142227456,
+     "unique_token_rows": 3,
+     "n": 60,
+     "tf_tok_acc": 0.5071428571428571
+    }
+   }
+  },
+  "true": {
+   "true": {
+    "path": "/home/dgut/pusht_runtime/r6_pilot_runs/20261019T161033Z/true_residual",
+    "curve": {
+     "0": 0.020828699693083763,
+     "150": 0.012443149462342262,
+     "300": 0.018464069813489914
+    },
+    "final": {
+     "val_L1": 0.018464069813489914,
+     "identity_L1": 0.004800586029887199,
+     "corr_delta": 0.09716122701333325,
+     "sign_at_1e-3": 0.46865671641791046,
+     "magnitude_ratio": 3.6251378380503794,
+     "unique_token_rows": 14,
+     "n": 60,
+     "tf_tok_acc": 0.5619047619047619
+    }
+   },
+   "true2": {
+    "path": "/home/dgut/pusht_runtime/r6_pilot_runs/20261019T161033Z/true_residual_rep2",
+    "curve": {
+     "0": 0.020828699693083763,
+     "150": 0.012559651397168636,
+     "300": 0.021826939657330513
+    },
+    "final": {
+     "val_L1": 0.021826939657330513,
+     "identity_L1": 0.004800586029887199,
+     "corr_delta": -0.053777946872830856,
+     "sign_at_1e-3": 0.4626865671641791,
+     "magnitude_ratio": 4.251439148246914,
+     "unique_token_rows": 5,
+     "n": 60,
+     "tf_tok_acc": 0.5452380952380952
+    }
+   }
+  }
+ },
+ "by_step": {
+  "0": {
+   "per_run": {
+    "duplicate": {
+     "duplicate": 0.020861374214291573,
+     "duplicate2": 0.020861374214291573
+    },
+    "true": {
+     "true": 0.020828699693083763,
+     "true2": 0.020828699693083763
+    }
+   },
+   "per_arm": {
+    "duplicate": {
+     "n": 2,
+     "mean": 0.020861374214291573,
+     "min": 0.020861374214291573,
+     "max": 0.020861374214291573,
+     "spread_pct": 0.0
+    },
+    "true": {
+     "n": 2,
+     "mean": 0.020828699693083763,
+     "min": 0.020828699693083763,
+     "max": 0.020828699693083763,
+     "spread_pct": 0.0
+    }
+   },
+   "separation": {
+    "true_max_lt_duplicate_min": true,
+    "mean_improvement_pct": 0.15662688790587312,
+    "cross_pair_orderings_consistent": true
+   }
+  },
+  "150": {
+   "per_run": {
+    "duplicate": {
+     "duplicate": 0.01961095817387104,
+     "duplicate2": 0.014026927761733532
+    },
+    "true": {
+     "true": 0.012443149462342262,
+     "true2": 0.012559651397168636
+    }
+   },
+   "per_arm": {
+    "duplicate": {
+     "n": 2,
+     "mean": 0.016818942967802286,
+     "min": 0.014026927761733532,
+     "max": 0.01961095817387104,
+     "spread_pct": 33.20084040058529
+    },
+    "true": {
+     "n": 2,
+     "mean": 0.01250140042975545,
+     "min": 0.012443149462342262,
+     "max": 0.012559651397168636,
+     "spread_pct": 0.9319110724568154
+    }
+   },
+   "separation": {
+    "true_max_lt_duplicate_min": true,
+    "mean_improvement_pct": 25.670712755584656,
+    "cross_pair_orderings_consistent": true
+   }
+  },
+  "300": {
+   "per_run": {
+    "duplicate": {
+     "duplicate": 0.026053987443447113,
+     "duplicate2": 0.023121625185012817
+    },
+    "true": {
+     "true": 0.018464069813489914,
+     "true2": 0.021826939657330513
+    }
+   },
+   "per_arm": {
+    "duplicate": {
+     "n": 2,
+     "mean": 0.024587806314229965,
+     "min": 0.023121625185012817,
+     "max": 0.026053987443447113,
+     "spread_pct": 11.926083282256691
+    },
+    "true": {
+     "n": 2,
+     "mean": 0.020145504735410213,
+     "min": 0.018464069813489914,
+     "max": 0.021826939657330513,
+     "spread_pct": 16.692904386568568
+    }
+   },
+   "separation": {
+    "true_max_lt_duplicate_min": true,
+    "mean_improvement_pct": 18.06709196366225,
+    "cross_pair_orderings_consistent": true
+   }
+  }
+ },
+ "note": "identical-configuration runs are the noise floor; an A/B effect must be read against that spread, not against a single pair"
+}

@@ -1,0 +1,29 @@
+{
+ "gpu": "NVIDIA RTX A6000, 49140 MiB, 580.178.04",
+ "torch": "2.4.1+cu121",
+ "cuda": "12.1",
+ "cudnn": 90100,
+ "device_capability": [
+  8,
+  6
+ ],
+ "python": "3.10.12",
+ "numpy": "1.26.4",
+ "transformers": "4.40.2",
+ "peft": "0.11.1",
+ "protocol": {
+  "steps": 300,
+  "train_frames": 200,
+  "val_frames": 60,
+  "lr": 0.0005,
+  "seed": 0,
+  "batch": 1,
+  "grad_clip": 1.0,
+  "target": "residual",
+  "optimizer": "AdamW(weight_decay=0)",
+  "scheduler": "none",
+  "gradient_checkpointing": true,
+  "precision": "bf16 autocast"
+ },
+ "note": "gradient checkpointing is ON because another user's job holds ~40 GB of the A6000; no foreign process was touched"
+}
