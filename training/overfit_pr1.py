@@ -179,9 +179,10 @@ def main():
                     pv, pr = T.obs(h, t, proc, 3, True, pmin, pmax)
                     act = T.c14(h, "action")[t].copy()
                     st = T.c14(h, "state")[t].copy()
+                    previous_action = T.c14(h, "action")[max(t - 1, 0)].copy() if t > 0 else st.copy()
                 target = AT.training_target(st, act, args.target_mode)
                 result.append({"pv": pv, "pr": pr, "act": act, "state": st,
-                               "idx": T.tok(T.norm_a(target, q01, q99))})
+                               "previous_action": previous_action, "idx": T.tok(T.norm_a(target, q01, q99))})
             return result
         cache = load_samples(samples)
         heldout = load_samples(val_pairs)
@@ -237,14 +238,14 @@ def main():
 
         @torch.no_grad()
         def evaluate(step, dataset, split_name):
-            P, G, S, TF, generated_token_rows = [], [], [], [], []
+            P, G, S, Prev, TF, generated_token_rows = [], [], [], [], [], []
             for s in dataset:
                 generated_action, generated_indices = gen(s)
                 P.append(generated_action)
                 generated_token_rows.append(generated_indices)
-                G.append(s["act"]); S.append(s["state"])
+                G.append(s["act"]); S.append(s["state"]); Prev.append(s["previous_action"])
                 _, tp = fwd_loss(s); TF.append(tp)
-            P, G, S = np.stack(P), np.stack(G), np.stack(S)
+            P, G, S, Prev = np.stack(P), np.stack(G), np.stack(S), np.stack(Prev)
             gt = np.stack([s["idx"] for s in dataset])
             tf_flat = np.concatenate([x for x in TF]); gt_flat = gt.reshape(-1)
             rec = {"stage": "eval", "split": split_name, "target_mode": args.target_mode, "step": int(step), "n": len(P),
@@ -252,10 +253,12 @@ def main():
                    "tf_tok_acc_per_dim": (tf_flat.reshape(len(P), 14) == gt_flat.reshape(len(P), 14)).mean(0).tolist(),
                    "gen_L1": float(np.abs(P - G).mean()),
                    "identity_L1": float(np.abs(S - G).mean()),
+                   "repeat_previous_L1": float(np.abs(Prev - G).mean()),
                    "pred_delta": float(np.abs(P - S).mean()),
                    "gt_delta": float(np.abs(G - S).mean()),
                    "per_dim_gen": np.abs(P - G).mean(0).tolist(),
                    "per_dim_identity": np.abs(S - G).mean(0).tolist(),
+                   "per_dim_repeat_previous": np.abs(Prev - G).mean(0).tolist(),
                    "uniq_rows": len({tuple(np.round(r, 3)) for r in P}),
                    "gen_tokens_per_sample": generated_token_rows,
                    "gt_tokens_per_sample": gt.tolist()}
