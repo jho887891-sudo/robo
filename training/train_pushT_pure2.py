@@ -255,6 +255,7 @@ def main():
     d = OUT + "/checkpoints/final"; os.makedirs(d, exist_ok=True)
     vla.save_pretrained(d + "/lora_adapter")
     if pp is not None: torch.save(pp.state_dict(), d + "/proprio_projector--pure.pt")
+    meta = AT.record_checkpoint_hashes(meta, d + "/lora_adapter", d + "/proprio_projector--pure.pt")
     meta.update({"heldout_bounds_autoreg_L1": l1, "heldout_physical_L1": phys})
     with open(os.path.join(OUT, "run_meta.json"), "w") as fh:
         json.dump(meta, fh, indent=1)
