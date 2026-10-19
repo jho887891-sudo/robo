@@ -40,6 +40,7 @@ os.environ.setdefault("PUSHT_BOUNDS", RT + "/push_T_bounds.npz")
 os.environ.setdefault("PUSHT_OFT", "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft")
 
 import train_pushT_pure2 as T          # noqa: E402  —— 真实训练代码（PR 分支原文件）
+from overfit_protocol import select_train_samples, validated_generation_indices
 
 MAX_STEPS = 300
 PASS, FAIL = "PASS", "FAIL"
@@ -61,16 +62,13 @@ def log(msg, fh=None):
 
 
 def pick_samples(n):
+    """Select overfit examples from TRAIN episodes; never consume held-out VAL episodes."""
     split = json.load(open(T.SPLIT))
-    out = []
-    for e in sorted(split["val"]):
+    episode_lengths = {}
+    for e in sorted(split["train"]):
         with h5py.File(os.path.join(T.HDF5_DIR, e), "r") as h:
-            Tn = h["action/left_arm_joint_states"].shape[0]
-        for t in range(20, max(21, Tn - 2), 40):
-            out.append([e, int(t)])
-            if len(out) >= n:
-                return out
-    return out
+            episode_lengths[e] = int(h["action/left_arm_joint_states"].shape[0])
+    return select_train_samples(split, episode_lengths, n=n)
 
 
 def main():
@@ -117,6 +115,7 @@ def main():
             if os.path.isfile(src):
                 shutil.copy2(src, os.path.join(snap, f))
         samples = pick_samples(args.n)
+        log("sample_source=train; selected %d fixed TRAIN examples (VAL untouched)" % len(samples), logf)
 
         # ---------- 机制选择：keep = 直接使用 PR 的 build()（内部调用 enable_pure_autoreg）
         if args.mechanism == "zero":
@@ -148,7 +147,7 @@ def main():
         status["grad_checkpoint"] = bool(use_ckpt)
 
         json.dump({"mechanism": args.mechanism, "steps": args.steps, "lr": args.lr,
-                   "samples": samples, "q01": q01.tolist(), "q99": q99.tolist(),
+                   "samples": samples, "sample_source": "train", "q01": q01.tolist(), "q99": q99.tolist(),
                    "hashes": {f: sha(os.path.join(snap, f)) for f in sorted(os.listdir(snap))},
                    "torch": torch.__version__},
                   open(os.path.join(snap, "config.json"), "w"), indent=1)
@@ -211,13 +210,16 @@ def main():
                     o = vla(input_ids=nxt, past_key_values=past, labels=None, use_cache=True)
                 past, lg = o.past_key_values, o.logits[0, -1]
             vla.train()
-            return T.detok(np.asarray(toks), q01, q99)
+            return T.detok(np.asarray(toks), q01, q99), validated_generation_indices(toks)
 
         @torch.no_grad()
         def evaluate(step):
-            P, G, S, TF = [], [], [], []
+            P, G, S, TF, generated_token_rows = [], [], [], [], []
             for s in cache:
-                P.append(gen(s)); G.append(s["act"]); S.append(s["state"])
+                generated_action, generated_indices = gen(s)
+                P.append(generated_action)
+                generated_token_rows.append(generated_indices)
+                G.append(s["act"]); S.append(s["state"])
                 _, tp = fwd_loss(s); TF.append(tp)
             P, G, S = np.stack(P), np.stack(G), np.stack(S)
             gt = np.stack([s["idx"] for s in cache])
@@ -232,14 +234,15 @@ def main():
                    "per_dim_gen": np.abs(P - G).mean(0).tolist(),
                    "per_dim_identity": np.abs(S - G).mean(0).tolist(),
                    "uniq_rows": len({tuple(np.round(r, 3)) for r in P}),
-                   "gen_tokens_per_sample": gt_flat.reshape(len(P), 14).tolist()}
+                   "gen_tokens_per_sample": generated_token_rows,
+                   "gt_tokens_per_sample": gt.tolist()}
             rec["ratio"] = rec["gen_L1"] / (rec["identity_L1"] + 1e-12)
             jsonl_like = rec
             log("EVAL step=%d | gen_L1=%.5f identity=%.5f ratio=%.2f | pred_delta=%.5f gt_delta=%.5f | "
                 "tf_acc=%.3f uniq=%d/%d" % (step, rec["gen_L1"], rec["identity_L1"], rec["ratio"],
                                              rec["pred_delta"], rec["gt_delta"], rec["tf_tok_acc"],
                                              rec["uniq_rows"], rec["n"]), logf)
-            mj.write(json.dumps({k: v for k, v in jsonl_like.items() if k != "gen_tokens_per_sample"}) + "\n")
+            mj.write(json.dumps(jsonl_like) + "\n")
             mj.flush()
             return rec
 
