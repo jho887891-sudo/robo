@@ -115,3 +115,51 @@ def summarize_manifest(rows, threshold=0.005):
             "threshold": threshold, "activity_counts": counts,
             "left_delta_mean": float(mat[:, 0].mean()),
             "right_delta_mean": float(mat[:, 1].mean())}
+
+
+def spread_validation_frames(split, episode_lengths, n, seed=0):
+    """Pick time-spread examples from *all* held-out episodes when n >= count.
+
+    Low-discrepancy fractions 1/2, 1/4, 3/4, ... prevent taking only a
+    few episodes from a skewed precomputed fixed-frame list.
+    """
+    train, val = set(split["train"]), list(split["val"])
+    if train & set(val) or len(set(val)) != len(val):
+        raise ValueError("train/val episode overlap or duplicate validation episodes")
+    if not val or not isinstance(n, int) or n < len(val):
+        raise ValueError("validation budget must cover every held-out episode")
+    order = sorted(val)
+    random.Random(seed).shuffle(order)
+    count = {e: 0 for e in order}
+    result = []
+    while len(result) < n:
+        made_progress = False
+        for e in order:
+            length = int(episode_lengths[e])
+            usable = length - 2  # match training's terminal exclusion
+            if usable <= 0:
+                raise ValueError("validation episode too short: " + e)
+            phase = count[e] + 1
+            # van der Corput base 2: 1/2, 1/4, 3/4, 1/8, ...
+            k, denom, numerator = phase, 1, 0
+            while k:
+                denominator_digit = k % 2
+                denom *= 2
+                numerator = numerator * 2 + denominator_digit
+                k //= 2
+            fraction = numerator / denom
+            t = min(usable - 1, int(fraction * usable))
+            used = {q[1] for q in result if q[0] == e}
+            if t in used:
+                nearby = [q for q in range(usable) if q not in used]
+                if not nearby:
+                    raise ValueError("insufficient unique validation frames: " + e)
+                t = min(nearby, key=lambda q: (abs(q - t), q))
+            result.append([e, t])
+            count[e] += 1
+            made_progress = True
+            if len(result) == n:
+                break
+        if not made_progress:
+            raise ValueError("could not fill validation frame manifest")
+    return result
