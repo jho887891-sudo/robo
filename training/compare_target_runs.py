@@ -26,9 +26,11 @@ def compare(absolute_dir, residual_dir):
     r, sr = load_run(residual_dir)
     if a["action_target_mode"] != "absolute" or r["action_target_mode"] != "residual":
         raise ValueError("wrong experiment target mode")
-    for key in ("samples", "val_samples", "steps", "lr", "mechanism",
-                "sampling_strategy", "validation_strategy", "seed", "median_delta"):
+    for key in ("samples", "val_samples", "steps", "lr", "mechanism"):
         if a[key] != r[key]:
+            raise ValueError("unmatched A/B experimental configuration: " + key)
+    for key in ("sampling_strategy", "validation_strategy", "seed", "median_delta"):
+        if a.get(key) != r.get(key):
             raise ValueError("unmatched A/B experimental configuration: " + key)
     if a.get("sampling_strategy") == "diverse" and a.get("train_manifest_diagnostics") != r.get("train_manifest_diagnostics"):
         raise ValueError("A/B training sample activity diagnostics differ")
