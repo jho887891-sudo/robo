@@ -1,0 +1,66 @@
+{
+ "git_commit": "4982f1a42d421ed93db25f44307117ee70130d42",
+ "candidate_frames_total": 1229,
+ "candidate_episodes": 80,
+ "stride": 20,
+ "start": 20,
+ "seed": 0,
+ "train": {
+  "requested": 200,
+  "selected": 200,
+  "episodes_covered": 80,
+  "episodes_total": 80,
+  "distinct_frames": 200,
+  "activity": {
+   "left_only": 62,
+   "right_only": 83,
+   "both_active": 36,
+   "neither_active": 19
+  },
+  "activity_ratio": {
+   "left_only": 0.31,
+   "right_only": 0.415,
+   "both_active": 0.18,
+   "neither_active": 0.095
+  },
+  "threshold": 0.005,
+  "left_delta_mean": 0.01690154852510508,
+  "right_delta_mean": 0.020859926400761303,
+  "frames_per_episode_min": 2,
+  "frames_per_episode_max": 3,
+  "frames_per_episode_histogram": {
+   "2": 40,
+   "3": 40
+  }
+ },
+ "val": {
+  "requested": 60,
+  "selected": 60,
+  "episodes_covered": 20,
+  "episodes_total": 20,
+  "distinct_frames": 60,
+  "frames_per_episode": {
+   "episode_0000048.hdf5": 3,
+   "episode_0000091.hdf5": 3,
+   "episode_0000080.hdf5": 3,
+   "episode_0000066.hdf5": 3,
+   "episode_0000001.hdf5": 3,
+   "episode_0000087.hdf5": 3,
+   "episode_0000052.hdf5": 3,
+   "episode_0000007.hdf5": 3,
+   "episode_0000008.hdf5": 3,
+   "episode_0000047.hdf5": 3,
+   "episode_0000013.hdf5": 3,
+   "episode_0000023.hdf5": 3,
+   "episode_0000011.hdf5": 3,
+   "episode_0000094.hdf5": 3,
+   "episode_0000016.hdf5": 3,
+   "episode_0000078.hdf5": 3,
+   "episode_0000041.hdf5": 3,
+   "episode_0000002.hdf5": 3,
+   "episode_0000063.hdf5": 3,
+   "episode_0000054.hdf5": 3
+  },
+  "overlap_with_train_episodes": 0
+ }
+}

@@ -1,0 +1,53 @@
+[10:36:00] samples: train=200 episodes=80; val=60 episodes=20, disjoint; sample=diverse val=spread
+[10:36:00] mechanism=keep -> PR enable_pure_autoreg active (causal autoreg)
+[10:36:01] samples=200  train_eps=80  q01/q99 computed from train split
+[10:37:57] pure_autoreg flag = True ; has attr = True
+[10:37:57] GPU free=9.1GB total=50.9GB
+[10:37:57] gradient checkpointing ON (显存保护)
+[10:37:58] trainable=127.7M
+[10:48:43] EVAL train target=absolute step=0 | gen_L1=0.47553 identity=0.01888 ratio=25.19 | pred_delta=0.47354 gt_delta=0.01888 | tf_acc=0.029 uniq=200/200
+[10:50:32] EVAL val target=absolute step=0 | gen_L1=0.43201 identity=0.00480 ratio=89.99 | pred_delta=0.43243 gt_delta=0.00480 | tf_acc=0.056 uniq=60/60
+[10:50:36] step=1 loss=15.8574 tok_acc=0.143 gnorm=45.74 mem=18.1GB 4s
+[10:51:06] step=25 loss=3.3527 tok_acc=0.500 gnorm=4.29 mem=18.7GB 34s
+[10:51:37] step=50 loss=2.4322 tok_acc=0.500 gnorm=3.72 mem=18.7GB 65s
+[10:52:08] step=75 loss=2.9961 tok_acc=0.500 gnorm=2.66 mem=18.7GB 96s
+[10:52:39] step=100 loss=2.6165 tok_acc=0.429 gnorm=4.62 mem=18.7GB 127s
+[10:53:10] step=125 loss=2.4679 tok_acc=0.571 gnorm=7.06 mem=18.7GB 158s
+[10:53:42] step=150 loss=2.5253 tok_acc=0.500 gnorm=3.13 mem=18.7GB 190s
+[10:54:14] step=175 loss=2.0286 tok_acc=0.571 gnorm=3.88 mem=18.7GB 222s
+[10:54:47] step=200 loss=2.0308 tok_acc=0.571 gnorm=4.58 mem=18.7GB 255s
+[11:00:49] EVAL train target=absolute step=200 | gen_L1=0.24229 identity=0.01888 ratio=12.83 | pred_delta=0.23992 gt_delta=0.01888 | tf_acc=0.446 uniq=80/200
+[11:02:44] EVAL val target=absolute step=200 | gen_L1=0.21235 identity=0.00480 ratio=44.23 | pred_delta=0.21124 gt_delta=0.00480 | tf_acc=0.483 uniq=25/60
+[11:03:16] step=225 loss=2.7161 tok_acc=0.500 gnorm=4.76 mem=18.7GB 764s
+[11:03:47] step=250 loss=1.9684 tok_acc=0.571 gnorm=3.93 mem=18.7GB 795s
+[11:04:19] step=275 loss=1.7590 tok_acc=0.643 gnorm=8.69 mem=18.7GB 827s
+[11:04:53] step=300 loss=1.8625 tok_acc=0.357 gnorm=4.48 mem=18.7GB 861s
+[11:05:25] step=325 loss=1.8056 tok_acc=0.571 gnorm=6.86 mem=18.7GB 893s
+[11:05:56] step=350 loss=1.9792 tok_acc=0.571 gnorm=4.23 mem=18.7GB 924s
+[11:06:27] step=375 loss=1.0813 tok_acc=0.643 gnorm=5.69 mem=18.7GB 955s
+[11:06:58] step=400 loss=1.8345 tok_acc=0.571 gnorm=7.27 mem=18.7GB 986s
+[11:12:48] EVAL train target=absolute step=400 | gen_L1=0.18414 identity=0.01888 ratio=9.75 | pred_delta=0.18330 gt_delta=0.01888 | tf_acc=0.573 uniq=131/200
+[11:14:32] EVAL val target=absolute step=400 | gen_L1=0.17003 identity=0.00480 ratio=35.42 | pred_delta=0.16912 gt_delta=0.00480 | tf_acc=0.489 uniq=46/60
+[11:15:03] step=425 loss=0.4871 tok_acc=0.857 gnorm=6.17 mem=18.7GB 1471s
+[11:15:34] step=450 loss=1.2738 tok_acc=0.714 gnorm=8.93 mem=18.7GB 1502s
+[11:16:04] step=475 loss=0.3981 tok_acc=0.929 gnorm=3.93 mem=18.7GB 1532s
+[11:16:35] step=500 loss=0.5234 tok_acc=0.714 gnorm=4.70 mem=18.7GB 1564s
+[11:17:07] step=525 loss=0.9273 tok_acc=0.786 gnorm=4.88 mem=18.7GB 1595s
+[11:17:39] step=550 loss=0.5764 tok_acc=0.857 gnorm=4.36 mem=18.7GB 1627s
+[11:18:10] step=575 loss=0.9851 tok_acc=0.714 gnorm=12.08 mem=18.7GB 1658s
+[11:18:43] step=600 loss=1.0998 tok_acc=0.714 gnorm=12.92 mem=18.7GB 1691s
+[11:24:47] EVAL train target=absolute step=600 | gen_L1=0.15357 identity=0.01888 ratio=8.13 | pred_delta=0.15105 gt_delta=0.01888 | tf_acc=0.725 uniq=55/200
+[11:26:34] EVAL val target=absolute step=600 | gen_L1=0.12858 identity=0.00480 ratio=26.79 | pred_delta=0.12767 gt_delta=0.00480 | tf_acc=0.475 uniq=15/60
+[11:27:06] step=625 loss=0.9373 tok_acc=0.857 gnorm=8.32 mem=18.7GB 2194s
+[11:27:36] step=650 loss=0.4672 tok_acc=0.857 gnorm=3.60 mem=18.7GB 2224s
+[11:28:07] step=675 loss=0.2998 tok_acc=0.929 gnorm=1.44 mem=18.7GB 2255s
+[11:28:38] step=700 loss=0.6644 tok_acc=0.714 gnorm=9.66 mem=18.7GB 2286s
+[11:29:09] step=725 loss=0.3188 tok_acc=0.929 gnorm=2.75 mem=18.7GB 2317s
+[11:29:39] step=750 loss=0.3009 tok_acc=0.857 gnorm=7.24 mem=18.7GB 2347s
+[11:30:10] step=775 loss=0.1649 tok_acc=1.000 gnorm=2.56 mem=18.7GB 2378s
+[11:30:41] step=800 loss=0.4722 tok_acc=0.857 gnorm=7.07 mem=18.7GB 2409s
+[11:36:29] EVAL train target=absolute step=800 | gen_L1=0.17215 identity=0.01888 ratio=9.12 | pred_delta=0.17024 gt_delta=0.01888 | tf_acc=0.783 uniq=64/200
+[11:38:11] EVAL val target=absolute step=800 | gen_L1=0.13351 identity=0.00480 ratio=27.81 | pred_delta=0.13282 gt_delta=0.00480 | tf_acc=0.486 uniq=14/60
+[11:43:46] EVAL train target=absolute step=800 | gen_L1=0.17215 identity=0.01888 ratio=9.12 | pred_delta=0.17024 gt_delta=0.01888 | tf_acc=0.783 uniq=64/200
+[11:45:24] EVAL val target=absolute step=800 | gen_L1=0.13351 identity=0.00480 ratio=27.81 | pred_delta=0.13282 gt_delta=0.00480 | tf_acc=0.486 uniq=14/60
+[11:45:27] saved /home/dgut/pusht_runtime/r5_ab_jobs/20261019T103523Z/absolute_keep/checkpoints/final
