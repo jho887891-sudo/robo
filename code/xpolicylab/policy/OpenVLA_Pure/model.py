@@ -34,6 +34,7 @@ from prismatic.models.projectors import ProprioProjector
 from prismatic.vla.constants import ACTION_DIM, ACTION_TOKEN_BEGIN_IDX
 
 from XPolicyLab.model_template import ModelTemplate
+from XPolicyLab.policy.OpenVLA_Pure.pure_autoreg_mode import enable_pure_autoreg
 from XPolicyLab.policy.OpenVLA_Pure.action_codec import (
     LEGAL_TOKEN_MAX,
     LEGAL_TOKEN_MIN,
@@ -140,8 +141,10 @@ class Model(ModelTemplate):
             trust_remote_code=True,
         )
         vla.vision_backbone.set_num_images_in_input(self.num_images)
+        enable_pure_autoreg(vla)
         vla = PeftModel.from_pretrained(vla, model_cfg["adapter_dir"], is_trainable=False)
         vla = vla.merge_and_unload()
+        enable_pure_autoreg(vla)
         self.vla = vla.to(self.device).eval()
         print("[OpenVLA_Pure] LoRA merged (cameras=%d)" % self.num_images, flush=True)
 

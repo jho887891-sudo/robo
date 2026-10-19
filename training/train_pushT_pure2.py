@@ -36,6 +36,16 @@ AutoConfig.register("openvla", OpenVLAConfig)
 AutoImageProcessor.register(OpenVLAConfig, PrismaticImageProcessor)
 AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
 from peft import LoraConfig, get_peft_model
+
+# The training script runs outside the package; reuse the identical deployment helper.
+_CODE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "code", "xpolicylab", "policy", "OpenVLA_Pure"))
+if not os.path.isfile(os.path.join(_CODE, "pure_autoreg_mode.py")):
+    _CODE = os.environ.get("PUSHT_PURE_POLICY_DIR", "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_Pure")
+if not os.path.isfile(os.path.join(_CODE, "pure_autoreg_mode.py")):
+    raise FileNotFoundError("pure_autoreg_mode.py not installed; set PUSHT_PURE_POLICY_DIR to deployed OpenVLA_Pure directory")
+if _CODE not in sys.path:
+    sys.path.insert(0, _CODE)
+from pure_autoreg_mode import enable_pure_autoreg
 from prismatic.models.backbones.llm.prompting import PurePromptBuilder
 from prismatic.models.projectors import ProprioProjector
 from prismatic.vla.constants import ACTION_TOKEN_BEGIN_IDX, STOP_INDEX, ACTION_DIM, NUM_ACTIONS_CHUNK, IGNORE_INDEX
@@ -73,6 +83,7 @@ def build(cams, use_proprio):
     vla = AutoModelForVision2Seq.from_pretrained(MODEL, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True,
                                                 trust_remote_code=True).to("cuda")
     vla.vision_backbone.set_num_images_in_input(cams)
+    enable_pure_autoreg(vla)  # ensure previous action tokens are not zeroed during training
     cfg = LoraConfig(r=32, lora_alpha=16, lora_dropout=0.0, target_modules="all-linear", init_lora_weights="gaussian")
     vla = get_peft_model(vla, cfg)
     tot = sum(p.numel() for p in vla.parameters() if p.requires_grad)
