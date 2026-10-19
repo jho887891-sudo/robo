@@ -159,3 +159,27 @@ correct action reconstruction should it be compared:
   prediction, **not** RoboDojo task success.
 
 No 300-step A/B numbers or closed-loop improvements are currently available.
+
+
+## 7. One-command remote preflight / opt-in run
+
+A separate, fail-closed wrapper now exists at `scripts/run_r4_ab.sh`.
+
+```bash
+# In a clean worktree on audit/r4-unified-action-target-ab:
+bash scripts/run_r4_ab.sh --check
+# Only after examining the preflight and with explicit authorization:
+bash scripts/run_r4_ab.sh --execute
+```
+
+The default `--check` **never launches training**. It validates branch, clean
+tracked files, dataset/split paths, pristine modeling source SHA-256, 20 held-out
+examples and training episode availability, plus the CPU contracts. Using
+`--execute` additionally requires at least 20 GB free VRAM and creates a brand-new
+timestamped output directory under `$PUSHT_RUNTIME/r4_ab_jobs/` by default.
+It then runs each 300-step A/B experiment and the strict comparator. A failure
+stops the script immediately while preserving whichever output/logs were written.
+
+The wrapper does **not** copy or overwrite the live RoboDojo policy files,
+merge a PR, restart services, or initiate a simulator rollout. It does not
+bypass the separately required deployment-source reconciliation gate.
