@@ -24,7 +24,7 @@ def write_run(root, mode, val_l1=0.018, source="train", val_samples=None):
     }
     def record(name, l1):
         return {"split": name, "n": 2 if name == "train" else 1,
-                "gen_L1": l1, "identity_L1": 0.008,
+                "gen_L1": l1, "identity_L1": 0.008, "repeat_previous_L1": 0.009,
                 "pred_delta": 0.01, "gt_delta": 0.008,
                 "per_dim_gen": [l1] * 14,
                 "per_dim_identity": [0.008] * 14}
