@@ -46,6 +46,7 @@ if not os.path.isfile(os.path.join(_CODE, "pure_autoreg_mode.py")):
 if _CODE not in sys.path:
     sys.path.insert(0, _CODE)
 from pure_autoreg_mode import enable_pure_autoreg
+import action_target as AT
 from prismatic.models.backbones.llm.prompting import PurePromptBuilder
 from prismatic.models.projectors import ProprioProjector
 from prismatic.vla.constants import ACTION_TOKEN_BEGIN_IDX, STOP_INDEX, ACTION_DIM, NUM_ACTIONS_CHUNK, IGNORE_INDEX
@@ -71,12 +72,16 @@ def norm_pr(s, pmin, pmax): return np.clip(2.0*(s-pmin)/(pmax-pmin+1e-8)-1.0, -1
 def detok(tokens, q01, q99): return AC.denormalize(AC.decode_indices(tokens, mode=CODEC_MODE), q01, q99)
 def tok(a_norm): return AC.encode_indices(a_norm, mode=CODEC_MODE).astype(np.int64)
 
-def action_stats(eps):
-    A = []
+def action_stats(eps, target_mode=AT.ABSOLUTE):
+    """Quantiles of TARGET REPRESENTATION, computed only on train episodes."""
+    AT.validate_mode(target_mode)
+    values = []
     for e in eps:
-        with h5py.File(os.path.join(HDF5_DIR, e), "r") as h: A.append(c14(h, "action"))
-    A = np.concatenate(A, 0)
-    return np.quantile(A, 0.01, axis=0).astype(np.float32), np.quantile(A, 0.99, axis=0).astype(np.float32)
+        with h5py.File(os.path.join(HDF5_DIR, e), "r") as h:
+            values.append(AT.training_target(c14(h, "state"), c14(h, "action"), target_mode))
+    all_targets = np.concatenate(values, 0)
+    return AT.validate_stats(np.quantile(all_targets, 0.01, axis=0),
+                             np.quantile(all_targets, 0.99, axis=0))
 
 def build(cams, use_proprio):
     proc = AutoProcessor.from_pretrained(MODEL, trust_remote_code=True)
@@ -119,7 +124,7 @@ def make_ids(proc, a_tokens):
     return inp, lab
 
 @torch.no_grad()
-def evaluate(vla, pp, proc, cams, use_proprio, pmin, pmax, q01, q99, eps, n):
+def evaluate(vla, pp, proc, cams, use_proprio, pmin, pmax, q01, q99, eps, n, target_mode=AT.ABSOLUTE):
     vla.eval()
     if pp is not None: pp.eval()
     random.seed(11)
@@ -128,6 +133,7 @@ def evaluate(vla, pp, proc, cams, use_proprio, pmin, pmax, q01, q99, eps, n):
         with h5py.File(os.path.join(HDF5_DIR, e), "r") as h:
             pv, pr = obs(h, t, proc, cams, use_proprio, pmin, pmax)
             gt_raw = c14(h, "action")[t].copy()
+            state_raw = c14(h, "state")[t].copy()
         b = PurePromptBuilder("openvla"); b.add_turn("human", "What action should the robot take to " + INSTR + "?")
         pids = proc.tokenizer(b.get_prompt(), return_tensors="pt").input_ids
         if int(pids[0, -1].item()) != 29871:
@@ -145,13 +151,17 @@ def evaluate(vla, pp, proc, cams, use_proprio, pmin, pmax, q01, q99, eps, n):
             lg = out.logits[0, -1]
             cand = lg[ACTION_TOKEN_BEGIN_IDX+1: ACTION_TOKEN_BEGIN_IDX+1+BINS]
             toks.append(int(torch.argmax(cand).item()))
-        preds.append(norm_a(detok(np.array(toks), q01, q99), q01, q99))
-        gts.append(norm_a(gt_raw, q01, q99))
+        pred_target = detok(np.array(toks), q01, q99)
+        preds.append(AT.joint_command(state_raw, pred_target, target_mode))
+        gts.append(gt_raw)
     vla.train()
     if pp is not None: pp.train()
     P = np.stack(preds); G = np.stack(gts)
-    return (float(np.abs(P-G).mean()), float(P.std(0).mean()), float(G.std(0).mean()),
-            len({tuple(np.round(r, 3)) for r in P}), len(P))
+    bd = np.load(BOUNDS_FILE); amin, amax = bd["amin"], bd["amax"]
+    norm_bounds = lambda x: np.clip(2.0*(x-amin)/(amax-amin+1e-8)-1.0, -1.0, 1.0)
+    return (float(np.abs(norm_bounds(P)-norm_bounds(G)).mean()),
+            float(P.std(0).mean()), float(G.std(0).mean()),
+            len({tuple(np.round(r, 3)) for r in P}), len(P), float(np.abs(P-G).mean()))
 
 EPS_FIXED = []
 def main():
@@ -167,14 +177,30 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--init_ckpt", type=str, default="")
     ap.add_argument("--lr_milestone", type=int, default=1000)
+    ap.add_argument("--action_target_mode", choices=AT.TARGET_MODES, default=AT.ABSOLUTE)
     args = ap.parse_args()
+    AT.validate_mode(args.action_target_mode)
+    if not os.environ.get("PUSHT_OUT"):
+        raise RuntimeError("Set PUSHT_OUT to a NEW isolated directory before starting a training run")
+    if args.action_target_mode == AT.RESIDUAL and args.init_ckpt:
+        raise ValueError("Residual experiment must start from base; cannot resume old absolute-action adapters")
+    if os.path.exists(os.path.join(OUT, "checkpoints")):
+        raise FileExistsError("PUSHT_OUT already contains checkpoints; choose a fresh experiment directory")
     random.seed(args.seed); np.random.seed(args.seed); torch.manual_seed(args.seed)
     os.makedirs(OUT + "/checkpoints", exist_ok=True)
     sj = json.load(open(SPLIT)); train_eps, val_eps = sj["train"], sj["val"]
     EPS_FIXED = [tuple(x) for x in json.load(open(SAMPLE_FIX))]
     log("train=%d val=%d | cams=%d proprio=%d | chunk=%d dim=%d | FIXED_SAMPLES=%d" % (
         len(train_eps), len(val_eps), args.cams, args.proprio, NUM_ACTIONS_CHUNK, ACTION_DIM, len(EPS_FIXED)))
-    q01, q99 = action_stats(train_eps)
+    q01, q99 = action_stats(train_eps, target_mode=args.action_target_mode)
+    # Save target representation alongside its training quantiles: deployment must match it.
+    meta = {"variant": "pure_openvla", "action_target_mode": args.action_target_mode,
+            "action_input_masking": "keep", "codec_mode": CODEC_MODE,
+            "cams": args.cams, "proprio": args.proprio, "q01": q01.tolist(),
+            "q99": q99.tolist(), "lr": args.lr, "lr_milestone": args.lr_milestone,
+            "steps": args.steps, "seed": args.seed}
+    with open(os.path.join(OUT, "run_meta.json"), "w") as fh:
+        json.dump(meta, fh, indent=1)
     nb = np.load(BOUNDS_FILE); pmin, pmax = nb["pmin"], nb["pmax"]
     proc, vla, pp = build(args.cams, bool(args.proprio))
     if args.init_ckpt:
@@ -198,7 +224,10 @@ def main():
         with h5py.File(os.path.join(HDF5_DIR, e), "r") as h:
             T = h["action/left_arm_joint_states"].shape[0]; t = random.randrange(0, max(1, T-1))
             pv, pr = obs(h, t, proc, args.cams, bool(args.proprio), pmin, pmax)
-            gt_tok = tok(norm_a(c14(h, "action")[t], q01, q99))
+            state_t = c14(h, "state")[t]
+            action_t = c14(h, "action")[t]
+            target_t = AT.training_target(state_t, action_t, args.action_target_mode)
+            gt_tok = tok(norm_a(target_t, q01, q99))
             # [R2-1] 训练目标必须落在合法动作 token 窗口内（不得出现 PAD / 越界）
             AC.assert_legal_token_ids(AC.token_ids(gt_tok))
         inp, lab = make_ids(proc, gt_tok)
@@ -219,18 +248,16 @@ def main():
             vla.save_pretrained(d + "/lora_adapter")
             if pp is not None: torch.save(pp.state_dict(), d + "/proprio_projector--pure.pt")
             log("saved " + d)
-            l1, psd, gsd, uq, nn = evaluate(vla, pp, proc, args.cams, bool(args.proprio), pmin, pmax, q01, q99, val_eps, args.eval_n)
-            log("EVAL step=%d autoreg_L1=%.4f pred_std=%.4f gt_std=%.4f ratio=%.3f uniq=%d/%d" % (step, l1, psd, gsd, psd/(gsd+1e-9), uq, nn))
-    l1, psd, gsd, uq, nn = evaluate(vla, pp, proc, args.cams, bool(args.proprio), pmin, pmax, q01, q99, val_eps, args.eval_n)
-    log("FINAL_EVAL autoreg_L1=%.4f pred_std=%.4f gt_std=%.4f ratio=%.3f uniq=%d/%d" % (l1, psd, gsd, psd/(gsd+1e-9), uq, nn))
+            l1, psd, gsd, uq, nn, phys = evaluate(vla, pp, proc, args.cams, bool(args.proprio), pmin, pmax, q01, q99, val_eps, args.eval_n, target_mode=args.action_target_mode)
+            log("EVAL step=%d bounds_autoreg_L1=%.4f physical_L1=%.5f pred_std=%.4f gt_std=%.4f ratio=%.3f uniq=%d/%d" % (step, l1, phys, psd, gsd, psd/(gsd+1e-9), uq, nn))
+    l1, psd, gsd, uq, nn, phys = evaluate(vla, pp, proc, args.cams, bool(args.proprio), pmin, pmax, q01, q99, val_eps, args.eval_n, target_mode=args.action_target_mode)
+    log("FINAL_EVAL bounds_autoreg_L1=%.4f physical_L1=%.5f pred_std=%.4f gt_std=%.4f ratio=%.3f uniq=%d/%d" % (l1, phys, psd, gsd, psd/(gsd+1e-9), uq, nn))
     d = OUT + "/checkpoints/final"; os.makedirs(d, exist_ok=True)
     vla.save_pretrained(d + "/lora_adapter")
     if pp is not None: torch.save(pp.state_dict(), d + "/proprio_projector--pure.pt")
-    json.dump({"variant": "pure_openvla", "cams": args.cams, "proprio": args.proprio, "steps": args.steps,
-               "lr": args.lr, "lora_r": 32, "target_modules": "all-linear", "num_bins": BINS,
-               "codec_mode": CODEC_MODE,
-               "heldout_autoreg_L1": l1, "q01": q01.tolist(), "q99": q99.tolist()},
-              open(OUT + "/run_meta.json", "w"), indent=1)
+    meta.update({"heldout_bounds_autoreg_L1": l1, "heldout_physical_L1": phys})
+    with open(os.path.join(OUT, "run_meta.json"), "w") as fh:
+        json.dump(meta, fh, indent=1)
     log("PURE2_TRAIN_DONE steps=%d" % step)
 
 if __name__ == "__main__":
