@@ -141,6 +141,8 @@ class Model(ModelTemplate):
         expected_masking = meta.get("action_input_masking")
         if expected_masking not in (None, "keep"):
             raise ValueError("checkpoint has incompatible action_input_masking=%r" % expected_masking)
+        AT.verify_checkpoint_hashes(meta, model_cfg["adapter_dir"],
+                                    model_cfg["proprio_projector_path"], self.action_target_mode)
         print("[OpenVLA_Pure] target=%s codec=%s autoreg=keep" %
               (self.action_target_mode, self.codec_mode), flush=True)
         nb = np.load(model_cfg["bounds_path"])
