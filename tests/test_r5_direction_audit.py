@@ -24,6 +24,7 @@ class TestR5DirectionMetrics(unittest.TestCase):
              "gt_tokens_per_sample": [[100]*14, [130]*14, [150]*14]}
         r = M.direction_report(cfg, e, threshold=0.002)
         self.assertEqual(r["correlation_quantity"], "absolute_position")
+        self.assertIsNone(r["active_gt_sign_accuracy"])
         self.assertEqual(r["undefined_corr_dims"], [])
 
     def test_decode_token_endpoints(self):
