@@ -36,6 +36,7 @@ from prismatic.vla.constants import ACTION_DIM, ACTION_TOKEN_BEGIN_IDX
 from XPolicyLab.model_template import ModelTemplate
 from XPolicyLab.policy.OpenVLA_Pure.pure_autoreg_mode import enable_pure_autoreg
 from XPolicyLab.policy.OpenVLA_Pure import action_target as AT
+from XPolicyLab.policy.OpenVLA_Pure import proprio_history as PH
 from XPolicyLab.policy.OpenVLA_Pure.action_codec import (
     LEGAL_TOKEN_MAX,
     LEGAL_TOKEN_MIN,
@@ -138,6 +139,16 @@ class Model(ModelTemplate):
             raise ValueError("unknown checkpoint codec_mode: %s" % self.codec_mode)
         if self.action_target_mode == AT.RESIDUAL and self.codec_mode != MODE_FIXED:
             raise ValueError("residual checkpoint requires corrected fixed action codec")
+        # [R6] proprio interface: legacy checkpoints (no metadata) stay 14D exactly as before.
+        self.proprio_history_mode = PH.resolve_mode(meta)
+        self.proprio_dim = PH.proprio_dim(self.proprio_history_mode)
+        if self.proprio_dim != int(meta.get("proprio_dim", 14)):
+            raise ValueError("checkpoint proprio_dim %r disagrees with mode %r"
+                             % (meta.get("proprio_dim"), self.proprio_history_mode))
+        if self.proprio_history_mode != PH.NONE:
+            print("[OpenVLA_Pure] proprio history mode=%s dim=%d (%s)" % (
+                self.proprio_history_mode, self.proprio_dim, PH.MODE_DESCRIPTION[self.proprio_history_mode]),
+                flush=True)
         expected_masking = meta.get("action_input_masking")
         if expected_masking not in (None, "keep"):
             raise ValueError("checkpoint has incompatible action_input_masking=%r" % expected_masking)
@@ -170,10 +181,11 @@ class Model(ModelTemplate):
         self.vla = vla.to(self.device).eval()
         print("[OpenVLA_Pure] LoRA merged (cameras=%d)" % self.num_images, flush=True)
 
-        self.proprio_projector = ProprioProjector(proprio_dim=14, llm_dim=self.vla.llm_dim)
-        self.proprio_projector.load_state_dict(
-            torch.load(model_cfg["proprio_projector_path"], map_location="cpu")
-        )
+        self.proprio_projector = ProprioProjector(proprio_dim=self.proprio_dim, llm_dim=self.vla.llm_dim)
+        state_dict = torch.load(model_cfg["proprio_projector_path"], map_location="cpu")
+        width = int(state_dict["fc1.weight"].shape[1])
+        PH.verify_projector_width(meta, width, self.proprio_history_mode)
+        self.proprio_projector.load_state_dict(state_dict)
         self.proprio_projector = self.proprio_projector.to(self.device).eval()
 
         self.task_name = model_cfg.get("task_name")
@@ -202,6 +214,7 @@ class Model(ModelTemplate):
                   flush=True)
 
         self.observation_window = None
+        self.proprio_history = PH.HistoryBuffer(self.proprio_history_mode)
         self._latest_env_idx_list = [0]
         self._pids = None
         self.last_decode = None   # [R2] 最近一次推理的 token / 概率轨迹（诊断用）
@@ -245,7 +258,7 @@ class Model(ModelTemplate):
         return res
 
     @torch.no_grad()
-    def infer(self, observation):
+    def infer(self, observation, env_idx=0):
         images = [
             self.processor.image_processor.apply_transform(Image.fromarray(img))
             for img in observation["images_raw"]
@@ -253,9 +266,10 @@ class Model(ModelTemplate):
         pixel_values = torch.cat(images, dim=0).unsqueeze(0).to(torch.bfloat16).to(self.device)
 
         state = np.asarray(observation["state"], dtype=np.float32).reshape(-1)[:14]
-        proprio_np = np.clip(
-            2.0 * (state - self.pmin) / (self.pmax - self.pmin + 1e-8) - 1.0, -1.0, 1.0
-        ).astype(np.float32)
+        # [R6] 14D: proprio = normalized current state (unchanged).
+        #      28D: [current, previous OBSERVED state] from the per-env buffer; the
+        #      first observation after reset() uses the documented zero-velocity rule.
+        proprio_np = self.proprio_history.observe(state, self.pmin, self.pmax, env_idx)
         proprio = torch.from_numpy(proprio_np).unsqueeze(0).to(self.device)
 
         instr_info = self._note_instruction(observation.get("instruction"))
@@ -337,6 +351,9 @@ class Model(ModelTemplate):
             "probs": probs,
             "action_codec_mode": self.codec_mode,
             "action_target_mode": self.action_target_mode,
+            "proprio_history_mode": self.proprio_history_mode,
+            "proprio_dim": int(self.proprio_dim),
+            "proprio_norm": [round(float(v), 5) for v in np.asarray(proprio_np).reshape(-1)],
             "decoded_target": [float(v) for v in decoded_target],
             "instruction_used": instr_info["instruction"],
             "instruction_source": instr_info["source"],
@@ -365,7 +382,8 @@ class Model(ModelTemplate):
     def get_action(self, **kwargs):
         if self.observation_window is None:
             raise AssertionError("update_obs or update_obs_batch first!")
-        chunk = self.infer(self.observation_window[0])
+        chunk = self.infer(self.observation_window[0],
+                           env_idx=self._latest_env_idx_list[0] if self._latest_env_idx_list else 0)
         if self.robot_action_dim_info is None:
             return [chunk[0]]
         return unpack_robot_state(chunk, self.action_type, self.robot_action_dim_info, source_type="obs")
@@ -376,4 +394,6 @@ class Model(ModelTemplate):
 
     def reset(self):
         self.observation_window = None
+        if getattr(self, "proprio_history", None) is not None:
+            self.proprio_history.reset()
         return

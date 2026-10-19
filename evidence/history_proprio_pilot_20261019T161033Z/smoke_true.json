@@ -1,0 +1,163 @@
+{
+ "history_mode": "true",
+ "result": "FAIL",
+ "checks": [
+  {
+   "check": "S1a_forward_loss_finite",
+   "result": "PASS",
+   "detail": {
+    "loss": 16.45623207092285
+   }
+  },
+  {
+   "check": "S1b_projector_grads_nonzero",
+   "result": "PASS",
+   "detail": {
+    "fc1.weight": 1.3291627168655396,
+    "fc1.bias": 0.4163919687271118,
+    "fc2.weight": 16.359134674072266,
+    "fc2.bias": 1.2861500978469849
+   }
+  },
+  {
+   "check": "S1c_lora_grads_nonzero",
+   "result": "PASS",
+   "detail": {
+    "n_lora_tensors": 852,
+    "max_norm": 36.0
+   }
+  },
+  {
+   "check": "S1d_both_proprio_slots_receive_gradient",
+   "result": "PASS",
+   "detail": {
+    "grad_current_slot": 0.9520033001899719,
+    "grad_history_slot": 0.927557647228241
+   }
+  },
+  {
+   "check": "S2_history_slot_changes_output",
+   "result": "FAIL",
+   "detail": {
+    "base": [
+     110,
+     127,
+     149,
+     184,
+     143,
+     116
+    ],
+    "perturbed": [
+     110,
+     127,
+     149,
+     184,
+     143,
+     116
+    ],
+    "dims_changed": 0
+   }
+  },
+  {
+   "check": "S3_current_slot_changes_output",
+   "result": "FAIL",
+   "detail": {
+    "dims_changed": 0
+   }
+  },
+  {
+   "check": "S4_no_future_state_leak",
+   "result": "PASS",
+   "detail": {
+    "frame_30": {
+     "input_and_target_identical": true
+    },
+    "frame_120": {
+     "input_and_target_identical": true
+    },
+    "frame_240": {
+     "input_and_target_identical": true
+    }
+   }
+  },
+  {
+   "check": "S5_kv_equals_full_sequence_argmax",
+   "result": "PASS",
+   "detail": {
+    "matching_dims": 14,
+    "kv": [
+     110,
+     127,
+     149,
+     184,
+     143,
+     116,
+     0,
+     0,
+     128,
+     0,
+     114,
+     119,
+     0,
+     128
+    ],
+    "full": [
+     110,
+     127,
+     149,
+     184,
+     143,
+     116,
+     0,
+     0,
+     128,
+     0,
+     114,
+     119,
+     0,
+     128
+    ]
+   }
+  },
+  {
+   "check": "S6a_generation_deterministic",
+   "result": "PASS",
+   "detail": null
+  },
+  {
+   "check": "S6b_logits_finite",
+   "result": "PASS",
+   "detail": {
+    "logits_shape": [
+     1,
+     820,
+     32064
+    ]
+   }
+  },
+  {
+   "check": "S6c_shape_contract",
+   "result": "PASS",
+   "detail": {
+    "proprio": [
+     1,
+     28
+    ],
+    "projector_proprio_dim": 28
+   }
+  }
+ ],
+ "frames": [
+  30,
+  120,
+  240
+ ],
+ "episode": "episode_0000000.hdf5",
+ "projector_params_28d": 16900096,
+ "projector_params_14d": 16842752,
+ "projector_param_delta": 57344,
+ "gpu_free_gb_at_start": 9.115860992,
+ "grad_current_slot": 0.9520033001899719,
+ "grad_history_slot": 0.927557647228241,
+ "torch": "2.4.1+cu121"
+}

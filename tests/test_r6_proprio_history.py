@@ -148,5 +148,28 @@ class TestCheckpointMetadata(unittest.TestCase):
             PH.time_alignment_report(CUR, None, 7)
 
 
+class TestDeploymentIntegration(unittest.TestCase):
+    """The deployed policy must not hard-code the 14D interface any more."""
+
+    def setUp(self):
+        self.path = os.path.join(REPO, "code", "xpolicylab", "policy", "OpenVLA_Pure", "model.py")
+        self.src = open(self.path).read()
+
+    def test_policy_resolves_proprio_interface_from_metadata(self):
+        self.assertIn("proprio_history as PH", self.src)
+        self.assertIn("PH.resolve_mode(meta)", self.src)
+
+    def test_projector_width_is_not_hardcoded_to_14(self):
+        self.assertIn("ProprioProjector(proprio_dim=self.proprio_dim", self.src)
+        self.assertNotIn("ProprioProjector(proprio_dim=14", self.src)
+
+    def test_inference_uses_the_history_buffer(self):
+        self.assertIn("self.proprio_history.observe(", self.src)
+        self.assertIn("self.proprio_history.reset()", self.src)
+
+    def test_checkpoint_width_mismatch_is_refused_before_loading(self):
+        self.assertIn("PH.verify_projector_width(meta, width, self.proprio_history_mode)", self.src)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
