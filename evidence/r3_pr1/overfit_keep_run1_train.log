@@ -1,0 +1,25 @@
+[02:30:06] mechanism=keep -> PR enable_pure_autoreg active (causal autoreg)
+[02:30:08] samples=32  train_eps=80  q01/q99 computed from train split
+[02:31:10] pure_autoreg flag = True ; has attr = True
+[02:31:10] GPU free=9.6GB total=50.9GB
+[02:31:10] gradient checkpointing ON (显存保护)
+[02:31:10] trainable=127.7M
+[02:32:50] EVAL step=0 | gen_L1=0.44649 identity=0.00834 ratio=53.54 | pred_delta=0.44558 gt_delta=0.00834 | tf_acc=0.031 uniq=32/32
+[02:32:52] step=1 loss=17.8459 tok_acc=0.000 gnorm=52.19 mem=17.6GB 2s
+[02:33:24] step=25 loss=3.1486 tok_acc=0.357 gnorm=5.89 mem=18.2GB 34s
+[02:33:58] step=50 loss=2.4215 tok_acc=0.500 gnorm=6.19 mem=18.2GB 69s
+[02:34:33] step=75 loss=0.7854 tok_acc=0.643 gnorm=6.93 mem=18.2GB 103s
+[02:35:07] step=100 loss=0.1819 tok_acc=0.929 gnorm=4.30 mem=18.2GB 137s
+[02:36:11] EVAL step=100 | gen_L1=0.12161 identity=0.00834 ratio=14.58 | pred_delta=0.12533 gt_delta=0.00834 | tf_acc=0.893 uniq=23/32
+[02:36:47] step=125 loss=0.1584 tok_acc=0.929 gnorm=8.14 mem=18.2GB 237s
+[02:37:21] step=150 loss=0.1997 tok_acc=0.929 gnorm=5.70 mem=18.2GB 271s
+[02:37:55] step=175 loss=0.1578 tok_acc=0.929 gnorm=6.93 mem=18.2GB 306s
+[02:38:30] step=200 loss=0.0512 tok_acc=1.000 gnorm=1.13 mem=18.2GB 340s
+[02:39:35] EVAL step=200 | gen_L1=0.06466 identity=0.00834 ratio=7.75 | pred_delta=0.07099 gt_delta=0.00834 | tf_acc=0.953 uniq=27/32
+[02:40:08] step=225 loss=0.0003 tok_acc=1.000 gnorm=0.02 mem=18.2GB 439s
+[02:40:44] step=250 loss=0.0033 tok_acc=1.000 gnorm=0.17 mem=18.2GB 474s
+[02:41:18] step=275 loss=0.0005 tok_acc=1.000 gnorm=0.06 mem=18.2GB 509s
+[02:41:53] step=300 loss=0.0037 tok_acc=1.000 gnorm=0.42 mem=18.2GB 544s
+[02:43:00] EVAL step=300 | gen_L1=0.02052 identity=0.00834 ratio=2.46 | pred_delta=0.02699 gt_delta=0.00834 | tf_acc=0.991 uniq=31/32
+[02:44:06] EVAL step=300 | gen_L1=0.02052 identity=0.00834 ratio=2.46 | pred_delta=0.02699 gt_delta=0.00834 | tf_acc=0.991 uniq=31/32
+[02:44:09] saved /home/dgut/pusht_runtime/r3_pr1_overfit/keep_run1/checkpoints/final

@@ -1,0 +1,25 @@
+[02:44:34] mechanism=zero -> enable_pure_autoreg disabled (OFT original masking)
+[02:44:35] samples=32  train_eps=80  q01/q99 computed from train split
+[02:46:00] pure_autoreg flag = False ; has attr = False
+[02:46:00] GPU free=9.2GB total=50.9GB
+[02:46:00] gradient checkpointing ON (显存保护)
+[02:46:00] trainable=127.7M
+[02:47:47] EVAL step=0 | gen_L1=0.44649 identity=0.00834 ratio=53.54 | pred_delta=0.44558 gt_delta=0.00834 | tf_acc=0.027 uniq=32/32
+[02:47:48] step=1 loss=17.3759 tok_acc=0.000 gnorm=104.88 mem=17.6GB 2s
+[02:48:20] step=25 loss=3.9092 tok_acc=0.286 gnorm=10.08 mem=18.2GB 33s
+[02:48:55] step=50 loss=4.9642 tok_acc=0.071 gnorm=8.57 mem=18.2GB 68s
+[02:49:30] step=75 loss=2.3436 tok_acc=0.571 gnorm=3.56 mem=18.2GB 103s
+[02:50:05] step=100 loss=5.0027 tok_acc=0.000 gnorm=4.59 mem=18.2GB 138s
+[02:51:14] EVAL step=100 | gen_L1=0.29204 identity=0.00834 ratio=35.02 | pred_delta=0.29342 gt_delta=0.00834 | tf_acc=0.346 uniq=30/32
+[02:51:51] step=125 loss=1.9883 tok_acc=0.500 gnorm=24.19 mem=18.2GB 244s
+[02:52:25] step=150 loss=0.7146 tok_acc=0.714 gnorm=4.58 mem=18.2GB 279s
+[02:53:01] step=175 loss=1.1003 tok_acc=0.643 gnorm=34.19 mem=18.2GB 314s
+[02:53:36] step=200 loss=0.8765 tok_acc=0.714 gnorm=6.15 mem=18.2GB 350s
+[02:54:43] EVAL step=200 | gen_L1=0.18340 identity=0.00834 ratio=21.99 | pred_delta=0.18662 gt_delta=0.00834 | tf_acc=0.658 uniq=32/32
+[02:55:18] step=225 loss=0.1576 tok_acc=0.929 gnorm=3.46 mem=18.2GB 451s
+[02:55:54] step=250 loss=0.5506 tok_acc=0.857 gnorm=4.25 mem=18.2GB 487s
+[02:56:29] step=275 loss=1.6618 tok_acc=0.714 gnorm=8.57 mem=18.2GB 522s
+[02:57:04] step=300 loss=0.1054 tok_acc=0.929 gnorm=2.58 mem=18.2GB 558s
+[02:58:12] EVAL step=300 | gen_L1=0.08808 identity=0.00834 ratio=10.56 | pred_delta=0.09244 gt_delta=0.00834 | tf_acc=0.806 uniq=32/32
+[02:59:22] EVAL step=300 | gen_L1=0.08808 identity=0.00834 ratio=10.56 | pred_delta=0.09244 gt_delta=0.00834 | tf_acc=0.806 uniq=32/32
+[02:59:25] saved /home/dgut/pusht_runtime/r3_pr1_overfit/zero_run1/checkpoints/final
