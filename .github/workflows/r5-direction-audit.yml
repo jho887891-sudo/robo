@@ -1,0 +1,29 @@
+name: R5 Direction Audit
+
+on:
+  push:
+    branches:
+      - audit/r5-direction-metrics-correction
+  pull_request:
+    paths:
+      - 'diagnostics/r5_direction_audit.py'
+      - 'tests/test_r5_direction_audit.py'
+      - 'evidence/r5_ab_run_20261019T103523Z/**'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install numeric dependency
+        run: python -m pip install numpy==1.26.4
+      - name: Compile analysis and tests
+        run: python -m py_compile diagnostics/r5_direction_audit.py tests/test_r5_direction_audit.py
+      - name: Run quantitative regression tests
+        run: python tests/test_r5_direction_audit.py
+      - name: Recompute audit from committed R5 evidence
+        run: python diagnostics/r5_direction_audit.py --threshold 0.002
