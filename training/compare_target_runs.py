@@ -45,6 +45,8 @@ def compare(absolute_dir, residual_dir):
             raise ValueError("unmatched evaluation sample counts")
         if abs(x["identity_L1"] - y["identity_L1"]) > 1e-6:
             raise ValueError("identity baseline mismatch across target modes")
+        if abs(x["repeat_previous_L1"] - y["repeat_previous_L1"]) > 1e-6:
+            raise ValueError("repeat-previous baseline mismatch across target modes")
         expected_split = "train" if split_key == "final_eval" else "val"
         if x.get("split") != expected_split or y.get("split") != expected_split:
             raise ValueError("incorrectly labeled evaluation split")
@@ -62,10 +64,13 @@ def compare(absolute_dir, residual_dir):
             "absolute_L1": float(x["gen_L1"]),
             "residual_L1": float(y["gen_L1"]),
             "identity_L1": float(x["identity_L1"]),
+            "repeat_previous_L1": float(x["repeat_previous_L1"]),
             "residual_minus_absolute_L1": float(y["gen_L1"] - x["gen_L1"]),
             "residual_improves": bool(y["gen_L1"] < x["gen_L1"]),
             "absolute_beats_identity": bool(x["gen_L1"] < x["identity_L1"]),
             "residual_beats_identity": bool(y["gen_L1"] < y["identity_L1"]),
+            "absolute_beats_repeat_previous": bool(x["gen_L1"] < x["repeat_previous_L1"]),
+            "residual_beats_repeat_previous": bool(y["gen_L1"] < y["repeat_previous_L1"]),
             "absolute_pred_delta": float(x["pred_delta"]),
             "residual_pred_delta": float(y["pred_delta"]),
             "expert_delta": float(x["gt_delta"]),
