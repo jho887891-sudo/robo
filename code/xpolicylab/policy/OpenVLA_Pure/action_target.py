@@ -71,3 +71,39 @@ def resolve_checkpoint_target(meta, configured_mode=ABSOLUTE):
     if declared != requested:
         raise ValueError("action target mismatch: checkpoint=%s deployment=%s" % (declared, requested))
     return requested
+
+
+def file_sha256(path):
+    """Hash checkpoint files so a residual target cannot be paired with old weights."""
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def record_checkpoint_hashes(meta, adapter_dir, projector_path):
+    """Add binding hashes to metadata after checkpoint files are written."""
+    import os
+    out = dict(meta)
+    out["adapter_sha256"] = file_sha256(os.path.join(adapter_dir, "adapter_model.safetensors"))
+    out["proprio_projector_sha256"] = file_sha256(projector_path)
+    return out
+
+
+def verify_checkpoint_hashes(meta, adapter_dir, projector_path, mode):
+    """Residual policy requires exact file identities; legacy absolute may lack hashes."""
+    import os
+    validate_mode(mode)
+    expected_adapter = meta.get("adapter_sha256")
+    expected_projector = meta.get("proprio_projector_sha256")
+    if mode == RESIDUAL and (not expected_adapter or not expected_projector):
+        raise ValueError("residual checkpoint metadata must bind adapter and projector SHA-256")
+    for name, path, expected in (
+        ("adapter", os.path.join(adapter_dir, "adapter_model.safetensors"), expected_adapter),
+        ("proprio_projector", projector_path, expected_projector),
+    ):
+        if expected and file_sha256(path) != expected:
+            raise ValueError("%s checksum mismatch: checkpoint artifacts and statistics do not belong together" % name)
+    return True
