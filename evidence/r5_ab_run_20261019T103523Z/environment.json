@@ -1,0 +1,13 @@
+{
+ "git_commit": "4982f1a42d421ed93db25f44307117ee70130d42",
+ "python": "3.10.12",
+ "torch": "2.4.1+cu121",
+ "cuda": "12.1",
+ "cudnn": 90100,
+ "transformers": "4.40.2",
+ "peft": "0.11.1",
+ "gpu": "NVIDIA RTX A6000",
+ "driver": "580.178.04",
+ "gpu_total_GiB": 47.4,
+ "other_gpu_apps": "3111650, 2486 MiB\n3451404, 5604 MiB\n3469786, 16200 MiB\n4054143, 408 MiB"
+}

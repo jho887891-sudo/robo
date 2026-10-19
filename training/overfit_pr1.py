@@ -41,9 +41,11 @@ os.environ.setdefault("PUSHT_OFT", "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLa
 
 import train_pushT_pure2 as T          # noqa: E402  —— 真实训练代码（PR 分支原文件）
 from overfit_protocol import select_train_samples, validated_generation_indices
+from r5_sampling import candidate_frames, diversified_manifest, summarize_manifest, spread_validation_frames
+from r5_metrics import summarize_prediction
 import action_target as AT
 
-MAX_STEPS = 300
+MAX_STEPS = 1000  # R5 upper bound; R4 default remains 300, no automatic training
 PASS, FAIL = "PASS", "FAIL"
 
 
@@ -62,14 +64,25 @@ def log(msg, fh=None):
         fh.write(line + "\n"); fh.flush()
 
 
-def pick_samples(n):
-    """Select overfit examples from TRAIN episodes; never consume held-out VAL episodes."""
+def pick_samples(n, strategy="legacy"):
+    """Legacy R4 or R5 episode-balanced motion-aware selection from TRAIN only."""
     split = json.load(open(T.SPLIT))
-    episode_lengths = {}
+    if strategy == "legacy":
+        lengths = {}
+        for e in sorted(split["train"]):
+            with h5py.File(os.path.join(T.HDF5_DIR, e), "r") as h:
+                lengths[e] = int(h["action/left_arm_joint_states"].shape[0])
+        return select_train_samples(split, lengths, n=n), {"strategy": "legacy"}
+    if strategy != "diverse":
+        raise ValueError("unsupported sampling strategy: " + strategy)
+    rows = []
     for e in sorted(split["train"]):
         with h5py.File(os.path.join(T.HDF5_DIR, e), "r") as h:
-            episode_lengths[e] = int(h["action/left_arm_joint_states"].shape[0])
-    return select_train_samples(split, episode_lengths, n=n)
+            rows.extend(candidate_frames(e, T.c14(h, "state"), T.c14(h, "action"), stride=20))
+    chosen = diversified_manifest(split, rows, n=n, seed=0)
+    return [[e, t] for e, t, _l, _r in chosen], {
+        "strategy": "diverse", "summary": summarize_manifest(chosen)
+    }
 
 
 def main():
@@ -77,6 +90,8 @@ def main():
     ap.add_argument("--mechanism", choices=["keep", "zero"], default="keep")
     ap.add_argument("--steps", type=int, default=MAX_STEPS)
     ap.add_argument("--n", type=int, default=32)
+    ap.add_argument("--sample-strategy", choices=["legacy", "diverse"], default="legacy")
+    ap.add_argument("--val-strategy", choices=["fixed", "spread"], default="fixed")
     ap.add_argument("--val-n", type=int, default=20)
     ap.add_argument("--target-mode", choices=AT.TARGET_MODES, default=AT.ABSOLUTE)
     ap.add_argument("--lr", type=float, default=5e-4)
@@ -111,7 +126,7 @@ def main():
     try:
         # ---------- snapshot
         snap = os.path.join(out, "_snapshot"); os.makedirs(snap, exist_ok=True)
-        for f in ("train_pushT_pure2.py", "overfit_pr1.py"):
+        for f in ("train_pushT_pure2.py", "overfit_pr1.py", "r5_sampling.py", "r5_metrics.py", "overfit_protocol.py"):
             src = os.path.join(HERE, f)
             if os.path.isfile(src):
                 shutil.copy2(src, os.path.join(snap, f))
@@ -119,18 +134,29 @@ def main():
             src = os.path.join(REPO, "code", "xpolicylab", "policy", "OpenVLA_Pure", f)
             if os.path.isfile(src):
                 shutil.copy2(src, os.path.join(snap, f))
-        samples = pick_samples(args.n)
+        samples, train_manifest_diagnostics = pick_samples(args.n, args.sample_strategy)
         split = json.load(open(T.SPLIT))
         train_set, val_set = set(split["train"]), set(split["val"])
         if train_set & val_set:
             raise ValueError("train/val episode overlap")
-        all_fixed = [tuple(x) for x in json.load(open(T.SAMPLE_FIX))]
-        val_pairs = all_fixed[:args.val_n]
+        if args.val_strategy == "fixed":
+            all_fixed = [tuple(x) for x in json.load(open(T.SAMPLE_FIX))]
+            val_pairs = all_fixed[:args.val_n]
+        else:
+            val_lengths = {}
+            for e in sorted(split["val"]):
+                with h5py.File(os.path.join(T.HDF5_DIR, e), "r") as h:
+                    val_lengths[e] = int(h["action/left_arm_joint_states"].shape[0])
+            val_pairs = spread_validation_frames(split, val_lengths, args.val_n, seed=0)
         if args.val_n <= 0 or len(val_pairs) != args.val_n or any(e not in val_set for e, _ in val_pairs):
             raise ValueError("held-out validation list missing or contains non-validation episodes")
+        if len({tuple(v) for v in val_pairs}) != len(val_pairs):
+            raise ValueError("duplicate validation (episode,frame) pair")
         if any(e not in train_set for e, _ in samples):
             raise ValueError("training samples contain held-out episodes")
-        log("samples: train=%d / val=%d; episode-disjoint" % (len(samples), len(val_pairs)), logf)
+        log("samples: train=%d episodes=%d; val=%d episodes=%d, disjoint; sample=%s val=%s" %
+            (len(samples), len({e for e, _ in samples}), len(val_pairs),
+             len({e for e, _ in val_pairs}), args.sample_strategy, args.val_strategy), logf)
 
         # ---------- 机制选择：keep = 直接使用 PR 的 build()（内部调用 enable_pure_autoreg）
         if args.mechanism == "zero":
@@ -141,6 +167,12 @@ def main():
 
         train_eps, val_eps = split["train"], split["val"]
         q01, q99 = T.action_stats(train_eps, target_mode=args.target_mode)
+        # State-only counterfactual baseline: one fixed TRAIN-derived delta for every episode.
+        train_deltas = []
+        for e in sorted(train_eps):
+            with h5py.File(os.path.join(T.HDF5_DIR, e), "r") as h:
+                train_deltas.append(T.c14(h, "action") - T.c14(h, "state"))
+        median_delta = np.median(np.concatenate(train_deltas, axis=0), axis=0).astype(np.float32)
         nb = np.load(T.BOUNDS_FILE); pmin, pmax = nb["pmin"], nb["pmax"]
         log("samples=%d  train_eps=%d  q01/q99 computed from train split" % (len(samples), len(train_eps)), logf)
 
@@ -163,7 +195,10 @@ def main():
         status["grad_checkpoint"] = bool(use_ckpt)
 
         json.dump({"mechanism": args.mechanism, "action_target_mode": args.target_mode, "steps": args.steps, "lr": args.lr,
-                   "samples": samples, "val_samples": val_pairs, "sample_source": "train", "q01": q01.tolist(), "q99": q99.tolist(),
+                   "sampling_strategy": args.sample_strategy, "validation_strategy": args.val_strategy,
+                   "seed": 0, "train_manifest_diagnostics": train_manifest_diagnostics,
+                   "samples": samples, "val_samples": val_pairs, "sample_source": "train",
+                   "median_delta": median_delta.tolist(), "q01": q01.tolist(), "q99": q99.tolist(),
                    "hashes": {f: sha(os.path.join(snap, f)) for f in sorted(os.listdir(snap))},
                    "torch": torch.__version__},
                   open(os.path.join(snap, "config.json"), "w"), indent=1)
@@ -180,9 +215,11 @@ def main():
                     act = T.c14(h, "action")[t].copy()
                     st = T.c14(h, "state")[t].copy()
                     previous_action = T.c14(h, "action")[max(t - 1, 0)].copy() if t > 0 else st.copy()
+                    previous_state = T.c14(h, "state")[max(t - 1, 0)].copy() if t > 0 else st.copy()
                 target = AT.training_target(st, act, args.target_mode)
                 result.append({"pv": pv, "pr": pr, "act": act, "state": st,
-                               "previous_action": previous_action, "idx": T.tok(T.norm_a(target, q01, q99))})
+                               "episode": e, "frame": int(t), "previous_action": previous_action,
+                               "previous_state": previous_state, "idx": T.tok(T.norm_a(target, q01, q99))})
             return result
         cache = load_samples(samples)
         heldout = load_samples(val_pairs)
@@ -263,6 +300,11 @@ def main():
                    "gen_tokens_per_sample": generated_token_rows,
                    "gt_tokens_per_sample": gt.tolist()}
             rec["ratio"] = rec["gen_L1"] / (rec["identity_L1"] + 1e-12)
+            # R5 diagnostics: full physical-unit comparison and genuine token diversity.
+            rec["r5"] = summarize_prediction(
+                P, G, S, np.stack([x["previous_state"] for x in dataset]),
+                [x["episode"] for x in dataset], generated_token_rows, median_delta)
+            rec["r5"]["validation_strategy"] = args.val_strategy if split_name == "val" else None
             jsonl_like = rec
             log("EVAL %s target=%s step=%d | gen_L1=%.5f identity=%.5f ratio=%.2f | pred_delta=%.5f gt_delta=%.5f | "
                 "tf_acc=%.3f uniq=%d/%d" % (split_name, args.target_mode, step, rec["gen_L1"], rec["identity_L1"], rec["ratio"],
@@ -307,7 +349,8 @@ def main():
              "action_target_mode": args.target_mode,
              "action_input_masking": args.mechanism,
              "codec_mode": T.CODEC_MODE,
-             "samples_from": "train", "steps": args.steps,
+             "samples_from": "train", "sampling_strategy": args.sample_strategy,
+             "validation_strategy": args.val_strategy, "steps": args.steps,
              "modeling_sha256": model_sha, "variant": "pure_openvla"},
             os.path.join(d, "lora_adapter"), os.path.join(d, "proprio_projector--pure.pt"))
         with open(os.path.join(out, "run_meta.json"), "w") as fh:

@@ -29,6 +29,11 @@ def compare(absolute_dir, residual_dir):
     for key in ("samples", "val_samples", "steps", "lr", "mechanism"):
         if a[key] != r[key]:
             raise ValueError("unmatched A/B experimental configuration: " + key)
+    for key in ("sampling_strategy", "validation_strategy", "seed", "median_delta"):
+        if a.get(key) != r.get(key):
+            raise ValueError("unmatched A/B experimental configuration: " + key)
+    if a.get("sampling_strategy") == "diverse" and a.get("train_manifest_diagnostics") != r.get("train_manifest_diagnostics"):
+        raise ValueError("A/B training sample activity diagnostics differ")
     if a["mechanism"] != "keep":
         raise ValueError("A/B requires the proven causal autoregressive mechanism")
     if a.get("sample_source") != "train" or r.get("sample_source") != "train":
@@ -60,6 +65,16 @@ def compare(absolute_dir, residual_dir):
     }
     for name, key in (("train", "final_eval"), ("val", "final_val_eval")):
         x, y = sa[key], sr[key]
+        if x.get("r5") != y.get("r5") and (("r5" in x) != ("r5" in y)):
+            raise ValueError("R5 metrics missing in one experiment")
+        if x.get("r5") and y.get("r5"):
+            if x["r5"]["evaluation_episode_count"] != y["r5"]["evaluation_episode_count"]:
+                raise ValueError("A/B R5 evaluation episode count mismatch")
+            for baseline in ("hold_state", "constant_velocity", "train_median_delta"):
+                xb = x["r5"]["episode_macro_L1"][baseline]
+                yb = y["r5"]["episode_macro_L1"][baseline]
+                if abs(xb - yb) > 1e-6:
+                    raise ValueError("R5 episode-macro baseline mismatch")
         out[name] = {
             "absolute_L1": float(x["gen_L1"]),
             "residual_L1": float(y["gen_L1"]),
@@ -78,6 +93,21 @@ def compare(absolute_dir, residual_dir):
             "residual_per_dim": y["per_dim_gen"],
             "identity_per_dim": x["per_dim_identity"],
         }
+        if x.get("r5") and y.get("r5"):
+            out[name]["r5"] = {
+                "evaluation_episodes": x["r5"]["evaluation_episode_count"],
+                "absolute_episode_macro_L1": x["r5"]["episode_macro_L1"]["model"],
+                "residual_episode_macro_L1": y["r5"]["episode_macro_L1"]["model"],
+                "episode_macro_hold_L1": x["r5"]["episode_macro_L1"]["hold_state"],
+                "episode_macro_constant_velocity_L1": x["r5"]["episode_macro_L1"]["constant_velocity"],
+                "episode_macro_train_median_delta_L1": x["r5"]["episode_macro_L1"]["train_median_delta"],
+                "absolute_per_arm": x["r5"]["per_arm_physical_L1"],
+                "residual_per_arm": y["r5"]["per_arm_physical_L1"],
+                "absolute_token_diversity": x["r5"]["per_dim_generated_token_diversity"],
+                "residual_token_diversity": y["r5"]["per_dim_generated_token_diversity"],
+                "absolute_beats_velocity_macro": x["r5"]["episode_macro_L1"]["model"] < x["r5"]["episode_macro_L1"]["constant_velocity"],
+                "residual_beats_velocity_macro": y["r5"]["episode_macro_L1"]["model"] < y["r5"]["episode_macro_L1"]["constant_velocity"],
+            }
     return out
 
 

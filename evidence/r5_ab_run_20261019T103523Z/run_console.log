@@ -1,0 +1,884 @@
+[preflight] commit=4982f1a42d421ed93db25f44307117ee70130d42
+[preflight] pristine modeling sha256: b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+[preflight] 80 TRAIN episodes / 20 VAL episodes; 60 spread held-out frames at training time
+test_absolute_roundtrip (__main__.ActionTargetContractTests) ... ok
+test_batch_roundtrip (__main__.ActionTargetContractTests) ... ok
+test_checkpoint_hash_binding_and_tampering (__main__.ActionTargetContractTests) ... ok
+test_identity_delta_zero (__main__.ActionTargetContractTests) ... ok
+test_invalid_mode_fail_closed (__main__.ActionTargetContractTests) ... ok
+test_metadata_legacy_absolute_is_allowed (__main__.ActionTargetContractTests) ... ok
+test_mismatched_metadata_rejected (__main__.ActionTargetContractTests) ... ok
+test_nonfinite_inputs_rejected (__main__.ActionTargetContractTests) ... ok
+test_residual_requires_declared_mode (__main__.ActionTargetContractTests) ... ok
+test_residual_roundtrip (__main__.ActionTargetContractTests) ... ok
+test_residual_without_hashes_rejected (__main__.ActionTargetContractTests) ... ok
+test_validate_quantiles (__main__.ActionTargetContractTests) ... ok
+test_wrong_shape_fail_closed (__main__.ActionTargetContractTests) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.034s
+
+OK
+test_matched_comparison_uses_validation (__main__.ComparisonTests) ... ok
+test_mismatched_validation_refused (__main__.ComparisonTests) ... ok
+test_missing_done_refused (__main__.ComparisonTests) ... ok
+test_wrong_mode_refused (__main__.ComparisonTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.015s
+
+OK
+test_invalid_prediction_index_rejected (__main__.TestGeneratedTokenLogs) ... ok
+test_invalid_prediction_length_rejected (__main__.TestGeneratedTokenLogs) ... ok
+test_log_uses_prediction_not_gt (__main__.TestGeneratedTokenLogs) ... ok
+test_bad_arguments_rejected (__main__.TestTrainOnlySampling) ... ok
+test_insufficient_data_fails_closed (__main__.TestTrainOnlySampling) ... ok
+test_reject_overlapping_splits (__main__.TestTrainOnlySampling) ... ok
+test_repeatable_selection (__main__.TestTrainOnlySampling) ... ok
+test_samples_from_train_never_validation (__main__.TestTrainOnlySampling) ... ok
+test_short_episodes_do_not_create_out_of_range_frame (__main__.TestTrainOnlySampling) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.002s
+
+OK
+test_boundary_table (__main__.TestEndpoints) ... ok
+test_minus_one (__main__.TestEndpoints) ... ok
+test_plus_one (__main__.TestEndpoints) ... ok
+test_zero (__main__.TestEndpoints) ... ok
+test_legacy_minus_one_never_hits_window_start (__main__.TestLegacyDefectsDocumented) ... ok
+test_legacy_plus_one_yields_pad (__main__.TestLegacyDefectsDocumented) ... ok
+test_legacy_range_exceeds_window (__main__.TestLegacyDefectsDocumented) ... ok
+test_all_256_indices_used (__main__.TestLegalWindow) ... ok
+test_all_values_map_to_legal_tokens (__main__.TestLegalWindow) ... ok
+test_no_pad_even_after_clipping_extremes (__main__.TestLegalWindow) ... ok
+test_random_values_map_to_legal_tokens (__main__.TestLegalWindow) ... ok
+test_validate_rejects_illegal (__main__.TestLegalWindow) ... ok
+test_gripper_all_values_legal (__main__.TestQuantileClipping) ... ok
+test_gripper_zero_one (__main__.TestQuantileClipping) ... ok
+test_raw_above_q99 (__main__.TestQuantileClipping) ... ok
+test_raw_below_q01 (__main__.TestQuantileClipping) ... ok
+test_bad_mode_rejected (__main__.TestQuantization) ... ok
+test_encode_decode_idempotent (__main__.TestQuantization) ... ok
+test_monotonic (__main__.TestQuantization) ... ok
+test_roundtrip_error_bound (__main__.TestQuantization) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.079s
+
+OK
+test_median_delta_baseline (__main__.R5MetricsTests) ... ok
+test_per_episode_macro_distinct_from_frame_mean (__main__.R5MetricsTests) ... ok
+test_reject_missing_pred_tokens (__main__.R5MetricsTests) ... ok
+test_right_arm_detects_error (__main__.R5MetricsTests) ... ok
+test_velocity_baseline (__main__.R5MetricsTests) ... ok
+test_candidate_frame_excludes_end (__main__.R5SamplingTests) ... ok
+test_episode_coverage_deterministic (__main__.R5SamplingTests) ... ok
+test_refuses_train_val_overlap (__main__.R5SamplingTests) ... ok
+test_refuses_validation_candidate (__main__.R5SamplingTests) ... ok
+test_reject_insufficient_val_coverage (__main__.R5SamplingTests) ... ok
+test_summarize_activity (__main__.R5SamplingTests) ... ok
+test_validation_spread_all_episodes (__main__.R5SamplingTests) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.013s
+
+OK
+{
+  "source": "evidence/r4_ab_run_20261019T044749Z",
+  "R4_train_frames": 32,
+  "R4_train_episodes": 5,
+  "R4_train_per_episode": {
+    "episode_0000000.hdf5": 9,
+    "episode_0000003.hdf5": 6,
+    "episode_0000004.hdf5": 9,
+    "episode_0000005.hdf5": 7,
+    "episode_0000006.hdf5": 1
+  },
+  "R4_val_frames": 20,
+  "R4_val_episodes": 10,
+  "R4_val_per_episode": {
+    "episode_0000002.hdf5": 2,
+    "episode_0000007.hdf5": 1,
+    "episode_0000008.hdf5": 1,
+    "episode_0000016.hdf5": 2,
+    "episode_0000047.hdf5": 1,
+    "episode_0000054.hdf5": 1,
+    "episode_0000066.hdf5": 4,
+    "episode_0000080.hdf5": 3,
+    "episode_0000087.hdf5": 1,
+    "episode_0000094.hdf5": 4
+  },
+  "residual_val_model_L1": 0.01431331131607294,
+  "absolute_val_model_L1": 0.5633774995803833,
+  "val_hold_position_L1": 0.009936397895216942,
+  "residual_val_unique_token_rows": 20,
+  "residual_val_unique_bins_by_dim": [
+    1,
+    1,
+    6,
+    8,
+    7,
+    6,
+    6,
+    12,
+    12,
+    10,
+    9,
+    11,
+    12,
+    5
+  ],
+  "residual_val_mode_fraction_by_dim": [
+    1.0,
+    1.0,
+    0.4,
+    0.45,
+    0.4,
+    0.45,
+    0.5,
+    0.4,
+    0.3,
+    0.4,
+    0.25,
+    0.4,
+    0.3,
+    0.4
+  ],
+  "caveats": [
+    "20 unique absolute joint commands does not prove 20 meaningful residual policies",
+    "20 frames are not 20 independent episodes",
+    "residual validation still loses to identity baseline"
+  ]
+}
+[preflight] CPU tests passed
+[preflight] GPU free 24.6GB of 50.9GB
+[run] absolute target (train 200 from 80 episodes, validation 60 across 20 episodes, 800 updates)
+2026-10-19 10:35:32.239927: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-19 10:35:33.492672: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[10:36:00] samples: train=200 episodes=80; val=60 episodes=20, disjoint; sample=diverse val=spread
+[10:36:00] mechanism=keep -> PR enable_pure_autoreg active (causal autoreg)
+[10:36:01] samples=200  train_eps=80  q01/q99 computed from train split
+10/19 [10:36:02] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:03,  1.77s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:03<00:01,  1.46s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:03<00:00,  1.01s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:03<00:00,  1.17s/it]
+[10:37:34] pristine modeling sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+[10:37:57] cams=3 proprio=True | LoRA trainable=110.8M | proprio projector=16.8M
+[10:37:57] pure_autoreg flag = True ; has attr = True
+[10:37:57] GPU free=9.1GB total=50.9GB
+[10:37:57] gradient checkpointing ON (显存保护)
+[10:37:58] trainable=127.7M
+`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/torch/utils/checkpoint.py:92: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+[10:48:43] EVAL train target=absolute step=0 | gen_L1=0.47553 identity=0.01888 ratio=25.19 | pred_delta=0.47354 gt_delta=0.01888 | tf_acc=0.029 uniq=200/200
+[10:50:32] EVAL val target=absolute step=0 | gen_L1=0.43201 identity=0.00480 ratio=89.99 | pred_delta=0.43243 gt_delta=0.00480 | tf_acc=0.056 uniq=60/60
+[10:50:36] step=1 loss=15.8574 tok_acc=0.143 gnorm=45.74 mem=18.1GB 4s
+[10:51:06] step=25 loss=3.3527 tok_acc=0.500 gnorm=4.29 mem=18.7GB 34s
+[10:51:37] step=50 loss=2.4322 tok_acc=0.500 gnorm=3.72 mem=18.7GB 65s
+[10:52:08] step=75 loss=2.9961 tok_acc=0.500 gnorm=2.66 mem=18.7GB 96s
+[10:52:39] step=100 loss=2.6165 tok_acc=0.429 gnorm=4.62 mem=18.7GB 127s
+[10:53:10] step=125 loss=2.4679 tok_acc=0.571 gnorm=7.06 mem=18.7GB 158s
+[10:53:42] step=150 loss=2.5253 tok_acc=0.500 gnorm=3.13 mem=18.7GB 190s
+[10:54:14] step=175 loss=2.0286 tok_acc=0.571 gnorm=3.88 mem=18.7GB 222s
+[10:54:47] step=200 loss=2.0308 tok_acc=0.571 gnorm=4.58 mem=18.7GB 255s
+[11:00:49] EVAL train target=absolute step=200 | gen_L1=0.24229 identity=0.01888 ratio=12.83 | pred_delta=0.23992 gt_delta=0.01888 | tf_acc=0.446 uniq=80/200
+[11:02:44] EVAL val target=absolute step=200 | gen_L1=0.21235 identity=0.00480 ratio=44.23 | pred_delta=0.21124 gt_delta=0.00480 | tf_acc=0.483 uniq=25/60
+[11:03:16] step=225 loss=2.7161 tok_acc=0.500 gnorm=4.76 mem=18.7GB 764s
+[11:03:47] step=250 loss=1.9684 tok_acc=0.571 gnorm=3.93 mem=18.7GB 795s
+[11:04:19] step=275 loss=1.7590 tok_acc=0.643 gnorm=8.69 mem=18.7GB 827s
+[11:04:53] step=300 loss=1.8625 tok_acc=0.357 gnorm=4.48 mem=18.7GB 861s
+[11:05:25] step=325 loss=1.8056 tok_acc=0.571 gnorm=6.86 mem=18.7GB 893s
+[11:05:56] step=350 loss=1.9792 tok_acc=0.571 gnorm=4.23 mem=18.7GB 924s
+[11:06:27] step=375 loss=1.0813 tok_acc=0.643 gnorm=5.69 mem=18.7GB 955s
+[11:06:58] step=400 loss=1.8345 tok_acc=0.571 gnorm=7.27 mem=18.7GB 986s
+[11:12:48] EVAL train target=absolute step=400 | gen_L1=0.18414 identity=0.01888 ratio=9.75 | pred_delta=0.18330 gt_delta=0.01888 | tf_acc=0.573 uniq=131/200
+[11:14:32] EVAL val target=absolute step=400 | gen_L1=0.17003 identity=0.00480 ratio=35.42 | pred_delta=0.16912 gt_delta=0.00480 | tf_acc=0.489 uniq=46/60
+[11:15:03] step=425 loss=0.4871 tok_acc=0.857 gnorm=6.17 mem=18.7GB 1471s
+[11:15:34] step=450 loss=1.2738 tok_acc=0.714 gnorm=8.93 mem=18.7GB 1502s
+[11:16:04] step=475 loss=0.3981 tok_acc=0.929 gnorm=3.93 mem=18.7GB 1532s
+[11:16:35] step=500 loss=0.5234 tok_acc=0.714 gnorm=4.70 mem=18.7GB 1564s
+[11:17:07] step=525 loss=0.9273 tok_acc=0.786 gnorm=4.88 mem=18.7GB 1595s
+[11:17:39] step=550 loss=0.5764 tok_acc=0.857 gnorm=4.36 mem=18.7GB 1627s
+[11:18:10] step=575 loss=0.9851 tok_acc=0.714 gnorm=12.08 mem=18.7GB 1658s
+[11:18:43] step=600 loss=1.0998 tok_acc=0.714 gnorm=12.92 mem=18.7GB 1691s
+[11:24:47] EVAL train target=absolute step=600 | gen_L1=0.15357 identity=0.01888 ratio=8.13 | pred_delta=0.15105 gt_delta=0.01888 | tf_acc=0.725 uniq=55/200
+[11:26:34] EVAL val target=absolute step=600 | gen_L1=0.12858 identity=0.00480 ratio=26.79 | pred_delta=0.12767 gt_delta=0.00480 | tf_acc=0.475 uniq=15/60
+[11:27:06] step=625 loss=0.9373 tok_acc=0.857 gnorm=8.32 mem=18.7GB 2194s
+[11:27:36] step=650 loss=0.4672 tok_acc=0.857 gnorm=3.60 mem=18.7GB 2224s
+[11:28:07] step=675 loss=0.2998 tok_acc=0.929 gnorm=1.44 mem=18.7GB 2255s
+[11:28:38] step=700 loss=0.6644 tok_acc=0.714 gnorm=9.66 mem=18.7GB 2286s
+[11:29:09] step=725 loss=0.3188 tok_acc=0.929 gnorm=2.75 mem=18.7GB 2317s
+[11:29:39] step=750 loss=0.3009 tok_acc=0.857 gnorm=7.24 mem=18.7GB 2347s
+[11:30:10] step=775 loss=0.1649 tok_acc=1.000 gnorm=2.56 mem=18.7GB 2378s
+[11:30:41] step=800 loss=0.4722 tok_acc=0.857 gnorm=7.07 mem=18.7GB 2409s
+[11:36:29] EVAL train target=absolute step=800 | gen_L1=0.17215 identity=0.01888 ratio=9.12 | pred_delta=0.17024 gt_delta=0.01888 | tf_acc=0.783 uniq=64/200
+[11:38:11] EVAL val target=absolute step=800 | gen_L1=0.13351 identity=0.00480 ratio=27.81 | pred_delta=0.13282 gt_delta=0.00480 | tf_acc=0.486 uniq=14/60
+[11:43:46] EVAL train target=absolute step=800 | gen_L1=0.17215 identity=0.01888 ratio=9.12 | pred_delta=0.17024 gt_delta=0.01888 | tf_acc=0.783 uniq=64/200
+[11:45:24] EVAL val target=absolute step=800 | gen_L1=0.13351 identity=0.00480 ratio=27.81 | pred_delta=0.13282 gt_delta=0.00480 | tf_acc=0.486 uniq=14/60
+/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/peft/utils/save_and_load.py:180: UserWarning: Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.
+  warnings.warn("Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.")
+[11:45:27] saved /home/dgut/pusht_runtime/r5_ab_jobs/20261019T103523Z/absolute_keep/checkpoints/final
+[run] residual target (same split, seed, setup)
+2026-10-19 11:45:47.565368: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-19 11:45:48.732319: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[11:46:09] samples: train=200 episodes=80; val=60 episodes=20, disjoint; sample=diverse val=spread
+[11:46:09] mechanism=keep -> PR enable_pure_autoreg active (causal autoreg)
+[11:46:10] samples=200  train_eps=80  q01/q99 computed from train split
+10/19 [11:46:11] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:03,  1.56s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:02<00:00,  1.06it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:02<00:00,  1.58it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:02<00:00,  1.28it/s]
+[11:47:12] pristine modeling sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+[11:47:26] cams=3 proprio=True | LoRA trainable=110.8M | proprio projector=16.8M
+[11:47:26] pure_autoreg flag = True ; has attr = True
+[11:47:26] GPU free=9.1GB total=50.9GB
+[11:47:26] gradient checkpointing ON (显存保护)
+[11:47:26] trainable=127.7M
+`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/torch/utils/checkpoint.py:92: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+[11:55:20] EVAL train target=residual step=0 | gen_L1=0.03395 identity=0.01888 ratio=1.80 | pred_delta=0.02278 gt_delta=0.01888 | tf_acc=0.024 uniq=200/200
+[11:56:57] EVAL val target=residual step=0 | gen_L1=0.02054 identity=0.00480 ratio=4.28 | pred_delta=0.01750 gt_delta=0.00480 | tf_acc=0.012 uniq=60/60
+[11:57:00] step=1 loss=13.7153 tok_acc=0.000 gnorm=49.58 mem=18.1GB 3s
+[11:57:29] step=25 loss=2.6346 tok_acc=0.571 gnorm=4.55 mem=18.7GB 31s
+[11:57:58] step=50 loss=1.8320 tok_acc=0.643 gnorm=3.52 mem=18.7GB 61s
+[11:58:28] step=75 loss=1.9899 tok_acc=0.643 gnorm=1.59 mem=18.7GB 90s
+[11:58:57] step=100 loss=2.0069 tok_acc=0.571 gnorm=13.16 mem=18.7GB 120s
+[11:59:26] step=125 loss=1.5680 tok_acc=0.643 gnorm=1.92 mem=18.7GB 149s
+[11:59:56] step=150 loss=3.4118 tok_acc=0.500 gnorm=4.38 mem=18.7GB 178s
+[12:00:25] step=175 loss=2.0179 tok_acc=0.500 gnorm=2.40 mem=18.7GB 208s
+[12:00:55] step=200 loss=1.7529 tok_acc=0.571 gnorm=1.42 mem=18.7GB 238s
+[12:06:26] EVAL train target=residual step=200 | gen_L1=0.02173 identity=0.01888 ratio=1.15 | pred_delta=0.00736 gt_delta=0.01888 | tf_acc=0.505 uniq=200/200
+[12:08:05] EVAL val target=residual step=200 | gen_L1=0.00753 identity=0.00480 ratio=1.57 | pred_delta=0.00450 gt_delta=0.00480 | tf_acc=0.562 uniq=60/60
+[12:08:34] step=225 loss=2.1432 tok_acc=0.571 gnorm=1.91 mem=18.7GB 697s
+[12:09:04] step=250 loss=1.0381 tok_acc=0.643 gnorm=3.68 mem=18.7GB 726s
+[12:09:34] step=275 loss=1.6955 tok_acc=0.643 gnorm=6.49 mem=18.7GB 756s
+[12:10:03] step=300 loss=1.9046 tok_acc=0.571 gnorm=2.25 mem=18.7GB 786s
+[12:10:32] step=325 loss=1.3430 tok_acc=0.571 gnorm=3.60 mem=18.7GB 815s
+[12:11:02] step=350 loss=2.2450 tok_acc=0.571 gnorm=4.27 mem=18.7GB 845s
+[12:11:32] step=375 loss=1.5996 tok_acc=0.571 gnorm=3.02 mem=18.7GB 874s
+[12:12:01] step=400 loss=0.7915 tok_acc=0.857 gnorm=3.01 mem=18.7GB 904s
+[12:17:31] EVAL train target=residual step=400 | gen_L1=0.01883 identity=0.01888 ratio=1.00 | pred_delta=0.01221 gt_delta=0.01888 | tf_acc=0.618 uniq=200/200
+[12:19:10] EVAL val target=residual step=400 | gen_L1=0.00773 identity=0.00480 ratio=1.61 | pred_delta=0.00532 gt_delta=0.00480 | tf_acc=0.546 uniq=60/60
+[12:19:40] step=425 loss=1.4913 tok_acc=0.571 gnorm=4.48 mem=18.7GB 1363s
+[12:20:09] step=450 loss=0.5663 tok_acc=0.857 gnorm=4.67 mem=18.7GB 1392s
+[12:20:39] step=475 loss=1.5454 tok_acc=0.714 gnorm=5.71 mem=18.7GB 1422s
+[12:21:09] step=500 loss=1.2230 tok_acc=0.643 gnorm=9.13 mem=18.7GB 1451s
+[12:21:38] step=525 loss=1.2209 tok_acc=0.786 gnorm=7.23 mem=18.7GB 1481s
+[12:22:08] step=550 loss=0.6289 tok_acc=0.929 gnorm=2.66 mem=18.7GB 1511s
+[12:22:38] step=575 loss=0.4135 tok_acc=0.929 gnorm=2.80 mem=18.7GB 1540s
+[12:23:07] step=600 loss=0.3586 tok_acc=0.929 gnorm=2.56 mem=18.7GB 1570s
+[12:28:49] EVAL train target=residual step=600 | gen_L1=0.01811 identity=0.01888 ratio=0.96 | pred_delta=0.00758 gt_delta=0.01888 | tf_acc=0.791 uniq=200/200
+[12:30:29] EVAL val target=residual step=600 | gen_L1=0.00581 identity=0.00480 ratio=1.21 | pred_delta=0.00266 gt_delta=0.00480 | tf_acc=0.554 uniq=60/60
+[12:30:59] step=625 loss=1.2723 tok_acc=0.857 gnorm=6.67 mem=18.7GB 2042s
+[12:31:28] step=650 loss=0.2278 tok_acc=0.929 gnorm=2.42 mem=18.7GB 2071s
+[12:31:58] step=675 loss=0.7577 tok_acc=0.857 gnorm=7.46 mem=18.7GB 2100s
+[12:32:28] step=700 loss=1.3068 tok_acc=0.786 gnorm=9.06 mem=18.7GB 2130s
+[12:32:57] step=725 loss=0.3327 tok_acc=0.857 gnorm=4.46 mem=18.7GB 2160s
+[12:33:26] step=750 loss=0.3460 tok_acc=0.929 gnorm=3.05 mem=18.7GB 2189s
+[12:33:56] step=775 loss=0.3007 tok_acc=0.929 gnorm=1.73 mem=18.7GB 2218s
+[12:34:25] step=800 loss=0.2029 tok_acc=0.929 gnorm=1.91 mem=18.7GB 2248s
+[12:39:56] EVAL train target=residual step=800 | gen_L1=0.01738 identity=0.01888 ratio=0.92 | pred_delta=0.00969 gt_delta=0.01888 | tf_acc=0.824 uniq=200/200
+[12:41:35] EVAL val target=residual step=800 | gen_L1=0.00749 identity=0.00480 ratio=1.56 | pred_delta=0.00498 gt_delta=0.00480 | tf_acc=0.557 uniq=60/60
+[12:47:04] EVAL train target=residual step=800 | gen_L1=0.01738 identity=0.01888 ratio=0.92 | pred_delta=0.00969 gt_delta=0.01888 | tf_acc=0.824 uniq=200/200
+[12:48:42] EVAL val target=residual step=800 | gen_L1=0.00749 identity=0.00480 ratio=1.56 | pred_delta=0.00498 gt_delta=0.00480 | tf_acc=0.557 uniq=60/60
+/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/peft/utils/save_and_load.py:180: UserWarning: Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.
+  warnings.warn("Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.")
+[12:48:45] saved /home/dgut/pusht_runtime/r5_ab_jobs/20261019T103523Z/residual_keep/checkpoints/final
+{
+  "comparison": "absolute_position_vs_residual_position",
+  "samples": 200,
+  "validation_samples": 60,
+  "updates": 800,
+  "mechanism": "keep",
+  "metric": "mean absolute error of 14D absolute joint positions (physical units)",
+  "train": {
+    "absolute_L1": 0.17214637994766235,
+    "residual_L1": 0.017376510426402092,
+    "identity_L1": 0.01888073794543743,
+    "repeat_previous_L1": 0.01888073794543743,
+    "residual_minus_absolute_L1": -0.15476986952126026,
+    "residual_improves": true,
+    "absolute_beats_identity": false,
+    "residual_beats_identity": true,
+    "absolute_beats_repeat_previous": false,
+    "residual_beats_repeat_previous": true,
+    "absolute_pred_delta": 0.17023563385009766,
+    "residual_pred_delta": 0.009688634425401688,
+    "expert_delta": 0.01888073794543743,
+    "absolute_per_dim": [
+      0.10362827032804489,
+      0.17451444268226624,
+      0.1518835425376892,
+      0.161077082157135,
+      0.03853921964764595,
+      0.18151353299617767,
+      0.22656236588954926,
+      0.16301627457141876,
+      0.3158562183380127,
+      0.26030513644218445,
+      0.21709102392196655,
+      0.08371210098266602,
+      0.1379692107439041,
+      0.19438087940216064
+    ],
+    "residual_per_dim": [
+      0.010064100846648216,
+      0.02470642514526844,
+      0.018518155440688133,
+      0.012539546936750412,
+      0.005204109940677881,
+      0.007653106469660997,
+      0.02107674442231655,
+      0.01332910917699337,
+      0.03235539048910141,
+      0.025126447901129723,
+      0.02537595108151436,
+      0.010950776748359203,
+      0.012210410088300705,
+      0.024160906672477722
+    ],
+    "identity_per_dim": [
+      0.014930635690689087,
+      0.03153800591826439,
+      0.02199832908809185,
+      0.015366218984127045,
+      0.005379664245992899,
+      0.008855924010276794,
+      0.020242057740688324,
+      0.01708233170211315,
+      0.03619575500488281,
+      0.026631377637386322,
+      0.019097452983260155,
+      0.006974554155021906,
+      0.011158151552081108,
+      0.028879854828119278
+    ],
+    "r5": {
+      "evaluation_episodes": 80,
+      "absolute_episode_macro_L1": 0.1771498814690858,
+      "residual_episode_macro_L1": 0.017804548854473978,
+      "episode_macro_hold_L1": 0.019547820067964496,
+      "episode_macro_constant_velocity_L1": 0.0035904517644667067,
+      "episode_macro_train_median_delta_L1": 0.019547820067964496,
+      "absolute_per_arm": {
+        "left": {
+          "model": 0.14824548363685608,
+          "hold_state": 0.016901547089219093,
+          "constant_velocity": 0.003261604579165578,
+          "train_median_delta": 0.016901547089219093
+        },
+        "right": {
+          "model": 0.19604726135730743,
+          "hold_state": 0.02085992507636547,
+          "constant_velocity": 0.003807441098615527,
+          "train_median_delta": 0.02085992507636547
+        }
+      },
+      "residual_per_arm": {
+        "left": {
+          "model": 0.014251735992729664,
+          "hold_state": 0.016901547089219093,
+          "constant_velocity": 0.003261604579165578,
+          "train_median_delta": 0.016901547089219093
+        },
+        "right": {
+          "model": 0.020501283928751945,
+          "hold_state": 0.02085992507636547,
+          "constant_velocity": 0.003807441098615527,
+          "train_median_delta": 0.02085992507636547
+        }
+      },
+      "absolute_token_diversity": [
+        {
+          "dimension": 0,
+          "unique_tokens": 24,
+          "mode_fraction": 0.39,
+          "mode_token": 174
+        },
+        {
+          "dimension": 1,
+          "unique_tokens": 28,
+          "mode_fraction": 0.39,
+          "mode_token": 0
+        },
+        {
+          "dimension": 2,
+          "unique_tokens": 30,
+          "mode_fraction": 0.39,
+          "mode_token": 0
+        },
+        {
+          "dimension": 3,
+          "unique_tokens": 30,
+          "mode_fraction": 0.395,
+          "mode_token": 251
+        },
+        {
+          "dimension": 4,
+          "unique_tokens": 28,
+          "mode_fraction": 0.39,
+          "mode_token": 145
+        },
+        {
+          "dimension": 5,
+          "unique_tokens": 29,
+          "mode_fraction": 0.495,
+          "mode_token": 174
+        },
+        {
+          "dimension": 6,
+          "unique_tokens": 8,
+          "mode_fraction": 0.535,
+          "mode_token": 255
+        },
+        {
+          "dimension": 7,
+          "unique_tokens": 17,
+          "mode_fraction": 0.445,
+          "mode_token": 105
+        },
+        {
+          "dimension": 8,
+          "unique_tokens": 23,
+          "mode_fraction": 0.445,
+          "mode_token": 0
+        },
+        {
+          "dimension": 9,
+          "unique_tokens": 23,
+          "mode_fraction": 0.445,
+          "mode_token": 0
+        },
+        {
+          "dimension": 10,
+          "unique_tokens": 20,
+          "mode_fraction": 0.445,
+          "mode_token": 255
+        },
+        {
+          "dimension": 11,
+          "unique_tokens": 21,
+          "mode_fraction": 0.44,
+          "mode_token": 184
+        },
+        {
+          "dimension": 12,
+          "unique_tokens": 20,
+          "mode_fraction": 0.48,
+          "mode_token": 188
+        },
+        {
+          "dimension": 13,
+          "unique_tokens": 8,
+          "mode_fraction": 0.565,
+          "mode_token": 255
+        }
+      ],
+      "residual_token_diversity": [
+        {
+          "dimension": 0,
+          "unique_tokens": 26,
+          "mode_fraction": 0.52,
+          "mode_token": 127
+        },
+        {
+          "dimension": 1,
+          "unique_tokens": 22,
+          "mode_fraction": 0.525,
+          "mode_token": 139
+        },
+        {
+          "dimension": 2,
+          "unique_tokens": 26,
+          "mode_fraction": 0.515,
+          "mode_token": 129
+        },
+        {
+          "dimension": 3,
+          "unique_tokens": 29,
+          "mode_fraction": 0.515,
+          "mode_token": 151
+        },
+        {
+          "dimension": 4,
+          "unique_tokens": 32,
+          "mode_fraction": 0.515,
+          "mode_token": 123
+        },
+        {
+          "dimension": 5,
+          "unique_tokens": 32,
+          "mode_fraction": 0.515,
+          "mode_token": 129
+        },
+        {
+          "dimension": 6,
+          "unique_tokens": 6,
+          "mode_fraction": 0.905,
+          "mode_token": 127
+        },
+        {
+          "dimension": 7,
+          "unique_tokens": 21,
+          "mode_fraction": 0.37,
+          "mode_token": 127
+        },
+        {
+          "dimension": 8,
+          "unique_tokens": 24,
+          "mode_fraction": 0.38,
+          "mode_token": 140
+        },
+        {
+          "dimension": 9,
+          "unique_tokens": 24,
+          "mode_fraction": 0.375,
+          "mode_token": 132
+        },
+        {
+          "dimension": 10,
+          "unique_tokens": 28,
+          "mode_fraction": 0.405,
+          "mode_token": 157
+        },
+        {
+          "dimension": 11,
+          "unique_tokens": 29,
+          "mode_fraction": 0.375,
+          "mode_token": 136
+        },
+        {
+          "dimension": 12,
+          "unique_tokens": 31,
+          "mode_fraction": 0.395,
+          "mode_token": 123
+        },
+        {
+          "dimension": 13,
+          "unique_tokens": 13,
+          "mode_fraction": 0.77,
+          "mode_token": 127
+        }
+      ],
+      "absolute_beats_velocity_macro": false,
+      "residual_beats_velocity_macro": false
+    }
+  },
+  "val": {
+    "absolute_L1": 0.13350553810596466,
+    "residual_L1": 0.007490083109587431,
+    "identity_L1": 0.004800586029887199,
+    "repeat_previous_L1": 0.004800586029887199,
+    "residual_minus_absolute_L1": -0.12601545499637723,
+    "residual_improves": true,
+    "absolute_beats_identity": false,
+    "residual_beats_identity": false,
+    "absolute_beats_repeat_previous": false,
+    "residual_beats_repeat_previous": false,
+    "absolute_pred_delta": 0.13282284140586853,
+    "residual_pred_delta": 0.004981385078281164,
+    "expert_delta": 0.004800586029887199,
+    "absolute_per_dim": [
+      0.1262677162885666,
+      0.20440277457237244,
+      0.34579095244407654,
+      0.1976025402545929,
+      0.062290009111166,
+      0.21532921493053436,
+      0.019192544743418694,
+      0.1550065129995346,
+      0.14253459870815277,
+      0.15455299615859985,
+      0.10135618597269058,
+      0.03441004455089569,
+      0.060341257601976395,
+      0.05000009387731552
+    ],
+    "residual_per_dim": [
+      0.012511045671999454,
+      0.012124366126954556,
+      0.012469535693526268,
+      0.007754142861813307,
+      0.004927198868244886,
+      0.006955030374228954,
+      0.0036747127305716276,
+      0.004913017153739929,
+      0.0074572390876710415,
+      0.00879694800823927,
+      0.01131500955671072,
+      0.006344590801745653,
+      0.004742534831166267,
+      0.0008758018375374377
+    ],
+    "identity_per_dim": [
+      0.008096226491034031,
+      0.00999631267040968,
+      0.008177145384252071,
+      0.007434079889208078,
+      0.004682652186602354,
+      0.005304388236254454,
+      0.0013068706030026078,
+      0.004204353783279657,
+      0.005554735194891691,
+      0.0046331328339874744,
+      0.00396889029070735,
+      0.0014722608029842377,
+      0.0023771494161337614,
+      0.0
+    ],
+    "r5": {
+      "evaluation_episodes": 20,
+      "absolute_episode_macro_L1": 0.1335055312141776,
+      "residual_episode_macro_L1": 0.007490083354059607,
+      "episode_macro_hold_L1": 0.004800585680641234,
+      "episode_macro_constant_velocity_L1": 0.0010220525553449988,
+      "episode_macro_train_median_delta_L1": 0.004800585680641234,
+      "absolute_per_arm": {
+        "left": {
+          "model": 0.16726797819137573,
+          "hold_state": 0.006428239401429892,
+          "constant_velocity": 0.00122743786778301,
+          "train_median_delta": 0.006428239401429892
+        },
+        "right": {
+          "model": 0.09974310547113419,
+          "hold_state": 0.0031729317270219326,
+          "constant_velocity": 0.0008166671614162624,
+          "train_median_delta": 0.0031729317270219326
+        }
+      },
+      "residual_per_arm": {
+        "left": {
+          "model": 0.008630861528217793,
+          "hold_state": 0.006428239401429892,
+          "constant_velocity": 0.00122743786778301,
+          "train_median_delta": 0.006428239401429892
+        },
+        "right": {
+          "model": 0.006349304690957069,
+          "hold_state": 0.0031729317270219326,
+          "constant_velocity": 0.0008166671614162624,
+          "train_median_delta": 0.0031729317270219326
+        }
+      },
+      "absolute_token_diversity": [
+        {
+          "dimension": 0,
+          "unique_tokens": 5,
+          "mode_fraction": 0.3333333333333333,
+          "mode_token": 25
+        },
+        {
+          "dimension": 1,
+          "unique_tokens": 5,
+          "mode_fraction": 0.3333333333333333,
+          "mode_token": 223
+        },
+        {
+          "dimension": 2,
+          "unique_tokens": 8,
+          "mode_fraction": 0.3333333333333333,
+          "mode_token": 249
+        },
+        {
+          "dimension": 3,
+          "unique_tokens": 6,
+          "mode_fraction": 0.3333333333333333,
+          "mode_token": 13
+        },
+        {
+          "dimension": 4,
+          "unique_tokens": 9,
+          "mode_fraction": 0.48333333333333334,
+          "mode_token": 79
+        },
+        {
+          "dimension": 5,
+          "unique_tokens": 8,
+          "mode_fraction": 0.3333333333333333,
+          "mode_token": 123
+        },
+        {
+          "dimension": 6,
+          "unique_tokens": 2,
+          "mode_fraction": 0.7333333333333333,
+          "mode_token": 0
+        },
+        {
+          "dimension": 7,
+          "unique_tokens": 4,
+          "mode_fraction": 0.7333333333333333,
+          "mode_token": 105
+        },
+        {
+          "dimension": 8,
+          "unique_tokens": 4,
+          "mode_fraction": 0.7333333333333333,
+          "mode_token": 0
+        },
+        {
+          "dimension": 9,
+          "unique_tokens": 4,
+          "mode_fraction": 0.7333333333333333,
+          "mode_token": 0
+        },
+        {
+          "dimension": 10,
+          "unique_tokens": 4,
+          "mode_fraction": 0.7333333333333333,
+          "mode_token": 255
+        },
+        {
+          "dimension": 11,
+          "unique_tokens": 4,
+          "mode_fraction": 0.7333333333333333,
+          "mode_token": 184
+        },
+        {
+          "dimension": 12,
+          "unique_tokens": 6,
+          "mode_fraction": 0.7333333333333333,
+          "mode_token": 188
+        },
+        {
+          "dimension": 13,
+          "unique_tokens": 2,
+          "mode_fraction": 0.7833333333333333,
+          "mode_token": 255
+        }
+      ],
+      "residual_token_diversity": [
+        {
+          "dimension": 0,
+          "unique_tokens": 7,
+          "mode_fraction": 0.4666666666666667,
+          "mode_token": 165
+        },
+        {
+          "dimension": 1,
+          "unique_tokens": 8,
+          "mode_fraction": 0.4666666666666667,
+          "mode_token": 128
+        },
+        {
+          "dimension": 2,
+          "unique_tokens": 8,
+          "mode_fraction": 0.45,
+          "mode_token": 112
+        },
+        {
+          "dimension": 3,
+          "unique_tokens": 8,
+          "mode_fraction": 0.4666666666666667,
+          "mode_token": 158
+        },
+        {
+          "dimension": 4,
+          "unique_tokens": 9,
+          "mode_fraction": 0.43333333333333335,
+          "mode_token": 126
+        },
+        {
+          "dimension": 5,
+          "unique_tokens": 9,
+          "mode_fraction": 0.4666666666666667,
+          "mode_token": 153
+        },
+        {
+          "dimension": 6,
+          "unique_tokens": 3,
+          "mode_fraction": 0.9666666666666667,
+          "mode_token": 127
+        },
+        {
+          "dimension": 7,
+          "unique_tokens": 3,
+          "mode_fraction": 0.7,
+          "mode_token": 127
+        },
+        {
+          "dimension": 8,
+          "unique_tokens": 3,
+          "mode_fraction": 0.7,
+          "mode_token": 140
+        },
+        {
+          "dimension": 9,
+          "unique_tokens": 4,
+          "mode_fraction": 0.7,
+          "mode_token": 132
+        },
+        {
+          "dimension": 10,
+          "unique_tokens": 5,
+          "mode_fraction": 0.7,
+          "mode_token": 157
+        },
+        {
+          "dimension": 11,
+          "unique_tokens": 7,
+          "mode_fraction": 0.7,
+          "mode_token": 136
+        },
+        {
+          "dimension": 12,
+          "unique_tokens": 9,
+          "mode_fraction": 0.7,
+          "mode_token": 123
+        },
+        {
+          "dimension": 13,
+          "unique_tokens": 2,
+          "mode_fraction": 0.9833333333333333,
+          "mode_token": 127
+        }
+      ],
+      "absolute_beats_velocity_macro": false,
+      "residual_beats_velocity_macro": false
+    }
+  }
+}
+[DONE] /home/dgut/pusht_runtime/r5_ab_jobs/20261019T103523Z/target_comparison.json

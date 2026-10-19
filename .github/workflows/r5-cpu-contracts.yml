@@ -1,0 +1,39 @@
+name: R5 CPU contracts
+
+on:
+  push:
+    branches:
+      - audit/r5-distribution-and-baseline-audit
+  pull_request:
+    paths:
+      - 'training/**'
+      - 'tests/**'
+      - 'code/xpolicylab/policy/OpenVLA_Pure/**'
+      - '.github/workflows/r5-cpu-contracts.yml'
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install numpy
+        run: python -m pip install numpy==1.26.4
+      - name: Validate opt-in remote runner shell syntax
+        run: bash -n scripts/run_r5_ab.sh
+      - name: Compile Python source
+        run: |
+          python -m py_compile training/train_pushT_pure2.py training/overfit_pr1.py training/overfit_protocol.py
+          python -m py_compile training/compare_target_runs.py diagnostics/check_r4_sources.py diagnostics/audit_r4_evidence.py training/r5_sampling.py training/r5_metrics.py
+          python -m py_compile code/xpolicylab/policy/OpenVLA_Pure/action_target.py code/xpolicylab/policy/OpenVLA_Pure/model.py
+      - name: Run CPU regression tests
+        run: |
+          python tests/test_action_target_contract.py
+          python tests/test_target_ab_compare.py
+          python tests/test_overfit_protocol.py
+          python tests/test_r5_distribution_metrics.py
+          python diagnostics/audit_r4_evidence.py
+          python tests/test_action_codec.py
