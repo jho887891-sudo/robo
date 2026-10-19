@@ -196,10 +196,10 @@ def main():
     AT.validate_mode(args.action_target_mode)
     if not os.environ.get("PUSHT_OUT"):
         raise RuntimeError("Set PUSHT_OUT to a NEW isolated directory before starting a training run")
-    if args.action_target_mode == AT.RESIDUAL and args.init_ckpt:
-        raise ValueError("Residual experiment must start from base; cannot resume old absolute-action adapters")
-    if os.path.exists(os.path.join(OUT, "checkpoints")):
-        raise FileExistsError("PUSHT_OUT already contains checkpoints; choose a fresh experiment directory")
+    if args.init_ckpt:
+        raise ValueError("R4 controlled training must start from the base model; cannot resume legacy adapters")
+    if os.path.exists(OUT) and os.listdir(OUT):
+        raise FileExistsError("PUSHT_OUT must be a fresh empty experiment directory, never overwrite old results")
     random.seed(args.seed); np.random.seed(args.seed); torch.manual_seed(args.seed)
     os.makedirs(OUT + "/checkpoints", exist_ok=True)
     sj = json.load(open(SPLIT)); train_eps, val_eps = sj["train"], sj["val"]
