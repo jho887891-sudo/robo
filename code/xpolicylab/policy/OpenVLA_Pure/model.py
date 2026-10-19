@@ -35,10 +35,12 @@ from prismatic.vla.constants import ACTION_DIM, ACTION_TOKEN_BEGIN_IDX
 
 from XPolicyLab.model_template import ModelTemplate
 from XPolicyLab.policy.OpenVLA_Pure.pure_autoreg_mode import enable_pure_autoreg
+from XPolicyLab.policy.OpenVLA_Pure import action_target as AT
 from XPolicyLab.policy.OpenVLA_Pure.action_codec import (
     LEGAL_TOKEN_MAX,
     LEGAL_TOKEN_MIN,
     MODE_LEGACY,
+    MODE_FIXED,
     N_BINS,
     decode_indices,
     denormalize,
@@ -128,6 +130,21 @@ class Model(ModelTemplate):
         meta = json.load(open(model_cfg["stats_path"]))
         self.q01 = np.asarray(meta["q01"], dtype=np.float32)
         self.q99 = np.asarray(meta["q99"], dtype=np.float32)
+        AT.validate_stats(self.q01, self.q99)
+        self.action_target_mode = AT.resolve_checkpoint_target(
+            meta, model_cfg.get("action_target_mode", AT.ABSOLUTE))
+        self.codec_mode = meta.get("codec_mode", MODE_LEGACY)
+        if self.codec_mode not in (MODE_FIXED, MODE_LEGACY):
+            raise ValueError("unknown checkpoint codec_mode: %s" % self.codec_mode)
+        if self.action_target_mode == AT.RESIDUAL and self.codec_mode != MODE_FIXED:
+            raise ValueError("residual checkpoint requires corrected fixed action codec")
+        expected_masking = meta.get("action_input_masking")
+        if expected_masking not in (None, "keep"):
+            raise ValueError("checkpoint has incompatible action_input_masking=%r" % expected_masking)
+        AT.verify_checkpoint_hashes(meta, model_cfg["adapter_dir"],
+                                    model_cfg["proprio_projector_path"], self.action_target_mode)
+        print("[OpenVLA_Pure] target=%s codec=%s autoreg=keep" %
+              (self.action_target_mode, self.codec_mode), flush=True)
         nb = np.load(model_cfg["bounds_path"])
         self.pmin = np.asarray(nb["pmin"], dtype=np.float32)
         self.pmax = np.asarray(nb["pmax"], dtype=np.float32)
@@ -140,11 +157,16 @@ class Model(ModelTemplate):
             low_cpu_mem_usage=True,
             trust_remote_code=True,
         )
+        # Source identity must match the real dynamic module used at training.
+        # This also prevents silently mixing the two independent R3 masking forks.
+        AT.verify_runtime_modeling(meta, vla, self.action_target_mode)
         vla.vision_backbone.set_num_images_in_input(self.num_images)
         enable_pure_autoreg(vla)
         vla = PeftModel.from_pretrained(vla, model_cfg["adapter_dir"], is_trainable=False)
         vla = vla.merge_and_unload()
         enable_pure_autoreg(vla)
+        if not getattr(vla, "_pure_autoreg_input_mode", False):
+            raise RuntimeError("pure autoreg action input mode was not enabled")
         self.vla = vla.to(self.device).eval()
         print("[OpenVLA_Pure] LoRA merged (cameras=%d)" % self.num_images, flush=True)
 
@@ -303,14 +325,19 @@ class Model(ModelTemplate):
         tok_ids = token_ids(np.asarray(tokens, dtype=np.int64))
         validate_token_ids(tok_ids)          # 越界 / PAD 会直接抛异常，不静默
         action_norm = decode_indices(np.asarray(tokens, dtype=np.int64))
-        action = denormalize(action_norm, self.q01, self.q99)
+        decoded_target = denormalize(action_norm, self.q01, self.q99)
+        action = AT.joint_command(state, decoded_target, self.action_target_mode)
         action = np.asarray(action, dtype=np.float32).reshape(1, -1)
+        if not np.isfinite(action).all():
+            raise ValueError("nonfinite predicted absolute joint command")
 
         self.last_decode = {
             "tokens": [int(t) for t in tokens],
             "token_ids": [int(t) for t in tok_ids],
             "probs": probs,
-            "action_codec_mode": TRAIN_CODEC_MODE,
+            "action_codec_mode": self.codec_mode,
+            "action_target_mode": self.action_target_mode,
+            "decoded_target": [float(v) for v in decoded_target],
             "instruction_used": instr_info["instruction"],
             "instruction_source": instr_info["source"],
         }
@@ -323,6 +350,8 @@ class Model(ModelTemplate):
             "proprio_norm": [round(float(v), 4) for v in np.asarray(proprio_np).reshape(-1)[:14]],
             "tokens": [int(t) for t in tokens],
             "token_ids": [int(t) for t in tok_ids],
+            "action_target_mode": self.action_target_mode,
+            "decoded_target": [round(float(v), 6) for v in decoded_target],
             "action": [round(float(v), 5) for v in action[0]],
             "delta_action_minus_state": [round(float(a - b), 5) for a, b in zip(action[0], np.asarray(state).reshape(-1)[:14])],
             "instruction_used": instr_info["instruction"],
