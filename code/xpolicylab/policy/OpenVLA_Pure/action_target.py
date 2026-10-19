@@ -107,3 +107,17 @@ def verify_checkpoint_hashes(meta, adapter_dir, projector_path, mode):
         if expected and file_sha256(path) != expected:
             raise ValueError("%s checksum mismatch: checkpoint artifacts and statistics do not belong together" % name)
     return True
+
+
+def verify_runtime_modeling(meta, core_model, mode):
+    """Check the loaded HF dynamic module, not merely an unused source file."""
+    import inspect
+    validate_mode(mode)
+    expected = meta.get("modeling_sha256")
+    if not expected and mode == RESIDUAL:
+        raise ValueError("residual checkpoint lacks runtime modeling_sha256 identity")
+    if expected:
+        actual = file_sha256(inspect.getfile(type(core_model)))
+        if actual != expected:
+            raise ValueError("active modeling_prismatic.py differs from checkpoint training module")
+    return True
