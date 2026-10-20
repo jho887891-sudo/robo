@@ -187,6 +187,41 @@ def run(candidate_dir, used_manifest_path, split_path, protocol_path,
             "note": "g1-g6 enforced here; a FAIL must leave the set unfrozen"}
 
 
+def freeze_checked(res, protocol_path, git_sha, freeze_out):
+    """Persist a 25=5+20 FINAL freeze with the split IDENTITIES inside its hashed manifest.
+
+    Unlike M.freeze(), this rejects missing/failed gates, incomplete splits, an
+    unpinned commit identity, and accidental overwrites of previous evidence.
+    """
+    import re
+    if not res.get("pass") or not res.get("checks") or not all(
+            c.get("pass") is True for c in res["checks"].values()):
+        raise ValueError("refusing FINAL freeze: R10 gate not fully passed")
+    if not re.fullmatch(r"[0-9a-fA-F]{40}", git_sha or ""):
+        raise ValueError("refusing FINAL freeze: require full 40-character Git commit SHA")
+    if os.path.lexists(freeze_out):
+        raise FileExistsError("refusing FINAL freeze: output already exists: " + freeze_out)
+    episodes = res["manifest"]["episodes"]
+    split = res["checks"]["split_assignment"]
+    dev = split["dev"]
+    final = split["final"]
+    names = [rec["file"] for rec in episodes]
+    if (len(names) != 25 or len(dev) != 5 or len(final) != 20
+            or len(set(names)) != 25 or set(names) != set(dev) | set(final)
+            or set(dev) & set(final)):
+        raise ValueError("refusing FINAL freeze: expected exactly 25 episodes / 5 DEV / 20 FINAL")
+    # The split and provenance are part of the manifest being SHA256-sealed.
+    sealed = dict(res["manifest"])
+    sealed["r10_split_assignment"] = split
+    sealed["r10_provenance"] = {
+        "protocol_sha256": res["protocol_sha256"],
+        "used_manifest_sha256": res["used_manifest_sha256"],
+        "guard_result_checks_sha256": hashlib.sha256(
+            json.dumps(res["checks"], sort_keys=True).encode("utf-8")).hexdigest(),
+    }
+    return M.freeze(sealed, json.load(open(protocol_path)), git_sha, freeze_out, protocol_path)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--candidate-dir", required=True)
@@ -202,6 +237,16 @@ def main():
     ap.add_argument("--allow-small-set-for-tests", action="store_true",
                     help="TEST ONLY: relax the protocol episode minimum to --expect-total")
     args = ap.parse_args()
+    # TEST-only overrides must never generate a frozen FINAL artefact.
+    if args.freeze_out and (args.allow_small_set_for_tests
+                            or args.expect_total != 25 or args.expect_dev != 5):
+        print("refusing to freeze: require production 25/5 counts, no test override",
+              file=sys.stderr)
+        return 9
+    if args.freeze_out and (not args.git_sha or os.path.abspath(args.freeze_out) == os.path.abspath(args.out)):
+        print("refusing to freeze: full Git SHA required and freeze output must differ from gate evidence",
+              file=sys.stderr)
+        return 9
     res = run(args.candidate_dir, args.used_manifest, args.split, args.protocol,
               args.expect_total, args.expect_dev, args.task_filter,
               args.allow_small_set_for_tests)
@@ -212,12 +257,16 @@ def main():
         print("[%s] %-22s %s" % ("PASS" if c.get("pass") else "FAIL", name,
                                  json.dumps({k: v for k, v in c.items() if k != "pass"},
                                             default=str)[:220]))
-    if res["pass"] and args.freeze_out and args.git_sha:
-        frozen = M.freeze(res["manifest"], json.load(open(args.protocol)), args.git_sha,
-                          args.freeze_out, args.protocol)
+    if args.freeze_out:
+        if not res["pass"]:
+            print("refusing to freeze: guard failed", file=sys.stderr)
+            return 9
+        try:
+            frozen = freeze_checked(res, args.protocol, args.git_sha, args.freeze_out)
+        except (ValueError, FileExistsError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 9
         print("FROZEN ->", args.freeze_out, "manifest_sha256", frozen["manifest_sha256"][:16])
-    elif args.freeze_out:
-        print("refusing to freeze: guard failed (or missing --git-sha)")
     print("R10 freeze guard:", "PASS" if res["pass"] else "FAIL")
     return 0 if res["pass"] else 9
 
