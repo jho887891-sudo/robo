@@ -257,3 +257,13 @@ _本 ROUTE 是长期索引，审计结论始终以对应的源代码/原始数�
 - **并行路线**：A 安全归档和确权后可优雅结束专属旧eval/6020；B PR11/12/14正式冻结回归；C 保留一次 7B KV GPU 300s 的已批准窗口；D k1采集入口源码审计、CPU 42D部署新适配器、12任务 TaskSpec/接口盘点、控制周期/评测指标工具和代码复现。真实新Push-T采集在“已证明合规且已获准的采集入口”和独立GPU资源同时存在后最多25次；未知k1不能直接运行。
 - **权限与状态**：CPU 可并行；GPU/Isaac采集串行；优化器训练0步、第二次GPU、额外11任务数据、main合并/真机部署仍未获批。**本段只记录计划，R10.2 的实际 Gate=EXECUTION_NOT_STARTED，不能拿 Spec 或PR当作已完成实验。**
 - **文件**：[R10.2 中文完整任务](missions/R10_2_AUTONOMOUS_MAX_SAFE_SPEC.md)；[机器可读执行模板](mission/R10_2_MISSION_MANIFEST.template.json)。执行日志/新SHA出现后再追加真正结果。
+
+
+#### R11–R16｜2026-10-21｜大任务一揽子授权模板（未来计划，尚未真实执行）
+
+- **研究方向不变**：先证明 Push-T 真实 OpenVLA-7B 42D/R 在 RoboDojo 闭环有独立成功证据，再扩展12任务；旧20样本/回合不当作真正FINAL。
+- **负责人委托原则**：将每个GPU/训练微步骤的审批改为固定总预算和可独立复算的阶段 Gate。**只有研究负责人将整份授权指令正式发给DeepSeek/明确采用其中额度时生效**；计划入库不等于已经采集或训练。
+- **拟授权上限**：新增单A6000合计≤32 GPU-hours，受限TRAIN过拟合≤100 optimizer steps，正式训练累计≤3000 steps；重新设计安全专家采集器并≤40次新Push-T尝试获得25有效回合（5 NEW_DEV+20新离线FINAL）；Push-T DEV闭环≤20回合与一次新30 sim seed正式闭环FINAL；条件满足可对已有其他任务进行CPU审计/两任务先导（仍计入同一GPU/steps总额度）。各项预算在独立机器可读账本中互不透支。
+- **新增训练前P0**：新R42旧CPU源码允许RGBA、接受重复timestamp、限速后边界可能超界，以及label/STOP/HF causal shift与prismatic 7D默认污染，均需独立回归与修复，不能看到R10.2 22/22就启动7B训练。
+- **阻断边界**：不得改main/旧权重HDF5/历史失败、擅停他人GPU进程、更换官方奖励/测试阈值、新采其余任务或真机部署。若专家生成能力/实时评测链路无法确认，即便剩余预算也不得假合格或盲目训练；受影响子线BLOCKED，独立CPU线继续。
+- **正式执行Spec**：[R11_R16_DELEGATED_EXECUTION_SPEC.md](missions/R11_R16_DELEGATED_EXECUTION_SPEC.md)；[分桶预算与Gate](mission/R11_R16_DELEGATED_BUDGET_AND_GATES.json)。实际运行结果后续必须另追加、固定真实SHA与原始日志。
