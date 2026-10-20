@@ -144,6 +144,19 @@ class TestMetrics(unittest.TestCase):
 
 
 class TestTrainer(unittest.TestCase):
+    def test_fixed_epoch_ablation_uses_last_checkpoint_not_train_best(self):
+        import torch
+        rng = np.random.default_rng(12)
+        X = rng.normal(size=(40, 28)).astype(np.float32)
+        R = (0.03 * X[:, :14]).astype(np.float32)
+        _, stats = T.train_mlp(
+            X, R, X, R, seed=0, hidden=(16,), epochs=5,
+            lr=1e-3, batch=20, patience=10**9, torch=torch,
+            select_best=False)
+        self.assertEqual(stats["checkpoint_selection"], "last")
+        self.assertEqual(stats["best_epoch"], 5)
+        self.assertEqual(len(stats["history"]), 5)
+
     def test_mlp_learns_a_linear_correction(self):
         import torch
         rng = np.random.default_rng(5)
