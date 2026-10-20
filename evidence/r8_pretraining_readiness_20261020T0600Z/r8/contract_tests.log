@@ -1,0 +1,17 @@
+PASS test_boundary_first_and_second_frame_follow_the_rest_at_start_rule
+PASS test_channel_window_coverage_is_measured_not_assumed          
+PASS test_degenerate_channel_windows_are_widened_explicitly        
+PASS test_history_reset_drops_the_previous_episode                 
+PASS test_history_time_alignment_is_exact_past_finite_difference   
+PASS test_legacy_14d_path_still_exists_and_42d_rejects_wrong_width 
+PASS test_no_future_information_leaks_into_the_current_input       
+PASS test_proprio42_shape_and_slot_layout                          
+PASS test_quantised_residual_still_recovers_the_action_within_the_bound
+PASS test_real_hdf5_minibatch_end_to_end                           
+PASS test_recovery_with_true_residual_reproduces_the_action_exactly
+PASS test_streaming_deployment_matches_batched_training_construction
+PASS test_token_roundtrip_stays_within_the_documented_quantisation_bound
+PASS test_velocity_residual_target_definition                      
+PASS test_zero_residual_recovers_constant_velocity_and_never_double_subtracts
+
+15 passed, 0 failed, 0 skipped (15 total)

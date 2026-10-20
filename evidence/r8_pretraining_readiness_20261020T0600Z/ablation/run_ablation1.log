@@ -1,0 +1,40 @@
+[data] train=64 dev=16 holdout=20 episodes
+[data] frames train=19127 dev=6186 holdout=6691 | feature dims=42
+[200/equal_updates seed=0] frames=200 eps=64 epochs=8000 steps~8000 | L1=54.201222 cv=0.001795 macro=53.813882 R2=-1661585268.8721 sign=0.678 beat_cv=0/20 Rscale=30196.273
+[200/equal_updates seed=1] frames=200 eps=64 epochs=8000 steps~8000 | L1=81.930527 cv=0.001795 macro=86.252970 R2=-2988601933.8431 sign=0.6924 beat_cv=0/20 Rscale=45644.788
+[200/equal_updates seed=2] frames=200 eps=64 epochs=8000 steps~8000 | L1=46.644505 cv=0.001795 macro=44.876893 R2=-1416213975.5412 sign=0.6702 beat_cv=0/20 Rscale=25986.376
+[200/equal_epochs seed=0] frames=200 eps=64 epochs=200 steps~200 | L1=331.011341 cv=0.001795 macro=321.932906 R2=-47972412206.5966 sign=0.6238 beat_cv=0/20 Rscale=184411.984
+[200/equal_epochs seed=1] frames=200 eps=64 epochs=200 steps~200 | L1=428.553786 cv=0.001795 macro=437.623765 R2=-69790192725.9223 sign=0.5988 beat_cv=0/20 Rscale=238754.492
+[200/equal_epochs seed=2] frames=200 eps=64 epochs=200 steps~200 | L1=266.658655 cv=0.001795 macro=259.136043 R2=-37232959921.5928 sign=0.586 beat_cv=0/20 Rscale=148559.982
+[200/dev_best seed=0] frames=200 eps=64 epochs=400 steps~400 | L1=294.841034 cv=0.001795 macro=285.927904 R2=-37725506163.1333 sign=0.6298 beat_cv=0/20 Rscale=164260.873
+[200/dev_best seed=1] frames=200 eps=64 epochs=400 steps~400 | L1=393.609407 cv=0.001795 macro=402.142917 R2=-56060795504.9423 sign=0.6075 beat_cv=0/20 Rscale=219286.380
+[200/dev_best seed=2] frames=200 eps=64 epochs=400 steps~400 | L1=244.434091 cv=0.001795 macro=238.119777 R2=-30506802366.7385 sign=0.6009 beat_cv=0/20 Rscale=136178.328
+[2000/equal_updates seed=0] frames=2000 eps=64 epochs=2000 steps~8000 | L1=0.030451 cv=0.001795 macro=0.027569 R2=-910.2417 sign=0.8797 beat_cv=0/20 Rscale=16.943
+[2000/equal_updates seed=1] frames=2000 eps=64 epochs=2000 steps~8000 | L1=0.023225 cv=0.001795 macro=0.021468 R2=-362.7946 sign=0.8687 beat_cv=0/20 Rscale=12.900
+[2000/equal_updates seed=2] frames=2000 eps=64 epochs=2000 steps~8000 | L1=0.023563 cv=0.001795 macro=0.021207 R2=-490.2113 sign=0.8849 beat_cv=0/20 Rscale=13.112
+[2000/equal_epochs seed=0] frames=2000 eps=64 epochs=200 steps~800 | L1=0.078854 cv=0.001795 macro=0.072603 R2=-3709.2771 sign=0.8294 beat_cv=0/20 Rscale=43.936
+[2000/equal_epochs seed=1] frames=2000 eps=64 epochs=200 steps~800 | L1=0.056746 cv=0.001795 macro=0.053568 R2=-1557.728 sign=0.7991 beat_cv=0/20 Rscale=31.563
+[2000/equal_epochs seed=2] frames=2000 eps=64 epochs=200 steps~800 | L1=0.058974 cv=0.001795 macro=0.054462 R2=-2296.7634 sign=0.7924 beat_cv=0/20 Rscale=32.874
+[2000/dev_best seed=0] frames=2000 eps=64 epochs=400 steps~1600 | L1=0.048695 cv=0.001795 macro=0.044647 R2=-1614.1196 sign=0.8585 beat_cv=0/20 Rscale=27.134
+[2000/dev_best seed=1] frames=2000 eps=64 epochs=400 steps~1600 | L1=0.042141 cv=0.001795 macro=0.040080 R2=-837.8183 sign=0.8266 beat_cv=0/20 Rscale=23.438
+[2000/dev_best seed=2] frames=2000 eps=64 epochs=400 steps~1600 | L1=0.045125 cv=0.001795 macro=0.041576 R2=-1352.227 sign=0.8338 beat_cv=0/20 Rscale=25.157
+[all/equal_updates seed=0] frames=19127 eps=64 epochs=211 steps~8018 | L1=0.001248 cv=0.001795 macro=0.001246 R2=0.5157 sign=0.9729 beat_cv=20/20 Rscale=0.915
+[all/equal_updates seed=1] frames=19127 eps=64 epochs=211 steps~8018 | L1=0.001305 cv=0.001795 macro=0.001305 R2=0.5161 sign=0.9721 beat_cv=20/20 Rscale=0.918
+[all/equal_updates seed=2] frames=19127 eps=64 epochs=211 steps~8018 | L1=0.001212 cv=0.001795 macro=0.001210 R2=0.4972 sign=0.9732 beat_cv=20/20 Rscale=0.880
+[all/equal_epochs seed=0] frames=19127 eps=64 epochs=200 steps~7600 | L1=0.001268 cv=0.001795 macro=0.001264 R2=0.5103 sign=0.9723 beat_cv=20/20 Rscale=0.906
+[all/equal_epochs seed=1] frames=19127 eps=64 epochs=200 steps~7600 | L1=0.001268 cv=0.001795 macro=0.001262 R2=0.5148 sign=0.9727 beat_cv=20/20 Rscale=0.910
+[all/equal_epochs seed=2] frames=19127 eps=64 epochs=200 steps~7600 | L1=0.001220 cv=0.001795 macro=0.001216 R2=0.4942 sign=0.9735 beat_cv=20/20 Rscale=0.882
+[all/dev_best seed=0] frames=19127 eps=64 epochs=239 steps~9082 | L1=0.001233 cv=0.001795 macro=0.001230 R2=0.5139 sign=0.973 beat_cv=20/20 Rscale=0.885
+[all/dev_best seed=1] frames=19127 eps=64 epochs=288 steps~10944 | L1=0.001224 cv=0.001795 macro=0.001225 R2=0.542 sign=0.9737 beat_cv=20/20 Rscale=0.886
+[all/dev_best seed=2] frames=19127 eps=64 epochs=320 steps~12160 | L1=0.001156 cv=0.001795 macro=0.001153 R2=0.51 sign=0.9733 beat_cv=20/20 Rscale=0.864
+
+=== summary (mean over seeds) ===
+  200   equal_updates  frames=   200 eps=64.0 steps=  8000 | L1=60.925418 macro=61.647915 R2=-2022133726.085 sign=0.680 beat_cv=0.0 Rscale=33942.479
+  200   equal_epochs   frames=   200 eps=64.0 steps=   200 | L1=342.074594 macro=339.564238 R2=-51665188284.704 sign=0.603 beat_cv=0.0 Rscale=190575.486
+  200   dev_best       frames=   200 eps=64.0 steps=   400 | L1=310.961511 macro=308.730199 R2=-41431034678.271 sign=0.613 beat_cv=0.0 Rscale=173241.861
+  2000  equal_updates  frames=  2000 eps=64.0 steps=  8000 | L1=0.025746 macro=0.023415 R2=-587.749 sign=0.878 beat_cv=0.0 Rscale=14.318
+  2000  equal_epochs   frames=  2000 eps=64.0 steps=   800 | L1=0.064858 macro=0.060211 R2=-2521.256 sign=0.807 beat_cv=0.0 Rscale=36.124
+  2000  dev_best       frames=  2000 eps=64.0 steps=  1600 | L1=0.045320 macro=0.042101 R2=-1268.055 sign=0.840 beat_cv=0.0 Rscale=25.243
+  all   equal_updates  frames= 19127 eps=64.0 steps=  8018 | L1=0.001255 macro=0.001254 R2=+0.510 sign=0.973 beat_cv=20.0 Rscale=0.905
+  all   equal_epochs   frames= 19127 eps=64.0 steps=  7600 | L1=0.001252 macro=0.001247 R2=+0.506 sign=0.973 beat_cv=20.0 Rscale=0.899
+  all   dev_best       frames= 19127 eps=64.0 steps= 10729 | L1=0.001204 macro=0.001203 R2=+0.522 sign=0.973 beat_cv=20.0 Rscale=0.878

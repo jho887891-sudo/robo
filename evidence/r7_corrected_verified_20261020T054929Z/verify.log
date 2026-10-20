@@ -1,0 +1,20 @@
+[PASS] cv_baseline_recomputed                               {"recomputed": 0.0018283173722575883, "script": 0.0018283173722575883}
+[PASS] nearest_residual_bound_below_cv                      {"bound": 0.0004622862325049937, "cv": 0.0018283173722575883, "ratio": 0.25284791334349527}
+[PASS] nearest_absolute_bound_above_cv                      {"bound": 0.0023258018773049116, "cv": 0.0018283173722575883, "ratio": 1.272099643418601}
+[PASS] absolute_bound_is_below_floor_encoder_error          {"nearest": 0.0023258018773049116, "floor_encoder": 0.003443762194365263}
+[PASS] oracle_independent_brute_force_agrees                {}
+[PASS] prediction_sidecars_exist_for_all_seeds              {"seeds": [0, 1, 2], "missing": []}
+[PASS] sidecar_L1_matches_logged_all_seeds                  {"0": {"L1_from_sidecar": 0.001232542513057992, "logged": 0.001232542513057992, "cv": 0.0017949555891966047}, "1": {"L1_from_sidecar": 0.001224494593468422, "logged": 0.001224494593468422, "cv": 0.0017949555891966047}, "2": {"L1_from_sidecar": 0.0011557722593863078, "logged": 0.0011557722593863078, "cv": 0.0017949555891966047}}
+[PASS] acceleration_MLP_beats_copy_V                        {"mlp_mean_L1": 0.0012042697886375739, "cv": 0.0017949555891966047, "relative_improvement": 0.32908101131539025}
+[PASS] exploratory_holdout_channel_diagnostics_NOT_a_selection_gate {"dims_worse_than_cv": [6, 13], "model_L1": 0.001232542513057992, "hybrid_arm_model_gripper_cv_L1": 0.001207954305264194, "cv_L1": 0.0017949555891966047}
+[PASS] dev_selected_hybrid_matches_reconstructed_holdout    {"dev_selected_dims": [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12], "holdout_L1": 0.001207954305264194, "logged_L1": 0.001207954305264194}
+[PASS] improvement_holds_in_most_episodes                   {"episodes": 20, "improved": 20, "mean_diff": -0.0005612300595747445}
+[PASS] probe_paired_stats_match_recomputation               {"probe": {"mean_diff": -0.0005612300595747445, "improved": 20}, "recomputed": {"mean_diff": -0.0005612300595747445, "improved": 20}}
+[PASS] R_target_better_than_delta_target                    {"SV_R": 0.001726876221250639, "SV_delta": 0.001786933132010773, "improvement": 0.03360893011847299}
+[FAIL] pilot200_R_and_fixed_budget_verified_all_seeds       {"0": {"L1_from_sidecar": 0.023098049232094915, "logged": 0.02328435865915307, "reconstruction_ok": true}, "1": {"L1_from_sidecar": 0.02795979387983389, "logged": 0.028404375076366898, "reconstruction_ok": true}, "2": {"L1_from_sidecar": 0.02280843134743689, "logged": 0.02275816115214079, "reconstruction_ok": true}}
+[PASS] full_frame_MLP_beats_200_frame_regime                {"full_frame_SV_R": 0.001726876221250639, "pilot200": 0.02481563162922025, "ratio": 14.370243404734744, "note": "observational coverage comparison; pilot sampled 80 episodes, full training uses 64"}
+[PASS] episode_splits_disjoint                              {"train": 64, "dev": 16, "holdout": 20}
+[PASS] holdout_matches_declared_split                       {"holdout": 20}
+[PASS] action_is_next_observation_and_inputs_are_past_only  {"episodes_checked": 20, "max_abs_action_minus_next_state": 0.0, "statement": "X_t uses S_t and S_(t-1) only; the label A_t equals S_(t+1)"}
+
+17/18 claims verified -> FAIL

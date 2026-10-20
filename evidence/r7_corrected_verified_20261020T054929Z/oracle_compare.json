@@ -1,0 +1,225 @@
+{
+ "n_val_frames": 6711,
+ "n_val_episodes": 20,
+ "n_train_frames_used_for_quantiles": 25553,
+ "cv_physical_L1_same_frames": 0.0018283173722575883,
+ "identity_physical_L1_same_frames": 0.007043121059249413,
+ "modes": {
+  "residual": {
+   "target": "residual",
+   "floor_encoder_oracle_L1": 0.0005846422864124179,
+   "nearest_representable_lower_bound_L1": 0.0004622862325049937,
+   "nearest_per_arm": {
+    "left": 0.0005676411674357951,
+    "right": 0.00035693115205504
+   },
+   "nearest_per_dim": [
+    0.0004931841394864023,
+    0.0006580210756510496,
+    0.000465392047772184,
+    0.0005153999081812799,
+    0.0007867300882935524,
+    0.0005961146671324968,
+    0.0004586928116623312,
+    0.0003886134654749185,
+    0.0003235085168853402,
+    0.00029324452043510973,
+    0.0005046579171903431,
+    0.0002906373410951346,
+    0.00031899200985208154,
+    0.0003788864996749908
+   ],
+   "floor_per_arm": {
+    "left": 0.0006687867533654716,
+    "right": 0.0005004977510681395
+   },
+   "improvement_floor_to_nearest": 0.0001223560539074242,
+   "fraction_entries_needing_other_bin": 0.47097515805607,
+   "fraction_entries_outside_q01_q99": 0.018785788790259064,
+   "physical_step_per_dim": [
+    0.0003859064012181525,
+    0.0008130980180759056,
+    0.0006120120193444047,
+    0.0005521378534681657,
+    0.00022130656037844864,
+    0.0002728982883341172,
+    0.0007843137371773813,
+    0.0003796955534056121,
+    0.0008404992666898989,
+    0.0006756660400652418,
+    0.0005994308228586234,
+    0.00022614825443894256,
+    0.00028784136269606795,
+    0.0007843137371773813
+   ],
+   "physical_step_mean": 0.0005310905653805961,
+   "theoretical_floor_if_uniform_step_over_4": 0.00013277264134514902,
+   "theoretical_floor_if_uniform_step_over_2": 0.00026554528269029804,
+   "cv_physical_L1_same_frames": 0.0018283173722575883,
+   "identity_physical_L1_same_frames": 0.007043121059249413,
+   "bound_vs_cv_ratio": 0.25284791320519984,
+   "bound_beats_cv": true,
+   "bound_beats_identity": true,
+   "q01": [
+    -0.049081966280937195,
+    -0.11318931728601456,
+    -0.07938072830438614,
+    -0.08383502066135406,
+    -0.027276918292045593,
+    -0.03535360097885132,
+    -0.10000000149011612,
+    -0.048551931977272034,
+    -0.11839025467634201,
+    -0.08931839466094971,
+    -0.09433529525995255,
+    -0.03095621056854725,
+    -0.03559064120054245,
+    -0.10000000149011612
+   ],
+   "q99": [
+    0.049324166029691696,
+    0.09415067732334137,
+    0.07668233662843704,
+    0.05696013197302818,
+    0.02915625460445881,
+    0.03423546254634857,
+    0.10000000149011612,
+    0.04827043414115906,
+    0.09593705832958221,
+    0.08297644555568695,
+    0.05851956456899643,
+    0.026711594313383102,
+    0.03780890628695488,
+    0.10000000149011612
+   ],
+   "caveat": "lower bound applies to one independent fixed-q01/q99 bin per dimension with no post-processing; any rescaling, blending with S, or learned inverse transform escapes it",
+   "independent_brute_force": {
+    "frames_checked": 6711,
+    "brute_force_nearest_L1": 0.00046228619602561557,
+    "brute_force_floor_L1": 0.0005846422481326751
+   }
+  },
+  "absolute": {
+   "target": "absolute",
+   "floor_encoder_oracle_L1": 0.003443762194365263,
+   "nearest_representable_lower_bound_L1": 0.0023258018773049116,
+   "nearest_per_arm": {
+    "left": 0.0031537553295493126,
+    "right": 0.001497848890721798
+   },
+   "nearest_per_dim": [
+    0.004589598625898361,
+    0.0023720376193523407,
+    0.0020271583925932646,
+    0.0013261102139949799,
+    0.004506806377321482,
+    0.0071802809834480286,
+    7.422030466841534e-05,
+    0.00400828430429101,
+    0.001272113062441349,
+    0.0010413791751489043,
+    0.0012879915302619338,
+    0.0013606889406219125,
+    0.001473135082051158,
+    4.112390161026269e-05
+   ],
+   "floor_per_arm": {
+    "left": 0.004250088811729487,
+    "right": 0.002637435233795974
+   },
+   "improvement_floor_to_nearest": 0.0011179599678143859,
+   "fraction_entries_needing_other_bin": 0.4308491389403325,
+   "fraction_entries_outside_q01_q99": 0.015943972582327524,
+   "physical_step_per_dim": [
+    0.0060693167003930786,
+    0.008730742510627349,
+    0.007283369318682554,
+    0.004654440444474127,
+    0.0019691523968004714,
+    0.004686619838078817,
+    0.00392156862745098,
+    0.006566721785302256,
+    0.008961306366266002,
+    0.007366761039285098,
+    0.004467971184674442,
+    0.0020338995783936746,
+    0.004294021223105637,
+    0.00392156862745098
+   ],
+   "physical_step_mean": 0.005351961402927533,
+   "theoretical_floor_if_uniform_step_over_4": 0.0013379903507318833,
+   "theoretical_floor_if_uniform_step_over_2": 0.0026759807014637665,
+   "cv_physical_L1_same_frames": 0.0018283173722575883,
+   "identity_physical_L1_same_frames": 0.007043121059249413,
+   "bound_vs_cv_ratio": 1.2720996427228248,
+   "bound_beats_cv": false,
+   "bound_beats_identity": true,
+   "q01": [
+    -1.0584343671798706,
+    -1.2678680533836223e-14,
+    -0.0008995752432383597,
+    -1.1728386878967285,
+    -0.2862500250339508,
+    -0.8173749446868896,
+    0.0,
+    -0.6954443454742432,
+    -3.659982778273733e-15,
+    2.521348151015299e-16,
+    -1.13933265209198,
+    -0.37580782175064087,
+    -0.809902548789978,
+    0.0
+   ],
+   "q99": [
+    0.4892413914203644,
+    2.226339340209961,
+    1.856359601020813,
+    0.014043625444173813,
+    0.21588383615016937,
+    0.3777131140232086,
+    1.0,
+    0.979069709777832,
+    2.285133123397827,
+    1.8785240650177002,
+    2.62416206894421e-15,
+    0.1428365707397461,
+    0.28507286310195923,
+    1.0
+   ],
+   "caveat": "lower bound applies to one independent fixed-q01/q99 bin per dimension with no post-processing; any rescaling, blending with S, or learned inverse transform escapes it",
+   "independent_brute_force": {
+    "frames_checked": 6711,
+    "brute_force_nearest_L1": 0.0023258019978661523,
+    "brute_force_floor_L1": 0.0034437620018340416
+   }
+  }
+ },
+ "quantized_copy_V": {
+  "nearest": 0.0020455275956878876,
+  "floor": 0.0021193871921098323
+ },
+ "independent_checks": [
+  {
+   "check": "brute_force_matches_nearest_bound_residual",
+   "pass": true,
+   "brute_force": 0.00046228619602561557,
+   "script": 0.0004622862325049937
+  },
+  {
+   "check": "nearest_never_worse_than_floor_residual",
+   "pass": true
+  },
+  {
+   "check": "brute_force_matches_nearest_bound_absolute",
+   "pass": true,
+   "brute_force": 0.0023258019978661523,
+   "script": 0.0023258018773049116
+  },
+  {
+   "check": "nearest_never_worse_than_floor_absolute",
+   "pass": true
+  }
+ ],
+ "independent_checks_pass": true,
+ "frame_set_note": "all legal validation frames t in [1, T-2] over the 20 held-out episodes; identical frame set to cv / identity / MLP baselines"
+}

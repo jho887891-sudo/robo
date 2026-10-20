@@ -1,0 +1,12 @@
+[data] train episodes=64 frames=19127 | dev episodes=16 frames=6186 | holdout episodes=20 frames=6691
+[SVAcc/R seed=0] holdout L1=0.001233 (cv 0.001795, identity 0.007015) | corr_delta=+0.973 sign@1e-3=0.973 | R_corr=+0.717 R_sign=0.826 | best_epoch=199 15s
+[SVAcc/R seed=1] holdout L1=0.001224 (cv 0.001795, identity 0.007015) | corr_delta=+0.975 sign@1e-3=0.974 | R_corr=+0.737 R_sign=0.826 | best_epoch=248 18s
+[SVAcc/R seed=2] holdout L1=0.001156 (cv 0.001795, identity 0.007015) | corr_delta=+0.973 sign@1e-3=0.973 | R_corr=+0.714 R_sign=0.833 | best_epoch=280 20s
+[SV/R seed=0] holdout L1=0.001721 (cv 0.001795, identity 0.007015) | corr_delta=+0.961 sign@1e-3=0.958 | R_corr=+0.555 R_sign=0.661 | best_epoch=394 24s
+[SV/R seed=1] holdout L1=0.001708 (cv 0.001795, identity 0.007015) | corr_delta=+0.961 sign@1e-3=0.958 | R_corr=+0.553 R_sign=0.657 | best_epoch=342 23s
+[SV/R seed=2] holdout L1=0.001659 (cv 0.001795, identity 0.007015) | corr_delta=+0.961 sign@1e-3=0.959 | R_corr=+0.556 R_sign=0.664 | best_epoch=386 24s
+[pilot200] fixed epoch budget = 386 (median best epoch of full-frame SV)
+[pilot200 seed=0] holdout L1=0.023098 | R_corr=+0.034 (trained on 200 frames / 80 episodes)
+[pilot200 seed=1] holdout L1=0.027960 | R_corr=+0.001 (trained on 200 frames / 80 episodes)
+[pilot200 seed=2] holdout L1=0.022808 | R_corr=+0.014 (trained on 200 frames / 80 episodes)
+wrote /home/dgut/pusht_runtime/r7_verify_r7_corrected_verified_20261020T054929Z/state_mlp_acc.json

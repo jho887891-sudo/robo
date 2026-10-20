@@ -1,0 +1,122 @@
+[preflight] commit=603990af542d8ed510e8298db3085ffd7c574376 mode=--all python=/home/dgut/pusht_runtime/venv_oft/bin/python
+Ran 5 tests in 0.033s
+
+OK
+Ran 16 tests in 2.799s
+
+OK
+{
+  "n_val_frames": 6711,
+  "cv_full_val_L1": 0.0018283173722575883,
+  "floor_vs_lower_bounds": {
+    "absolute": {
+      "floor_encoder_oracle_L1": 0.003443762194365263,
+      "nearest_representable_lower_bound_L1": 0.0023258018773049116,
+      "best_bin_beats_cv": false
+    },
+    "residual": {
+      "floor_encoder_oracle_L1": 0.0005846422864124179,
+      "nearest_representable_lower_bound_L1": 0.0004622862325049937,
+      "best_bin_beats_cv": true
+    }
+  }
+}
+val frames 6711 | cv 0.001828 | identity 0.007043
+[residual] floor=0.000585  nearest_bound=0.000462  (x cv=0.253)  beats_cv=True | step_mean=0.000531 | clip=0.0188 | other_bin=0.471
+        per-arm nearest: left=0.000568 right=0.000357 | brute-force check 0.000462
+[absolute] floor=0.003444  nearest_bound=0.002326  (x cv=1.272)  beats_cv=False | step_mean=0.005352 | clip=0.0159 | other_bin=0.431
+        per-arm nearest: left=0.003154 right=0.001498 | brute-force check 0.002326
+quantized copy-V: {'nearest': 0.002046, 'floor': 0.002119}
+independent checks pass: True
+   brute_force_matches_nearest_bound_residual PASS
+   nearest_never_worse_than_floor_residual    PASS
+   brute_force_matches_nearest_bound_absolute PASS
+   nearest_never_worse_than_floor_absolute    PASS
+wrote /home/dgut/pusht_runtime/r7_verify_r7_corrected_verified_20261020T054929Z/oracle_compare.json
+baselines on kNN set: hold=0.007017  copy_V=0.001855
+  per_dim_linear_all_val     0.001855  (full heldout set; NOT same subset as copy-V below)
+  per_dim_linear_knn_set     0.001878  (x copy_V = 1.013)
+  quadratic_ridge            0.001989  (x copy_V = 1.072)
+  joint_linear_14x14         0.002020  (x copy_V = 1.089)
+  knn_10                     0.002170  (x copy_V = 1.170)
+  knn_5                      0.002206  (x copy_V = 1.189)
+  knn_25                     0.002229  (x copy_V = 1.202)
+  knn_1                      0.002795  (x copy_V = 1.507)
+best=per_dim_linear_knn_set 0.001878 -> none of these tested models beats copy-V on the matched validation subset
+motion-rich subset n=2648 (39.5%): hold=0.013958 cv=0.003282 knn10=0.003883
+wrote /home/dgut/pusht_runtime/r7_verify_r7_corrected_verified_20261020T054929Z/history_ceiling_matched.json
+[SV/delta seed=0] holdout L1=0.001823 (cv 0.001828, identity 0.007043) | corr_delta=+0.960 sign@1e-3=0.955 | R_corr=+0.557 R_sign=0.652 | best_epoch=393 26s
+[SV/delta seed=1] holdout L1=0.001768 (cv 0.001828, identity 0.007043) | corr_delta=+0.960 sign@1e-3=0.957 | R_corr=+0.556 R_sign=0.660 | best_epoch=386 26s
+[SV/delta seed=2] holdout L1=0.001769 (cv 0.001828, identity 0.007043) | corr_delta=+0.959 sign@1e-3=0.958 | R_corr=+0.551 R_sign=0.658 | best_epoch=359 27s
+[S/R seed=0] holdout L1=0.002539 (cv 0.001828, identity 0.007043) | corr_delta=+0.942 sign@1e-3=0.938 | R_corr=+0.210 R_sign=0.570 | best_epoch=159 13s
+[S/R seed=1] holdout L1=0.002397 (cv 0.001828, identity 0.007043) | corr_delta=+0.943 sign@1e-3=0.942 | R_corr=+0.219 R_sign=0.575 | best_epoch=190 15s
+[S/R seed=2] holdout L1=0.002166 (cv 0.001828, identity 0.007043) | corr_delta=+0.947 sign@1e-3=0.949 | R_corr=+0.265 R_sign=0.579 | best_epoch=344 24s
+[S/delta seed=0] holdout L1=0.006494 (cv 0.001828, identity 0.007043) | corr_delta=+0.634 sign@1e-3=0.624 | R_corr=+0.212 R_sign=0.586 | best_epoch=229 18s
+[S/delta seed=1] holdout L1=0.006531 (cv 0.001828, identity 0.007043) | corr_delta=+0.627 sign@1e-3=0.628 | R_corr=+0.209 R_sign=0.583 | best_epoch=212 17s
+[S/delta seed=2] holdout L1=0.006614 (cv 0.001828, identity 0.007043) | corr_delta=+0.636 sign@1e-3=0.618 | R_corr=+0.219 R_sign=0.584 | best_epoch=373 27s
+[V/R seed=0] holdout L1=0.001789 (cv 0.001828, identity 0.007043) | corr_delta=+0.955 sign@1e-3=0.955 | R_corr=+0.461 R_sign=0.625 | best_epoch=202 16s
+[V/R seed=1] holdout L1=0.001759 (cv 0.001828, identity 0.007043) | corr_delta=+0.955 sign@1e-3=0.956 | R_corr=+0.474 R_sign=0.632 | best_epoch=245 19s
+[V/R seed=2] holdout L1=0.001733 (cv 0.001828, identity 0.007043) | corr_delta=+0.955 sign@1e-3=0.957 | R_corr=+0.472 R_sign=0.625 | best_epoch=299 22s
+[V/delta seed=0] holdout L1=0.001815 (cv 0.001828, identity 0.007043) | corr_delta=+0.954 sign@1e-3=0.955 | R_corr=+0.458 R_sign=0.623 | best_epoch=265 18s
+[V/delta seed=1] holdout L1=0.001801 (cv 0.001828, identity 0.007043) | corr_delta=+0.954 sign@1e-3=0.955 | R_corr=+0.460 R_sign=0.619 | best_epoch=371 24s
+[V/delta seed=2] holdout L1=0.001820 (cv 0.001828, identity 0.007043) | corr_delta=+0.953 sign@1e-3=0.956 | R_corr=+0.441 R_sign=0.614 | best_epoch=262 19s
+[pilot200] fixed epoch budget = 377 (median best epoch of full-frame SV)
+[pilot200 seed=0] holdout L1=0.023284 | R_corr=+0.033 (trained on 200 frames / 80 episodes)
+[pilot200 seed=1] holdout L1=0.028404 | R_corr=-0.000 (trained on 200 frames / 80 episodes)
+[pilot200 seed=2] holdout L1=0.022758 | R_corr=+0.014 (trained on 200 frames / 80 episodes)
+wrote /home/dgut/pusht_runtime/r7_verify_r7_corrected_verified_20261020T054929Z/state_mlp.json
+[data] train episodes=64 frames=19127 | dev episodes=16 frames=6186 | holdout episodes=20 frames=6691
+[SVAcc/R seed=0] holdout L1=0.001233 (cv 0.001795, identity 0.007015) | corr_delta=+0.973 sign@1e-3=0.973 | R_corr=+0.717 R_sign=0.826 | best_epoch=199 15s
+[SVAcc/R seed=1] holdout L1=0.001224 (cv 0.001795, identity 0.007015) | corr_delta=+0.975 sign@1e-3=0.974 | R_corr=+0.737 R_sign=0.826 | best_epoch=248 18s
+[SVAcc/R seed=2] holdout L1=0.001156 (cv 0.001795, identity 0.007015) | corr_delta=+0.973 sign@1e-3=0.973 | R_corr=+0.714 R_sign=0.833 | best_epoch=280 20s
+[SV/R seed=0] holdout L1=0.001721 (cv 0.001795, identity 0.007015) | corr_delta=+0.961 sign@1e-3=0.958 | R_corr=+0.555 R_sign=0.661 | best_epoch=394 24s
+[SV/R seed=1] holdout L1=0.001708 (cv 0.001795, identity 0.007015) | corr_delta=+0.961 sign@1e-3=0.958 | R_corr=+0.553 R_sign=0.657 | best_epoch=342 23s
+[SV/R seed=2] holdout L1=0.001659 (cv 0.001795, identity 0.007015) | corr_delta=+0.961 sign@1e-3=0.959 | R_corr=+0.556 R_sign=0.664 | best_epoch=386 24s
+[pilot200] fixed epoch budget = 386 (median best epoch of full-frame SV)
+[pilot200 seed=0] holdout L1=0.023098 | R_corr=+0.034 (trained on 200 frames / 80 episodes)
+[pilot200 seed=1] holdout L1=0.027960 | R_corr=+0.001 (trained on 200 frames / 80 episodes)
+[pilot200 seed=2] holdout L1=0.022808 | R_corr=+0.014 (trained on 200 frames / 80 episodes)
+wrote /home/dgut/pusht_runtime/r7_verify_r7_corrected_verified_20261020T054929Z/state_mlp_acc.json
+correction structure: corr(R, accel)=0.433  corr(R, -V)=0.178  |R|/|V|=0.254
+acceleration autocorrelation (holdout, per-episode mean)=0.442
+[SV_R] L1=0.001727  vs cv: mean diff=-0.000095, improved 14/20 episodes, bootstrap P(improve)=1.000 CI[-0.000142,-0.000048]
+[V_R] L1=0.001761  vs cv: mean diff=-0.000040, improved 13/20 episodes, bootstrap P(improve)=0.984 CI[-0.000076,-0.000004]
+[SV_delta] L1=0.001787  vs cv: mean diff=-0.000012, improved 10/20 episodes, bootstrap P(improve)=0.696 CI[-0.000061,+0.000039]
+  stratum tiny_lt_1e-3       n=  558 model=0.000456 cv=0.000445 rel_improvement=-2.5%
+  stratum small_1e-3_5e-3    n= 3505 model=0.000666 cv=0.000951 rel_improvement=+30.0%
+  stratum medium_5e-3_2e-2   n= 2010 model=0.001741 cv=0.002460 rel_improvement=+29.2%
+  stratum large_ge_2e-2      n=  618 model=0.003497 cv=0.005640 rel_improvement=+38.0%
+proprio kNN bound: knn_mean_R L1=0.001527  nearest-neighbour L1=0.002107  (MLP R L1=0.001233)
+residual: episode-offset variance explained (oracle upper bound)=0.003
+wrote /home/dgut/pusht_runtime/r7_verify_r7_corrected_verified_20261020T054929Z/probe_main.json
+correction structure: corr(R, accel)=0.433  corr(R, -V)=0.178  |R|/|V|=0.254
+acceleration autocorrelation (holdout, per-episode mean)=0.442
+[SVAcc_R] L1=0.001204  vs cv: mean diff=-0.000561, improved 20/20 episodes, bootstrap P(improve)=1.000 CI[-0.000622,-0.000501]
+[SV_R] L1=0.001696  vs cv: mean diff=-0.000076, improved 14/20 episodes, bootstrap P(improve)=1.000 CI[-0.000119,-0.000036]
+  stratum tiny_lt_1e-3       n=  558 model=0.000456 cv=0.000445 rel_improvement=-2.5%
+  stratum small_1e-3_5e-3    n= 3505 model=0.000666 cv=0.000951 rel_improvement=+30.0%
+  stratum medium_5e-3_2e-2   n= 2010 model=0.001741 cv=0.002460 rel_improvement=+29.2%
+  stratum large_ge_2e-2      n=  618 model=0.003497 cv=0.005640 rel_improvement=+38.0%
+proprio kNN bound: knn_mean_R L1=0.001527  nearest-neighbour L1=0.002107  (MLP R L1=0.001233)
+residual: episode-offset variance explained (oracle upper bound)=0.003
+wrote /home/dgut/pusht_runtime/r7_verify_r7_corrected_verified_20261020T054929Z/probe_acc.json
+[PASS] cv_baseline_recomputed                               {"recomputed": 0.0018283173722575883, "script": 0.0018283173722575883}
+[PASS] nearest_residual_bound_below_cv                      {"bound": 0.0004622862325049937, "cv": 0.0018283173722575883, "ratio": 0.25284791334349527}
+[PASS] nearest_absolute_bound_above_cv                      {"bound": 0.0023258018773049116, "cv": 0.0018283173722575883, "ratio": 1.272099643418601}
+[PASS] absolute_bound_is_below_floor_encoder_error          {"nearest": 0.0023258018773049116, "floor_encoder": 0.003443762194365263}
+[PASS] oracle_independent_brute_force_agrees                {}
+[PASS] prediction_sidecars_exist_for_all_seeds              {"seeds": [0, 1, 2], "missing": []}
+[PASS] sidecar_L1_matches_logged_all_seeds                  {"0": {"L1_from_sidecar": 0.001232542513057992, "logged": 0.001232542513057992, "cv": 0.0017949555891966047}, "1": {"L1_from_sidecar": 0.001224494593468422, "logged": 0.001224494593468422, "cv": 0.0017949555891966047}, "2": {"L1_from_sidecar": 0.0011557722593863078, "logged": 0.0011557722593863078, "cv": 0.0017949555891966047}}
+[PASS] acceleration_MLP_beats_copy_V                        {"mlp_mean_L1": 0.0012042697886375739, "cv": 0.0017949555891966047, "relative_improvement": 0.32908101131539025}
+[PASS] exploratory_holdout_channel_diagnostics_NOT_a_selection_gate {"dims_worse_than_cv": [6, 13], "model_L1": 0.001232542513057992, "hybrid_arm_model_gripper_cv_L1": 0.001207954305264194, "cv_L1": 0.0017949555891966047}
+[PASS] dev_selected_hybrid_matches_reconstructed_holdout    {"dev_selected_dims": [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12], "holdout_L1": 0.001207954305264194, "logged_L1": 0.001207954305264194}
+[PASS] improvement_holds_in_most_episodes                   {"episodes": 20, "improved": 20, "mean_diff": -0.0005612300595747445}
+[PASS] probe_paired_stats_match_recomputation               {"probe": {"mean_diff": -0.0005612300595747445, "improved": 20}, "recomputed": {"mean_diff": -0.0005612300595747445, "improved": 20}}
+[PASS] R_target_better_than_delta_target                    {"SV_R": 0.001726876221250639, "SV_delta": 0.001786933132010773, "improvement": 0.03360893011847299}
+[FAIL] pilot200_R_and_fixed_budget_verified_all_seeds       {"0": {"L1_from_sidecar": 0.023098049232094915, "logged": 0.02328435865915307, "reconstruction_ok": true}, "1": {"L1_from_sidecar": 0.02795979387983389, "logged": 0.028404375076366898, "reconstruction_ok": true}, "2": {"L1_from_sidecar": 0.02280843134743689, "logged": 0.02275816115214079, "reconstruction_ok": true}}
+[PASS] full_frame_MLP_beats_200_frame_regime                {"full_frame_SV_R": 0.001726876221250639, "pilot200": 0.02481563162922025, "ratio": 14.370243404734744, "note": "observational coverage comparison; pilot sampled 80 episodes, full training uses 64"}
+[PASS] episode_splits_disjoint                              {"train": 64, "dev": 16, "holdout": 20}
+[PASS] holdout_matches_declared_split                       {"holdout": 20}
+[PASS] action_is_next_observation_and_inputs_are_past_only  {"episodes_checked": 20, "max_abs_action_minus_next_state": 0.0, "statement": "X_t uses S_t and S_(t-1) only; the label A_t equals S_(t+1)"}
+
+17/18 claims verified -> FAIL

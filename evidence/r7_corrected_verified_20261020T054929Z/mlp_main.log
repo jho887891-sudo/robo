@@ -1,0 +1,24 @@
+[data] train episodes=64 frames=19191 | dev episodes=16 frames=6202 | holdout episodes=20 frames=6711
+[SV/R seed=0] holdout L1=0.001740 (cv 0.001828, identity 0.007043) | corr_delta=+0.960 sign@1e-3=0.956 | R_corr=+0.557 R_sign=0.663 | best_epoch=312 23s
+[SV/R seed=1] holdout L1=0.001725 (cv 0.001828, identity 0.007043) | corr_delta=+0.961 sign@1e-3=0.958 | R_corr=+0.571 R_sign=0.661 | best_epoch=377 24s
+[SV/R seed=2] holdout L1=0.001715 (cv 0.001828, identity 0.007043) | corr_delta=+0.960 sign@1e-3=0.958 | R_corr=+0.563 R_sign=0.665 | best_epoch=377 24s
+[SV/delta seed=0] holdout L1=0.001823 (cv 0.001828, identity 0.007043) | corr_delta=+0.960 sign@1e-3=0.955 | R_corr=+0.557 R_sign=0.652 | best_epoch=393 26s
+[SV/delta seed=1] holdout L1=0.001768 (cv 0.001828, identity 0.007043) | corr_delta=+0.960 sign@1e-3=0.957 | R_corr=+0.556 R_sign=0.660 | best_epoch=386 26s
+[SV/delta seed=2] holdout L1=0.001769 (cv 0.001828, identity 0.007043) | corr_delta=+0.959 sign@1e-3=0.958 | R_corr=+0.551 R_sign=0.658 | best_epoch=359 27s
+[S/R seed=0] holdout L1=0.002539 (cv 0.001828, identity 0.007043) | corr_delta=+0.942 sign@1e-3=0.938 | R_corr=+0.210 R_sign=0.570 | best_epoch=159 13s
+[S/R seed=1] holdout L1=0.002397 (cv 0.001828, identity 0.007043) | corr_delta=+0.943 sign@1e-3=0.942 | R_corr=+0.219 R_sign=0.575 | best_epoch=190 15s
+[S/R seed=2] holdout L1=0.002166 (cv 0.001828, identity 0.007043) | corr_delta=+0.947 sign@1e-3=0.949 | R_corr=+0.265 R_sign=0.579 | best_epoch=344 24s
+[S/delta seed=0] holdout L1=0.006494 (cv 0.001828, identity 0.007043) | corr_delta=+0.634 sign@1e-3=0.624 | R_corr=+0.212 R_sign=0.586 | best_epoch=229 18s
+[S/delta seed=1] holdout L1=0.006531 (cv 0.001828, identity 0.007043) | corr_delta=+0.627 sign@1e-3=0.628 | R_corr=+0.209 R_sign=0.583 | best_epoch=212 17s
+[S/delta seed=2] holdout L1=0.006614 (cv 0.001828, identity 0.007043) | corr_delta=+0.636 sign@1e-3=0.618 | R_corr=+0.219 R_sign=0.584 | best_epoch=373 27s
+[V/R seed=0] holdout L1=0.001789 (cv 0.001828, identity 0.007043) | corr_delta=+0.955 sign@1e-3=0.955 | R_corr=+0.461 R_sign=0.625 | best_epoch=202 16s
+[V/R seed=1] holdout L1=0.001759 (cv 0.001828, identity 0.007043) | corr_delta=+0.955 sign@1e-3=0.956 | R_corr=+0.474 R_sign=0.632 | best_epoch=245 19s
+[V/R seed=2] holdout L1=0.001733 (cv 0.001828, identity 0.007043) | corr_delta=+0.955 sign@1e-3=0.957 | R_corr=+0.472 R_sign=0.625 | best_epoch=299 22s
+[V/delta seed=0] holdout L1=0.001815 (cv 0.001828, identity 0.007043) | corr_delta=+0.954 sign@1e-3=0.955 | R_corr=+0.458 R_sign=0.623 | best_epoch=265 18s
+[V/delta seed=1] holdout L1=0.001801 (cv 0.001828, identity 0.007043) | corr_delta=+0.954 sign@1e-3=0.955 | R_corr=+0.460 R_sign=0.619 | best_epoch=371 24s
+[V/delta seed=2] holdout L1=0.001820 (cv 0.001828, identity 0.007043) | corr_delta=+0.953 sign@1e-3=0.956 | R_corr=+0.441 R_sign=0.614 | best_epoch=262 19s
+[pilot200] fixed epoch budget = 377 (median best epoch of full-frame SV)
+[pilot200 seed=0] holdout L1=0.023284 | R_corr=+0.033 (trained on 200 frames / 80 episodes)
+[pilot200 seed=1] holdout L1=0.028404 | R_corr=-0.000 (trained on 200 frames / 80 episodes)
+[pilot200 seed=2] holdout L1=0.022758 | R_corr=+0.014 (trained on 200 frames / 80 episodes)
+wrote /home/dgut/pusht_runtime/r7_verify_r7_corrected_verified_20261020T054929Z/state_mlp.json
