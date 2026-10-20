@@ -1,0 +1,27 @@
+### step=env_snapshot
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python tools/r9_env_snapshot.py /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/environment.json
+### start=2026-10-20T14:05:24Z
+{
+ "git": {
+  "head": "52422372e5eacdcd0ee841ef2b91bdc5a71066c7",
+  "branch": "experiment/r9-freeze-64train",
+  "describe": "5242237",
+  "status_porcelain": [
+   "?? scripts/r9_gate_a.sh",
+   "?? tools/r9_env_snapshot.py"
+  ]
+ },
+ "packages": {
+  "torch": "2.4.1+cu121",
+  "transformers": "4.40.2",
+  "peft": "0.11.1",
+  "h5py": "3.16.0",
+  "numpy": "1.26.4",
+  "PIL": "12.3.0",
+  "timm": "0.9.10"
+ }
+}
+n_episodes 100 | episode_list_sha256 eb00a40d20e31c0b | bounds 5c567abcd5e6afa9 | split 2654e31912fd04ca
+-> /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/environment.json
+### exit=0

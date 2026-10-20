@@ -1,0 +1,39 @@
+### step=test_vla_adapter
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python tests/test_r8_vla_adapter.py
+### start=2026-10-20T14:05:30Z
+test_frame0_and_frame1_boundaries (__main__.TestFeatureLayout) ... ok
+test_online_equals_offline_and_env_isolation (__main__.TestFeatureLayout) ... ok
+test_shape_and_boundary_rules (__main__.TestFeatureLayout) ... ok
+test_frozen_contract_is_consistent (__main__.TestMetadata) ... ok
+test_roundtrip_and_fail_closed (__main__.TestMetadata) ... ok
+test_real_projector_width_and_params (__main__.TestProjectorClass) ... /home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/wandb/analytics/sentry.py:90: SentryHubDeprecationWarning: `sentry_sdk.Hub` is deprecated and will be removed in a future major release. Please consult our 1.x to 2.x migration guide for details on how to migrate `Hub` usage to the new API: https://docs.sentry.io/platforms/python/migration/1.x-to-2.x
+  self.hub = sentry_sdk.Hub(client)
+2026-10-20 14:05:37.709817: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-20 14:05:37.777029: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+ok
+test_wrong_width_state_dict_rejected (__main__.TestProjectorClass) ... ok
+test_real_frames_no_leak_and_finite (__main__.TestRealData) ... ok
+test_clip_to_bounds (__main__.TestTargetAndCommand) ... ok
+test_codec_bound (__main__.TestTargetAndCommand) ... ok
+test_gripper_policy_and_cv_requirement (__main__.TestTargetAndCommand) ... ok
+test_residual_target_and_exact_command (__main__.TestTargetAndCommand) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 8.871s
+
+OK
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+### exit=0

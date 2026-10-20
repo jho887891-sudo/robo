@@ -1,0 +1,37 @@
+### step=test_contract
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python tests/test_r8_contract.py
+### start=2026-10-20T14:05:41Z
+test_boundary_flags (__main__.TestBoundaryRules) ... ok
+test_buffer_reproduces_offline_vectors (__main__.TestBoundaryRules) ... ok
+test_env_isolation (__main__.TestBoundaryRules) ... ok
+test_frame_two_has_zero_acceleration (__main__.TestBoundaryRules) ... ok
+test_reset_restores_cold_start (__main__.TestBoundaryRules) ... ok
+test_checklist_covers_required_items (__main__.TestCheckpointContract) ... ok
+test_legacy_14_and_28_still_resolve (__main__.TestCheckpointContract) ... ok
+test_projector_width_mismatch_rejected (__main__.TestCheckpointContract) ... ok
+test_r8_requires_full_metadata (__main__.TestCheckpointContract) ... ok
+test_unsupported_legacy_dim_rejected (__main__.TestCheckpointContract) ... ok
+test_command_after_decoding_stays_finite (__main__.TestCodecRoundTrip) ... ok
+test_floor_encoding_bounded_by_one_step (__main__.TestCodecRoundTrip) ... ok
+test_nearest_bin_is_the_lower_bound (__main__.TestCodecRoundTrip) ... ok
+test_buffer_never_uses_predictions (__main__.TestNoFutureLeak) ... ok
+test_future_frames_do_not_change_input_or_target (__main__.TestNoFutureLeak) ... ok
+test_bounded_and_finite (__main__.TestProprioShape) ... ok
+test_dim_42_and_layout (__main__.TestProprioShape) ... ok
+test_requires_previous_state (__main__.TestProprioShape) ... ok
+test_action_target_module_unchanged (__main__.TestRealHDF5Batch) ... ok
+test_deploy_buffer_matches_training_vectors_on_real_episode (__main__.TestRealHDF5Batch) ... ok
+test_minimal_three_frame_batch (__main__.TestRealHDF5Batch) ... ok
+test_no_leak_on_real_episode (__main__.TestRealHDF5Batch) ... ok
+test_quantiles_from_train_only_on_R (__main__.TestRealHDF5Batch) ... ok
+test_command_inverts_target_exactly (__main__.TestVelocityResidualTarget) ... ok
+test_modes_are_distinct (__main__.TestVelocityResidualTarget) ... ok
+test_target_equals_delta_minus_velocity (__main__.TestVelocityResidualTarget) ... ok
+test_unknown_mode_rejected (__main__.TestVelocityResidualTarget) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.249s
+
+OK
+### exit=0

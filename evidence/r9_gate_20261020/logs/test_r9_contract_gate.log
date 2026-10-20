@@ -1,0 +1,17 @@
+[PASS] split_identity                                       
+[PASS] quantiles_from_64_train                              {"max_abs_diff_q01": 3.0174851506359346e-09, "max_abs_diff_q99": 9.536742145987986e-09, "n_rows_64": 19127, "material_change_vs_80_episode_fit_max_rel": 0.2929057662709994}
+[PASS] dtype_stability                                      
+[PASS] scales_match_A                                       {"v": 0.0, "a": 0.0}
+[PASS] zero_centred                                         
+[PASS] codec_roundtrip                                      {"max_abs_error_in_range": 0.00017164647579193115, "one_bin_step_max": 0.00017185891920235008, "distinguishable_motion_colliding_with_zero_bin": 0, "out_of_range_fraction": 0.018026331979820353}
+[PASS] no_future_leak                                       
+[PASS] provenance                                           
+[PASS] detects_dev_episode_in_fit                           {"injected": "episode_0000000.hdf5"}
+[PASS] detects_80_episode_provenance                        
+[PASS] detects_wrong_quantiles                              
+[PASS] detects_degenerate_bins                              {"max_abs_error_in_range": 0.0, "one_bin_step_max": 7.30449121327803e-12}
+[PASS] detects_missing_target_mode                          
+[PASS] detects_wrong_gripper_dims                           
+[PASS] detects_legacy_normalisation                         
+
+15/15 checks passed

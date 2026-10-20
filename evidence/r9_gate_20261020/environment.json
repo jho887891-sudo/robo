@@ -1,0 +1,65 @@
+{
+ "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+ "executable": "/home/dgut/pusht_runtime/venv_oft/bin/python",
+ "platform": "Linux-5.15.0-191-generic-x86_64-with-glibc2.35",
+ "repo": "/home/T7/ojh/robot_actual/r9_A",
+ "git": {
+  "head": "52422372e5eacdcd0ee841ef2b91bdc5a71066c7",
+  "branch": "experiment/r9-freeze-64train",
+  "describe": "5242237",
+  "status_porcelain": [
+   "?? scripts/r9_gate_a.sh",
+   "?? tools/r9_env_snapshot.py"
+  ]
+ },
+ "packages": {
+  "torch": "2.4.1+cu121",
+  "transformers": "4.40.2",
+  "peft": "0.11.1",
+  "h5py": "3.16.0",
+  "numpy": "1.26.4",
+  "PIL": "12.3.0",
+  "timm": "0.9.10"
+ },
+ "gpu": {
+  "nvidia_smi": {
+   "cmd": [
+    "nvidia-smi",
+    "--query-gpu=name,memory.total,memory.used,driver_version",
+    "--format=csv,noheader"
+   ],
+   "rc": 0,
+   "stdout": "NVIDIA RTX A6000, 49140 MiB, 24414 MiB, 580.178.04",
+   "stderr": ""
+  },
+  "compute_apps": {
+   "cmd": [
+    "nvidia-smi",
+    "--query-compute-apps=pid,used_memory",
+    "--format=csv,noheader"
+   ],
+   "rc": 0,
+   "stdout": "3111650, 2486 MiB\n3451404, 5604 MiB\n3469786, 16200 MiB",
+   "stderr": ""
+  }
+ },
+ "data": {
+  "hdf5_dir": "/home/T7/ojh/robot_actual/data/data/hdf5/push_T/arx_x5/data",
+  "n_episodes": 100,
+  "episodes_first": [
+   "episode_0000000.hdf5",
+   "episode_0000001.hdf5",
+   "episode_0000002.hdf5"
+  ],
+  "episodes_last": [
+   "episode_0000097.hdf5",
+   "episode_0000098.hdf5",
+   "episode_0000099.hdf5"
+  ],
+  "episode_list_sha256": "eb00a40d20e31c0bd1af9a307ebc8e40b2cc3f6ea6c8a0d19b8d354ada4b7207",
+  "bounds_path": "/home/dgut/pusht_runtime/push_T_bounds.npz",
+  "bounds_sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+  "split_path": "/home/T7/ojh/robot_actual/r9_A/data/split80.json",
+  "split_sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2"
+ }
+}

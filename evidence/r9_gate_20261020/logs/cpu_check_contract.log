@@ -1,0 +1,18 @@
+### step=cpu_check_contract
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python diagnostics/r8_smoke.py --check-contract --norm-contract /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/frozen_contract_64train.json --out /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/cpu_contract
+### start=2026-10-20T14:05:42Z
+[contract] NormalizationContract(mode=signed_motion, quantile=0.99) | source: /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/frozen_contract_64train.json
+[PASS] feature_shape_frame_30                         {"shape": [42], "min": -1.0, "max": 1.0}
+[PASS] feature_shape_frame_70                         {"shape": [42], "min": -1.0, "max": 1.0}
+[PASS] zero_motion_is_zero_in_motion_slots            {"motion_slots_max_abs": 0.0}
+[PASS] deploy_buffer_matches_offline_features         
+[PASS] command_reconstruction_exact                   {"max_abs": 1.7881403441277754e-09}
+[PASS] decoded_residual_within_one_step               {"max_abs": 0.00016800127923488617, "step_mean": 0.00012774932838510722}
+[PASS] gripper_policy_applied                         {"excluded_dims": [6, 13]}
+[PASS] command_clipped_to_joint_bounds                
+[PASS] metadata_roundtrip                             
+[PASS] metadata_fail_closed_on_wrong_dim              {"raised": "ValueError"}
+
+CPU contract checks: PASS
+### exit=0

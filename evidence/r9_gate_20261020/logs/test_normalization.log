@@ -1,0 +1,27 @@
+### step=test_normalization
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python tests/test_r8_normalization.py
+### start=2026-10-20T14:05:30Z
+test_legacy_matches_production_contract (__main__.TestLegacyParity) ... ok
+test_legacy_zero_motion_is_not_zero_where_bounds_exclude_zero (__main__.TestLegacyParity) ... ok
+test_fail_closed (__main__.TestMetadata) ... ok
+test_roundtrip (__main__.TestMetadata) ... ok
+test_five_dimensions_lose_negative_magnitude_under_legacy (__main__.TestRealDataLoss) ... ok
+test_legacy_clips_about_a_third_of_motion_entries (__main__.TestRealDataLoss) ... ok
+test_signed_clipping_is_only_the_quantile_tail (__main__.TestRealDataLoss) ... ok
+test_signed_preserves_sign_on_real_data (__main__.TestRealDataLoss) ... ok
+test_fit_rejects_too_few_rows_and_bad_quantile (__main__.TestScaleFitting) ... ok
+test_missing_scales_rejected (__main__.TestScaleFitting) ... ok
+test_scales_are_train_only_quantiles (__main__.TestScaleFitting) ... ok
+test_bound_counterexample_from_the_audit (__main__.TestSignedMotion)
+bounds [0,1]: legacy maps -0.01 and 0.00 to the same -1; signed does not. ... ok
+test_no_hidden_state_future_independence (__main__.TestSignedMotion) ... ok
+test_sign_and_magnitude_preserved_inside_range (__main__.TestSignedMotion) ... ok
+test_values_are_bounded_and_finite (__main__.TestSignedMotion) ... ok
+test_zero_motion_maps_to_zero (__main__.TestSignedMotion) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.287s
+
+OK
+### exit=0

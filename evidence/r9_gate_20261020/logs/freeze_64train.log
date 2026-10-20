@@ -1,0 +1,9 @@
+### step=freeze_64train
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python tools/make_frozen_contract.py --contracts evidence/r8_vla_42d_smoke_20261020/frozen_norm_contracts.json --scheme B99_signed --episodes 0 --out /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/frozen_contract_64train.json
+### start=2026-10-20T14:05:42Z
+frozen contract -> /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/frozen_contract_64train.json
+  normalization_mode: signed_motion quantile: 0.99
+  proprio_dim: 42 target: velocity_residual
+  q01[:4]: [-0.016690000891685486, -0.021862000226974487, -0.01669500023126602, -0.01649400033056736]  q99[:4]: [0.013264999724924564, 0.02196200005710125, 0.017308000475168228, 0.01662999950349331]
+### exit=0

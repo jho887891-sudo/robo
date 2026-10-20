@@ -1,0 +1,13 @@
+### step=fail_closed_old80
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python diagnostics/r8_smoke.py --check-contract --norm-contract evidence/r8_vla_42d_smoke_20261020/frozen_r8_contract.json --out /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/cpu_old80_rejected
+### start=2026-10-20T14:05:43Z
+Traceback (most recent call last):
+  File "/home/T7/ojh/robot_actual/r9_A/diagnostics/r8_smoke.py", line 497, in <module>
+    sys.exit(main())
+  File "/home/T7/ojh/robot_actual/r9_A/diagnostics/r8_smoke.py", line 475, in main
+    q01, q99 = frozen_quantiles(meta)
+  File "/home/T7/ojh/robot_actual/r9_A/diagnostics/r8_smoke.py", line 110, in frozen_quantiles
+    raise ValueError("R8 frozen target quantiles require 64 TRAIN / 16 DEV; regenerate contract")
+ValueError: R8 frozen target quantiles require 64 TRAIN / 16 DEV; regenerate contract
+### exit=1

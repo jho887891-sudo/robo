@@ -1,0 +1,11 @@
+env_snapshot	/home/dgut/pusht_runtime/venv_oft/bin/python tools/r9_env_snapshot.py /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/environment.json	0
+py_compile	/home/dgut/pusht_runtime/venv_oft/bin/python -m py_compile tools/make_frozen_contract.py diagnostics/r8_smoke.py diagnostics/r6_data.py training/r7_state_mlp.py	0
+test_meta_audit	/home/dgut/pusht_runtime/venv_oft/bin/python tests/test_r8_frozen_metadata_audit.py	0
+test_normalization	/home/dgut/pusht_runtime/venv_oft/bin/python tests/test_r8_normalization.py	0
+test_vla_adapter	/home/dgut/pusht_runtime/venv_oft/bin/python tests/test_r8_vla_adapter.py	0
+test_contract	/home/dgut/pusht_runtime/venv_oft/bin/python tests/test_r8_contract.py	0
+sha_before_old80	sha256sum evidence/r8_vla_42d_smoke_20261020/frozen_r8_contract.json	0
+freeze_64train	/home/dgut/pusht_runtime/venv_oft/bin/python tools/make_frozen_contract.py --contracts evidence/r8_vla_42d_smoke_20261020/frozen_norm_contracts.json --scheme B99_signed --episodes 0 --out /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/frozen_contract_64train.json	0
+cpu_check_contract	/home/dgut/pusht_runtime/venv_oft/bin/python diagnostics/r8_smoke.py --check-contract --norm-contract /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/frozen_contract_64train.json --out /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/cpu_contract	0
+fail_closed_old80	/home/dgut/pusht_runtime/venv_oft/bin/python diagnostics/r8_smoke.py --check-contract --norm-contract evidence/r8_vla_42d_smoke_20261020/frozen_r8_contract.json --out /home/dgut/pusht_runtime/r9_gate_20261020T140524Z/cpu_old80_rejected	1
+sha_after_old80	sha256sum evidence/r8_vla_42d_smoke_20261020/frozen_r8_contract.json	0

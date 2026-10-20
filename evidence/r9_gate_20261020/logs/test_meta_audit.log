@@ -1,0 +1,16 @@
+### step=test_meta_audit
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python tests/test_r8_frozen_metadata_audit.py
+### start=2026-10-20T14:05:29Z
+test_64_train_16_dev_never_80 (__main__.TestFrozenR8QuantileProvenance) ... ok
+test_80_episode_quantiles_fail_closed (__main__.TestFrozenR8QuantileProvenance) ... ok
+test_kv_harness_uses_shared_prefix (__main__.TestFrozenR8QuantileProvenance) ... ok
+test_limit_cannot_reintroduce_dev (__main__.TestFrozenR8QuantileProvenance) ... ok
+test_missing_provenance_and_degenerate_bins_fail (__main__.TestFrozenR8QuantileProvenance) ... ok
+test_quantiles_are_taken_from_metadata (__main__.TestFrozenR8QuantileProvenance) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.036s
+
+OK
+### exit=0

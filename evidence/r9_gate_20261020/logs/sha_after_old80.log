@@ -1,0 +1,6 @@
+### step=sha_after_old80
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: sha256sum evidence/r8_vla_42d_smoke_20261020/frozen_r8_contract.json
+### start=2026-10-20T14:05:43Z
+b680d702ca95ce95c8a7aba62c29c1525c424b4ab7a81cd2151ea02d5e1d8862  evidence/r8_vla_42d_smoke_20261020/frozen_r8_contract.json
+### exit=0

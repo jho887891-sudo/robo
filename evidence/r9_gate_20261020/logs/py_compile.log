@@ -1,0 +1,5 @@
+### step=py_compile
+### cwd=/home/T7/ojh/robot_actual/r9_A
+### cmd: /home/dgut/pusht_runtime/venv_oft/bin/python -m py_compile tools/make_frozen_contract.py diagnostics/r8_smoke.py diagnostics/r6_data.py training/r7_state_mlp.py
+### start=2026-10-20T14:05:29Z
+### exit=0
