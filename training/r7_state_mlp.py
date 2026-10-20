@@ -126,7 +126,7 @@ def make_mlp(n_in, hidden, seed, torch):
 
 
 def train_mlp(Xtr, Rtr, Xdev, Rdev, seed, hidden=(128, 128), epochs=400, lr=1e-3,
-              batch=512, patience=40, torch=None):
+              batch=512, patience=40, torch=None, select_best=True):
     """Full-batch-ish Adam on physical L1(R_hat, R); early stop on dev L1."""
     torch.set_num_threads(max(1, min(8, os.cpu_count() or 1)))
     mu_x, sd_x = Xtr.mean(0), Xtr.std(0) + 1e-8
@@ -163,9 +163,14 @@ def train_mlp(Xtr, Rtr, Xdev, Rdev, seed, hidden=(128, 128), epochs=400, lr=1e-3
                     "state": {k: v.clone() for k, v in net.state_dict().items()}}
         elif ep - best["epoch"] >= patience:
             break
-    net.load_state_dict(best["state"])
+    if select_best:
+        net.load_state_dict(best["state"])
+    # The 200-frame ablation is a fixed-budget experiment, not training
+    # checkpoint selection against the same 200 training frames.
     net.eval()
-    return net, {"best_epoch": best["epoch"], "dev_best_L1": best["dev_L1"],
+    return net, {"best_epoch": best["epoch"] if select_best else len(hist),
+                 "checkpoint_selection": "dev_best" if select_best else "last",
+                 "dev_best_L1": best["dev_L1"],
                  "x_mean": mu_x, "x_std": sd_x, "history": hist}
 
 
@@ -344,7 +349,7 @@ def main():
         for seed in args.seeds:
             net, stats = train_mlp(Xp, Rp, Xp, Rp, seed, tuple(args.hidden),
                                    fixed_epochs, args.lr, min(args.batch, len(Xp)),
-                                   10 ** 9, torch=torch)
+                                   10 ** 9, torch=torch, select_best=False)
             out_hat = predict(net, Xva, stats, torch).astype(np.float32)
             # The pilot is trained on R even if the last grid target is
             # "delta": never use the stale outer loop variable `tgt` here.
@@ -354,6 +359,14 @@ def main():
             ev["seed"] = int(seed)
             ev["n_train_frames"] = int(len(Xp))
             ev["episodes_covered"] = int(len(set(pilot_blob["episode"].tolist())))
+            ev["checkpoint_selection"] = stats["checkpoint_selection"]
+            ev["fixed_epochs_executed"] = int(len(stats["history"]))
+            side = os.path.join(os.path.dirname(os.path.abspath(args.out)),
+                                "pred_pilot200_R_%d.npz" % seed)
+            np.savez_compressed(side, R_hat=R_hat, R_gt=R_gt, cmd=cmd,
+                                gt=val_blob["A"], state=val_blob["S"],
+                                V=val_blob["V"], episode=val_blob["episode"],
+                                frame=val_blob["frame"])
             result["pilot200"].setdefault("per_seed", []).append(ev)
             print("[pilot200 seed=%d] holdout L1=%.6f | R_corr=%+.3f (trained on %d frames / %d episodes)"
                   % (seed, ev["L1"], ev["correction"]["corr"] or float("nan"),
