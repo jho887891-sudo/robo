@@ -1,0 +1,148 @@
+{
+ "grad_log": [
+  {
+   "stage": "train",
+   "step": 1,
+   "loss": 13.879014015197754,
+   "tok_acc": 0.0,
+   "gnorm": 49.844818115234375,
+   "proj_grad_current_slot": 0.01583714410662651,
+   "proj_grad_history_slot": 0.01583714410662651,
+   "mem_gb": 18.06626048,
+   "elapsed_s": 1.6
+  },
+  {
+   "stage": "train",
+   "step": 25,
+   "loss": 2.68758487701416,
+   "tok_acc": 0.5714285714285714,
+   "gnorm": 2.453007698059082,
+   "proj_grad_current_slot": 0.0015661328798159957,
+   "proj_grad_history_slot": 0.0015661328798159957,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 28.9
+  },
+  {
+   "stage": "train",
+   "step": 50,
+   "loss": 1.9435890913009644,
+   "tok_acc": 0.6428571428571429,
+   "gnorm": 3.536278247833252,
+   "proj_grad_current_slot": 0.0025608332362025976,
+   "proj_grad_history_slot": 0.0025608332362025976,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 57.8
+  },
+  {
+   "stage": "train",
+   "step": 75,
+   "loss": 1.99774968624115,
+   "tok_acc": 0.5714285714285714,
+   "gnorm": 1.6407201290130615,
+   "proj_grad_current_slot": 0.004223990254104137,
+   "proj_grad_history_slot": 0.004223990254104137,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 86.6
+  },
+  {
+   "stage": "train",
+   "step": 100,
+   "loss": 2.134096384048462,
+   "tok_acc": 0.5714285714285714,
+   "gnorm": 2.1686835289001465,
+   "proj_grad_current_slot": 0.0015320430975407362,
+   "proj_grad_history_slot": 0.0015320430975407362,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 115.3
+  },
+  {
+   "stage": "train",
+   "step": 125,
+   "loss": 1.591188669204712,
+   "tok_acc": 0.6428571428571429,
+   "gnorm": 1.626244306564331,
+   "proj_grad_current_slot": 0.004794612992554903,
+   "proj_grad_history_slot": 0.004794612992554903,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 144.0
+  },
+  {
+   "stage": "train",
+   "step": 150,
+   "loss": 2.365267515182495,
+   "tok_acc": 0.5,
+   "gnorm": 1.4927008152008057,
+   "proj_grad_current_slot": 0.004804716911166906,
+   "proj_grad_history_slot": 0.004804716911166906,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 172.6
+  },
+  {
+   "stage": "train",
+   "step": 175,
+   "loss": 2.760451555252075,
+   "tok_acc": 0.42857142857142855,
+   "gnorm": 3.568915605545044,
+   "proj_grad_current_slot": 0.002238647313788533,
+   "proj_grad_history_slot": 0.002238647313788533,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 301.8
+  },
+  {
+   "stage": "train",
+   "step": 200,
+   "loss": 1.731478214263916,
+   "tok_acc": 0.6428571428571429,
+   "gnorm": 1.6767951250076294,
+   "proj_grad_current_slot": 0.002823253395035863,
+   "proj_grad_history_slot": 0.002823253395035863,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 331.2
+  },
+  {
+   "stage": "train",
+   "step": 225,
+   "loss": 2.1302812099456787,
+   "tok_acc": 0.5714285714285714,
+   "gnorm": 1.5133930444717407,
+   "proj_grad_current_slot": 0.0011398735223338008,
+   "proj_grad_history_slot": 0.0011398735223338008,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 359.6
+  },
+  {
+   "stage": "train",
+   "step": 250,
+   "loss": 1.5107730627059937,
+   "tok_acc": 0.6428571428571429,
+   "gnorm": 7.5256781578063965,
+   "proj_grad_current_slot": 0.0027342522516846657,
+   "proj_grad_history_slot": 0.0027342522516846657,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 388.3
+  },
+  {
+   "stage": "train",
+   "step": 275,
+   "loss": 1.578636646270752,
+   "tok_acc": 0.6428571428571429,
+   "gnorm": 3.21915340423584,
+   "proj_grad_current_slot": 0.002398874843493104,
+   "proj_grad_history_slot": 0.002398874843493104,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 417.7
+  },
+  {
+   "stage": "train",
+   "step": 300,
+   "loss": 1.7994087934494019,
+   "tok_acc": 0.5,
+   "gnorm": 7.207808017730713,
+   "proj_grad_current_slot": 0.0024998944718390703,
+   "proj_grad_history_slot": 0.0024998944718390703,
+   "mem_gb": 18.655843328,
+   "elapsed_s": 446.4
+  }
+ ],
+ "history_slot_gradient_seen": true
+}

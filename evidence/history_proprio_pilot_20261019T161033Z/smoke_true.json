@@ -1,0 +1,361 @@
+{
+ "history_mode": "true",
+ "result": "PASS",
+ "checks": [
+  {
+   "check": "S1a_forward_loss_finite",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "loss": 16.45623207092285
+   }
+  },
+  {
+   "check": "S1b_projector_grads_nonzero",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "fc1.weight": 1.3317391872406006,
+    "fc1.bias": 0.4171990752220154,
+    "fc2.weight": 16.393484115600586,
+    "fc2.bias": 1.2888576984405518
+   }
+  },
+  {
+   "check": "S1c_lora_grads_nonzero",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "n_lora_tensors": 852,
+    "max_norm": 36.0
+   }
+  },
+  {
+   "check": "S1d_both_proprio_slots_receive_gradient",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "grad_current_slot": 0.9538564085960388,
+    "grad_history_slot": 0.9293476939201355
+   }
+  },
+  {
+   "check": "S2_history_slot_reaches_action_logits",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "sweep": [
+     {
+      "amplitude": 0.1,
+      "max_abs_delta_logit": 0.203125,
+      "mean_abs_delta_logit": 0.042637526988983154,
+      "tokens_changed": 0,
+      "tokens": [
+       110,
+       127,
+       149,
+       184,
+       143,
+       116,
+       0,
+       0,
+       128,
+       0,
+       114,
+       119,
+       0,
+       128
+      ]
+     },
+     {
+      "amplitude": 0.35,
+      "max_abs_delta_logit": 0.21875,
+      "mean_abs_delta_logit": 0.05125969648361206,
+      "tokens_changed": 0,
+      "tokens": [
+       110,
+       127,
+       149,
+       184,
+       143,
+       116,
+       0,
+       0,
+       128,
+       0,
+       114,
+       119,
+       0,
+       128
+      ]
+     },
+     {
+      "amplitude": 1.0,
+      "max_abs_delta_logit": 0.25,
+      "mean_abs_delta_logit": 0.07322379946708679,
+      "tokens_changed": 0,
+      "tokens": [
+       110,
+       127,
+       149,
+       184,
+       143,
+       116,
+       0,
+       0,
+       128,
+       0,
+       114,
+       119,
+       0,
+       128
+      ]
+     }
+    ],
+    "gate_max_abs_delta_logit": 0.05
+   }
+  },
+  {
+   "check": "S3_current_slot_reaches_action_logits",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "sweep": [
+     {
+      "amplitude": 0.1,
+      "max_abs_delta_logit": 0.16796875,
+      "mean_abs_delta_logit": 0.04368370771408081,
+      "tokens_changed": 0,
+      "tokens": [
+       110,
+       127,
+       149,
+       184,
+       143,
+       116,
+       0,
+       0,
+       128,
+       0,
+       114,
+       119,
+       0,
+       128
+      ]
+     },
+     {
+      "amplitude": 0.35,
+      "max_abs_delta_logit": 0.203125,
+      "mean_abs_delta_logit": 0.04741877317428589,
+      "tokens_changed": 0,
+      "tokens": [
+       110,
+       127,
+       149,
+       184,
+       143,
+       116,
+       0,
+       0,
+       128,
+       0,
+       114,
+       119,
+       0,
+       128
+      ]
+     },
+     {
+      "amplitude": 1.0,
+      "max_abs_delta_logit": 0.25,
+      "mean_abs_delta_logit": 0.0758163332939148,
+      "tokens_changed": 6,
+      "tokens": [
+       110,
+       127,
+       149,
+       184,
+       143,
+       147,
+       0,
+       0,
+       128,
+       128,
+       127,
+       132,
+       128,
+       0
+      ]
+     }
+    ],
+    "gate_max_abs_delta_logit": 0.05
+   }
+  },
+  {
+   "check": "S7a_reference_14d_interface_sensitivity",
+   "result": "PASS",
+   "informational": true,
+   "detail": {
+    "sweep": [
+     {
+      "amplitude": 0.1,
+      "max_abs_delta_logit": 0.1875,
+      "tokens_changed": 0
+     },
+     {
+      "amplitude": 0.35,
+      "max_abs_delta_logit": 0.25,
+      "tokens_changed": 6
+     },
+     {
+      "amplitude": 1.0,
+      "max_abs_delta_logit": 0.3525390625,
+      "tokens_changed": 5
+     }
+    ],
+    "note": "same measurement on the R2-R5 14D interface"
+   }
+  },
+  {
+   "check": "S7b_reference_visual_sensitivity",
+   "result": "PASS",
+   "informational": true,
+   "detail": {
+    "image_noise_0.05": {
+     "max_abs_delta_logit": 6.0,
+     "tokens_changed": 10
+    },
+    "images_zeroed": {
+     "max_abs_delta_logit": 9.953125,
+     "tokens_changed": 11
+    }
+   }
+  },
+  {
+   "check": "S7c_reference_top1_confidence",
+   "result": "PASS",
+   "informational": true,
+   "detail": {
+    "per_dim_top1_prob": [
+     0.2872,
+     0.9815,
+     0.8165,
+     0.7493,
+     0.9172,
+     0.371,
+     0.9997,
+     0.6673,
+     0.893,
+     0.4639,
+     0.3342,
+     0.9548,
+     0.9828,
+     0.934
+    ],
+    "min": 0.2871887683868408,
+    "mean": 0.7394556850194931
+   }
+  },
+  {
+   "check": "S4_no_future_state_leak",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "frame_30": {
+     "input_and_target_identical": true
+    },
+    "frame_120": {
+     "input_and_target_identical": true
+    },
+    "frame_240": {
+     "input_and_target_identical": true
+    }
+   }
+  },
+  {
+   "check": "S5_kv_equals_full_sequence_argmax",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "matching_dims": 14,
+    "kv": [
+     110,
+     127,
+     149,
+     184,
+     143,
+     116,
+     0,
+     0,
+     128,
+     0,
+     114,
+     119,
+     0,
+     128
+    ],
+    "full": [
+     110,
+     127,
+     149,
+     184,
+     143,
+     116,
+     0,
+     0,
+     128,
+     0,
+     114,
+     119,
+     0,
+     128
+    ]
+   }
+  },
+  {
+   "check": "S6a_generation_deterministic",
+   "result": "PASS",
+   "informational": false,
+   "detail": null
+  },
+  {
+   "check": "S6b_logits_finite",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "logits_shape": [
+     1,
+     820,
+     32064
+    ]
+   }
+  },
+  {
+   "check": "S6c_shape_contract",
+   "result": "PASS",
+   "informational": false,
+   "detail": {
+    "proprio": [
+     1,
+     28
+    ],
+    "projector_proprio_dim": 28
+   }
+  }
+ ],
+ "frames": [
+  30,
+  120,
+  240
+ ],
+ "episode": "episode_0000000.hdf5",
+ "projector_params_28d": 16900096,
+ "projector_params_14d": 16842752,
+ "projector_param_delta": 57344,
+ "gpu_free_gb_at_start": 9.048752128,
+ "grad_current_slot": 0.9538564085960388,
+ "grad_history_slot": 0.9293476939201355,
+ "max_abs_delta_logit_history_slot": 0.25,
+ "max_abs_delta_logit_current_slot": 0.25,
+ "torch": "2.4.1+cu121"
+}

@@ -1,0 +1,19 @@
+train frames 25393 | val frames 6711 (kNN on 2000)
+  per-dim linear done
+  knn_1 done -> 0.002795
+  knn_5 done -> 0.002206
+  knn_10 done -> 0.002170
+  knn_25 done -> 0.002229
+  quadratic ridge done
+baselines on kNN set: hold=0.007017  copy_V=0.001855
+  per_dim_linear_all_val     0.001855  (x copy_V = 1.000)
+  per_dim_linear_knn_set     0.001878  (x copy_V = 1.013)
+  quadratic_ridge            0.001989  (x copy_V = 1.072)
+  joint_linear_14x14         0.002020  (x copy_V = 1.089)
+  knn_10                     0.002170  (x copy_V = 1.170)
+  knn_5                      0.002206  (x copy_V = 1.189)
+  knn_25                     0.002229  (x copy_V = 1.202)
+  knn_1                      0.002795  (x copy_V = 1.507)
+best=per_dim_linear_all_val 0.001855 -> no fitted history-only model beats copying the past velocity
+motion-rich subset n=2648 (39.5%): hold=0.013958 cv=0.003282 knn10=0.003883
+wrote /tmp/r6_ceiling.json

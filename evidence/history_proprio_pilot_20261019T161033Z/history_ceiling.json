@@ -1,0 +1,33 @@
+{
+ "n_train_frames": 25393,
+ "n_val_frames": 6711,
+ "n_knn_eval_frames": 2000,
+ "baselines": {
+  "hold_state_zero_delta": 0.007017201690567662,
+  "constant_velocity_copy_V": 0.001854576225534133,
+  "hold_state_zero_delta_all_val": 0.007043121059249413,
+  "constant_velocity_copy_V_all_val": 0.0018283173722575886
+ },
+ "models": {
+  "per_dim_linear_all_val": 0.001854657175156663,
+  "per_dim_linear_knn_set": 0.0018783835519763652,
+  "knn_1": 0.002794854317642948,
+  "knn_5": 0.0022056129095106933,
+  "knn_10": 0.002170192084495191,
+  "knn_25": 0.0022285214197710055,
+  "quadratic_ridge": 0.0019885296626962973,
+  "joint_linear_14x14": 0.0020200376128224292
+ },
+ "best_model": "per_dim_linear_all_val",
+ "best_model_L1": 0.001854657175156663,
+ "constant_velocity_L1_knn_set": 0.001854576225534133,
+ "best_vs_copy_velocity_ratio": 1.0000436480428099,
+ "interpretation": "no fitted history-only model beats copying the past velocity",
+ "motion_rich_subset": {
+  "n": 2648,
+  "share": 0.39457606914021753,
+  "hold": 0.013957754129391223,
+  "cv": 0.003281734892141193,
+  "knn_10_on_first_400": 0.0038830833121787835
+ }
+}

@@ -1,0 +1,58 @@
+2026-10-19 16:43:18.519154: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-19 16:43:18.595132: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[16:43:25] arm=true target=residual | train=200 frames/80 episodes val=60 frames/20 episodes (disjoint)
+10/19 [16:43:27] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  3.33it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  3.57it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.84it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.74it/s]
+[16:43:59] pristine modeling sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+[16:44:12] cams=3 proprio=False | LoRA trainable=110.8M | proprio projector=0.0M
+[16:44:12] proprio interface: mode=true dim=28 projector_params=16900096 (28D both arms)
+[16:44:12] GPU free=9.1GB total=50.9GB
+[16:44:12] gradient checkpointing ON
+[16:46:25] slot1-slot0 mean|gap| = 0.024667 (max 0.076768) over 200 samples
+[16:46:25] trainable=127.7M (LoRA+projector)
+`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/torch/utils/checkpoint.py:92: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+[16:48:00] EVAL train arm=true step=0 | gen_L1=0.04001 identity=0.02648 ratio=1.511 | corr_delta=-0.055 sign@1e-3=0.461 | beats_cv=0/60 uniq_rows=60/60
+[16:49:35] EVAL val arm=true step=0 | gen_L1=0.02083 identity=0.00480 ratio=4.339 | corr_delta=-0.079 sign@1e-3=0.46 | beats_cv=0/20 uniq_rows=60/60
+[16:49:36] step=1 loss=13.8488 tok_acc=0.000 gnorm=50.44 | pp.grad cur=0.01558 hist=0.01557 | mem=18.1GB 1s
+[16:50:04] step=25 loss=2.8188 tok_acc=0.571 gnorm=2.82 | pp.grad cur=0.001834 hist=0.001818 | mem=18.7GB 29s
+[16:50:33] step=50 loss=2.0885 tok_acc=0.500 gnorm=2.95 | pp.grad cur=0.003327 hist=0.003255 | mem=18.7GB 58s
+[16:51:01] step=75 loss=1.9143 tok_acc=0.714 gnorm=1.93 | pp.grad cur=0.005281 hist=0.005202 | mem=18.7GB 86s
+[16:51:30] step=100 loss=2.0954 tok_acc=0.571 gnorm=3.73 | pp.grad cur=0.001063 hist=0.001032 | mem=18.7GB 115s
+[16:51:59] step=125 loss=1.5767 tok_acc=0.571 gnorm=2.63 | pp.grad cur=0.005186 hist=0.005219 | mem=18.7GB 144s
+[16:52:28] step=150 loss=2.6360 tok_acc=0.500 gnorm=2.30 | pp.grad cur=0.009858 hist=0.009865 | mem=18.7GB 173s
+[16:54:04] EVAL val arm=true step=150 | gen_L1=0.01244 identity=0.00480 ratio=2.592 | corr_delta=-0.133 sign@1e-3=0.457 | beats_cv=0/20 uniq_rows=60/60
+[16:54:33] step=175 loss=1.9360 tok_acc=0.571 gnorm=2.03 | pp.grad cur=0.002569 hist=0.002562 | mem=18.7GB 298s
+[16:55:02] step=200 loss=1.6266 tok_acc=0.643 gnorm=1.68 | pp.grad cur=0.001615 hist=0.001614 | mem=18.7GB 328s
+[16:55:32] step=225 loss=2.1936 tok_acc=0.571 gnorm=2.06 | pp.grad cur=0.002569 hist=0.002547 | mem=18.7GB 357s
+[16:56:01] step=250 loss=1.4390 tok_acc=0.714 gnorm=8.73 | pp.grad cur=0.001529 hist=0.001496 | mem=18.7GB 386s
+[16:56:30] step=275 loss=1.0786 tok_acc=0.714 gnorm=3.03 | pp.grad cur=0.01002 hist=0.009874 | mem=18.7GB 416s
+[16:56:59] step=300 loss=1.8371 tok_acc=0.571 gnorm=2.44 | pp.grad cur=0.001018 hist=0.0009876 | mem=18.7GB 444s
+[16:58:36] EVAL train arm=true step=300 | gen_L1=0.03148 identity=0.02648 ratio=1.189 | corr_delta=0.231 sign@1e-3=0.602 | beats_cv=0/60 uniq_rows=60/60
+[17:00:13] EVAL val arm=true step=300 | gen_L1=0.01846 identity=0.00480 ratio=3.846 | corr_delta=0.097 sign@1e-3=0.469 | beats_cv=0/20 uniq_rows=60/60
+/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/peft/utils/save_and_load.py:180: UserWarning: Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.
+  warnings.warn("Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.")
+[17:00:15] saved /home/dgut/pusht_runtime/r6_pilot_runs/20261019T161033Z/true_residual/checkpoints/final
