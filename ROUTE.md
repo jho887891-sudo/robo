@@ -237,3 +237,14 @@ _本 ROUTE 是长期索引，审计结论始终以对应的源代码/原始数�
 - **当前状态**：`STOP_PROJECT_EVAL_CONDITIONALLY_AUTHORIZED_NOT_EXECUTED`。这是权限变化，不代表任何 PID 已停止或显存已释放；实际结果必须用停止前后进程快照、评测数据 SHA、GPU 测量及固定 commit 复核。
 - **下一阶段依赖**：并行做旧 10 路评测归档与确权、PR #14 冻结执行回归、未知 `k1_*` 源码只读审计；资源合格后按原 R10 授权仅执行一次 300s KV GPU 诊断；训练继续禁止。
 - **授权执行规范**：[`missions/R10_1_AUTHORIZED_RESOURCE_RELEASE.md`](missions/R10_1_AUTHORIZED_RESOURCE_RELEASE.md)，文件固定提交请查本独立审计分支 SHA。既有 R10 归档保持不变。
+
+
+#### 项目终局路线｜2026-10-21｜R10.1 → R23（计划，不是实验完成）
+
+- **现状固定**：R10 CPU 六 Gate 归档，真实 7B KV 未执行、新 Push-T 25 个 HDF5 未采集、新 42D 训练步数为 0；旧 20 已反复参与模型选择。共享 GPU 与数据源是关键路径，不可因文档完成就标 PASS。
+- **M1**：Push-T 真实 7B 42D/R 训练、正确推理控制和一次性冻结闭环评测；证实任务成功而非离线 L1。
+- **M2**：12 个标准 RoboDojo Generalization 任务的统一策略、12/12 可执行与可评测、逐项闭环成功率；工程可运行不等于任务掌握。候选 12-task 清单待与服务器确认冻结。官方额外 12 个 *_random 视为 OOD 测试。
+- **M3**：基于 M2 错误分类，开展语义场景/多视角几何/Planner/主动感知/世界模型的受控消融。无收益不能声称创新成功。
+- **阶段**：R10.1 安全释放资源 → R11 KV → R12 全新 25 Push-T 冻结 → R13 真 7B 零步 Smoke + 新部署 → R14 仅 TRAIN 过拟合 → R15 分段 Push-T → R16 单任务闭环 → R17 12-task 固定 TaskSpec（可提前 CPU 并行）→ R18 其他任务数据 → R19 共用模型适配 → R20 2→4→12 多任务训练 → R21 12-task 官方闭环评测 → R22 研究消融 → R23 可复算交付。所有日期/预算仅为计划，不构成 GPU/采集授权。
+- **新增硬风险**：旧纯 VLA 推理约 0.93 秒/动作，但 HDF5 数据 25Hz（40ms 每帧）；真实控制周期/仿真同步需要 Gate，不能把离线精度当实时能力。现有部署代码还是 Push-T 固定语言/14D或28D历史，不能将 R9 CPU 42D train 视为已经部署可用。
+- **计划原件**：[PROJECT_COMPLETION_MASTERPLAN.md](missions/PROJECT_COMPLETION_MASTERPLAN.md)；[机器可读 Gate](mission/PROJECT_COMPLETION_GATES.json)。两个文件只描述未来目标；先按 [R10.1 有条件授权任务](missions/R10_1_AUTHORIZED_RESOURCE_RELEASE.md) 执行，不因此开启任何新训练、重型 GPU、11任务新数据或 main 合并。
