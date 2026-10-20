@@ -1,0 +1,6 @@
+{
+ "n_episodes": 100,
+ "dataset_sha256": "6757696397863af8058b296a80f9c50ccfc1ed824c43e8d6f6f122cbd610040a",
+ "protocol_sha256": "69ae5083325ce24fc4fa87212d0f7680100ce38e5a38e88938aafb7f1fd9bce4",
+ "note": "protocol frozen; the dataset manifest for the NEW set does not exist yet - BLOCKED on acquisition authorization"
+}
