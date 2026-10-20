@@ -1,0 +1,18 @@
+[PASS] split_64_16_20_disjoint                        {"train": 64, "dev": 16, "holdout": 20}
+[PASS] contract_mode_signed_motion                    {"mode": "signed_motion"}
+[PASS] rejects_legacy_80_episode_contract             {}
+[PASS] rejects_legacy_normalisation                   {}
+[PASS] frame_pool_starts_at_2                         {"pool": [2, 3, 4, 5, 6, 7, 8]}
+[PASS] rejects_frame_t_below_2                        {}
+[PASS] accepts_frame_t_2                              {}
+[PASS] proprio42_matches_manual                       {"shape": [42], "max_delta": 0.0}
+[PASS] target_R_identity                              {"max_delta": 0.0}
+[PASS] tokens_are_legal_action_ids                    {"token_range": [31744, 31744]}
+[PASS] decode_roundtrip_and_gripper_policy            {"max_abs_error_in_range_model_dims": 0.0, "one_bin_step_max": 0.00017185891920235008, "excluded": [6, 13]}
+[PASS] rejects_14d_projector_with_42d_features        {}
+[PASS] rejects_absolute_target_with_42d               {}
+[PASS] accepts_42d_projector                          {}
+[PASS] integration_contract_complete                  {"keys": ["action_codec_mode", "bounds_sha256", "frame_pool", "frozen_contract_path", "frozen_contract_sha256", "gripper_policy", "history_boundary_policy", "motion_quantile", "normalization_mode", "proprio_dim", "propri
+[PASS] entrypoint_gaps_documented                     {"n_gaps": 6}
+
+16/16 checks passed

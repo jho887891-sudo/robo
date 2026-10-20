@@ -1,0 +1,11 @@
+2026-10-20 14:17:41.291892: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-20 14:17:41.371075: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Using ARX constants:
+  NUM_ACTIONS_CHUNK = 1
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[14:17:46] selfcheck PASS over 8 frames (2 TRAIN episodes)
+[14:17:46] selfcheck -> evidence/r9_trainer_trace_20261020/entrypoint_selfcheck.json

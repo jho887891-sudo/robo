@@ -1,0 +1,258 @@
+{
+ "mode": "selfcheck",
+ "pass": true,
+ "n_rows": 8,
+ "rows": [
+  {
+   "episode": "episode_0000003.hdf5",
+   "t": 2,
+   "feature_shape": [
+    42
+   ],
+   "token_range": [
+    31744,
+    31999
+   ],
+   "decode_error_in_range": 0.00012665987014770508,
+   "decode_ok": true,
+   "gripper_policy": [
+    6,
+    13
+   ],
+   "in_bounds": true
+  },
+  {
+   "episode": "episode_0000003.hdf5",
+   "t": 3,
+   "feature_shape": [
+    42
+   ],
+   "token_range": [
+    31744,
+    31999
+   ],
+   "decode_error_in_range": 0.00016555190086364746,
+   "decode_ok": true,
+   "gripper_policy": [
+    6,
+    13
+   ],
+   "in_bounds": true
+  },
+  {
+   "episode": "episode_0000003.hdf5",
+   "t": 4,
+   "feature_shape": [
+    42
+   ],
+   "token_range": [
+    31744,
+    31999
+   ],
+   "decode_error_in_range": 0.00012665987014770508,
+   "decode_ok": true,
+   "gripper_policy": [
+    6,
+    13
+   ],
+   "in_bounds": true
+  },
+  {
+   "episode": "episode_0000003.hdf5",
+   "t": 5,
+   "feature_shape": [
+    42
+   ],
+   "token_range": [
+    31766,
+    31999
+   ],
+   "decode_error_in_range": 0.00012665987014770508,
+   "decode_ok": true,
+   "gripper_policy": [
+    6,
+    13
+   ],
+   "in_bounds": true
+  },
+  {
+   "episode": "episode_0000004.hdf5",
+   "t": 2,
+   "feature_shape": [
+    42
+   ],
+   "token_range": [
+    31744,
+    31999
+   ],
+   "decode_error_in_range": 0.00014890916645526886,
+   "decode_ok": true,
+   "gripper_policy": [
+    6,
+    13
+   ],
+   "in_bounds": true
+  },
+  {
+   "episode": "episode_0000004.hdf5",
+   "t": 3,
+   "feature_shape": [
+    42
+   ],
+   "token_range": [
+    31744,
+    31999
+   ],
+   "decode_error_in_range": 0.00012665987014770508,
+   "decode_ok": true,
+   "gripper_policy": [
+    6,
+    13
+   ],
+   "in_bounds": true
+  },
+  {
+   "episode": "episode_0000004.hdf5",
+   "t": 4,
+   "feature_shape": [
+    42
+   ],
+   "token_range": [
+    31744,
+    31999
+   ],
+   "decode_error_in_range": 0.00013816356658935547,
+   "decode_ok": true,
+   "gripper_policy": [
+    6,
+    13
+   ],
+   "in_bounds": true
+  },
+  {
+   "episode": "episode_0000004.hdf5",
+   "t": 5,
+   "feature_shape": [
+    42
+   ],
+   "token_range": [
+    31744,
+    31999
+   ],
+   "decode_error_in_range": 0.00014704465866088867,
+   "decode_ok": true,
+   "gripper_policy": [
+    6,
+    13
+   ],
+   "in_bounds": true
+  }
+ ],
+ "splits": {
+  "train": 64,
+  "dev": 16,
+  "holdout": 20
+ },
+ "integration_contract": {
+  "proprio_mode": "svacc",
+  "proprio_dim": 42,
+  "proprio_layout": "[state, velocity, acceleration]",
+  "normalization_mode": "signed_motion",
+  "motion_quantile": 0.99,
+  "target_representation": "velocity_residual",
+  "action_codec_mode": "fixed",
+  "frame_pool": "t >= 2 (V,Acc defined); offline t in [2, n-2]",
+  "gripper_policy": {
+   "model_dims": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "gripper_dims": [
+    6,
+    13
+   ],
+   "rule": "gripper channels use S + V (DEV-selected)"
+  },
+  "history_boundary_policy": "V=0,Acc=0 at t=0; Acc=0 at t=1",
+  "frozen_contract_path": "/home/T7/ojh/robot_actual/r9_B/evidence/r9_gate_20261020/frozen_contract_64train.json",
+  "frozen_contract_sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+  "bounds_sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+  "split_sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2",
+  "q01": [
+   -0.01668977364897728,
+   -0.02186211571097374,
+   -0.016695233061909676,
+   -0.016493815928697586,
+   -0.014417302794754505,
+   -0.012508862651884556,
+   -0.019671935588121414,
+   -0.014066160656511784,
+   -0.02291058748960495,
+   -0.022728590294718742,
+   -0.020033517852425575,
+   -0.012456152588129044,
+   -0.012892135418951511,
+   -0.009999996982514858
+  ],
+  "q99": [
+   0.013265335932374,
+   0.021961908787488937,
+   0.017307674512267113,
+   0.016630180180072784,
+   0.01295564416795969,
+   0.010503924451768398,
+   0.014142386615276337,
+   0.017510924488306046,
+   0.020828304812312126,
+   0.017956862226128578,
+   0.018842976540327072,
+   0.016514427959918976,
+   0.014218397438526154,
+   0.009999990463256836
+  ]
+ },
+ "gaps_vs_standard_entrypoint": [
+  {
+   "gap": "proprio_dim",
+   "standard": "14 (current S_t only)",
+   "r9_required": "42 [S,V,Acc]"
+  },
+  {
+   "gap": "proprio_normalisation",
+   "standard": "position bounds pmin/pmax",
+   "r9_required": "signed_motion q99 for V/Acc, position bounds kept for S"
+  },
+  {
+   "gap": "target",
+   "standard": "AT.ABSOLUTE / AT.RESIDUAL (A or A-S)",
+   "r9_required": "velocity_residual R=(A-S)-V"
+  },
+  {
+   "gap": "quantiles",
+   "standard": "action_stats(all 80 train episodes)",
+   "r9_required": "frozen q01/q99 from 64 TRAIN only"
+  },
+  {
+   "gap": "frame_sampling",
+   "standard": "t = randrange(0, T-1)",
+   "r9_required": "t >= 2 (history-safe); offline t in [2, n-2]"
+  },
+  {
+   "gap": "checkpoint_meta",
+   "standard": "variant/cams/proprio/q01/q99",
+   "r9_required": "plus normalisation mode, codec, split hash, contract sha"
+  }
+ ],
+ "cuda_used": false,
+ "optimizer_steps": 0
+}

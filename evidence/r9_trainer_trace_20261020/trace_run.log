@@ -1,0 +1,29 @@
+2026-10-20 14:18:38.601019: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-20 14:18:38.648888: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+  _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+  _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[PASS] B1_real_entrypoint_imported                    VERIFIED_CPU     {"module": "/home/T7/ojh/robot_actual/r9_B/training/train_pushT_pure2.py", "sha256": "e88135583850ffa6", "cams3": ["cam_head", "cam_left_wrist", "cam_right_wrist"], "action_dim_constant": 256}
+[PASS] B2_legacy_14d_path_unchanged                   VERIFIED_CPU     {"q01_shape": [14], "pr14_shape": [14], "degenerate_dims_q99_eq_q01": [6], "episodes_used": ["episode_0000003.hdf5", "episode_0000004.hdf5"], "note": "trainer still computes 80-episode quantiles; degeneracy here is a small-sample artefact of using 2 episodes in this trace"}
+[PASS] B3_prompt_and_label_mask                       VERIFIED_CPU     {"n_supervised": 15, "n_prompt_tokens": 36, "stop_token": 2, "token_range": [31859, 31892], "prompt_ignored": 36}
+[PASS] B4_42d_features_real_hdf5                      VERIFIED_CPU     {"n_rows": 12, "worst_delta_vs_manual": 0.0, "samples": [{"episode": "episode_0000003.hdf5", "t": 2, "shape": [42], "finite": true, "max_abs": 1.0}, {"episode": "episode_0000003.hdf5", "t": 3, "shape": [42], "finite": true, "max_abs": 1.0}, {"episode": "episode_0000003.hdf5", "t": 4, "shape": [42], "finite": true, "max_abs": 1.0}]}
+[PASS] B5_target_R_identity                           VERIFIED_CPU     {"max_abs_delta": 0.0, "R_abs_max": 0.0027563124895095825, "q01_head": [-0.01668977364897728, -0.02186211571097374, -0.016695233061909676], "q99_head": [0.013265335932374, 0.021961908787488937, 0.017307674512267113]}
+[PASS] B6_decode_to_command                           VERIFIED_CPU     {"max_abs_error_in_range": 0.00015926361083984375, "one_bin_step_max": 0.00017185891920235008, "out_of_range_dims": [], "gripper_from_S_plus_V": true, "excluded_dims": [6, 13], "physical_L1_this_frame": 4.6412595111178234e-05}
+[PASS] B7_zero_update_loss_trace                      MOCK_FORWARD     {"loss": 5.4939045906066895, "n_supervised_positions": 14, "grad_abs_sum": 39.51126277446747, "optimizer_steps": 0, "device": "cpu", "mock": true, "real_projector_params_llm4096": 16957440}
+[PASS] B8_features_ignore_future                      VERIFIED_CPU     {"max_abs_delta": 0.0}
+[PASS] B9_fail_closed                                 VERIFIED_CPU     {"legacy_80_episode_contract": true, "projector_dim_14": true, "frame_t_1": true, "absolute_target_with_42d": true}
+[PASS] B10_cuda_only_scope_declared                   PENDING_GPU      {"cuda_only_lines": {"obs": 2, "build": 2, "evaluate": 3}, "sample": [{"line": 123, "text": "pv = torch.cat(imgs, dim=0).unsqueeze(0).to(torch.bfloat16).to(\"cuda\")"}, {"line": 126, "text": "pr = torch.from_numpy(norm_pr(c14(h, \"state\")[t], pmin, pmax)).unsqueeze(0).to(\"cuda\")"}], "statement": "real 7B forward/backward/loss on GPU is NOT run and NOT claimed"}
+[PASS] B11_entrypoint_constants_audit                 HYPOTHESIS       {"platform_detected_by": "sys.argv substring (no aloha/libero token -> LIBERO)", "ACTION_DIM": 7, "NUM_ACTIONS_CHUNK": 8, "PROPRIO_DIM": 8, "codec_expects_action_dim": 14, "evaluate_uses_action_dim": ["for k in range(ACTION_DIM):"], "r9_entrypoint_references_ACTION_DIM": false, "mismatch": true, "impact": "untouched entrypoint decodes only ACTION_DIM tokens in evaluate() in this env; the R9 entryp
+
+11/11 checks passed -> PASS
+trace -> evidence/r9_trainer_trace_20261020/r9_trainer_trace.json
