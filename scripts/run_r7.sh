@@ -12,16 +12,23 @@ case "$mode" in
 esac
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
-if [[ "$(git branch --show-current)" != "audit/r7-state-dynamics-baseline" ]]; then
-  echo "[STOP] use a worktree on audit/r7-state-dynamics-baseline" >&2; exit 3
-fi
+current_branch="$(git branch --show-current)"
+case "$current_branch" in
+  audit/r7-state-dynamics-baseline|review/r7-state-dynamics-audit-20261020) ;;
+  *) echo "[STOP] use an isolated R7 baseline/audit worktree" >&2; exit 3 ;;
+esac
 if ! git diff --quiet || ! git diff --cached --quiet; then
   echo "[STOP] dirty tracked tree; commit first" >&2; exit 3
 fi
 export PUSHT_HDF5="${PUSHT_HDF5:-/home/T7/ojh/robot_actual/data/data/hdf5/push_T/arx_x5/data}"
 export PUSHT_SPLIT="${PUSHT_SPLIT:-/home/dgut/pusht_runtime/split80.json}"
-export R7_TS="${R7_TS:-20261020T0050Z}"
-export R7_RUNS="${R7_RUNS:-/home/dgut/pusht_runtime/r7}"
+export R7_TS="${R7_TS:-20261020T0050Z_review}"
+# Do not overwrite the R7 baseline run with corrected pilot and metric evidence.
+export R7_RUNS="${R7_RUNS:-/home/dgut/pusht_runtime/r7_review_${R7_TS}}"
+if [[ -e "$R7_RUNS/verification.json" ]]; then
+  echo "[STOP] output directory already contains verification evidence; use new R7_RUNS" >&2
+  exit 3
+fi
 py="${R7_PYTHON:-/home/dgut/pusht_runtime/venv_oft/bin/python}"
 mkdir -p "$R7_RUNS"
 echo "[preflight] commit=$(git rev-parse HEAD) mode=$mode python=$py"
