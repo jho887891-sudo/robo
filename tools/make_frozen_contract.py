@@ -23,7 +23,18 @@ for sub in ("training", "diagnostics", "code/xpolicylab/policy/OpenVLA_Pure"):
 import r6_data as D          # noqa: E402
 import r8_contract as C      # noqa: E402
 import r8_vla_adapter as A   # noqa: E402
+from r7_state_mlp import split_episodes  # noqa: E402
 from r8_normalization import NormalizationContract  # noqa: E402
+
+
+def select_quantile_train_episodes(split, limit=0):
+    """Use the SAME 64/16/20 partition as R7/R8, never silently include DEV."""
+    train, dev = split_episodes(split["train"], n_dev=16)
+    if set(train) & set(dev) or set(train) & set(split["val"]) or set(dev) & set(split["val"]):
+        raise ValueError("TRAIN/DEV/holdout overlap in frozen-contract split")
+    if limit < 0 or limit > len(train):
+        raise ValueError("episode limit must be 0..%d (0 means ALL 64 TRAIN)" % len(train))
+    return (train[:limit] if limit else train), dev
 
 
 def main():
@@ -31,7 +42,7 @@ def main():
     ap.add_argument("--contracts", required=True, help="workstream-A norm_contracts.json")
     ap.add_argument("--scheme", default="B99_signed")
     ap.add_argument("--episodes", type=int, default=0,
-                    help="limit TRAIN episodes for the quantiles (0 = all 80)")
+                    help="limit 64 TRAIN-only episodes after 64/16/20 split (0 = all 64)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     blob = json.load(open(args.contracts))
@@ -39,7 +50,7 @@ def main():
         raise SystemExit("scheme %r not in %s (have %s)" % (args.scheme, args.contracts, sorted(blob)))
     contract = NormalizationContract.from_metadata(blob[args.scheme])
     split = D.load_split()
-    eps = split["train"] if args.episodes <= 0 else split["train"][:args.episodes]
+    eps, dev = select_quantile_train_episodes(split, args.episodes)
     S, Aa, V = [], [], []
     for name in eps:
         ep = D.load_episode(name)
@@ -52,7 +63,9 @@ def main():
     meta = A.metadata(contract, q01, q99)
     meta["frozen_from"] = {"contracts_file": os.path.abspath(args.contracts),
                           "scheme": args.scheme,
-                          "n_train_episodes_for_quantiles": len(eps)}
+                          "n_train_episodes_for_quantiles": len(eps),
+                           "n_dev_episodes_excluded": len(dev),
+                           "train_episode_names": list(eps)}
     with open(args.out, "w") as fh:
         json.dump(meta, fh, indent=1)
     print("frozen contract ->", args.out)

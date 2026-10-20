@@ -101,11 +101,25 @@ def residual_quantiles(frames):
 
 
 # ------------------------------------------------------------------- checks (CPU)
-def run_contract_checks(contract, out):
+
+def frozen_quantiles(meta):
+    """Fail closed: GPU/CPU decoder uses frozen 64-TRAIN-only quantiles."""
+    provenance = meta.get("frozen_from", {})
+    if (provenance.get("n_train_episodes_for_quantiles") != 64 or
+            provenance.get("n_dev_episodes_excluded") != 16):
+        raise ValueError("R8 frozen target quantiles require 64 TRAIN / 16 DEV; regenerate contract")
+    a = np.asarray(meta.get("q01", []), dtype=np.float32)
+    b = np.asarray(meta.get("q99", []), dtype=np.float32)
+    if (a.shape != (14,) or b.shape != (14,) or not np.isfinite(a).all()
+            or not np.isfinite(b).all() or not (b > a).all()):
+        raise ValueError("frozen q01/q99 must be finite 14D ranges with q99 > q01")
+    return a, b
+
+
+def run_contract_checks(contract, out, q01, q99):
     nb = np.load(os.environ["PUSHT_BOUNDS"])
     pmin, pmax = nb["pmin"].astype(np.float32), nb["pmax"].astype(np.float32)
     frames = real_frames(2)
-    q01, q99 = residual_quantiles(frames)
     ok = True
     feats = []
     for f in frames:
@@ -338,12 +352,11 @@ def run_gpu_smoke(args, contract, out, q01, q99):
 
 
 def kv_diagnose(args, contract, out):
-    """Explain a KV-vs-full mismatch: numeric sensitivity or structural defect?
+    """Compare full-sequence vs cached KV logits under identical teacher-forced prefixes.
 
-    One decode step per iteration. At every step both paths emit their full 256-bin logit
-    vector for the SAME context, so a mismatch can be attributed: if the top1-top2 margin
-    of the full path is smaller than the logit delta between the paths, bf16 incremental
-    vs batched matmul is enough to flip the argmax; otherwise it is structural.
+    Record the complete 256-bin logit differences and top1-top2 margins. A token
+    flip compatible with a low margin does not establish that bf16 is the cause.
+    Classify root cause only after precision-controlled follow-up.
 
     NOTE: this mode was written after the main smoke reported 8/14 token agreement. It has
     NOT yet produced a verdict on the shared GPU (its first run hit the documented
@@ -356,6 +369,9 @@ def kv_diagnose(args, contract, out):
     from prismatic.models.backbones.llm.prompting import PurePromptBuilder
 
     free, _total = torch.cuda.mem_get_info()
+    if free / 1e9 < args.min_free_gb:
+        raise RuntimeError("insufficient GPU memory for KV diagnose: %.2fGB < %.2fGB"
+                           % (free / 1e9, args.min_free_gb))
     proc, vla, _ = T.build(3, False)
     llm_dim = int(vla.llm_dim)
     if free / 1e9 < 30.0:
@@ -404,21 +420,24 @@ def kv_diagnose(args, contract, out):
         if k == 13:
             break
         with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
-            o_next = vla(input_ids=torch.tensor([[W0 + tk]], dtype=torch.long, device="cuda"),
+            # Teacher-force the SAME full-path token into cache.
+            o_next = vla(input_ids=torch.tensor([[W0 + tf]], dtype=torch.long, device="cuda"),
                          past_key_values=cached, labels=None, use_cache=True)
         cached = o_next.past_key_values
         lg_kv = o_next.logits[0, -1][W0:W0 + BINS].float()
         del o_next
         gc.collect(); torch.cuda.empty_cache()
     mism = [s for s in steps if not s["match"]]
-    numerical = all(s["top1_minus_top2_full"] <= s["max_abs_dlogit"] + 1e-6 for s in mism)
-    summary = {"steps": steps, "n_match": sum(1 for s in steps if s["match"]), "n_total": len(steps),
+    flips_compatible_with_delta = all(s["top1_minus_top2_full"] <= 2.0 * s["max_abs_dlogit"] + 1e-6 for s in mism)
+    summary = {"same_prefix_teacher_forced": True, "reference_prefix": "full_sequence_greedy",
+               "steps": steps, "n_match": sum(1 for s in steps if s["match"]), "n_total": len(steps),
                "first_mismatch_step": next((s["step"] for s in steps if not s["match"]), None),
-               "mismatches_explained_by_logit_delta": numerical,
+               "mismatches_compatible_with_measured_logit_delta": flips_compatible_with_delta,
                "median_margin": float(np.median([s["top1_minus_top2_full"] for s in steps])),
                "median_max_dlogit": float(np.median([s["max_abs_dlogit"] for s in steps])),
-               "verdict": ("numerical sensitivity of bf16 argmax at near-ties" if numerical
-                           else "STRUCTURAL mismatch - investigate"),
+               "verdict": ("OPEN: argmax flips consistent with measured logit differences; cause needs precision-controlled recheck"
+                           if flips_compatible_with_delta else
+                           "OPEN: anomalous same-prefix mismatch; inspect cache/attention/token alignment"),
                "out": out}
     json.dump(summary, open(os.path.join(out, "r8_kv_diagnose.json"), "w"), indent=1)
     print("KV/full match %d/%d | first mismatch step %s | median margin %.6f | median "
@@ -453,17 +472,18 @@ def main():
     out_dir = args.out or os.path.join("/home/dgut/pusht_runtime/r8_smoke", time.strftime("%Y%m%dT%H%M%SZ"))
     os.makedirs(out_dir, exist_ok=True)
     contract, meta = load_frozen_contract(args.norm_contract, args.allow_legacy)
+    q01, q99 = frozen_quantiles(meta)
     print("[contract]", contract, "| source:", args.norm_contract, flush=True)
     if args.kv_diagnose:
-        kv_diagnose(args, contract, out_dir)
-        return 0
+        summary = kv_diagnose(args, contract, out_dir)
+        return 0 if summary["n_match"] == summary["n_total"] else 6
     if args.check_contract:
-        ok, extra = run_contract_checks(contract, out_dir)
+        ok, extra = run_contract_checks(contract, out_dir, q01, q99)
         json.dump({"mode": "cpu_contract", "pass": ok, "contract": meta, "checks": RESULTS,
                    "extra": extra, "out": out_dir},
                   open(os.path.join(out_dir, "r8_smoke_cpu.json"), "w"), indent=1)
         return 0 if ok else 4
-    ok, extra = run_gpu_smoke(args, contract, out_dir, *residual_quantiles(real_frames(1)))
+    ok, extra = run_gpu_smoke(args, contract, out_dir, q01, q99)
     summary = {"mode": "gpu", "pass": ok, "checks": RESULTS, "extra": extra,
                "contract": meta, "torch": __import__("torch").__version__,
                "cuda": __import__("torch").version.cuda, "out": out_dir}
