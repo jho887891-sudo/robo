@@ -1,6 +1,6 @@
 # R9 independent content-disjoint audit (2026-10-20)
 
-**Status: IMPLEMENTED + 7/7 LOCAL_SYNTHETIC_VERIFIED; remote real-HDF5 regression PENDING.**
+**Status: IMPLEMENTED + 9/9 LOCAL_SYNTHETIC_VERIFIED; remote real-HDF5 regression PENDING.**
 
 Baseline: `research/r9-new-test-readiness@f8e43b0ca6ccaa8a5711e338ba12e0f3be69328f`.
 Do not change `main`, original R9 evidence, `protocol/r9_eval_protocol.json` or the existing R8 checker.
@@ -14,15 +14,15 @@ A renamed copy of a previously used episode can pass g3 if the candidate has no 
 
 ## Narrow patch
 - Add `tools/r9_final_disjoint.py` as an additional fail-closed **g3/g4 pre-freeze check**. Required arguments: candidate manifest, complete 100-episode `manifest_existing100.json`, `split80.json`, R9 protocol, and a new unused output JSON path.
-- Reject candidate/old content-hash intersection, filename intersection, internal duplicates, incomplete used reference, wrong task/frequency/length, and fewer than 5 DEV + 15 FINAL episodes.
+- Reject candidate/old content-hash AND state/action-hash intersections, filename intersection, internal duplicates, incomplete or unanchored used reference, wrong task/frequency/length, and fewer than 5 DEV + 15 FINAL episodes. Verify the 100-episode reference dataset SHA against the protocol.
 - The original R8 script is unchanged; this new check must be used before any future R9 FINAL freeze, and the execution protocol should explicitly include it on next revision.
-- Add 7 synthetic positive/negative controls, notably **renamed old content with a new filename**.
+- Add 9 synthetic positive/negative controls, notably **renamed old content with a new filename**.
 
 Local synthetic regression (run by independent auditor, no HDF5/GPU/data access):
 ```
 python -m py_compile tools/r9_final_disjoint.py tests/test_r9_final_disjoint.py
 python tests/test_r9_final_disjoint.py
-# 7 tests, OK
+# 9 tests, OK
 ```
 
 Future real-data g3/g4 command, AFTER authorized acquisition and manifest creation:
