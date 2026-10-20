@@ -115,12 +115,15 @@ def run():
             all_a.append(e["action"][t])
             all_v.append(e["state"][t] - e["state"][t-1])
         return np.concatenate(all_s), np.concatenate(all_a), np.concatenate(all_v)
-    S_tr, A_tr, _ = arrays(train_episodes)
+    # q01/q99 MUST match the actual R5/R6 training action_stats contract:
+    # train quantiles use ALL frames, not the time-valid 1:-1 diagnostic subset.
+    S_tr_all = np.concatenate([e["state"] for e in train_episodes])
+    A_tr_all = np.concatenate([e["action"] for e in train_episodes])
     S, A, V = arrays(val_episodes)
     cv_L1 = float(np.abs((S + V) - A).mean())
     modes = {}
     for mode in ("absolute", "residual"):
-        T_train = A_tr if mode == "absolute" else A_tr - S_tr
+        T_train = A_tr_all if mode == "absolute" else A_tr_all - S_tr_all
         q01 = np.quantile(T_train, 0.01, axis=0).astype(np.float32)
         q99 = np.quantile(T_train, 0.99, axis=0).astype(np.float32)
         T_val = A if mode == "absolute" else A - S
