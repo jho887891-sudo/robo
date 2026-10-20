@@ -1,0 +1,550 @@
+{
+ "candidates": [
+  {
+   "id": "local_push_T_100",
+   "path": "/home/T7/ojh/robot_actual/data/data/hdf5/push_T/arx_x5/data",
+   "note": "the 100 episodes already used by R2-R9",
+   "exists": true,
+   "n_hdf5": 100,
+   "total_bytes": 7779327333,
+   "median_bytes": 74584664,
+   "min_bytes": 35847344,
+   "max_bytes": 197090415,
+   "sample_files": [
+    "episode_0000000.hdf5",
+    "episode_0000001.hdf5",
+    "episode_0000002.hdf5"
+   ],
+   "probe": [
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 360,
+     "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+     "vision_shape": [
+      360
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 513,
+     "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+     "vision_shape": [
+      513
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 420,
+     "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+     "vision_shape": [
+      420
+     ]
+    }
+   ],
+   "all_probe_state_action": true,
+   "instructions": [
+    "Push the T-shaped block to align it precisely with the gray T-shaped pad."
+   ],
+   "is_target_task": true,
+   "expected_task_matches": true,
+   "verdict": "USABLE_PUSH_T"
+  },
+  {
+   "id": "robodojo_demo_arx_x5",
+   "path": "/home/T7/ojh/robot_actual/RoboDojo/data/demo/arx_x5/data",
+   "note": "different task, cannot serve as push_T final set",
+   "exists": true,
+   "n_hdf5": 20,
+   "total_bytes": 1455512026,
+   "median_bytes": 68076760,
+   "min_bytes": 48680028,
+   "max_bytes": 117424332,
+   "sample_files": [
+    "episode_0000000.hdf5",
+    "episode_0000001.hdf5",
+    "episode_0000002.hdf5"
+   ],
+   "probe": [
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 241,
+     "instruction": "Stack the three bowls together.",
+     "vision_shape": [
+      241
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 367,
+     "instruction": "Stack the three bowls together.",
+     "vision_shape": [
+      367
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 342,
+     "instruction": "Stack the three bowls together.",
+     "vision_shape": [
+      342
+     ]
+    }
+   ],
+   "all_probe_state_action": true,
+   "instructions": [
+    "Stack the three bowls together."
+   ],
+   "is_target_task": false,
+   "expected_task_matches": true,
+   "verdict": "DIFFERENT_TASK"
+  },
+  {
+   "id": "openvla_offline_bundle_stage63",
+   "path": "/home/T7/ojh/robot_actual/openvla_offline_bundle/stage63_d0/sim_data/push_T",
+   "note": "declared (600,480,640,3) but 9 KB per file -> fixtures",
+   "exists": true,
+   "n_hdf5": 108,
+   "total_bytes": 991872,
+   "median_bytes": 9184,
+   "min_bytes": 9184,
+   "max_bytes": 9184,
+   "sample_files": [
+    "push_T_ep0000.hdf5",
+    "push_T_ep0001.hdf5",
+    "push_T_ep0002.hdf5"
+   ],
+   "probe": [
+    {
+     "readable": true,
+     "top_level": [
+      "instruction",
+      "proprio",
+      "state",
+      "success",
+      "vision"
+     ],
+     "groups": [
+      "instruction",
+      "proprio",
+      "state",
+      "success",
+      "vision"
+     ],
+     "has_state_action": false,
+     "frames": 600,
+     "instruction": "",
+     "vision_shape": [
+      600,
+      480,
+      640,
+      3
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "instruction",
+      "proprio",
+      "state",
+      "success",
+      "vision"
+     ],
+     "groups": [
+      "instruction",
+      "proprio",
+      "state",
+      "success",
+      "vision"
+     ],
+     "has_state_action": false,
+     "frames": 600,
+     "instruction": "",
+     "vision_shape": [
+      600,
+      480,
+      640,
+      3
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "instruction",
+      "proprio",
+      "state",
+      "success",
+      "vision"
+     ],
+     "groups": [
+      "instruction",
+      "proprio",
+      "state",
+      "success",
+      "vision"
+     ],
+     "has_state_action": false,
+     "frames": 600,
+     "instruction": "",
+     "vision_shape": [
+      600,
+      480,
+      640,
+      3
+     ]
+    }
+   ],
+   "all_probe_state_action": false,
+   "instructions": [],
+   "verdict": "PLACEHOLDER_FIXTURES"
+  },
+  {
+   "id": "stack_bowls",
+   "path": "/home/T7/ojh/robot_actual/data/data/hdf5/stack_bowls/arx_x5/data",
+   "note": "different task on this host",
+   "exists": true,
+   "n_hdf5": 100,
+   "total_bytes": 12599725918,
+   "median_bytes": 116913338,
+   "min_bytes": 48704924,
+   "max_bytes": 242036330,
+   "sample_files": [
+    "episode_0000000.hdf5",
+    "episode_0000001.hdf5",
+    "episode_0000002.hdf5"
+   ],
+   "probe": [
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 241,
+     "instruction": "Stack the three bowls together.",
+     "vision_shape": [
+      241
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 367,
+     "instruction": "Stack the three bowls together.",
+     "vision_shape": [
+      367
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 342,
+     "instruction": "Stack the three bowls together.",
+     "vision_shape": [
+      342
+     ]
+    }
+   ],
+   "all_probe_state_action": true,
+   "instructions": [
+    "Stack the three bowls together."
+   ],
+   "is_target_task": false,
+   "expected_task_matches": true,
+   "verdict": "DIFFERENT_TASK"
+  },
+  {
+   "id": "sweep_blocks",
+   "path": "/home/T7/ojh/robot_actual/data/data/hdf5/sweep_blocks/arx_x5/data",
+   "note": "different task on this host",
+   "exists": true,
+   "n_hdf5": 100,
+   "total_bytes": 15712994326,
+   "median_bytes": 153943628,
+   "min_bytes": 85648671,
+   "max_bytes": 266147056,
+   "sample_files": [
+    "episode_0000000.hdf5",
+    "episode_0000001.hdf5",
+    "episode_0000002.hdf5"
+   ],
+   "probe": [
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 703,
+     "instruction": "Pick up the broom, hand it over to the right hand, then use the dustpan to sweep the blocks.",
+     "vision_shape": [
+      703
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 986,
+     "instruction": "Pick up the broom, hand it over to the right hand, then use the dustpan to sweep the blocks.",
+     "vision_shape": [
+      986
+     ]
+    },
+    {
+     "readable": true,
+     "top_level": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "groups": [
+      "action",
+      "additional_info",
+      "data_format_version",
+      "instruction",
+      "state",
+      "vision"
+     ],
+     "has_state_action": true,
+     "frames": 1064,
+     "instruction": "Pick up the broom, hand it over to the right hand, then use the dustpan to sweep the blocks.",
+     "vision_shape": [
+      1064
+     ]
+    }
+   ],
+   "all_probe_state_action": true,
+   "instructions": [
+    "Pick up the broom, hand it over to the right hand, then use the dustpan to sweep the blocks."
+   ],
+   "is_target_task": false,
+   "expected_task_matches": true,
+   "verdict": "DIFFERENT_TASK"
+  }
+ ],
+ "bytes_per_episode_estimate": 77793273,
+ "gb_per_episode_estimate": 0.078,
+ "acquisition_options": [
+  {
+   "route": "official_increment",
+   "description": "download additional official push_T episodes that do not overlap this host",
+   "episodes": [
+    20,
+    128
+   ],
+   "estimated_bytes": [
+    1555865466,
+    9957538986
+   ],
+   "requires_authorization": "data download",
+   "executed": false
+  },
+  {
+   "route": "new_collection_expert_script",
+   "description": "record 20-30 new episodes with the RoboDojo expert script (same task/robot)",
+   "episodes": [
+    20,
+    30
+   ],
+   "estimated_bytes": [
+    1555865466,
+    2333798199
+   ],
+   "requires_authorization": "simulation collection",
+   "executed": false
+  },
+  {
+   "route": "cross_task_transfer",
+   "description": "other RoboDojo tasks already on disk",
+   "episodes": [
+    20
+   ],
+   "estimated_bytes": [
+    1555865466
+   ],
+   "requires_authorization": "none, but cannot be a push_T final set",
+   "executed": false
+  }
+ ],
+ "unused_local_push_T_episodes": 0,
+ "blocker": "BLOCKED_DATA_ACQUISITION_AUTHORIZATION",
+ "policy": "no download, no collection, no FINAL-set evaluation in this round"
+}

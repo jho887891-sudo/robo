@@ -1,0 +1,113 @@
+{
+ "checks": [
+  {
+   "check": "protocol_extends_r8_by_hash",
+   "pass": true,
+   "detail": {
+    "declared": "48ad7326f9ae938e",
+    "actual": "48ad7326f9ae938e"
+   }
+  },
+  {
+   "check": "protocol_has_six_gates",
+   "pass": true,
+   "detail": {
+    "gates": [
+     "g1_build",
+     "g2_verify",
+     "g3_disjoint",
+     "g4_size",
+     "g5_freeze",
+     "g6_no_peek"
+    ]
+   }
+  },
+  {
+   "check": "protocol_blocks_acquisition",
+   "pass": true,
+   "detail": {
+    "status": "BLOCKED_DATA_ACQUISITION_AUTHORIZATION"
+   }
+  },
+  {
+   "check": "protocol_min_final_episodes_is_15",
+   "pass": true,
+   "detail": {
+    "dev_episodes": 5,
+    "final_episodes_min": 15,
+    "rule": "episode-level disjoint; DEV chosen by seeded hash of the content_sha256; FINAL is the remainder",
+    "dev_final_must_be_disjoint": true
+   }
+  },
+  {
+   "check": "protocol_forbids_peeking",
+   "pass": true,
+   "detail": {
+    "n_forbidden": 5
+   }
+  },
+  {
+   "check": "episode_record_is_deterministic",
+   "pass": true,
+   "detail": {
+    "frames": 360,
+    "sha": "17e45f25dcb9da80"
+   }
+  },
+  {
+   "check": "detects_duplicate_content",
+   "pass": true,
+   "detail": {
+    "n": 4,
+    "unique": 2
+   }
+  },
+  {
+   "check": "duplicates_fail_disjointness",
+   "pass": true,
+   "detail": {
+    "overlap": 0,
+    "dups": 2
+   }
+  },
+  {
+   "check": "verify_roundtrip_ok",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "existing_100_are_all_used_up",
+   "pass": true,
+   "detail": {
+    "dataset_sha256": "6757696397863af8"
+   }
+  },
+  {
+   "check": "disjoint_reports_100_overlap",
+   "pass": true,
+   "detail": {
+    "overlap": 100
+   }
+  },
+  {
+   "check": "survey_verdicts",
+   "pass": true,
+   "detail": {
+    "local_push_T_100": "USABLE_PUSH_T",
+    "robodojo_demo_arx_x5": "DIFFERENT_TASK",
+    "openvla_offline_bundle_stage63": "PLACEHOLDER_FIXTURES",
+    "stack_bowls": "DIFFERENT_TASK",
+    "sweep_blocks": "DIFFERENT_TASK"
+   }
+  },
+  {
+   "check": "survey_budget_positive_and_not_executed",
+   "pass": true,
+   "detail": {
+    "gb_per_episode": 0.078
+   }
+  }
+ ],
+ "n_pass": 13,
+ "n_total": 13
+}

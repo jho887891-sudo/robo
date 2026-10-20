@@ -1,0 +1,15 @@
+[PASS] protocol_extends_r8_by_hash                  {"declared": "48ad7326f9ae938e", "actual": "48ad7326f9ae938e"}
+[PASS] protocol_has_six_gates                       {"gates": ["g1_build", "g2_verify", "g3_disjoint", "g4_size", "g5_freeze", "g6_no_peek"]}
+[PASS] protocol_blocks_acquisition                  {"status": "BLOCKED_DATA_ACQUISITION_AUTHORIZATION"}
+[PASS] protocol_min_final_episodes_is_15            {"dev_episodes": 5, "final_episodes_min": 15, "rule": "episode-level disjoint; DEV chosen by seeded hash of the content_sha256; FINAL is the remainder", "dev_final_must_be_disjoint
+[PASS] protocol_forbids_peeking                     {"n_forbidden": 5}
+[PASS] episode_record_is_deterministic              {"frames": 360, "sha": "17e45f25dcb9da80"}
+[PASS] detects_duplicate_content                    {"n": 4, "unique": 2}
+[PASS] duplicates_fail_disjointness                 {"overlap": 0, "dups": 2}
+[PASS] verify_roundtrip_ok                          {}
+[PASS] existing_100_are_all_used_up                 {"dataset_sha256": "6757696397863af8"}
+[PASS] disjoint_reports_100_overlap                 {"overlap": 100}
+[PASS] survey_verdicts                              {"local_push_T_100": "USABLE_PUSH_T", "robodojo_demo_arx_x5": "DIFFERENT_TASK", "openvla_offline_bundle_stage63": "PLACEHOLDER_FIXTURES", "stack_bowls": "DIFFERENT_TASK", "sweep_bl
+[PASS] survey_budget_positive_and_not_executed      {"gb_per_episode": 0.078}
+
+13/13 checks passed

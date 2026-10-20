@@ -1,0 +1,55 @@
+{
+ "bytes_per_episode_estimate": 77793273,
+ "gb_per_episode_estimate": 0.078,
+ "acquisition_options": [
+  {
+   "route": "official_increment",
+   "description": "download additional official push_T episodes that do not overlap this host",
+   "episodes": [
+    20,
+    128
+   ],
+   "estimated_bytes": [
+    1555865466,
+    9957538986
+   ],
+   "requires_authorization": "data download",
+   "executed": false
+  },
+  {
+   "route": "new_collection_expert_script",
+   "description": "record 20-30 new episodes with the RoboDojo expert script (same task/robot)",
+   "episodes": [
+    20,
+    30
+   ],
+   "estimated_bytes": [
+    1555865466,
+    2333798199
+   ],
+   "requires_authorization": "simulation collection",
+   "executed": false
+  },
+  {
+   "route": "cross_task_transfer",
+   "description": "other RoboDojo tasks already on disk",
+   "episodes": [
+    20
+   ],
+   "estimated_bytes": [
+    1555865466
+   ],
+   "requires_authorization": "none, but cannot be a push_T final set",
+   "executed": false
+  }
+ ],
+ "unused_local_push_T_episodes": 0,
+ "blocker": "BLOCKED_DATA_ACQUISITION_AUTHORIZATION",
+ "policy": "no download, no collection, no FINAL-set evaluation in this round"
+}
+local_push_T_100                 USABLE_PUSH_T        n=100 median=74584664 instruction='Push the T-shaped block to align it precisely with the gray T-shaped pad.'
+robodojo_demo_arx_x5             DIFFERENT_TASK       n=20 median=68076760 instruction='Stack the three bowls together.'
+openvla_offline_bundle_stage63   PLACEHOLDER_FIXTURES n=108 median=9184 instruction=None
+stack_bowls                      DIFFERENT_TASK       n=100 median=116913338 instruction='Stack the three bowls together.'
+sweep_blocks                     DIFFERENT_TASK       n=100 median=153943628 instruction='Pick up the broom, hand it over to the right hand, then use the dustpan to sweep the blocks.'
+-> evidence/r9_eval_prep_20261020/r9_data_sources.json

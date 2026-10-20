@@ -1,0 +1,817 @@
+{
+ "data_dir": "/home/T7/ojh/robot_actual/data/data/hdf5/push_T/arx_x5/data",
+ "task_filter": null,
+ "n_episodes": 100,
+ "n_unique_content": 100,
+ "n_duplicate_content": 0,
+ "total_frames": 32304,
+ "frequencies": [
+  25
+ ],
+ "instructions": [
+  "Push the T-shaped block to align it precisely with the gray T-shaped pad."
+ ],
+ "dataset_sha256": "6757696397863af8058b296a80f9c50ccfc1ed824c43e8d6f6f122cbd610040a",
+ "episodes": [
+  {
+   "file": "episode_0000000.hdf5",
+   "length": 360,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "17e45f25dcb9da80a8bd6b3446253a2fa1bf56754f97874c33743bf52f686189",
+   "state_action_sha256": "b45c5a1e0873d19f94e8c9753d37fc8149844bff5ea34192f0858cece0de962f"
+  },
+  {
+   "file": "episode_0000001.hdf5",
+   "length": 513,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "26651f54b67855be8621330488052af7ec5713533952870de2f1563715486c66",
+   "state_action_sha256": "f5f6599a168211d72425099f968c32fbc7544dce04060db6efc972ab7e78ab88"
+  },
+  {
+   "file": "episode_0000002.hdf5",
+   "length": 420,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "f985c96842d956632adc25a5faedc63a9af915d437c8fbdfb2d249b6d9f7ee3f",
+   "state_action_sha256": "abec96469230de99576b1840aa219827f298506e3fdb15ed4f9f7f9ec54e3613"
+  },
+  {
+   "file": "episode_0000003.hdf5",
+   "length": 234,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "9fe5d25f56ba5dc4b2e4a7e3b648403167e7ab7ef7ccb023ca6465977f2dfac6",
+   "state_action_sha256": "4fc82ca1ad5f805d363ebbb739cff656e7cb0279b99e920d3c66b336c7212dea"
+  },
+  {
+   "file": "episode_0000004.hdf5",
+   "length": 361,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "d10ecb8749563d14fed235db4d82075cbdfcc9ce658f192d5a27250894b88086",
+   "state_action_sha256": "b35243a57547b528870ffad2c738c0a982602ee0087c38327af0a00d66cf392c"
+  },
+  {
+   "file": "episode_0000005.hdf5",
+   "length": 280,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "0c170efebb3308adf6ba43b65b09d6bdc550076009801ea43cd60fcfbec194f8",
+   "state_action_sha256": "e8028bf4d09af51963e28b42e9d3daef3495ad35f93c90f7ac7589c1a67f4af4"
+  },
+  {
+   "file": "episode_0000006.hdf5",
+   "length": 405,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "efa310dd6553bd7035c4b24ff8c2e65d5129fe30f10328b4e6412b81acb8edf8",
+   "state_action_sha256": "b5e5891466b8f3a4c512cbaf64fce126360746c7757f6155188578a414b860a6"
+  },
+  {
+   "file": "episode_0000007.hdf5",
+   "length": 237,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "83fa799d8e171efc945d3db3dd4a2b741cdb90ba48f688c076674526311b8636",
+   "state_action_sha256": "67a9a88c4cba501a380705ca4467742aa0f25c844568fc08c0b1a67c02d092fa"
+  },
+  {
+   "file": "episode_0000008.hdf5",
+   "length": 384,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "2669a95c769d62d135b62fea2160ea8d0bae90e0fd84d2196d5b2c209d86de77",
+   "state_action_sha256": "69817037e018eec45c7beea8e65203b66bee6c146c37a28225d5703cbf236391"
+  },
+  {
+   "file": "episode_0000009.hdf5",
+   "length": 773,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "e74bb5d5924ca93fef8444459267d720754e449de13cf853a30449e75d505743",
+   "state_action_sha256": "5b8fb939a3cb7386d0abc901e721e6842ac4726e463fc581bbf58fb5f976ff1e"
+  },
+  {
+   "file": "episode_0000010.hdf5",
+   "length": 320,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "4e801edf295c701cdef112d087a6c1e3431453cc74f602b92977ac58f587d4e1",
+   "state_action_sha256": "6e9b93babb8f435ce12a53749778b5633053637402a42b231485aa624ec95e87"
+  },
+  {
+   "file": "episode_0000011.hdf5",
+   "length": 272,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "7037a591779af0b4e463dc56476cefe869b284e6e9d21492dcb5cdfe35164a83",
+   "state_action_sha256": "0d348c5ac9371f5503d44b0ada480d820927edce7ab49c7d16db48ad2900fa43"
+  },
+  {
+   "file": "episode_0000012.hdf5",
+   "length": 418,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "d95e4e46bf70561ca85fefa810a72bfe8cfd13add705b6183d749fb8689cbac1",
+   "state_action_sha256": "34621b8ff3465a6aa1bb05fd3f4ae8b9eb5a801241344427a9c42840c0204469"
+  },
+  {
+   "file": "episode_0000013.hdf5",
+   "length": 348,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "f101b6a1a319e73f3699308d8be4785b1c2e0246e34284bc6b468762636f1c4d",
+   "state_action_sha256": "ed347d1bc476742b9f529d3cb1833dcd66c0e30458d44b2668aa50f974c1e84b"
+  },
+  {
+   "file": "episode_0000014.hdf5",
+   "length": 295,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "cc2df4bd02efe1b35883432933a7fcf77d9002b9080bcfab2c78a25f1fbd4771",
+   "state_action_sha256": "8986a012a3fe88079a549022dd85ea765e49d3c2f93d6748924bda8fc872ff00"
+  },
+  {
+   "file": "episode_0000015.hdf5",
+   "length": 333,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "c2da00c6fe241585dfeda019a3ed58b05ddda6b543e984042ed7cbbdcb67ad6e",
+   "state_action_sha256": "75bf2cca1198f8f3f22a9792ae051b303d71d58fb3b4350a3d4f64da2687d6b6"
+  },
+  {
+   "file": "episode_0000016.hdf5",
+   "length": 287,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "5f4a868775da7a53812eb11a3db5d3fe9484109e6b601fd2cfefb883e5b3d41c",
+   "state_action_sha256": "b322742ecaba5bcd52893b24c2dd5b75188cef64b10e4614be2810d0817ec269"
+  },
+  {
+   "file": "episode_0000017.hdf5",
+   "length": 433,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "1cbeacd7dee223d416c106e383cc3e014b7e4bdd31cc0e1850d30f1fac1ec5c5",
+   "state_action_sha256": "8037fcb9ef536c726e3f8e437417cd432a60841bc124740a3d78a624f03e3a8f"
+  },
+  {
+   "file": "episode_0000018.hdf5",
+   "length": 316,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "a2cc2a0be2b5c1815fac3ca008b17e0a2ba3d375321f09ac56647897bd28a0b8",
+   "state_action_sha256": "26b09220d7d031959aeabc2def13963805904b6fd8677f279b52d4aaefa5fdad"
+  },
+  {
+   "file": "episode_0000019.hdf5",
+   "length": 197,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "f2a74b9d19627e3480e5b24e01673c70bbf36d5f975e00a58b624c4a9c722f0f",
+   "state_action_sha256": "8910513c93dd36a0f28a5639dfad5131ef5ebab4efc2d8fa55f56df8b4752676"
+  },
+  {
+   "file": "episode_0000020.hdf5",
+   "length": 295,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "d2ca553d2eebe921cc6c0b39b24c6c207cfde05243acd4d6afd3c38b604116d7",
+   "state_action_sha256": "bf13660bcfd5c7f250deaaa9b37b221479a66e8bfc3d1eb090a2bce3ab623ff0"
+  },
+  {
+   "file": "episode_0000021.hdf5",
+   "length": 356,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "c7c6fbc1db288416117670d47f874d53b8033cd7101901a410a421a5a31404f3",
+   "state_action_sha256": "7638ae3a0dbc504626ddb3da67206108150f9a9ef19a0696459deb1b990fc8fd"
+  },
+  {
+   "file": "episode_0000022.hdf5",
+   "length": 386,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "996ea94b2abc6642cc515ddf9b75433f9c3f7a3d11b745e21020e1aa2cb76ab3",
+   "state_action_sha256": "e0e5521453a5ca1b6e4c7c5bb194a65b9fbab060e3eb3d652e198fdf6dc72989"
+  },
+  {
+   "file": "episode_0000023.hdf5",
+   "length": 360,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "94d5e66d2cd6e54dc4f3f364a0598dbca24ee8be9fbf9656f16d4c847bfec80e",
+   "state_action_sha256": "043918e9364f5afb6870a80dea09fea747e168ff9a7705847c399eedd905752d"
+  },
+  {
+   "file": "episode_0000024.hdf5",
+   "length": 455,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "b0012846b8e185de0305cdf0ad26f6eb2f84cc139db10f4e2e1ac98e8d7846a2",
+   "state_action_sha256": "a6a677e0416a3511dd681fbdde4dc75e3e19ed4218ffa99430a4d520a7401a23"
+  },
+  {
+   "file": "episode_0000025.hdf5",
+   "length": 553,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "f81647162cd2c78ccfed7df6749ec317b2e87a4528304bf3a12bea0e5f04e872",
+   "state_action_sha256": "0a55a78d609e95b2933d648abd74178b5eb15c555ea3aa79f60dc9ac79125988"
+  },
+  {
+   "file": "episode_0000026.hdf5",
+   "length": 428,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "b8c3bec7658b923d21bc891523b02c806e926dc45bdbf3ff9a025e5804045920",
+   "state_action_sha256": "1678d1cad8d866f54ffd5104e2aab90faa01627b2e03eee2e266fddfab5fe03b"
+  },
+  {
+   "file": "episode_0000027.hdf5",
+   "length": 310,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "66194a29df7b9ce00614ac858464f2b1f74091304cd9506748a1627840543a94",
+   "state_action_sha256": "b65bb75e22ec514ab46857b8d2c342a2b3ed06154c331c22de21aafd33f0c810"
+  },
+  {
+   "file": "episode_0000028.hdf5",
+   "length": 403,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "c2f6189f669706fb2626eb2437a646a448ad2ce7b6994e8cc5007358daca4d7c",
+   "state_action_sha256": "5ed9ac1612b7a5b91152dbb484214234b31109819ee3661201fecfb3cd24b54a"
+  },
+  {
+   "file": "episode_0000029.hdf5",
+   "length": 285,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "25f9041f13c18418648586f69fa211c2c46967801e3b432a0698ca19691eced3",
+   "state_action_sha256": "07cca673ceebd4d206d26206da21db60ce1a5230f394a08eebc8a5a9e631865c"
+  },
+  {
+   "file": "episode_0000030.hdf5",
+   "length": 250,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "9493560be4bde2db6bbbb1edd877f32fcaa80d28f32a3572e12ad151f0d08cae",
+   "state_action_sha256": "c330ae2bb6937d42c2f02dd6f0c1255863454c66d4cca432a7eae9655fa5634c"
+  },
+  {
+   "file": "episode_0000031.hdf5",
+   "length": 177,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "bde82c4307ed2d1cdd14ea6bc41abe6dd084c226f6e6b4d9de48f9a20b7b0063",
+   "state_action_sha256": "b4b5a1438d4ed962ac12860139f37be24ded28ad65654c17b3c9cf4f121cf203"
+  },
+  {
+   "file": "episode_0000032.hdf5",
+   "length": 319,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "776bc3efb67dbf6b4dcc67d36f3e9b110313855c2e407300caf24a1ccfec74e6",
+   "state_action_sha256": "92c76c620bdfab1b9515a19353a4b6d11be28dd420b81352b0f534d16677f9ff"
+  },
+  {
+   "file": "episode_0000033.hdf5",
+   "length": 320,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "0f9adb1a1b7863cd8cc382cca7161d672a566abed948ba733cb27434dbcd7012",
+   "state_action_sha256": "3acc3666dd7481178878917742f1eaaeed3fb4af9ebe5872a57ff48763425e36"
+  },
+  {
+   "file": "episode_0000034.hdf5",
+   "length": 433,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "767f82ab5cf7b89da566e7af61dd77000cfdf0ad97c400eb84a31e35e1e06061",
+   "state_action_sha256": "e055226d1cc5839f83f6b1e551a303be8d6fa4080395d48c7d292a36f66a5bd1"
+  },
+  {
+   "file": "episode_0000035.hdf5",
+   "length": 212,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "981adc1e581e84b84ecbf911648150865df4532fc93220289730f8c534319c76",
+   "state_action_sha256": "5445c9707b3b362950556c80c13dbf171cdf3ff153959927cc53d097376bfc43"
+  },
+  {
+   "file": "episode_0000036.hdf5",
+   "length": 227,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "0c12817c8b8a41cacb5824f7497893b863ecc9da41137a2c8fae9801875aa2fe",
+   "state_action_sha256": "c8a76f110bb0c836aaa1c0075296b02744216fee5fb34f133929eb53edf789c8"
+  },
+  {
+   "file": "episode_0000037.hdf5",
+   "length": 273,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "3ae048e964e67a4d947a3a1087060c35d355044d3aa5ab28be274590ec1847ee",
+   "state_action_sha256": "e12f8d93e643202f9b6fab6af598832b2976ad6185d36399e05969b5b6fa8fff"
+  },
+  {
+   "file": "episode_0000038.hdf5",
+   "length": 390,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "5fb10494675eca6cf36df1923fa1def61591e23fc091c67ed7bc51fec37692c6",
+   "state_action_sha256": "33130e69dd1efbe0f0d4c582615654dfda555a4d98fb454e39dda480c4c90d7b"
+  },
+  {
+   "file": "episode_0000039.hdf5",
+   "length": 222,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "77e2b7d4ad43673e1ed2349bd74c3bcea3fcb02dd38420428c94518d2421a038",
+   "state_action_sha256": "8426111ff468171b36300b1c2bef4c515d00336105ccd93422afe8472a8a68df"
+  },
+  {
+   "file": "episode_0000040.hdf5",
+   "length": 284,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "8c1919a9f977af6a8bdf9c651c774c7735ad25bc53aca1b7c8f006a1cc661409",
+   "state_action_sha256": "2d20ff04034f8f5e43bff9638e8ccd0326114d32d3c218e423afc41b78713794"
+  },
+  {
+   "file": "episode_0000041.hdf5",
+   "length": 480,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "60a26a3980168e9a89fdd2814902fb34ef811349672c73948aae7987b9a8168c",
+   "state_action_sha256": "5d87b3010cb67eb831a7fba3a49fc9da1ef57e4cd3e4e086a0aabfe26444940c"
+  },
+  {
+   "file": "episode_0000042.hdf5",
+   "length": 169,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "d439a719da00594a489c484e0a07f9627a2d64a179df1f6de520b3865833cc45",
+   "state_action_sha256": "9da943b706a2ef5deb6ea511605c36d6e6b11bdf1e46000f8e40b6e9af2ecc9f"
+  },
+  {
+   "file": "episode_0000043.hdf5",
+   "length": 340,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "a74937aea980dd60d58ad4a9cfc518a84bdf2303e329896effe64da72ca74f52",
+   "state_action_sha256": "678739cf93e8333275f5378822325c7a776982db645a473dcfc6aca468e8704d"
+  },
+  {
+   "file": "episode_0000044.hdf5",
+   "length": 507,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "b2151497f33caa7e9ea2f93fd3bf9645ad861458b4529bfe5b5aed29e68ea6d7",
+   "state_action_sha256": "d742629c9c8f4dd7e667a0409e8889f125027bb0a85f52b9a6096add449193ed"
+  },
+  {
+   "file": "episode_0000045.hdf5",
+   "length": 294,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "52c9c61a88ff98feb0ce0568fda19d19a62f19ceecbd1bffa58b9b2225994485",
+   "state_action_sha256": "5bde257c09cc46b10c7909310ab0a2cd729b06eb0caa7cb8c4ca6c30745848ae"
+  },
+  {
+   "file": "episode_0000046.hdf5",
+   "length": 168,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "3e77786e54fefd5f47823277bc42c08fb0b9a78c824761afbba4124a33ec72af",
+   "state_action_sha256": "ac6284fe4e5ba1e4fef4f89680269584900eab51d50f23537b49f3a1f66943f2"
+  },
+  {
+   "file": "episode_0000047.hdf5",
+   "length": 401,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "6ffc67df4144e8a4c9433b8897611b1a64ccbe8411b4e7ba9b6c3dca6ce04098",
+   "state_action_sha256": "e34d4d9991d5aecd0800777899de5226f3ee2e9dc8f511f24653b129f8454d81"
+  },
+  {
+   "file": "episode_0000048.hdf5",
+   "length": 418,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "de78345b3fa088e7a5aeb4385d4b72cecb2c1d137b37c6988be8ed9bfa3b92f3",
+   "state_action_sha256": "0e2617bbb782df5330f5a831ca02cf916aa13dc7b7f0482df2c285c80b613d94"
+  },
+  {
+   "file": "episode_0000049.hdf5",
+   "length": 188,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "dd8977dce069a5d1b24a3537f87e61cf65a827273d469efd03c97fdc0e3b7483",
+   "state_action_sha256": "ca7e3fb78cdb9419c1d21f82abb186a951fe3e8b6ee1c657eeb33ce11a83035e"
+  },
+  {
+   "file": "episode_0000050.hdf5",
+   "length": 567,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "704731a5d3e33691497df27ecb20472eb2795c11f4aa38833e99d432d784c5d9",
+   "state_action_sha256": "55fdcd010efde375958d99389b3783acae8fa3243c840facc62c132717f708db"
+  },
+  {
+   "file": "episode_0000051.hdf5",
+   "length": 383,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "082520c3cc2bcf64fa19a41c4426c7cb5bf67b2642f8204dab4558085c193f77",
+   "state_action_sha256": "4da23ee73376661656cb7a2999b9ac4f2d79eedc4a12c8ae8f2dbaec4f02b9fe"
+  },
+  {
+   "file": "episode_0000052.hdf5",
+   "length": 427,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "e29b94554b4519f89c94b6d6e95570093811a701363918a72f737d424f6efdac",
+   "state_action_sha256": "da4bf9896eef7aac0ce5c2948d663c1feb2f36960d24a4710ef242c2dbc7a6ac"
+  },
+  {
+   "file": "episode_0000053.hdf5",
+   "length": 254,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "7d6238a256ef1c839ed2d146b1bd9ba61a31cfa60d3ccf2731b20906438069e7",
+   "state_action_sha256": "a50e4495cf7b93f48254c7d5590959ffaf19b5125a9cb8524a3f4ecb068aa4e3"
+  },
+  {
+   "file": "episode_0000054.hdf5",
+   "length": 422,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "408529e127aef8c8527a4a480b68a02f767bcbf7cd2bfdfe39bee10dac3ec076",
+   "state_action_sha256": "4d1af0ac788364ab798f393892c74a1bcefbacc0e6e71dc071b7c802fd6896a6"
+  },
+  {
+   "file": "episode_0000055.hdf5",
+   "length": 330,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "7b0b7e8d7e29b8cb2883aece8599fa56052d2c5c936b99be4e4072d18b193d6b",
+   "state_action_sha256": "0b74cdcb5cf1780516e4ab264d1a0d66f37c49ea98b14c4892006c59d71a463f"
+  },
+  {
+   "file": "episode_0000056.hdf5",
+   "length": 170,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "f9b394d62ed14abb752fe48f22bc01066b58da8eccf25d25deb148ef3f8942c3",
+   "state_action_sha256": "f7c3890a43445417daf6785c838f283976f20c627aad5350f43ed40d62ccbc2c"
+  },
+  {
+   "file": "episode_0000057.hdf5",
+   "length": 271,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "69052ef5b94306c780c6891220dc2ae12094b738f5514b4459a402699e0e2404",
+   "state_action_sha256": "0a11ca34fd0936e8c9935f8b3e4bfe44750cb8d1a344303aff26072be379ecd6"
+  },
+  {
+   "file": "episode_0000058.hdf5",
+   "length": 344,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "27400b9eb29a5bef8111962993055333964718022836f7254fe17e1e4fd4795f",
+   "state_action_sha256": "6c12e3ce3ee7fc04ec137298fb9c6a156df8ebee1548d52ed93b9e3b960964d5"
+  },
+  {
+   "file": "episode_0000059.hdf5",
+   "length": 417,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "4198a742a2fecbb0ec4b1b4b425fed300902e034d3be41ab5ebebba41bc1fd11",
+   "state_action_sha256": "dc35963d7db2840d01fad9f138b599af581b5b3a621f0ec416f2baf8efdad48c"
+  },
+  {
+   "file": "episode_0000060.hdf5",
+   "length": 426,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "85b446f4422ba58eaeb105acf91a152a06f5051cc90eeabface046aa1cdf539d",
+   "state_action_sha256": "fdbe909fd3495d2a0bf523a00350252592767ae6d863db175219f5b56b22fcb3"
+  },
+  {
+   "file": "episode_0000061.hdf5",
+   "length": 252,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "03c0b7d62bb64feeec78e879b7eed3f326a96f5955c9e8e281ddef2d61d10bea",
+   "state_action_sha256": "d3990c931bdc00295e8dab41bc4538608fda046b79d0f0f4847763080732d678"
+  },
+  {
+   "file": "episode_0000062.hdf5",
+   "length": 294,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "9c531bb97ebe434085fc95e482bd1c4bd340af65c7e16641c73496aa547c6bfe",
+   "state_action_sha256": "d3846565e710e6362666eca745f99c38574e524ea372dd305c1194d8d07e2f17"
+  },
+  {
+   "file": "episode_0000063.hdf5",
+   "length": 202,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "f0c7c90e8bb70123960eced994b4a4035402b9ad2c373b0cfde47cd63317ff2b",
+   "state_action_sha256": "f913b7b6c6ed947ee1454d09b6923a2bbc014fcec6b0f43d130b5fd3e1b83455"
+  },
+  {
+   "file": "episode_0000064.hdf5",
+   "length": 241,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "49da8f03e0d9e8c8181854ac1fb377d119f481191a3df51a452f75d4d13ddaa3",
+   "state_action_sha256": "2467e4a1191d543a65373b4a9170465c6e152da0d17c598f04face8ae10b2217"
+  },
+  {
+   "file": "episode_0000065.hdf5",
+   "length": 334,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "f5f1aab1f584767d2800972ca0f16acb22c2d1208210fbbfa2c83e10dfcdb733",
+   "state_action_sha256": "ae073c758eaa6245063d841f857e74254a4c75877c10ed6c780ac066e3103cbb"
+  },
+  {
+   "file": "episode_0000066.hdf5",
+   "length": 252,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "124b053a8851e2112219eb65adad77da89e7a7bcea8ffd8c8725bf5738bbbcd7",
+   "state_action_sha256": "93ee62edb917fe3c9e77783b705717629a697e519f306743a194c63c40739e79"
+  },
+  {
+   "file": "episode_0000067.hdf5",
+   "length": 322,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "8198f87fbd8c1ef2194e2cadb592dfcbc0f8078405cfcd9a18f5dffc1ef47593",
+   "state_action_sha256": "2ef7d0fe9eadc0403e5b32541131b09e1beffe38ab930b3e81bef1c323108eb5"
+  },
+  {
+   "file": "episode_0000068.hdf5",
+   "length": 228,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "eb1e9103c78e9e573c8d243d953e45552e4f0d59af89a2fed51414f9d87f0be7",
+   "state_action_sha256": "061bca301170d82a7918d91ac754f8529025897530cfb50158a964e6ef58ed4e"
+  },
+  {
+   "file": "episode_0000069.hdf5",
+   "length": 355,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "c367cd55382e96399ecef5586798e6676803f5d140ab291dff861432a2f77113",
+   "state_action_sha256": "ba51b350d2ac14dad8a585aafed0d425bdbc39ba20fa2099046de2ae27cd8e81"
+  },
+  {
+   "file": "episode_0000070.hdf5",
+   "length": 302,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "9bb1e60f383365f7d0b1608150488f6783de7eb6d9a5e666137dfddeabe69703",
+   "state_action_sha256": "3deef0aa39e7ce2202cc552f23d0df8758880f5be3939d980fe52bcd007dba3f"
+  },
+  {
+   "file": "episode_0000071.hdf5",
+   "length": 303,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "ab1cc4783b722544629b52449078879eaa55ffe9bcdcd177738d07bcc7335a42",
+   "state_action_sha256": "8f0e83646b7de7ba3c9ea272bebf148da9d681a26bbbf6c8ec96a40a506d9181"
+  },
+  {
+   "file": "episode_0000072.hdf5",
+   "length": 429,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "c981de78a601594bb21c2376d4ebabc4be013c7838a8532b6d150f6e7aacefbf",
+   "state_action_sha256": "42954aadfe7141735770e86dfd61fe3915e383efcc593684fdb75f93615b46a3"
+  },
+  {
+   "file": "episode_0000073.hdf5",
+   "length": 186,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "24b66371b208e8ebc77965ed4bc82ef8fa25afa471848250dd0d90c357ff7e26",
+   "state_action_sha256": "a3a612652b7019c2e4c5f7eba197b050a0cddf9d1a5a6cd71939cbbe34b59c1d"
+  },
+  {
+   "file": "episode_0000074.hdf5",
+   "length": 235,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "14e7496ce0f32f460db6121ef5559bae01ea1fe3568e1740ceccea9038cb2760",
+   "state_action_sha256": "aa2251b7451163b0a8f881fd84a5bff9512a05e385d5f0fdf6943afe1d2b1c65"
+  },
+  {
+   "file": "episode_0000075.hdf5",
+   "length": 251,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "802938697e62b9fe8ae14dae50f4c437afb2d9bac166b79035c7c64769ac8608",
+   "state_action_sha256": "de560dc44038d3263a18608fe6e06516ba82e0b402140d3980edfcf2e0952a10"
+  },
+  {
+   "file": "episode_0000076.hdf5",
+   "length": 159,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "44948e1b53b33c1975f236a5b804b86a43e5fb0ae7e4bc0a249169cef122b05a",
+   "state_action_sha256": "467aff6eb0e7f3f1fe697eeb1b4c6324abd2ab2ec9ad401e44a2533bd650401f"
+  },
+  {
+   "file": "episode_0000077.hdf5",
+   "length": 513,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "b33e129536e5eb5009af67324355196d1e8bd6a6ac37a20f7d6e4999eadfe2fd",
+   "state_action_sha256": "96d356ed3a0055672acf866b61dfe561fb8dc9aacd0c1fa72c8a5ce3fb2241f3"
+  },
+  {
+   "file": "episode_0000078.hdf5",
+   "length": 181,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "495002d8db5f5583be14a110b1fe5fd1c4e858c661d34a6e57540164e082bc1e",
+   "state_action_sha256": "bbbf6017be030b5c15a3f90d7bb7dc89c6af963b3e0ba7e60fc8e74fcc5569c6"
+  },
+  {
+   "file": "episode_0000079.hdf5",
+   "length": 351,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "d2858ce4eec94f30bf4a95b88d2fe0aa98c76761b7b37a5a0564f305f91f928c",
+   "state_action_sha256": "cfab8cc098c81f5adb6ff860f87cc4d318254966469389f5eb538369cfbeac7a"
+  },
+  {
+   "file": "episode_0000080.hdf5",
+   "length": 183,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "e23bd449b049745dd525b85888bf8b98e819a710c51e47a8d6856871c7850672",
+   "state_action_sha256": "addde28f881220543fd9455d7b71aa3bea1e20ae7017eb9239c70e1ebdebf841"
+  },
+  {
+   "file": "episode_0000081.hdf5",
+   "length": 358,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "748cb084d177682b65b9b74a1e885e66c98439899d40e23f831ee572e7fbc24d",
+   "state_action_sha256": "45df13579ce0f01a3c76651232a81a303cb3ec5a5e414aee478662167ce40142"
+  },
+  {
+   "file": "episode_0000082.hdf5",
+   "length": 466,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "30c56c09b9ec24180e80407d6735095c6d4e5817358d32fec4bbf4be2d7b5ed4",
+   "state_action_sha256": "4e028572262dbd1f3a0119947284d1cfb4360155fc2da909648d021adb02fb47"
+  },
+  {
+   "file": "episode_0000083.hdf5",
+   "length": 371,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "d11e1d5ce42e5d3ecd6162ae861310b63c55ead18fba782c7206a2839122f050",
+   "state_action_sha256": "9f1eddb2502aaece59df1aa22f38ae9f1aefe997183f7e6d9c289865650d3db9"
+  },
+  {
+   "file": "episode_0000084.hdf5",
+   "length": 227,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "8df92b3384a262af88f786f67f11548af1c893048b5828a04cccb8c3fd3d9c55",
+   "state_action_sha256": "d8976fddb2810aa57a5ff3e8b08384967d56c9b824b7594d5194183eb1a43859"
+  },
+  {
+   "file": "episode_0000085.hdf5",
+   "length": 371,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "d5ab596f1c972ab73ba215e5d41697c441d496c46f88a5e0e8f8be03d5410b05",
+   "state_action_sha256": "aa73e8eec83267de672316e8671cf8d5d19e7853b8439d0f6ab7ffc2900af402"
+  },
+  {
+   "file": "episode_0000086.hdf5",
+   "length": 183,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "6706495a1d39f93486da7401f031d6b8badadc24129aee0721eb926efad25a69",
+   "state_action_sha256": "2cc648cf3b8766ef858822cb164f29205656b5b8e630428b2845c9c561d2b534"
+  },
+  {
+   "file": "episode_0000087.hdf5",
+   "length": 261,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "7c16e4a480b67448eab2d43d2fa619b6a1ccdc327339050e37bb2369a1b3b358",
+   "state_action_sha256": "4385050512fdff6e5a7ffe5177b21306e86826cd7741e63d08abd7cb14370241"
+  },
+  {
+   "file": "episode_0000088.hdf5",
+   "length": 447,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "e42747228d377d0283fbe0a1e3c45f4b02e1b5df953f1b59c627f2178a81ca8c",
+   "state_action_sha256": "4d199b416ff8131cc1b2b2fb44dee267c0743f54a422cdc051d367e75a37ca08"
+  },
+  {
+   "file": "episode_0000089.hdf5",
+   "length": 392,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "1189128585d22cf973d815aaa0592ba9066df45be2fd9765a86796ef7b5680f0",
+   "state_action_sha256": "b6b8887de87cc17886f6f17c97a2233abe2f50e27996e40c59d23b5441e63811"
+  },
+  {
+   "file": "episode_0000090.hdf5",
+   "length": 156,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "8f9abd6238eeb1e649a086b899cba6aa0ed5dbfd8b0c491f871d5c21eb47e3e6",
+   "state_action_sha256": "573d7c8b690cbae3f1198295f26fe4cdd1bd9d9c36eadf010b2c30e30e70141c"
+  },
+  {
+   "file": "episode_0000091.hdf5",
+   "length": 393,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "3ff434b8e73db59b5c0b64e53f0ef6d289acddae7f63d342ebefac6b6e892729",
+   "state_action_sha256": "98a80481057bcd3933154e78c2247d215b86ed0ec51b5e206a200bdb94191b9e"
+  },
+  {
+   "file": "episode_0000092.hdf5",
+   "length": 234,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "74d0a7d23410934b9b6142f71928f22aedf80004d0d8981555e6022b0b113e54",
+   "state_action_sha256": "98481d016124c213ece05d9d2f065fd93e5e48d09af40ff3888b1d577af3e216"
+  },
+  {
+   "file": "episode_0000093.hdf5",
+   "length": 211,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "c26e72b5edc31e3026b10cd26e610de9e9b165ed3b8c9b4d5ab3ed8c4985f746",
+   "state_action_sha256": "05b68178a2eacb954986e8848ad2522b720ce53d7e23e5948fd15673703ebdd7"
+  },
+  {
+   "file": "episode_0000094.hdf5",
+   "length": 310,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "ef9d169c688970eb73e0591ca75d7b9a573e2d3735cd7d895863f7d5d69df081",
+   "state_action_sha256": "183c40d2b993f41cfde5670ae475190dba40a47ad9cf48d50808f8957e295a07"
+  },
+  {
+   "file": "episode_0000095.hdf5",
+   "length": 228,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "7208318447b71d5b92aa2d06b1811f91e4df8cac0f1309a3fb1b3856d5e4543c",
+   "state_action_sha256": "e30133f772f78d3eb0fe8f0391359d6311fcb2a1cad3e872f912b134f9776c88"
+  },
+  {
+   "file": "episode_0000096.hdf5",
+   "length": 300,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "efbdf08d314147a35eb7eacdb6945d779eebfcc9dee45d2516b94e3f4b581e72",
+   "state_action_sha256": "2283a2a6edbe2f8b847dec9c81889699803e498122f67447dbbd9c72bb0e675d"
+  },
+  {
+   "file": "episode_0000097.hdf5",
+   "length": 286,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "fdc67ca30c8e3d1a668417fca1de78ff220e8e2d0ca9cfb52e2be568d9992bab",
+   "state_action_sha256": "2c24d47e64af6bad41b74085bf82c98d9d33c7f3e99f5afa2f8ffc72d747cec8"
+  },
+  {
+   "file": "episode_0000098.hdf5",
+   "length": 248,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "6f130a2ddafee82f996f802c0900e269ab91961651b89acd3222bb799c03b233",
+   "state_action_sha256": "357ecc71ae752bd2433a5cfbc9b7c4b4b8086b13aa0bbc8aca49d93d4c0a8711"
+  },
+  {
+   "file": "episode_0000099.hdf5",
+   "length": 189,
+   "instruction": "Push the T-shaped block to align it precisely with the gray T-shaped pad.",
+   "frequency": 25,
+   "content_sha256": "c239c1b230fe49c56267035569e9f69790e9ae18032704fd2a57979bdfc7c26d",
+   "state_action_sha256": "bd215abe1c972a409b6d6f4b621aabfe2fb5b1a70c9bf650a157590018ad03d7"
+  }
+ ]
+}

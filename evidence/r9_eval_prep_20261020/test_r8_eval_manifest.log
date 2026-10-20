@@ -1,0 +1,17 @@
+test_build_is_deterministic (__main__.TestManifest) ... ok
+test_content_hash_detects_a_single_changed_value (__main__.TestManifest) ... ok
+test_disjoint_detects_overlap_with_used_split (__main__.TestManifest) ... /home/T7/ojh/robot_actual/r9_D/tools/r8_eval_manifest.py:103: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpzr6yz9ov/split.json' mode='r' encoding='UTF-8'>
+  split = json.load(open(split_path))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_duplicate_content_detected (__main__.TestManifest) ... ok
+test_freeze_binds_manifest_protocol_and_sha (__main__.TestManifest) ... /home/T7/ojh/robot_actual/r9_D/tests/test_r8_eval_manifest.py:99: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp84drh0zp/frozen.json' mode='r' encoding='UTF-8'>
+  reloaded = json.load(open(out))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_verify_reports_tampering (__main__.TestManifest) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.167s
+
+OK

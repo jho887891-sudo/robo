@@ -1,0 +1,18 @@
+{
+ "ok": false,
+ "n_overlap_with_used": 100,
+ "overlapping_files": [
+  "episode_0000000.hdf5",
+  "episode_0000001.hdf5",
+  "episode_0000002.hdf5",
+  "episode_0000003.hdf5",
+  "episode_0000004.hdf5",
+  "episode_0000005.hdf5",
+  "episode_0000006.hdf5",
+  "episode_0000007.hdf5",
+  "episode_0000008.hdf5",
+  "episode_0000009.hdf5"
+ ],
+ "n_duplicate_content": 0,
+ "used_episode_count": 100
+}

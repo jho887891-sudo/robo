@@ -1,0 +1,140 @@
+{
+ "mission_id": "RD-R9-GATE-20261020-01",
+ "protocol_version": "r9.1",
+ "status": "BLOCKED_DATA_ACQUISITION_AUTHORIZATION",
+ "goal": "an untouched final evaluation set for push_T (episode-disjoint from the 100 episodes used by R2-R9), frozen BEFORE any model is evaluated on it",
+ "task": "push_T",
+ "extends": {
+  "r8_protocol": "protocol/r8_eval_protocol.json",
+  "r8_protocol_sha256": "48ad7326f9ae938ecdd8d9e19e219297fcb594fbcbb823066cecc1163327aa55",
+  "note": "metrics/baselines/gates are inherited unchanged; only the acquisition, freeze and disjointness rules are extended"
+ },
+ "inclusion": {
+  "instruction_contains": "Push the T-shaped block",
+  "frequency_hz": 25,
+  "min_frames": 100,
+  "require_state_action_14d": true,
+  "require_three_cameras": [
+   "cam_head",
+   "cam_left_wrist",
+   "cam_right_wrist"
+  ]
+ },
+ "exclusion": {
+  "must_be_content_disjoint_from": {
+   "dataset_sha256_of_used_100": "6757696397863af8058b296a80f9c50ccfc1ed824c43e8d6f6f122cbd610040a",
+   "split_file": "data/split80.json",
+   "rule": "no file name overlap AND no content_sha256 overlap with any of the 100 used episodes"
+  },
+  "never_used_in": [
+   "R2",
+   "R3",
+   "R4",
+   "R5",
+   "R6",
+   "R7",
+   "R8",
+   "R9 discovery"
+  ],
+  "must_be_recorded_after_utc": "2026-10-20T00:00:00Z",
+  "reject_placeholders_below_bytes": 100000,
+  "reject_other_tasks": true
+ },
+ "splits": {
+  "dev_episodes": 5,
+  "final_episodes_min": 15,
+  "rule": "episode-level disjoint; DEV chosen by seeded hash of the content_sha256; FINAL is the remainder",
+  "dev_final_must_be_disjoint": true
+ },
+ "metrics_primary": [
+  "physical L1 over 14 joint dims (frame mean, then episode macro)",
+  "velocity-correction R^2 = 1 - Var(R_hat - R_gt)/Var(R_gt)",
+  "sign agreement on |delta| >= 1e-3",
+  "episodes beating copy-V (>= 90%)"
+ ],
+ "metrics_secondary": [
+  "cosine(delta_hat, delta_gt)",
+  "per-arm L1",
+  "per-dim L1",
+  "motion-stratum L1",
+  "magnitude ratio"
+ ],
+ "baselines": [
+  "identity A_hat=S",
+  "constant velocity A_hat=S+V",
+  "TRAIN-only affine [S,V]",
+  "42D MLP holdout reference (exploratory only)"
+ ],
+ "acquisition_routes": [
+  {
+   "id": "official_increment",
+   "episodes": [
+    20,
+    128
+   ],
+   "estimated_bytes": [
+    1555865460,
+    9957538944
+   ],
+   "requires_authorization": "data download by the research lead",
+   "precheck": "content hash must not collide with the used 100 (tools/r8_eval_manifest.py disjoint)",
+   "executed": false
+  },
+  {
+   "id": "new_collection_expert_script",
+   "episodes": [
+    20,
+    30
+   ],
+   "estimated_bytes": [
+    1555865460,
+    2333798190
+   ],
+   "requires_authorization": "simulation collection by the research lead",
+   "precheck": "same task/robot/3 cameras, 25 Hz, record in a NEW directory, never overwrite existing data",
+   "executed": false
+  },
+  {
+   "id": "cross_task_transfer",
+   "episodes": [
+    20
+   ],
+   "estimated_bytes": [
+    1555865460
+   ],
+   "requires_authorization": "not authorizable as a push_T final set",
+   "precheck": "rejected: demo/stack_bowls/sweep_blocks are different tasks (see r9_data_sources.json)",
+   "executed": false,
+   "permitted": false
+  }
+ ],
+ "freeze_procedure": [
+  "g1 build: tools/r8_eval_manifest.py build --data-dir <new dir> --task-filter push --out manifest.json",
+  "g2 verify: tools/r8_eval_manifest.py verify --manifest manifest.json  (must be ok)",
+  "g3 disjoint: tools/r8_eval_manifest.py disjoint --manifest manifest.json --split data/split80.json (must be ok)",
+  "g4 size: n_episodes >= final_episodes_min (15)",
+  "g5 freeze: tools/r8_eval_manifest.py freeze --manifest manifest.json --protocol protocol/r9_eval_protocol.json --git-sha <SHA> --out frozen_manifest.json",
+  "g6 commit the frozen manifest and its sha256 BEFORE any model touches the set; any later change invalidates the evaluation"
+ ],
+ "gates": {
+  "g1_build": "manifest built from the new directory",
+  "g2_verify": "manifest verifies against the directory (content hashes stable)",
+  "g3_disjoint": "no name/content overlap with the used 100, no duplicate content inside",
+  "g4_size": "at least 15 FINAL episodes",
+  "g5_freeze": "frozen manifest committed with protocol sha + git sha",
+  "g6_no_peek": "no model evaluation on FINAL before g5"
+ },
+ "forbidden": [
+  "downloading or recording data without research-lead authorization",
+  "evaluating FINAL before the freeze is committed",
+  "reusing any of the 100 used episodes (or their frames) as FINAL",
+  "presenting cross-task data as a push_T final set",
+  "overwriting existing HDF5 files or previous evidence"
+ ],
+ "evidence_requirements": [
+  "r9_data_sources.json (survey + budgets)",
+  "manifest + verify + disjoint JSON for every candidate directory",
+  "frozen manifest sha256 and the git SHA that committed it",
+  "coverage report vs coverage_targets_from_existing_set"
+ ]
+}
