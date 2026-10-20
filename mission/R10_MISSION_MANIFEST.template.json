@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "mission_id": "RD-R10-AUTH-20261020-01",
+  "kind": "R10_EXECUTION_OUTPUT_TEMPLATE",
+  "status": "AUTHORIZED_NOT_EXECUTED",
+  "authored_utc": "2026-10-20",
+  "owner": "research_lead",
+  "execution_agent": "deepseek",
+  "independent_auditor": "chatgpt",
+  "baseline": {
+    "r9_atlas": "fdb65da13fcf0ae5ae8d927b5864b0aedf2dd4d5",
+    "r8_audit": "52422372e5eacdcd0ee841ef2b91bdc5a71066c7",
+    "r9_A": "f7b8b39e2394772ae6b2d8d929c7a0ba0fb10ed9",
+    "r9_B": "1cd50f1ae447a73289fd3a2dfd24eb14e973681d",
+    "r9_C": "02735bc2f16d60275ece01526f68860feafd5054",
+    "r9_D": "f8e43b0ca6ccaa8a5711e338ba12e0f3be69328f",
+    "audit_PR11": "93faece89a101b4fc31071781d6297eab121783a",
+    "audit_PR12": "026d48e0e5efbdee58eb31185a8bb135b0ffba09",
+    "main_protected_readonly": "329614f54d3090b9b6ab120855ba50fbc93bdd1e"
+  },
+  "approved": {
+    "gpu_kv": {
+      "approved": true,
+      "max_sessions": 1,
+      "max_total_seconds_including_load": 300,
+      "min_free_vram_gib": 24,
+      "optimizer_steps": 0
+    },
+    "new_push_t_capture": {
+      "approved": true,
+      "new_episodes": 25,
+      "dev_episodes": 5,
+      "final_episodes": 20,
+      "task": "push_T",
+      "robot": "arx_x5",
+      "cameras": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "frequency_hz": 25,
+      "do_not_overwrite": true
+    },
+    "official_download": false,
+    "large_scale_training": false,
+    "openvla_optimizer_steps": 0,
+    "merge_main": false,
+    "production_deployment": false
+  },
+  "gates": [
+    {
+      "id": "P0_CPU_PREFLIGHT",
+      "status": "NOT_STARTED",
+      "checked_source_shas": [],
+      "tests": [],
+      "failure_evidence": [],
+      "comment": "PR11/PR12 remote regressions and 256-bin GPU sidecar readiness"
+    },
+    {
+      "id": "KV_GPU_DIAG_EXECUTION",
+      "status": "AUTHORIZED_NOT_STARTED",
+      "gpu_actual_sessions": 0,
+      "wall_seconds": null,
+      "gpu_vram_free_gib": null,
+      "logits_sidecar_sha256": null,
+      "raw_logs": [],
+      "comment": "DIAG_EXECUTED is separate from KV_EQUIVALENT"
+    },
+    {
+      "id": "KV_EQUIVALENT",
+      "status": "OPEN_UNVERIFIED",
+      "n_match": null,
+      "n_total": 14,
+      "first_mismatch": null,
+      "root_cause": "OPEN",
+      "logs": []
+    },
+    {
+      "id": "NEW_CAPTURE_25",
+      "status": "AUTHORIZED_NOT_STARTED",
+      "attempted": 0,
+      "valid": 0,
+      "hdf5_dir": null,
+      "raw_capture_logs": []
+    },
+    {
+      "id": "DEV5_FINAL20_FREEZE",
+      "status": "BLOCKED_DEPENDS_ON_CAPTURE",
+      "dev_count": 0,
+      "final_count": 0,
+      "reference_100_dataset_sha256": "6757696397863af8058b296a80f9c50ccfc1ed824c43e8d6f6f122cbd610040a",
+      "frozen_manifest_sha256": null,
+      "freeze_git_sha": null,
+      "evaluated_final": false
+    }
+  ],
+  "no_training_attestation": {
+    "optimizer_steps": 0,
+    "new_checkpoints": 0
+  },
+  "branch_shas": [],
+  "source_checksums": [],
+  "commands_with_exit_codes": [],
+  "open_hypotheses": [],
+  "failures": [],
+  "independent_audit": {
+    "status": "PENDING",
+    "review_commit": null
+  },
+  "route_update": {
+    "status": "PENDING_REAL_EXECUTION",
+    "path": "ROUTE.md"
+  }
+}
