@@ -1,0 +1,283 @@
+{
+  "schema_version": "1.0",
+  "written_date": "2026-10-21",
+  "kind": "FUTURE_PROJECT_ROADMAP_NOT_EXECUTION",
+  "repo": "jho887891-sudo/robo",
+  "protected_main_sha": "329614f54d3090b9b6ab120855ba50fbc93bdd1e",
+  "source_r10_sha": "4af5d603c6410ec951ac8b1b138312bbdebb9c24",
+  "source_review_sha": "429e28affd67f9643a122bdb5bc0f958f9befa43",
+  "official_robodojo_inventory_sha": "09bd5f5e762b949f5858ece31347ce62057b3a5e",
+  "scope": {
+    "phase": "PROPOSED_UNFROZEN",
+    "official_dimension": "generalization",
+    "n_tasks": 12,
+    "n_random_variant_ood": 12,
+    "task_names": [
+      "stack_bowls",
+      "push_T",
+      "pack_objects_into_box",
+      "fold_clothes",
+      "hang_mugs",
+      "sweep_blocks",
+      "pour_liquid_into_cup",
+      "make_toast",
+      "arrange_largest_number",
+      "sort_nesting_dolls_by_size",
+      "store_laptop_and_headphones",
+      "stack_blocks"
+    ]
+  },
+  "milestones": {
+    "M1": {
+      "task": "push_T",
+      "status": "PLANNED",
+      "criterion_proposal": "at least 10/30 new simulator seeds succeed plus safe action contract, no-op/CV matched comparison; preregistration needed"
+    },
+    "M2": {
+      "task": "12-task one-checkpoint generalist",
+      "status": "PLANNED",
+      "criterion_proposal": "12/12 interface, 12/12 sim reports; competence 3/30 each and >=25% macro; preregistration needed"
+    },
+    "M3": {
+      "task": "planner, semantic perception and active sensing",
+      "status": "OPTIONAL_RESEARCH",
+      "criterion_proposal": "evidence-backed matched ablation or honest null result"
+    }
+  },
+  "authorized_now": [
+    "conditional owned Push-T long eval graceful shutdown",
+    "1x KV GPU <=300s >=24 GiB free",
+    "25 new push_T episodes DEV5 FINAL20 (unknown collector gated)"
+  ],
+  "not_authorized": [
+    "7B optimizer steps",
+    "extra GPU after KV",
+    "11 other task collections/downloads",
+    "merge main",
+    "production or real-robot deployment"
+  ],
+  "phases": [
+    {
+      "id": "R10.1",
+      "title": "安全归档与资源恢复",
+      "deps": [],
+      "status": "CONDITIONALLY_AUTHORIZED_PENDING_REMOTE",
+      "approved": "owned-project graceful release only",
+      "gates": [
+        "old eval provenance",
+        "safe shutdown if no consumers",
+        "PR14 freeze real CPU regression",
+        "k1 read-only audit"
+      ]
+    },
+    {
+      "id": "R11",
+      "title": "7B KV cache real diagnosis",
+      "deps": [
+        "R10.1_GPU_AVAILABILITY"
+      ],
+      "status": "AUTHORIZED_NOT_EXECUTED",
+      "approved": "single <=300s GPU diagnostic; >=24GiB available",
+      "gates": [
+        "real logits sidecar 14x256",
+        "cache-full teacher-forced prefix consistency",
+        "no false success/exit"
+      ]
+    },
+    {
+      "id": "R12",
+      "title": "Push-T independent 25 capture and freeze",
+      "deps": [
+        "R10.1_COLLECTOR_AUDIT",
+        "R10.1_FREEZE_AUDIT"
+      ],
+      "status": "CAPTURE_AUTHORIZED_EXECUTION_BLOCKED",
+      "approved": "new Push-T 25: DEV5 FINAL20; collector execution subject to source safety",
+      "gates": [
+        "25 real new HDF5",
+        "camera/timing/joint 14D",
+        "old100 and internal content disjoint",
+        "sealed 5/20 lists",
+        "before any FINAL eval"
+      ]
+    },
+    {
+      "id": "R13",
+      "title": "real 7B 42D no-optimizer smoke + deploy",
+      "deps": [
+        "R11"
+      ],
+      "status": "PLANNED_NEEDS_NEW_GPU_AUTH",
+      "gates": [
+        "0 updates",
+        "42D projector gradient",
+        "14 autoreg bins",
+        "train/deploy preprocessing",
+        "checkpoint hash readback",
+        "runtime action-dim safety"
+      ]
+    },
+    {
+      "id": "R14",
+      "title": "clean TRAIN-only controlled overfit",
+      "deps": [
+        "R13"
+      ],
+      "status": "PLANNED_NEEDS_TRAINING_AUTH",
+      "gates": [
+        "<=100 steps",
+        "no DEV/FINAL fit",
+        "nonzero gradient",
+        "token/command learning",
+        "no no-op collapse"
+      ]
+    },
+    {
+      "id": "R15",
+      "title": "Push-T staged training",
+      "deps": [
+        "R14"
+      ],
+      "status": "PLANNED_NEEDS_TRAINING_AUTH",
+      "gates": [
+        "300->1000->3000 separately",
+        "DEV vs constant velocity",
+        "metadata + seeds",
+        "fail-closed early stop"
+      ]
+    },
+    {
+      "id": "R16",
+      "title": "Push-T closed-loop and untouched sim FINAL",
+      "deps": [
+        "R15",
+        "R12"
+      ],
+      "status": "PLANNED_NEEDS_SIM_GPU_AUTH",
+      "gates": [
+        "latency/control clock",
+        "DEV 1->5->10",
+        "fixed 30-seed simulation final",
+        "object progress, score and Wilson CI"
+      ],
+      "milestone": "M1"
+    },
+    {
+      "id": "R17",
+      "title": "12-task task scope/installed-contract inventory",
+      "deps": [],
+      "status": "CPU_PLANNED_SAFE_PARALLEL",
+      "gates": [
+        "frozen 12-task list",
+        "installed simulator commit",
+        "task-cameras-action-spec each",
+        "source licenses"
+      ],
+      "milestone": "M2 prerequisite"
+    },
+    {
+      "id": "R18",
+      "title": "11-task new data + provenance",
+      "deps": [
+        "R17"
+      ],
+      "status": "PLANNED_NEEDS_DATA_AUTH",
+      "gates": [
+        "training data each task",
+        "dev and independent final each",
+        "strict episode/scene dedup",
+        "valid collector and licenses"
+      ]
+    },
+    {
+      "id": "R19",
+      "title": "shared language-conditioned multi-task policy",
+      "deps": [
+        "R13",
+        "R17",
+        "R18_PARTIAL_TWO_TASKS"
+      ],
+      "status": "PLANNED_CPU_FIRST_GPU_LATER",
+      "gates": [
+        "2->4 compatible TaskSpec",
+        "shared model",
+        "task prompt real",
+        "task-specific train-only normalizers",
+        "per-env 42D history",
+        "deploy equals train"
+      ]
+    },
+    {
+      "id": "R20",
+      "title": "2->4->12 multitask training",
+      "deps": [
+        "R18",
+        "R19"
+      ],
+      "status": "PLANNED_NEEDS_LARGE_GPU_AUTH",
+      "gates": [
+        "balanced training",
+        "anti-forgetting matrix",
+        "per-task DEV",
+        "single frozen checkpoint"
+      ]
+    },
+    {
+      "id": "R21",
+      "title": "12-task simulation FINAL evaluation",
+      "deps": [
+        "R20"
+      ],
+      "status": "PLANNED_NEEDS_SIM_GPU_AUTH",
+      "gates": [
+        "12 of 12 protocols",
+        "proposed 12x30 untouched sim seeds",
+        "per task & macro success and CI",
+        "honest M2 capability verdict"
+      ],
+      "milestone": "M2"
+    },
+    {
+      "id": "R22",
+      "title": "scene/world state/planner/active perception ablation",
+      "deps": [
+        "R21"
+      ],
+      "status": "OPTIONAL_RESEARCH_NEEDS_AUTH",
+      "gates": [
+        "distinct hypothesis",
+        "matched baseline data/compute",
+        "independent gain or honest null"
+      ],
+      "milestone": "M3"
+    },
+    {
+      "id": "R23",
+      "title": "audited final handoff",
+      "deps": [
+        "R16",
+        "R21"
+      ],
+      "status": "PLANNED",
+      "gates": [
+        "provenance SHA",
+        "versioned report",
+        "rollout videos & metric calculators",
+        "ROUTE append-only",
+        "no unauthorized main merge"
+      ],
+      "milestone": "RELEASE"
+    }
+  ],
+  "delivery_per_phase": [
+    "branch_full_sha",
+    "raw_stdout_stderr_exit",
+    "env_and_budget",
+    "tests_and_negative_controls",
+    "logits_or_predictions",
+    "model_and_data_sha",
+    "stage_manifest",
+    "append_route_only_after_verified"
+  ],
+  "instructions": "Never conflate PLANNED with VERIFIED; freeze affected dependent line on failure; CPU independent safe tasks continue."
+}
