@@ -92,6 +92,21 @@ def main():
                 {"mlp_mean_L1": mean_acc, "cv": sidecar_L1[per_seed[0]["seed"]]["cv"],
                  "relative_improvement": 1 - mean_acc / sidecar_L1[per_seed[0]["seed"]]["cv"]})
 
+    # ---- claim 2b: per-dimension split - is the correction useful on every channel?
+    z0 = np.load(os.path.join(args.run_dir, "pred_SVAcc_R_%d.npz" % per_seed[0]["seed"]))
+    err_m = np.abs(z0["cmd"] - z0["gt"])
+    err_cv0 = np.abs(z0["state"] + z0["V"] - z0["gt"])
+    worse = [int(d) for d in range(14) if err_m[:, d].mean() > err_cv0[:, d].mean()]
+    hybrid = z0["cmd"].copy()
+    for d in worse:
+        hybrid[:, d] = (z0["state"] + z0["V"])[:, d]
+    check("gripper_channels_prefer_copy_V_arm_channels_prefer_model",
+          worse == [6, 13],
+          {"dims_worse_than_cv": worse,
+           "model_L1": float(err_m.mean()),
+           "hybrid_arm_model_gripper_cv_L1": float(np.abs(hybrid - z0["gt"]).mean()),
+           "cv_L1": float(err_cv0.mean())})
+
     # ---- claim 3: paired per-episode consistency from the sidecar itself
     z = np.load(os.path.join(args.run_dir, "pred_SVAcc_R_%d.npz" % per_seed[0]["seed"]))
     err = np.abs(z["cmd"] - z["gt"]); err_cv = np.abs(z["state"] + z["V"] - z["gt"])

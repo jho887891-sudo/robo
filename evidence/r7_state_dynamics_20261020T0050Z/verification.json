@@ -70,6 +70,19 @@
    }
   },
   {
+   "claim": "gripper_channels_prefer_copy_V_arm_channels_prefer_model",
+   "pass": true,
+   "detail": {
+    "dims_worse_than_cv": [
+     6,
+     13
+    ],
+    "model_L1": 0.001232542513057992,
+    "hybrid_arm_model_gripper_cv_L1": 0.001207954305264194,
+    "cv_L1": 0.0017949555891966047
+   }
+  },
+  {
    "claim": "improvement_holds_in_most_episodes",
    "pass": true,
    "detail": {
