@@ -1,0 +1,300 @@
+{
+  "schema_version": "1.0",
+  "mission_id": "RD-R10.2-MAXSAFE-20261021-01",
+  "status": "SPEC_COMMITTED_EXECUTION_NOT_STARTED",
+  "authored_date": "2026-10-21",
+  "repo": "jho887891-sudo/robo",
+  "baseline_shas": {
+    "main": "329614f54d3090b9b6ab120855ba50fbc93bdd1e",
+    "r10": "4af5d603c6410ec951ac8b1b138312bbdebb9c24",
+    "r10_review": "429e28affd67f9643a122bdb5bc0f958f9befa43",
+    "r9A": "f7b8b39e2394772ae6b2d8d929c7a0ba0fb10ed9",
+    "r9B": "1cd50f1ae447a73289fd3a2dfd24eb14e973681d",
+    "r9C": "02735bc2f16d60275ece01526f68860feafd5054",
+    "r9D": "f8e43b0ca6ccaa8a5711e338ba12e0f3be69328f",
+    "pr11": "93faece89a101b4fc31071781d6297eab121783a",
+    "pr12": "026d48e0e5efbdee58eb31185a8bb135b0ffba09",
+    "masterplan": "8a95b7cf6fe878a257fe03fa7b7d11950b0ec915"
+  },
+  "execution_spec_path": "missions/R10_2_AUTONOMOUS_MAX_SAFE_SPEC.md",
+  "allowed": {
+    "cpu_max_wall_hours": 8,
+    "max_parallel_cpu_worktrees": 4,
+    "kv_gpu_sessions": 1,
+    "kv_gpu_max_seconds_total_including_loading": 300,
+    "kv_gpu_min_free_gib": 24,
+    "new_pushT_attempts_max": 25,
+    "new_pushT_dev_expected": 5,
+    "new_pushT_final_expected": 20,
+    "graceful_owned_eval_stop": "conditional_on_owner_evidence_no_consumers",
+    "unknown_k1_execution": false,
+    "optimizer_steps": 0,
+    "new_training": false,
+    "new_11_task_data": false,
+    "merge_main": false,
+    "real_robot_deployment": false
+  },
+  "lanes": [
+    {
+      "id": "A",
+      "title": "Resource and owned-eval archival/shutdown",
+      "depends_on": [],
+      "status": "CONDITIONALLY_AUTHORIZED",
+      "resource": "CPU+only safe owned shutdown",
+      "exit_checks": [
+        "old run ids hashed",
+        "owner confirmed",
+        "no other consumers",
+        "pre/post VRAM measured"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "B",
+      "title": "PR11/12/14 real CPU freeze tests",
+      "depends_on": [],
+      "status": "AUTHORIZED_CPU",
+      "resource": "CPU",
+      "exit_checks": [
+        "positive actual freeze writes 5/20",
+        "negative runs exit nonzero",
+        "protocol SHA pinned",
+        "old100 content/state-action collision rejected"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "C0_C3",
+      "title": "KV cpu preflight and 14x256 sidecar",
+      "depends_on": [],
+      "status": "AUTHORIZED_CPU",
+      "resource": "CPU",
+      "exit_checks": [
+        "same teacher-forced tokens",
+        "train64 freeze SHA",
+        "legal 14 tokens",
+        "preflight cache and version",
+        "sidecar hash"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "C4",
+      "title": "One genuine 7B KV probe",
+      "depends_on": [
+        "A_VRAM_24GIB",
+        "C0_C3"
+      ],
+      "status": "AUTHORIZED_ONCE_NOT_RUN",
+      "resource": "GPU <=300sec>=24GiB",
+      "exit_checks": [
+        "real exit preserved with pipefail",
+        "full 14x256 kv/full npz",
+        "source model metadata pinned",
+        "no optimizer"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "C5",
+      "title": "Independent KV logits recomputation",
+      "depends_on": [
+        "C4"
+      ],
+      "status": "AUTHORIZED_CPU_DEPENDENT",
+      "resource": "CPU",
+      "exit_checks": [
+        "independent topk/max-delta/margin",
+        "KV equivalent separate from execution"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "D1",
+      "title": "Collector candidate read-only audit",
+      "depends_on": [],
+      "status": "AUTHORIZED_CPU",
+      "resource": "read-only CPU",
+      "exit_checks": [
+        "k1 sources SHA",
+        "task/action/frame and writer validity",
+        "overwrite guard",
+        "explicit decision if unapproved"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "D2",
+      "title": "25 new PushT collection",
+      "depends_on": [
+        "D1_VERIFIED_APPROVED_COLLECTOR",
+        "A_RESOURCE_WINDOW",
+        "B"
+      ],
+      "status": "AUTHORIZED_CAPTURE_CONDITIONAL",
+      "resource": "<=25 attempts, no other GPU overlap",
+      "exit_checks": [
+        "new HDF5 episode hashes",
+        "DEV5 FINAL20",
+        "no old100 overlap",
+        "no eval peeking"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "D3",
+      "title": "42D new deploy adapter CPU",
+      "depends_on": [],
+      "status": "AUTHORIZED_CPU",
+      "resource": "CPU only",
+      "exit_checks": [
+        "B42 train/deploy contracts",
+        "zero motion/episode boundaries",
+        "14D codec and gripper",
+        "metadata and negative regressions"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "D4",
+      "title": "12-task TaskSpec CPU inventory",
+      "depends_on": [],
+      "status": "AUTHORIZED_CPU",
+      "resource": "CPU",
+      "exit_checks": [
+        "installed vs upstream task list",
+        "12 specs with UNKNOWN explicit",
+        "embodiment/cameras/prompts",
+        "no new data"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "D5",
+      "title": "Latency/control/eval metrics CPU",
+      "depends_on": [],
+      "status": "AUTHORIZED_CPU",
+      "resource": "CPU",
+      "exit_checks": [
+        "timestamps and jitter",
+        "L1 matched baselines",
+        "success/Wilson simulator summary",
+        "no real new sim"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    },
+    {
+      "id": "D6",
+      "title": "Docs/audit evidence and ROUTE",
+      "depends_on": [],
+      "status": "AUTHORIZED_CPU",
+      "resource": "CPU",
+      "exit_checks": [
+        "raw logs and sha",
+        "machine manifest",
+        "PRs independent",
+        "append-only ROUTE"
+      ],
+      "actual_commands": [],
+      "source_shas": [],
+      "run_start_utc": null,
+      "run_end_utc": null,
+      "exit_codes": [],
+      "logs": [],
+      "evidence_sha256": [],
+      "issues": []
+    }
+  ],
+  "deliverables": [
+    "report/R10_2_STAGE_READINESS.md",
+    "report/R10_2_RESOURCE.md",
+    "report/R10_2_FREEZE.md",
+    "report/R10_2_KV.md",
+    "report/R10_2_COLLECTOR.md",
+    "report/R10_2_42D_DEPLOY.md",
+    "report/R10_2_12TASK.md",
+    "report/R10_2_CONTROL.md",
+    "mission/R10_2_MISSION_MANIFEST.json",
+    "evidence/r10_2_<UTC>/FAILURES.md",
+    "ROUTE.md append-only"
+  ],
+  "runtime_measured": {
+    "gpu_kv_runs": null,
+    "optimizer_steps": null,
+    "episodes_collected": null,
+    "confirmed_shutdown_pids": [],
+    "nvidia_before": null,
+    "nvidia_after": null
+  },
+  "no_completion_claims_without_logs": true
+}
