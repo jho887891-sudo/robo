@@ -1,0 +1,69 @@
+{
+ "checks": [
+  {
+   "check": "synthetic_set_passes_all_gates",
+   "pass": true,
+   "detail": {
+    "schema": true,
+    "build": true,
+    "cross_set_disjoint": true,
+    "counts": true,
+    "split_assignment": true,
+    "verify": true
+   }
+  },
+  {
+   "check": "split_assignment_is_disjoint_and_deterministic",
+   "pass": true,
+   "detail": {
+    "dev_sha": "2c4b696a5219919f"
+   }
+  },
+  {
+   "check": "guard_is_recomputable",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "detects_renamed_used_episode",
+   "pass": true,
+   "detail": {
+    "overlap": 1
+   }
+  },
+  {
+   "check": "detects_same_trajectory_new_instruction",
+   "pass": true,
+   "detail": {
+    "dups": 1
+   }
+  },
+  {
+   "check": "rejects_placeholder_file",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "rejects_wrong_frequency",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "rejects_missing_camera",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "rejects_wrong_episode_count",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "freeze_requires_guard_pass",
+   "pass": true,
+   "detail": {}
+  }
+ ],
+ "n_pass": 10,
+ "n_total": 10
+}

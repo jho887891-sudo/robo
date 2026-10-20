@@ -1,0 +1,14 @@
+[PASS] clean_run_is_equivalent                    {"verdict": "SAME_PREFIX_EQUIVALENT", "n_match": 5}
+[PASS] exit_code_zero_on_match                    {}
+[PASS] teacher_forcing_uses_full_tokens           {"fed": [0, 0, 0, 0]}
+[PASS] prefix_len_grows_by_one                    {}
+[PASS] small_delta_classed_numeric_plausible      {"class": "numeric_plausible", "delta": 0.015}
+[PASS] exit_code_nonzero_on_mismatch              {}
+[PASS] huge_delta_classed_structural              {"class": "structural_suspect", "delta": 5.91}
+[PASS] window_slice                               {}
+[PASS] authorized_wrapper_does_not_fake_gpu_pass  {"exit": 8}
+[PASS] unauthorized_wrapper_still_fails_closed    {"exit": 7}
+[PASS] static_audit_real_probe_passes             {"missing": [], "forbidden_found": []}
+[PASS] static_audit_detects_old_bug               {}
+
+12/12 checks passed

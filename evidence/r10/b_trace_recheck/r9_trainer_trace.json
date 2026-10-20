@@ -1,0 +1,320 @@
+{
+ "contract": "/home/T7/ojh/robot_actual/r10/cpu/evidence/r9_gate_20261020/frozen_contract_64train.json",
+ "contract_sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+ "entrypoint_module": "/home/T7/ojh/robot_actual/r10/cpu/training/train_pushT_pure2.py",
+ "entrypoint_sha256": "e88135583850ffa6bf6d644a928fcd43b4269dacea906b16af784e34ee414b2b",
+ "splits": {
+  "train": 64,
+  "dev": 16,
+  "holdout": 20
+ },
+ "cuda_used": false,
+ "optimizer_steps": 0,
+ "seven_b_loaded": false,
+ "checks": [
+  {
+   "check": "B1_real_entrypoint_imported",
+   "pass": true,
+   "label": "VERIFIED_CPU",
+   "detail": {
+    "module": "/home/T7/ojh/robot_actual/r10/cpu/training/train_pushT_pure2.py",
+    "sha256": "e88135583850ffa6",
+    "cams3": [
+     "cam_head",
+     "cam_left_wrist",
+     "cam_right_wrist"
+    ],
+    "action_dim_constant": 256
+   }
+  },
+  {
+   "check": "B2_legacy_14d_path_unchanged",
+   "pass": true,
+   "label": "VERIFIED_CPU",
+   "detail": {
+    "q01_shape": [
+     14
+    ],
+    "pr14_shape": [
+     14
+    ],
+    "degenerate_dims_q99_eq_q01": [
+     6
+    ],
+    "episodes_used": [
+     "episode_0000003.hdf5",
+     "episode_0000004.hdf5"
+    ],
+    "note": "trainer still computes 80-episode quantiles; degeneracy here is a small-sample artefact of using 2 episodes in this trace"
+   }
+  },
+  {
+   "check": "B3_prompt_and_label_mask",
+   "pass": true,
+   "label": "VERIFIED_CPU",
+   "detail": {
+    "n_supervised": 15,
+    "n_prompt_tokens": 36,
+    "stop_token": 2,
+    "token_range": [
+     31859,
+     31892
+    ],
+    "prompt_ignored": 36
+   }
+  },
+  {
+   "check": "B4_42d_features_real_hdf5",
+   "pass": true,
+   "label": "VERIFIED_CPU",
+   "detail": {
+    "n_rows": 12,
+    "worst_delta_vs_manual": 0.0,
+    "samples": [
+     {
+      "episode": "episode_0000003.hdf5",
+      "t": 2,
+      "shape": [
+       42
+      ],
+      "finite": true,
+      "max_abs": 1.0
+     },
+     {
+      "episode": "episode_0000003.hdf5",
+      "t": 3,
+      "shape": [
+       42
+      ],
+      "finite": true,
+      "max_abs": 1.0
+     },
+     {
+      "episode": "episode_0000003.hdf5",
+      "t": 4,
+      "shape": [
+       42
+      ],
+      "finite": true,
+      "max_abs": 1.0
+     }
+    ]
+   }
+  },
+  {
+   "check": "B5_target_R_identity",
+   "pass": true,
+   "label": "VERIFIED_CPU",
+   "detail": {
+    "max_abs_delta": 0.0,
+    "R_abs_max": 0.0027563124895095825,
+    "q01_head": [
+     -0.01668977364897728,
+     -0.02186211571097374,
+     -0.016695233061909676
+    ],
+    "q99_head": [
+     0.013265335932374,
+     0.021961908787488937,
+     0.017307674512267113
+    ]
+   }
+  },
+  {
+   "check": "B6_decode_to_command",
+   "pass": true,
+   "label": "VERIFIED_CPU",
+   "detail": {
+    "max_abs_error_in_range": 0.00015926361083984375,
+    "one_bin_step_max": 0.00017185891920235008,
+    "out_of_range_dims": [],
+    "gripper_from_S_plus_V": true,
+    "excluded_dims": [
+     6,
+     13
+    ],
+    "physical_L1_this_frame": 4.6412595111178234e-05
+   }
+  },
+  {
+   "check": "B7_zero_update_loss_trace",
+   "pass": true,
+   "label": "MOCK_FORWARD",
+   "detail": {
+    "loss": 5.4939045906066895,
+    "n_supervised_positions": 14,
+    "grad_abs_sum": 39.51126277446747,
+    "optimizer_steps": 0,
+    "device": "cpu",
+    "mock": true,
+    "real_projector_params_llm4096": 16957440
+   }
+  },
+  {
+   "check": "B8_features_ignore_future",
+   "pass": true,
+   "label": "VERIFIED_CPU",
+   "detail": {
+    "max_abs_delta": 0.0
+   }
+  },
+  {
+   "check": "B9_fail_closed",
+   "pass": true,
+   "label": "VERIFIED_CPU",
+   "detail": {
+    "legacy_80_episode_contract": true,
+    "projector_dim_14": true,
+    "frame_t_1": true,
+    "absolute_target_with_42d": true
+   }
+  },
+  {
+   "check": "B10_cuda_only_scope_declared",
+   "pass": true,
+   "label": "PENDING_GPU",
+   "detail": {
+    "cuda_only_lines": {
+     "obs": 2,
+     "build": 2,
+     "evaluate": 3
+    },
+    "sample": [
+     {
+      "line": 123,
+      "text": "pv = torch.cat(imgs, dim=0).unsqueeze(0).to(torch.bfloat16).to(\"cuda\")"
+     },
+     {
+      "line": 126,
+      "text": "pr = torch.from_numpy(norm_pr(c14(h, \"state\")[t], pmin, pmax)).unsqueeze(0).to(\"cuda\")"
+     }
+    ],
+    "statement": "real 7B forward/backward/loss on GPU is NOT run and NOT claimed"
+   }
+  },
+  {
+   "check": "B11_entrypoint_constants_audit",
+   "pass": true,
+   "label": "HYPOTHESIS",
+   "detail": {
+    "platform_detected_by": "sys.argv substring (no aloha/libero token -> LIBERO)",
+    "ACTION_DIM": 7,
+    "NUM_ACTIONS_CHUNK": 8,
+    "PROPRIO_DIM": 8,
+    "codec_expects_action_dim": 14,
+    "evaluate_uses_action_dim": [
+     "for k in range(ACTION_DIM):"
+    ],
+    "r9_entrypoint_references_ACTION_DIM": false,
+    "mismatch": true,
+    "impact": "untouched entrypoint decodes only ACTION_DIM tokens in evaluate() in this env; the R9 entrypoint never uses that constant and decodes 14",
+    "status": "HYPOTHESIS_OPEN_RISK"
+   }
+  }
+ ],
+ "pass": true,
+ "n_pass": 11,
+ "n_total": 11,
+ "integration_contract": {
+  "proprio_mode": "svacc",
+  "proprio_dim": 42,
+  "proprio_layout": "[state, velocity, acceleration]",
+  "normalization_mode": "signed_motion",
+  "motion_quantile": 0.99,
+  "target_representation": "velocity_residual",
+  "action_codec_mode": "fixed",
+  "frame_pool": "t >= 2 (V,Acc defined); offline t in [2, n-2]",
+  "gripper_policy": {
+   "model_dims": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "gripper_dims": [
+    6,
+    13
+   ],
+   "rule": "gripper channels use S + V (DEV-selected)"
+  },
+  "history_boundary_policy": "V=0,Acc=0 at t=0; Acc=0 at t=1",
+  "frozen_contract_path": "/home/T7/ojh/robot_actual/r10/cpu/evidence/r9_gate_20261020/frozen_contract_64train.json",
+  "frozen_contract_sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+  "bounds_sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+  "split_sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2",
+  "q01": [
+   -0.01668977364897728,
+   -0.02186211571097374,
+   -0.016695233061909676,
+   -0.016493815928697586,
+   -0.014417302794754505,
+   -0.012508862651884556,
+   -0.019671935588121414,
+   -0.014066160656511784,
+   -0.02291058748960495,
+   -0.022728590294718742,
+   -0.020033517852425575,
+   -0.012456152588129044,
+   -0.012892135418951511,
+   -0.009999996982514858
+  ],
+  "q99": [
+   0.013265335932374,
+   0.021961908787488937,
+   0.017307674512267113,
+   0.016630180180072784,
+   0.01295564416795969,
+   0.010503924451768398,
+   0.014142386615276337,
+   0.017510924488306046,
+   0.020828304812312126,
+   0.017956862226128578,
+   0.018842976540327072,
+   0.016514427959918976,
+   0.014218397438526154,
+   0.009999990463256836
+  ]
+ },
+ "standard_entrypoint_gaps": [
+  {
+   "gap": "proprio_dim",
+   "standard": "14 (current S_t only)",
+   "r9_required": "42 [S,V,Acc]"
+  },
+  {
+   "gap": "proprio_normalisation",
+   "standard": "position bounds pmin/pmax",
+   "r9_required": "signed_motion q99 for V/Acc, position bounds kept for S"
+  },
+  {
+   "gap": "target",
+   "standard": "AT.ABSOLUTE / AT.RESIDUAL (A or A-S)",
+   "r9_required": "velocity_residual R=(A-S)-V"
+  },
+  {
+   "gap": "quantiles",
+   "standard": "action_stats(all 80 train episodes)",
+   "r9_required": "frozen q01/q99 from 64 TRAIN only"
+  },
+  {
+   "gap": "frame_sampling",
+   "standard": "t = randrange(0, T-1)",
+   "r9_required": "t >= 2 (history-safe); offline t in [2, n-2]"
+  },
+  {
+   "gap": "checkpoint_meta",
+   "standard": "variant/cams/proprio/q01/q99",
+   "r9_required": "plus normalisation mode, codec, split hash, contract sha"
+  }
+ ],
+ "torch": "2.4.1+cu121",
+ "cuda_initialized": false
+}

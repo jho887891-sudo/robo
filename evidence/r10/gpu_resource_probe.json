@@ -1,0 +1,40 @@
+{
+ "utc": "2026-10-20T15:31:49Z",
+ "free_gib": 23.2996826171875,
+ "total_gib": 47.40179443359375,
+ "used_gib": 24.10211181640625,
+ "min_free_gib_required": 24.0,
+ "gate": "BLOCKED_RESOURCE",
+ "nvidia_smi": {
+  "cmd": [
+   "nvidia-smi",
+   "--query-gpu=name,memory.total,memory.used,utilization.gpu",
+   "--format=csv,noheader"
+  ],
+  "rc": 0,
+  "out": "NVIDIA RTX A6000, 49140 MiB, 24681 MiB, 21 %",
+  "err": ""
+ },
+ "compute_apps": {
+  "cmd": [
+   "nvidia-smi",
+   "--query-compute-apps=pid,process_name,used_memory",
+   "--format=csv,noheader"
+  ],
+  "rc": 0,
+  "out": "3111650, /isaac-sim/kit/kit, 2486 MiB\n3451404, /isaac-sim/kit/python/bin/python3, 5604 MiB\n3469786, /home/dgut/pusht_runtime/venv_oft/bin/python, 16200 MiB\n1878436, /home/dgut/pusht_runtime/venv_oft/bin/python, 262 MiB",
+  "err": ""
+ },
+ "docker_ps": {
+  "cmd": [
+   "docker",
+   "ps",
+   "--format",
+   "{{.Names}} {{.Image}} {{.Status}}"
+  ],
+  "rc": 0,
+  "out": "rd_setup nvcr.io/nvidia/isaac-sim:5.1.0 Up 2 days",
+  "err": ""
+ },
+ "note": "never stop or signal a foreign process; free VRAM is whatever is left"
+}

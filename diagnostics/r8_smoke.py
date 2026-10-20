@@ -23,6 +23,7 @@ Checks
   9 peak VRAM, wall time, environment and exit code recorded
 """
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -351,16 +352,71 @@ def run_gpu_smoke(args, contract, out, q01, q99):
                 "gradient_checkpointing": use_ckpt}
 
 
+# --------------------------------------------------------- R10 KV probe helpers
+NUMERIC_FLOOR_DLOGIT = 0.05      # documented heuristic, NOT a proof of bf16 causation
+KV_SIDECAR_NAME = "r10_kv_logits.npz"
+
+
+def kv_preflight(vla=None, free_bytes=None, min_free_gib=24.0):
+    """Refuse to run the KV diagnostic unless the cache path is usable.
+
+    A KV-cache diagnostic needs use_cache=True. Gradient checkpointing forces
+    use_cache=False, which is what broke the first R8 attempt, so it is DISABLED here
+    explicitly (no silent flag flips) and recorded in the summary.
+    """
+    info = {"min_free_gib": float(min_free_gib)}
+    free_gib = None if free_bytes is None else float(free_bytes) / float(2 ** 30)
+    info["free_gib"] = free_gib
+    if free_gib is not None and free_gib < float(min_free_gib):
+        raise RuntimeError("insufficient free VRAM for KV diagnose: %.2f GiB < %.2f GiB"
+                           % (free_gib, float(min_free_gib)))
+    if vla is not None:
+        gc_before = bool(getattr(vla, "is_gradient_checkpointing", False))
+        if gc_before:
+            vla.gradient_checkpointing_disable()
+        info["gradient_checkpointing_before"] = gc_before
+        info["gradient_checkpointing_after"] = bool(getattr(vla, "is_gradient_checkpointing", False))
+        try:
+            vla.config.use_cache = True
+        except Exception:  # noqa: BLE001 - config shape differs across wrappers
+            pass
+        info["use_cache_config"] = bool(getattr(getattr(vla, "config", None), "use_cache", True))
+        if info["gradient_checkpointing_after"]:
+            raise RuntimeError("gradient checkpointing must be disabled for a KV-cache diagnostic")
+    return info
+
+
+def save_kv_logits_sidecar(out_dir, logits_kv, logits_full, tokens_kv, tokens_full):
+    """Persist the full 256-bin logits for every step (R10 requirement)."""
+    kv = np.asarray(logits_kv, dtype=np.float32)
+    fl = np.asarray(logits_full, dtype=np.float32)
+    if kv.shape != fl.shape or kv.ndim != 2 or kv.shape[1] != BINS:
+        raise ValueError("logits must be (steps, %d); got %s vs %s" % (BINS, kv.shape, fl.shape))
+    if kv.shape[0] != len(tokens_kv) or kv.shape[0] != len(tokens_full):
+        raise ValueError("token count does not match logits rows")
+    if not (np.isfinite(kv).all() and np.isfinite(fl).all()):
+        raise ValueError("non-finite logits")
+    os.makedirs(out_dir, exist_ok=True)
+    path = os.path.join(out_dir, KV_SIDECAR_NAME)
+    np.savez_compressed(path, logits_kv=kv, logits_full=fl,
+                        token_kv=np.asarray(tokens_kv, dtype=np.int64),
+                        token_full=np.asarray(tokens_full, dtype=np.int64),
+                        step=np.arange(kv.shape[0], dtype=np.int64),
+                        column_index=np.arange(BINS, dtype=np.int64))
+    with open(path, "rb") as fh:
+        data = fh.read()
+    return {"path": os.path.abspath(path), "sha256": hashlib.sha256(data).hexdigest(),
+            "bytes": len(data), "shape": list(kv.shape), "dtype": str(kv.dtype),
+            "columns": "action-token window %d..%d (256 bins)" % (W0, W0 + BINS - 1)}
+
 def kv_diagnose(args, contract, out):
-    """Compare full-sequence vs cached KV logits under identical teacher-forced prefixes.
+    """R10 same-prefix KV diagnostic: teacher-forced full-path history, full logits archived.
 
-    Record the complete 256-bin logit differences and top1-top2 margins. A token
-    flip compatible with a low margin does not establish that bf16 is the cause.
-    Classify root cause only after precision-controlled follow-up.
-
-    NOTE: this mode was written after the main smoke reported 8/14 token agreement. It has
-    NOT yet produced a verdict on the shared GPU (its first run hit the documented
-    past_key_values assertion, now fixed); treat "numeric vs structural" as OPEN.
+    Differences from the R8 version (all evidence/plumbing, no model-math change):
+      * per-step 256-bin logits for BOTH branches go to an .npz sidecar with sha256
+      * cache preflight (gradient checkpointing disabled, use_cache=True, cache must exist)
+      * free-VRAM gate in GiB (2^30), recorded before/after
+      * per-step cache/prefix lengths and the step0 (prefix-only) boundary are recorded
     """
     import gc
     import torch
@@ -368,14 +424,11 @@ def kv_diagnose(args, contract, out):
     import train_pushT_pure2 as T
     from prismatic.models.backbones.llm.prompting import PurePromptBuilder
 
-    free, _total = torch.cuda.mem_get_info()
-    if free / 1e9 < args.min_free_gb:
-        raise RuntimeError("insufficient GPU memory for KV diagnose: %.2fGB < %.2fGB"
-                           % (free / 1e9, args.min_free_gb))
+    free, total = torch.cuda.mem_get_info()
+    pre = kv_preflight(None, free, args.min_free_gb)
     proc, vla, _ = T.build(3, False)
     llm_dim = int(vla.llm_dim)
-    if free / 1e9 < 30.0:
-        vla.gradient_checkpointing_enable()
+    pre.update(kv_preflight(vla, free, args.min_free_gb))
     proj = A.build_projector(llm_dim, device="cuda")
     f = real_frames(1)[0]
     feats = A.build_proprio(f["S"], f["Sp"], f["Spp"], contract)
@@ -391,6 +444,7 @@ def kv_diagnose(args, contract, out):
 
     vla.eval(); proj.eval()
     steps = []
+    lg_kv_rows, lg_full_rows = [], []
     toks_kv, toks_full = [], []
     cached = None
     with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
@@ -398,7 +452,9 @@ def kv_diagnose(args, contract, out):
                 labels=pids.clone(), proprio=pr, proprio_projector=proj, use_cache=True)
     cached = o.past_key_values
     if cached is None:
-        raise RuntimeError("no KV cache returned; disable gradient checkpointing for this mode")
+        raise RuntimeError("no KV cache returned (use_cache=True): refusing to fake a comparison")
+    cache_len = int(cached[0][0].shape[-2])
+    prefix_len = int(pids.shape[1])
     lg_kv = o.logits[0, -1][W0:W0 + BINS].float()
     del o
     for k in range(14):
@@ -412,40 +468,71 @@ def kv_diagnose(args, contract, out):
         del o_full
         tk, tf = int(torch.argmax(lg_kv).item()), int(torch.argmax(lg_full).item())
         toks_kv.append(tk); toks_full.append(tf)
+        lg_kv_rows.append(lg_kv.detach().float().cpu().numpy().copy())
+        lg_full_rows.append(lg_full.detach().float().cpu().numpy().copy())
         srt = torch.sort(lg_full, descending=True).values
         steps.append({"step": k, "token_kv": tk, "token_full": tf, "match": tk == tf,
                       "max_abs_dlogit": float((lg_kv - lg_full).abs().max().item()),
                       "mean_abs_dlogit": float((lg_kv - lg_full).abs().mean().item()),
-                      "top1_minus_top2_full": float((srt[0] - srt[1]).item())})
+                      "top1_minus_top2_full": float((srt[0] - srt[1]).item()),
+                      "prefix_len_full": int(inp_full.shape[1]),
+                      "cache_len_kv": int(cache_len),
+                      "step0_prefix_only": bool(k == 0)})
         if k == 13:
             break
         with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
-            # Teacher-force the SAME full-path token into cache.
+            # Teacher-force the SAME full-path token into the cached branch.
             o_next = vla(input_ids=torch.tensor([[W0 + tf]], dtype=torch.long, device="cuda"),
                          past_key_values=cached, labels=None, use_cache=True)
         cached = o_next.past_key_values
+        if cached is None:
+            raise RuntimeError("cache lost after step %d; refusing to continue" % k)
+        cache_len = int(cached[0][0].shape[-2])
         lg_kv = o_next.logits[0, -1][W0:W0 + BINS].float()
         del o_next
         gc.collect(); torch.cuda.empty_cache()
+    sidecar = save_kv_logits_sidecar(out, np.vstack(lg_kv_rows), np.vstack(lg_full_rows),
+                                     toks_kv, toks_full)
     mism = [s for s in steps if not s["match"]]
-    flips_compatible_with_delta = all(s["top1_minus_top2_full"] <= 2.0 * s["max_abs_dlogit"] + 1e-6 for s in mism)
-    summary = {"same_prefix_teacher_forced": True, "reference_prefix": "full_sequence_greedy",
-               "steps": steps, "n_match": sum(1 for s in steps if s["match"]), "n_total": len(steps),
+    worst = max([s["max_abs_dlogit"] for s in mism], default=0.0)
+    if not mism:
+        cls = "equivalent"
+    elif worst <= NUMERIC_FLOOR_DLOGIT:
+        cls = "numeric_plausible"
+    else:
+        cls = "structural_suspect"
+    summary = {"DIAG_EXECUTED": True, "same_prefix_teacher_forced": True,
+               "reference_prefix": "full_sequence_greedy",
+               "step0_semantics": "step0 uses the prefix only for BOTH branches",
+               "steps": steps, "n_match": sum(1 for s in steps if s["match"]),
+               "n_total": len(steps),
                "first_mismatch_step": next((s["step"] for s in steps if not s["match"]), None),
-               "mismatches_compatible_with_measured_logit_delta": flips_compatible_with_delta,
                "median_margin": float(np.median([s["top1_minus_top2_full"] for s in steps])),
                "median_max_dlogit": float(np.median([s["max_abs_dlogit"] for s in steps])),
-               "verdict": ("OPEN: argmax flips consistent with measured logit differences; cause needs precision-controlled recheck"
-                           if flips_compatible_with_delta else
-                           "OPEN: anomalous same-prefix mismatch; inspect cache/attention/token alignment"),
+               "max_abs_dlogit_at_mismatch": float(worst),
+               "numeric_floor_dlogit": float(NUMERIC_FLOOR_DLOGIT),
+               "mismatch_class": cls,
+               "KV_EQUIVALENT": bool(not mism),
+               "verdict": ("KV_EQUIVALENT: identical tokens under identical prefixes" if not mism
+                           else "OPEN_UNRESOLVED: mismatch recorded, cause not established"),
+               "logits_sidecar": sidecar,
+               "precision": {"model_dtype": str(next(vla.parameters()).dtype),
+                             "autocast": "bfloat16"},
+               "preflight": pre, "free_bytes_before": int(free), "free_bytes_total": int(total),
+               "model_reference": os.environ.get("PUSHT_MODEL", ""),
+               "probe_sha256": __import__("hashlib").sha256(open(__file__, "rb").read()).hexdigest(),
+               "contract_path": os.path.abspath(args.norm_contract),
                "out": out}
-    json.dump(summary, open(os.path.join(out, "r8_kv_diagnose.json"), "w"), indent=1)
+    free_after, _t = torch.cuda.mem_get_info()
+    summary["free_bytes_after"] = int(free_after)
+    with open(os.path.join(out, "r8_kv_diagnose.json"), "w") as fh:
+        json.dump(summary, fh, indent=1)
     print("KV/full match %d/%d | first mismatch step %s | median margin %.6f | median "
-          "max|dlogit| %.6f | %s" % (summary["n_match"], summary["n_total"],
-                                     summary["first_mismatch_step"], summary["median_margin"],
-                                     summary["median_max_dlogit"], summary["verdict"]), flush=True)
+          "max|dlogit| %.6f | class=%s | sidecar=%s (%d bytes)"
+          % (summary["n_match"], summary["n_total"], summary["first_mismatch_step"],
+             summary["median_margin"], summary["median_max_dlogit"], cls,
+             sidecar["path"], sidecar["bytes"]), flush=True)
     return summary
-
 
 def main():
     ap = argparse.ArgumentParser()

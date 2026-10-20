@@ -1,0 +1,99 @@
+{
+ "checks": [
+  {
+   "check": "split_identity",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "quantiles_from_64_train",
+   "pass": true,
+   "detail": {
+    "max_abs_diff_q01": 3.0174851506359346e-09,
+    "max_abs_diff_q99": 9.536742145987986e-09,
+    "n_rows_64": 19127,
+    "material_change_vs_80_episode_fit_max_rel": 0.2929057662709994
+   }
+  },
+  {
+   "check": "dtype_stability",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "scales_match_A",
+   "pass": true,
+   "detail": {
+    "v": 0.0,
+    "a": 0.0
+   }
+  },
+  {
+   "check": "zero_centred",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "codec_roundtrip",
+   "pass": true,
+   "detail": {
+    "max_abs_error_in_range": 0.00017164647579193115,
+    "one_bin_step_max": 0.00017185891920235008,
+    "distinguishable_motion_colliding_with_zero_bin": 0,
+    "out_of_range_fraction": 0.018026331979820353
+   }
+  },
+  {
+   "check": "no_future_leak",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "provenance",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "detects_dev_episode_in_fit",
+   "pass": true,
+   "detail": {
+    "injected": "episode_0000000.hdf5"
+   }
+  },
+  {
+   "check": "detects_80_episode_provenance",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "detects_wrong_quantiles",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "detects_degenerate_bins",
+   "pass": true,
+   "detail": {
+    "max_abs_error_in_range": 0.0,
+    "one_bin_step_max": 7.30449121327803e-12
+   }
+  },
+  {
+   "check": "detects_missing_target_mode",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "detects_wrong_gripper_dims",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "detects_legacy_normalisation",
+   "pass": true,
+   "detail": null
+  }
+ ],
+ "n_pass": 15,
+ "n_total": 15
+}

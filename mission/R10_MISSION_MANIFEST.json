@@ -1,0 +1,285 @@
+{
+ "mission_id": "RD-R10-AUTH-20261020-01",
+ "mission_spec": {
+  "branch": "docs/research-route-r2-r10-20261020",
+  "sha": "ebf11db90bd0f611a162bed5d5de1b46779ca605",
+  "path": "missions/R10_AUTHORIZED_EXECUTION.md"
+ },
+ "executor": "deepseek",
+ "auditor": "chatgpt",
+ "decision_maker": "research_lead",
+ "authorization": {
+  "record": "research lead replied '我批准了' to the R9 cross-audit question (2026-10-20)",
+  "granted": [
+   "one bounded 7B KV GPU diagnosis (<=5 min incl. weights, >=24 GiB free)",
+   "collection of 25 new push_T episodes (5 NEW_DEV / 20 NEW_FINAL)"
+  ],
+  "not_granted": [
+   "any 7B optimizer step or training",
+   "official full-dataset download",
+   "more than 25 new episodes",
+   "merging PRs or writing main",
+   "formal robot deployment"
+  ]
+ },
+ "baseline": {
+  "r8_audit_sha": "52422372e5eacdcd0ee841ef2b91bdc5a71066c7",
+  "gate_a_sha": "f7b8b39e2394772ae6b2d8d929c7a0ba0fb10ed9",
+  "gate_b_sha": "1cd50f1ae447a73289fd3a2dfd24eb14e973681d",
+  "gate_c_sha": "02735bc2f16d60275ece01526f68860feafd5054",
+  "gate_d_sha": "f8e43b0ca6ccaa8a5711e338ba12e0f3be69328f",
+  "pr11_disjoint_sha": "93faece89a101b4fc31071781d6297eab121783a",
+  "pr12_kv_exit_sha": "026d48e0e5efbdee58eb31185a8bb135b0ffba09",
+  "main_sha": "329614f54d3090b9b6ab120855ba50fbc93bdd1e",
+  "main_untouched": true,
+  "prior_branches_unmodified": true
+ },
+ "work_branch": {
+  "branch": "r10/cpu-gates",
+  "base_sha": "026d48e"
+ },
+ "gates": [
+  {
+   "gate": "P0.1",
+   "title": "independent PR #11 content-disjoint tool re-verification",
+   "status": "PASS_CPU",
+   "actually_ran": true,
+   "results": {
+    "synthetic_tests": "9/9",
+    "renamed_used_episode_rejected": true,
+    "same_state_action_new_instruction_rejected": true,
+    "placeholder_wrong_freq_missing_camera_wrong_count_rejected": true,
+    "used_reference_dataset_sha256": "6757696397863af8058b296a80f9c50ccfc1ed824c43e8d6f6f122cbd610040a"
+   },
+   "evidence": [
+    "evidence/r10/test_r9_final_disjoint.log",
+    "evidence/r10/test_r10_freeze_guard.log"
+   ]
+  },
+  {
+   "gate": "P0.2",
+   "title": "independent PR #12 exit-code semantics",
+   "status": "PASS_CPU",
+   "actually_ran": true,
+   "results": {
+    "unauthorized_exit": 7,
+    "authorized_but_not_executed_exit": 8,
+    "regression": "12/12",
+    "wrapper_does_not_claim_gpu_pass": true,
+    "real_probe_invoked": "diagnostics/r8_smoke.py --kv-diagnose (documented + probed)"
+   },
+   "evidence": [
+    "evidence/r10/wrapper_unauthorized.log",
+    "evidence/r10/wrapper_authorized_no_run.log",
+    "evidence/r10/test_r9_kv_same_prefix_r10tree.log"
+   ]
+  },
+  {
+   "gate": "P0.3",
+   "title": "r10_freeze_guard: enforce g1-g6 from real HDF5",
+   "status": "PASS_CPU",
+   "actually_ran": true,
+   "results": {
+    "tool": "tools/r10_freeze_guard.py",
+    "regression": "10/10",
+    "checks": [
+     "schema",
+     "build",
+     "cross_set_disjoint",
+     "counts",
+     "split_assignment",
+     "verify"
+    ],
+    "freeze_refused_when_guard_fails": true,
+    "expected_counts": {
+     "total": 25,
+     "dev": 5,
+     "final": 20
+    },
+    "split_assignment": "sha256(seed=r10-dev-v1 + content_sha256), deterministic"
+   },
+   "evidence": [
+    "evidence/r10/test_r10_freeze_guard.log"
+   ]
+  },
+  {
+   "gate": "P0.4",
+   "title": "kv_diagnose archives full 256-bin logits (sidecar)",
+   "status": "PASS_CPU",
+   "actually_ran": true,
+   "results": {
+    "patch_lines": "+116/-29 in diagnostics/r8_smoke.py",
+    "sidecar": "r10_kv_logits.npz (logits_kv[14,256], logits_full[14,256], token_kv, token_full, step, column_index)",
+    "sha256_and_shape_recorded": true,
+    "model_math_unchanged": true,
+    "window_constants": [
+     31744,
+     256
+    ],
+    "regression": "16/16"
+   },
+   "evidence": [
+    "evidence/r10/probe_patch.json",
+    "evidence/r10/test_r10_kv_probe.log"
+   ]
+  },
+  {
+   "gate": "P0.5",
+   "title": "cache preflight vs gradient checkpointing conflict",
+   "status": "PASS_CPU",
+   "actually_ran": true,
+   "results": {
+    "gradient_checkpointing_disabled_explicitly": true,
+    "use_cache_forced_true": true,
+    "empty_cache_refused": true,
+    "free_vram_gate_unit": "GiB (2**30)",
+    "no_silent_flag_flip": true
+   },
+   "evidence": [
+    "evidence/r10/test_r10_kv_probe.log"
+   ]
+  },
+  {
+   "gate": "P0.6",
+   "title": "re-verify frozen contract, 42D/R/codec trace, dims and token window",
+   "status": "PASS_CPU",
+   "actually_ran": true,
+   "results": {
+    "a_contract_verification": "9/9",
+    "a_regression": "15/15",
+    "b_trace": "11/11",
+    "b_regression": "16/16",
+    "action_dim_codec": 14,
+    "token_window": [
+     31744,
+     31999
+    ],
+    "prismatic_constants_risk": {
+     "ACTION_DIM": 7,
+     "NUM_ACTIONS_CHUNK": 8,
+     "PROPRIO_DIM": 8,
+     "label": "HYPOTHESIS",
+     "impact": "untouched entrypoint evaluate() loops range(ACTION_DIM); the R9/R10 42D entrypoint does not use it"
+    }
+   },
+   "evidence": [
+    "evidence/r10/a_contract_recheck.log",
+    "evidence/r10/b_trace_recheck.log",
+    "evidence/r10/test_r9_contract_gate.log",
+    "evidence/r10/test_r9_trainer_contract.log"
+   ]
+  },
+  {
+   "gate": "GPU-KV",
+   "title": "one bounded 7B KV vs full diagnosis",
+   "status": "BLOCKED_RESOURCE",
+   "actually_ran": false,
+   "authorized": true,
+   "reason": "free VRAM 23.300 GiB < required 24.000 GiB (2**30); 24.102 GiB held by three foreign processes",
+   "measurements": {
+    "free_gib": 23.3,
+    "total_gib": 47.402,
+    "used_by_others_gib": 24.102,
+    "required_gib": 24,
+    "shortfall_gib": 0.7,
+    "pids": [
+     "3111650 /isaac-sim/kit/kit 2486 MiB",
+     "3451404 /isaac-sim/kit/python/bin/python3 5604 MiB",
+     "3469786 venv python 16200 MiB (push_T policy server :6020, since 10-18)"
+    ],
+    "container": "rd_setup nvcr.io/nvidia/isaac-sim:5.1.0 (running 10-env push_T eval)"
+   },
+   "foreign_processes_signalled": false,
+   "attempts": 0,
+   "unblock": "free >= 24 GiB, then exactly one bounded run (timeout 300s) with the patched probe",
+   "sidecars_ready": true,
+   "evidence": [
+    "evidence/r10/gpu_resource_probe.json",
+    "report/R10_KV_ROOT_CAUSE_AUDIT.md"
+   ]
+  },
+  {
+   "gate": "NEW-DATA",
+   "title": "collect 25 new push_T episodes and freeze 5/20",
+   "status": "BLOCKED_ENV",
+   "actually_ran": false,
+   "authorized": true,
+   "reason": "no collection entry point in the checked-out RoboDojo (only eval/server/client); isaacsim not importable on the host; the only simulator container is busy with a long-running eval; free VRAM below the documented threshold",
+   "dry_run_findings": {
+    "robodojo_subcommands": [
+     "eval",
+     "server",
+     "client"
+    ],
+    "isaacsim_importable_host": false,
+    "isaacsim_importable_venv": false,
+    "isaac_sim_binary_on_path": false,
+    "container": "rd_setup (nvcr.io/nvidia/isaac-sim:5.1.0) running _run_client.sh push_T OpenVLA_Pure 6020 1",
+    "existing_100_all_used": true,
+    "unused_local_episodes": 0
+   },
+   "budget": {
+    "bytes_per_episode": 77793273,
+    "episodes": 25,
+    "estimated_gb": 1.94
+   },
+   "guard_ready": {
+    "tool": "tools/r10_freeze_guard.py",
+    "regression": "10/10",
+    "negative_controls": 7,
+    "requires": "PASS on all checks before freeze"
+   },
+   "episodes_collected": 0,
+   "episodes_frozen": 0,
+   "evidence": [
+    "report/R10_NEW_DATA_PROVENANCE.md",
+    "evidence/r10/test_r10_freeze_guard.log"
+   ]
+  }
+ ],
+ "summary": {
+  "cpu_gates_passed": [
+   "P0.1",
+   "P0.2",
+   "P0.3",
+   "P0.4",
+   "P0.5",
+   "P0.6"
+  ],
+  "authorized_but_blocked": {
+   "GPU-KV": "BLOCKED_RESOURCE",
+   "NEW-DATA": "BLOCKED_ENV"
+  },
+  "training": "NOT_AUTHORIZED",
+  "verdict": "all CPU prerequisites are closed and recomputable; the two authorized real actions are blocked by resources (GPU occupancy) and by a missing collection entry point, not by code or design"
+ },
+ "resource_use": {
+  "gpu_used_by_this_round": false,
+  "optimizer_steps": 0,
+  "network_used": false,
+  "data_written": "only CPU evidence (<150 KB) and temporary synthetic HDF5 in /tmp for guard tests",
+  "failure_rounds": {
+   "probe_test": 1,
+   "guard_test": 3,
+   "criteria_relaxed": false
+  }
+ },
+ "not_claimed": [
+  "KV root cause identified",
+  "any 25 episodes collected or frozen",
+  "FINAL set available for evaluation",
+  "any 7B training or closed-loop result"
+ ],
+ "next_required_from_research_lead": [
+  "decide whether the 10-18 long-running push_T eval (pids 3451345/3451404 + policy server 3469786) may be stopped to free >=24 GiB",
+  "name/authorise a collection program (none exists in the repo) plus an exclusive GPU window, or accept NEW-DATA as BLOCKED_ENV",
+  "no training budget is granted; a later training request must come after a KV verdict"
+ ],
+ "recompute": [
+  "python tools/r10_freeze_guard.py --candidate-dir <new dir> --used-manifest evidence/r9_eval_prep_20261020/manifest_existing100.json --split data/split80.json --protocol protocol/r9_eval_protocol.json --out evidence/r10/freeze_guard.json",
+  "python tests/test_r10_kv_probe.py && python tests/test_r10_freeze_guard.py",
+  "python tools/r9_contract_gate.py --contract evidence/r9_gate_20261020/frozen_contract_64train.json --repo . --out evidence/r10/a_contract_recheck",
+  "python tools/r9_trainer_trace.py --contract evidence/r9_gate_20261020/frozen_contract_64train.json --out evidence/r10/b_trace_recheck",
+  "python tools/r10_resource_probe.py evidence/r10/gpu_resource_probe.json"
+ ]
+}

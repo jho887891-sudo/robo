@@ -1,0 +1,94 @@
+{
+ "goal": "untouched final evaluation set for push_T one-step joint-action prediction (R8)",
+ "task": "push_T",
+ "inclusion": {
+  "instruction_contains": "Push the T-shaped block",
+  "frequency_hz": 25,
+  "min_frames": 100
+ },
+ "exclusion": {
+  "must_not_overlap_with": "the 100 episodes covered by /home/dgut/pusht_runtime/split80.json",
+  "must_be_recorded_after": "2026-10-20T00:00:00Z",
+  "must_never_have_been_used_in": [
+   "R2",
+   "R3",
+   "R4",
+   "R5",
+   "R6",
+   "R7",
+   "R8 discovery"
+  ]
+ },
+ "splits": {
+  "dev_episodes": 5,
+  "final_episodes_min": 15,
+  "rule": "episode-level, disjoint; dev chosen by seeded hash of file name"
+ },
+ "metrics_primary": [
+  "physical L1 over 14 joint dims (frame mean, then episode macro)",
+  "velocity-correction R^2 = 1 - Var(R_hat - R_gt)/Var(R_gt)",
+  "sign agreement on |delta| >= 1e-3",
+  "episodes beating copy-V (target 20/20 or >= 90%)"
+ ],
+ "metrics_secondary": [
+  "cosine(delta_hat, delta_gt)",
+  "per-arm L1",
+  "per-dim L1",
+  "motion-stratum L1",
+  "magnitude ratio"
+ ],
+ "baselines": {
+  "identity": "A_hat = S",
+  "constant_velocity": "A_hat = S + V",
+  "train_affine": "per-dim affine [S,V] -> delta fitted on TRAIN only",
+  "mlp_42d_R": "MLP 42-128-128-14, [S,V,Acc] -> R, reported per seed and as a mean"
+ },
+ "gates": {
+  "g1_l1_below_copyV": "mean L1 < copy-V on the frozen final split",
+  "g2_correction_r2": ">= 0.30",
+  "g3_direction_sign": "sign agreement on |delta| >= 1e-3 >= 0.75",
+  "g4_episode_coverage": ">= 90% of final episodes beat copy-V",
+  "g5_no_channel_regression": "no arm-joint dimension worse than copy-V; grippers use the DEV policy",
+  "g6_seed_stability": "seed-mean spread <= 10%"
+ },
+ "reporting": {
+  "single_evaluation": "the frozen set is evaluated once per model revision; no re-tuning on it",
+  "must_report": [
+   "all seeds",
+   "per-episode table",
+   "the frozen protocol hash",
+   "git SHA of the evaluated code"
+  ],
+  "prohibited": [
+   "reporting a favourable subset",
+   "changing gates after seeing results",
+   "reusing the old 20 holdout as the final claim"
+  ]
+ },
+ "freeze_procedure": {
+  "tool": "tools/r8_eval_manifest.py",
+  "steps": [
+   "build a manifest over the new data directory",
+   "check disjointness against split80.json",
+   "commit the manifest and this protocol",
+   "run 'freeze' with the current git SHA and commit the frozen file BEFORE any model sees the data",
+   "verify the manifest again immediately before evaluation"
+  ]
+ },
+ "coverage_targets_from_existing_set": {
+  "episode_length_frames": {
+   "min": 156,
+   "max": 773,
+   "mean": 323
+  },
+  "per_episode_mean_abs_delta": {
+   "min": 0.00462,
+   "max": 0.01049,
+   "mean": 0.00697
+  },
+  "per_episode_share_moving_frames_ge_5e-3": {
+   "mean": 0.383
+  },
+  "note": "the new set must span at least this range; object initial pose is only observable in the images, so diversity is checked via image hashes plus initial EE pose spread"
+ }
+}

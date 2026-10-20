@@ -1,0 +1,112 @@
+{
+ "checks": [
+  {
+   "check": "has_sidecar_helper",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "has_preflight_helper",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "preflight_rejects_low_vram",
+   "pass": true,
+   "detail": {
+    "free_gib": 23.3,
+    "min": 24.0
+   }
+  },
+  {
+   "check": "preflight_accepts_enough_vram",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "preflight_disables_gradient_checkpointing",
+   "pass": true,
+   "detail": {
+    "min_free_gib": 24.0,
+    "free_gib": 25.0,
+    "gradient_checkpointing_before": true,
+    "gradient_checkpointing_after": false,
+    "use_cache_config": true
+   }
+  },
+  {
+   "check": "preflight_forces_use_cache",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "sidecar_written_with_hash",
+   "pass": true,
+   "detail": {
+    "bytes": 28334,
+    "shape": [
+     14,
+     256
+    ]
+   }
+  },
+  {
+   "check": "sidecar_roundtrip_exact",
+   "pass": true,
+   "detail": {
+    "keys": [
+     "column_index",
+     "logits_full",
+     "logits_kv",
+     "step",
+     "token_full",
+     "token_kv"
+    ]
+   }
+  },
+  {
+   "check": "sidecar_rejects_wrong_width",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "sidecar_rejects_token_mismatch",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "sidecar_rejects_nonfinite",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "kv_diagnose_uses_preflight_and_sidecar",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "kv_diagnose_no_gradient_checkpointing_enable",
+   "pass": true,
+   "detail": {
+    "scoped_to": "kv_diagnose only (the main smoke mode still uses it for backward)"
+   }
+  },
+  {
+   "check": "kv_diagnose_rejects_missing_cache",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "kv_diagnose_records_diag_executed",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "kv_window_constants_unchanged",
+   "pass": true,
+   "detail": {}
+  }
+ ],
+ "n_pass": 16,
+ "n_total": 16
+}
