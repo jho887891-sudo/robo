@@ -214,3 +214,26 @@ _本 ROUTE 是长期索引，审计结论始终以对应的源代码/原始数�
 - **决策（需研究负责人）**：①是否释放/暂停 10-18 起的长跑评测以腾出 ≥24 GiB；②采集入口缺失，需指定采集程序
   （或授权使用既有 `k1_*` 脚本）并给出独立窗口；③7B 训练仍未授权。
 - **Evidence**：`r10/cpu-gates` 的 `mission/R10_MISSION_MANIFEST.json`、`report/R10_*.md`、`evidence/r10/`。
+
+
+#### R10 · 独立审计补记（2026-10-20，保留上方执行者原始叙述）
+
+- **提交验证**：执行分支 `r10/cpu-gates@4af5d603c6410ec951ac8b1b138312bbdebb9c24` 与 `mission/R10_MISSION_MANIFEST.json` 存在，R10 CPU P0 六线有原始测试日志；未发现真实 GPU KV 或新采 HDF5 产物。历史 R8 的 KV 8/14 根因仍 OPEN。
+- **资源不是结果**：归档于 `evidence/r10/gpu_resource_probe.json` 的显存空闲 23.300 GiB，低于预注册 24 GiB；GPU-KV `BLOCKED_RESOURCE`、NEW-DATA `BLOCKED_ENV`。这不代表模型通过或失败。进程归属、是否完成评测、是否允许安全结束仍需项目负责人确认，禁止默认发送 kill 信号。
+- **审计发现 P0-FRZ-1**：初版 `tools/r10_freeze_guard.py` 的 `--allow-small-set-for-tests` 可与 `--freeze-out` 同用，`--expect-total/--expect-dev` 可在冻结前改变，且缺少 `--git-sha` 时可能出现程序退出 0、并未真正冻结的情况。独立审计分支现在对正式冻结强制 25 回合/5 DEV/20 FINAL、禁止 TEST override、缺 SHA 失败并返回非零。
+- **审计发现 P0-FRZ-2**：原 `M.freeze` 只对候选全集 manifest 哈希封存，`r10_freeze_guard` 虽然计算了 NEW_DEV/NEW_FINAL 名单，却**没有把名单写进实际冻结文件**。独立补丁把两个名单、种子、协议 SHA、旧参考清单 SHA 和检查哈希写入受哈希保护的 manifest，不允许覆盖旧冻结文件。
+- **审计发现 P1-RUN-1**：R10 报告的 `timeout ... 2>&1 | tee ...` 未显式 `set -o pipefail` / 保存 `PIPESTATUS[0]`，若 timeout/OOM 失败但 tee 成功可能误记退出码 0。任何实跑必须修复 shell 退出传播，并以真实 JSON + sidecar 哈希验收。
+- **可用性**：这些冻结与命令修复处于 **IMPLEMENTED / REMOTE_TEST_PENDING** 的独立审计分支，未重新运行远程真实 HDF5。原 R10 CPU 10/10 不包含这些新增的冻结执行负例，不得借旧测试结果声称审计补丁已经通过。
+- **采集入口**：`k1_final_take_action.py` / `k1_ori2_full_push.py` 仅被 R10 的报告提及，未在固定 GitHub 执行分支归档源码，不能认定它们符合 HDF5 writer/新 seed/三相机/25Hz。下一步只能先进行远程**只读**代码审计；不据名称授权运行。
+- **审计 SHA / PR**：见最新 Draft review PR；旧 `r10/cpu-gates`、PR #11/#12、`main@329614f` 未修改。
+
+**修正上述 R10 叙述的一句话**：R10 CPU 有证据，但正式 FINAL 冻结路径存在新的安全缺口，不能说“只要拿到数据就能立即可靠冻结”。修复应先在原环境复测，再允许首次真实冻结。
+
+
+#### R10.1｜2026-10-20｜旧 Push-T 评测资源释放：研究负责人有条件授权，尚未执行
+
+- **研究负责人决定**：同意**在确认评测是本项目自有、完整结果/录像/日志已持久化、无其他消费者依赖后**，以现有官方停机接口优先的方式优雅结束 10-18 启动的旧 Push-T 评测客户端与专属 `:6020` 策略服务，释放 GPU。仅准对再次确权后的对应本项目进程操作。
+- **明确不含**：其他用户/其他任务进程、共享 Isaac Sim 基础进程、`docker stop`、`pkill`、`kill -9`、未审计 `k1_*` 采集器执行、增加 7B 训练/GPU 次数、新数据下载、PR 合并或正式部署。
+- **当前状态**：`STOP_PROJECT_EVAL_CONDITIONALLY_AUTHORIZED_NOT_EXECUTED`。这是权限变化，不代表任何 PID 已停止或显存已释放；实际结果必须用停止前后进程快照、评测数据 SHA、GPU 测量及固定 commit 复核。
+- **下一阶段依赖**：并行做旧 10 路评测归档与确权、PR #14 冻结执行回归、未知 `k1_*` 源码只读审计；资源合格后按原 R10 授权仅执行一次 300s KV GPU 诊断；训练继续禁止。
+- **授权执行规范**：[`missions/R10_1_AUTHORIZED_RESOURCE_RELEASE.md`](missions/R10_1_AUTHORIZED_RESOURCE_RELEASE.md)，文件固定提交请查本独立审计分支 SHA。既有 R10 归档保持不变。
