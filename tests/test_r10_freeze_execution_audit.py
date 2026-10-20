@@ -24,6 +24,8 @@ def fake_result():
     checks = {k: {"pass": True} for k in
               ("schema", "build", "cross_set_disjoint", "counts", "verify")}
     checks["split_assignment"] = split
+    checks["cross_set_disjoint"]["small_set_override"] = False
+    checks["counts"]["expect_total"] = 25
     return {"pass": True, "checks": checks,
             "manifest": {"episodes": episodes, "n_episodes": 25,
                          "n_unique_content": 25, "task_filter": "push"},
@@ -64,6 +66,18 @@ class FreezeAudit(unittest.TestCase):
             with self.assertRaises(ValueError):
                 G.freeze_checked(fake_result(), self.proto, sha, self.freeze)
         self.assertFalse(os.path.exists(self.freeze))
+
+    def test_rejects_test_mode_flag_even_if_all_checks_pass(self):
+        r = fake_result()
+        r["checks"]["cross_set_disjoint"]["small_set_override"] = True
+        with self.assertRaises(ValueError):
+            G.freeze_checked(r, self.proto, self.sha, self.freeze)
+
+    def test_rejects_missing_gate_even_if_all_remaining_pass(self):
+        r = fake_result()
+        del r["checks"]["verify"]
+        with self.assertRaises(ValueError):
+            G.freeze_checked(r, self.proto, self.sha, self.freeze)
 
     def test_rejects_protocol_drift(self):
         bad_protocol = os.path.join(self.temp.name, "changed.json")
