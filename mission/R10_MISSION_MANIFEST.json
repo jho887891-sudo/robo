@@ -9,7 +9,7 @@
  "auditor": "chatgpt",
  "decision_maker": "research_lead",
  "authorization": {
-  "record": "research lead replied '我批准了' to the R9 cross-audit question (2026-10-20)",
+  "record": "research lead replied '\u6211\u6279\u51c6\u4e86' to the R9 cross-audit question (2026-10-20)",
   "granted": [
    "one bounded 7B KV GPU diagnosis (<=5 min incl. weights, >=24 GiB free)",
    "collection of 25 new push_T episodes (5 NEW_DEV / 20 NEW_FINAL)"
@@ -36,7 +36,9 @@
  },
  "work_branch": {
   "branch": "r10/cpu-gates",
-  "base_sha": "026d48e"
+  "base_sha": "026d48e",
+  "gates_commit_sha": "e67a3c72fabae3acc89a525a547f3df1b3a6afa9",
+  "note": "this file is amended in a follow-up commit on the same branch; the gate evidence itself is in e67a3c7"
  },
  "gates": [
   {
