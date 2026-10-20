@@ -1,0 +1,74 @@
+{
+ "schema_version": "1.0",
+ "mission_id": "RD-R11-R16-DELEGATION-20261021-01",
+ "spec_sha": "83b579415588e60572768ec0e11f5868520fa695",
+ "aggregate": {
+  "cap_s": 115200,
+  "new_gpu_seconds_used": 0
+ },
+ "results": {
+  "formal_optimizer_steps_used": 0,
+  "overfit_optimizer_steps_used": 0,
+  "collector_attempts": 0,
+  "new_valid_episodes": 0,
+  "dev_rollouts": 0,
+  "sim_final_rollouts": 0,
+  "first_gpu_job_utc": null,
+  "last_gpu_job_utc": null
+ },
+ "buckets": {
+  "COLLECTOR": {
+   "cap_s": 14400,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R13_7B_ZERO_STEP": {
+   "cap_s": 1800,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R14_TRAIN_OVERFIT": {
+   "cap_s": 3600,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R15_TRAIN_FORMAL": {
+   "cap_s": 50400,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R16_SIM_DEV": {
+   "cap_s": 14400,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R16_SIM_FINAL": {
+   "cap_s": 21600,
+   "seconds_used": 0,
+   "status": "BLOCKED",
+   "jobs": []
+  },
+  "TWO_TASK_PILOT": {
+   "cap_s": 7200,
+   "seconds_used": 0,
+   "status": "BLOCKED",
+   "jobs": []
+  },
+  "RESERVE": {
+   "cap_s": 1800,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  }
+ },
+ "events": [],
+ "notes": [
+  "Every bucket cap and the aggregate cap apply simultaneously; unused buckets are not reassignable.",
+  "Booked by training/r11_train_pushT_r42.py before/after each GPU job; a negative balance aborts."
+ ]
+}

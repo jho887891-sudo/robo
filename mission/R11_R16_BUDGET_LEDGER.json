@@ -4,7 +4,7 @@
  "spec_sha": "83b579415588e60572768ec0e11f5868520fa695",
  "aggregate": {
   "cap_s": 115200,
-  "new_gpu_seconds_used": 169.7
+  "new_gpu_seconds_used": 0
  },
  "results": {
   "formal_optimizer_steps_used": 0,
@@ -25,13 +25,13 @@
   },
   "R13_7B_ZERO_STEP": {
    "cap_s": 1800,
-   "seconds_used": 169.7,
+   "seconds_used": 0,
    "status": "PLANNED",
    "jobs": []
   },
   "R14_TRAIN_OVERFIT": {
    "cap_s": 3600,
-   "seconds_used": 0.0,
+   "seconds_used": 0,
    "status": "PLANNED",
    "jobs": []
   },
@@ -66,99 +66,7 @@
    "jobs": []
   }
  },
- "events": [
-  {
-   "utc": "2026-10-20T19:36:50Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "start",
-   "seconds": 0.0,
-   "note": "runs/r13_smoke_20261020T193647Z",
-   "extra": {
-    "budget_s": 1500.0
-   }
-  },
-  {
-   "utc": "2026-10-20T19:36:50Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "model_build_begin",
-   "seconds": 0.0,
-   "note": "",
-   "extra": {}
-  },
-  {
-   "utc": "2026-10-20T19:37:57Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "abort",
-   "seconds": 70.0,
-   "note": "attempt 1 crashed on assert_projector_width(torch.Size) after the 7B load; real wall clock booked conservatively, no evidence produced",
-   "extra": {
-    "attempt": 1,
-    "stage": "post_model_build"
-   }
-  },
-  {
-   "utc": "2026-10-20T19:39:15Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "start",
-   "seconds": 0.0,
-   "note": "runs/r13_smoke_20261020T193912Z",
-   "extra": {
-    "budget_s": 1400.0
-   }
-  },
-  {
-   "utc": "2026-10-20T19:39:15Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "model_build_begin",
-   "seconds": 0.0,
-   "note": "",
-   "extra": {}
-  },
-  {
-   "utc": "2026-10-20T19:40:13Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "model_build_done",
-   "seconds": 0.0,
-   "note": "",
-   "extra": {}
-  },
-  {
-   "utc": "2026-10-20T19:40:17Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "forward_backward_done",
-   "seconds": 0.0,
-   "note": "",
-   "extra": {}
-  },
-  {
-   "utc": "2026-10-20T19:40:23Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "inference_done",
-   "seconds": 0.0,
-   "note": "",
-   "extra": {}
-  },
-  {
-   "utc": "2026-10-20T19:40:55Z",
-   "bucket": "R13_7B_ZERO_STEP",
-   "event": "end",
-   "seconds": 99.7,
-   "note": "VERIFIED_GPU_ZERO_UPDATE",
-   "extra": {
-    "wall_clock_s": 99.7
-   }
-  },
-  {
-   "utc": "2026-10-20T19:46:12Z",
-   "bucket": "R14_TRAIN_OVERFIT",
-   "event": "start",
-   "seconds": 0.0,
-   "note": "runs/r14_overfit_20261020T194610Z",
-   "extra": {
-    "budget_s": 3000.0
-   }
-  }
- ],
+ "events": [],
  "notes": [
   "Every bucket cap and the aggregate cap apply simultaneously; unused buckets are not reassignable.",
   "Booked by training/r11_train_pushT_r42.py before/after each GPU job; a negative balance aborts."
