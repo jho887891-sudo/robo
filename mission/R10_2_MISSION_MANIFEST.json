@@ -1,0 +1,339 @@
+{
+ "schema_version": "1.0",
+ "mission_id": "RD-R10.2-MAXSAFE-20261021-01",
+ "status": "EXECUTED_PARTIAL: CPU lanes A/B/D done, KV GPU executed once (14/14), new data BLOCKED_COLLECTOR",
+ "execution_spec_path": "missions/R10_2_AUTONOMOUS_MAX_SAFE_SPEC.md",
+ "spec_sha": "ac2d1eee7344c8a50e4ade2d5a91f48167ccf344",
+ "baseline_shas": {
+  "main": "329614f54d3090b9b6ab120855ba50fbc93bdd1e",
+  "r10": "4af5d603c6410ec951ac8b1b138312bbdebb9c24",
+  "r10_gate_evidence": "e67a3c72fabae3acc89a525a547f3df1b3a6afa9",
+  "r10_review_pr14": "429e28affd67f9643a122bdb5bc0f958f9befa43",
+  "r9A": "f7b8b39e2394772ae6b2d8d929c7a0ba0fb10ed9",
+  "r9B": "1cd50f1ae447a73289fd3a2dfd24eb14e973681d",
+  "r9C": "02735bc2f16d60275ece01526f68860feafd5054",
+  "r9D": "f8e43b0ca6ccaa8a5711e338ba12e0f3be69328f",
+  "pr11": "93faece89a101b4fc31071781d6297eab121783a",
+  "pr12": "026d48e0e5efbdee58eb31185a8bb135b0ffba09",
+  "masterplan": "8a95b7cf6fe878a257fe03fa7b7d11950b0ec915",
+  "upstream_robodojo_ref": "09bd5f5e762b949f5858ece31347ce62057b3a5e (NOT resolvable in this repo; upstream reference only, UNVERIFIED here)"
+ },
+ "branch_heads": {
+  "A": "r10.2/resource-release@a3396eb",
+  "B": "r10.2/final-freeze-audit@8d86a25",
+  "C": "r10.2/kv-diagnosis@3e1d56b",
+  "D": "r10.2/42d-deploy-12task@a51ef15"
+ },
+ "allowed": {
+  "kv_gpu_sessions": 1,
+  "kv_gpu_sessions_used": 1,
+  "kv_gpu_max_seconds_total_including_loading": 300,
+  "kv_gpu_min_free_gib": 24,
+  "kv_gpu_elapsed_s": 98,
+  "new_pushT_attempts_max": 25,
+  "new_pushT_attempts_used": 0,
+  "optimizer_steps": 0,
+  "new_training": false,
+  "new_11_task_data": false,
+  "merge_main": false,
+  "main_untouched": true,
+  "real_robot_deployment": false,
+  "unknown_k1_execution": false,
+  "network_download": false
+ },
+ "lanes": [
+  {
+   "id": "A",
+   "title": "owned push_T eval + :6020 server graceful release",
+   "status": "EXECUTED",
+   "resource": "CPU + authorised signals",
+   "exit_checks": [
+    "OWNER_PROVED",
+    "EVIDENCE_SAFE",
+    "NO_OTHER_CONSUMERS",
+    "pre/post VRAM measured"
+   ],
+   "actual_commands": [
+    "scripts/r10_2_a_snapshot.sh evidence/r10_2_20261020T164001Z",
+    "scripts/r10_2_a_stop.py client --out evidence/r10_2_20261020T164001Z",
+    "scripts/r10_2_a_stop.py server --out evidence/r10_2_20261020T164001Z"
+   ],
+   "run_start_utc": "2026-10-20T16:40:01Z",
+   "run_end_utc": "2026-10-20T16:43:59Z",
+   "exit_codes": [
+    {
+     "pid": 3451404,
+     "role": "eval client",
+     "signal": "SIGINT",
+     "result": "EXITED_ON_SIGINT",
+     "waited_s": 37,
+     "rc": 0
+    },
+    {
+     "pid": 3469786,
+     "role": ":6020 policy server",
+     "signal": "SIGINT->SIGTERM",
+     "result": "EXITED_ON_SIGTERM",
+     "waited_s": 60,
+     "rc": 0
+    }
+   ],
+   "untouched": [
+    "3111650 isaac-sim kit",
+    "rd_setup container",
+    "no SIGKILL",
+    "no pkill",
+    "no docker stop"
+   ],
+   "vram_before_gib": 23.3,
+   "vram_after_gib": 44.639,
+   "evidence": [
+    "evidence/r10_2_20261020T164001Z/",
+    "report/R10_2_RESOURCE.md"
+   ],
+   "issues": [
+    "old eval had produced no per-episode results since 2026-10-18T13:01Z and was looping on 4,696,992 AssertionErrors in /tmp/run_dbg2.log (2.18 GB, sha256 5259701f…6be206c6)"
+   ]
+  },
+  {
+   "id": "B",
+   "title": "FINAL freeze path cross-audit",
+   "status": "VERIFIED_CPU_TESTED",
+   "resource": "CPU",
+   "actual_commands": [
+    "python tests/test_r10_freeze_execution_audit.py",
+    "python tests/test_r10_freeze_guard.py",
+    "python tests/test_r9_final_disjoint.py",
+    "python tests/test_r9_kv_same_prefix.py",
+    "python tools/r10_2_b_freeze_cli_audit.py"
+   ],
+   "exit_codes": {
+    "freeze_execution_audit": "11 tests OK",
+    "freeze_guard": "10/10",
+    "final_disjoint": "9 tests OK",
+    "kv_wrapper": "12/12",
+    "cli_audit": "21/21"
+   },
+   "freeze_positive": {
+    "file_bytes": 15889,
+    "episodes": 25,
+    "dev": 5,
+    "final": 20,
+    "seals": [
+     "content_sha256",
+     "state_action_sha256",
+     "seed",
+     "protocol_sha256",
+     "used_manifest_sha256",
+     "full_git_sha"
+    ]
+   },
+   "freeze_negatives_rejected": [
+    "renamed_used_episode",
+    "instruction_only_change",
+    "placeholder_9kb",
+    "missing_camera",
+    "rgb_channel_anomaly",
+    "wrong_frequency_30hz",
+    "too_few_frames",
+    "wrong_task",
+    "wrong_episode_count_24",
+    "internal_duplicate",
+    "protocol_drift",
+    "test_only_override",
+    "freeze_path_exists",
+    "unbuildable_manifest",
+    "corrupt_truncated_hdf5"
+   ],
+   "evidence": [
+    "evidence/r10_2/b_freeze_cli_audit.json",
+    "evidence/r10_2/test_r10_freeze_execution_audit.log",
+    "report/R10_2_FREEZE.md"
+   ],
+   "issues": []
+  },
+  {
+   "id": "C",
+   "title": "single authorised 7B KV vs full diagnosis",
+   "status": "VERIFIED_GPU",
+   "resource": "GPU (1 session)",
+   "actual_commands": [
+    "timeout 300s python diagnostics/r8_smoke.py --kv-diagnose --norm-contract evidence/r9_gate_20261020/frozen_contract_64train.json --min-free-gb 24 --out evidence/r10_2/kv_gpu_20261020T164559Z",
+    "python tools/r10_2_c5_recompute.py evidence/r10_2/kv_gpu_20261020T164559Z evidence/r10_2/kv_gpu_20261020T164559Z/c5_recompute.json"
+   ],
+   "run_start_utc": "2026-10-20T16:46:02Z",
+   "run_end_utc": "2026-10-20T16:47:40Z",
+   "exit_codes": {
+    "probe": 0,
+    "c5_recompute": 0
+   },
+   "kv": {
+    "DIAG_EXECUTED": true,
+    "KV_EQUIVALENT": true,
+    "ROOT_CAUSE_RESOLVED": "HYPOTHESIS_SUPPORTED",
+    "n_match": 14,
+    "n_total": 14,
+    "first_mismatch_step": null,
+    "median_margin": 1.5625,
+    "median_max_abs_dlogit": 0.234375,
+    "step0_max_abs_dlogit": 0,
+    "step13_max_abs_dlogit": 0.171875,
+    "tokens": [
+     132,
+     102,
+     128,
+     139,
+     93,
+     118,
+     0,
+     128,
+     0,
+     128,
+     0,
+     114,
+     0,
+     114
+    ],
+    "sidecar": {
+     "file": "r10_kv_logits.npz",
+     "sha256": "534b026c0558d8f2dcf3b60d5c5ac0dcecf6588727e95c975947f369784cc7d7",
+     "shape": [
+      14,
+      256
+     ],
+     "dtype": "float32",
+     "bytes": 16151
+    },
+    "free_gib_before": 44.639,
+    "contract_sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+    "probe_sha256": "b080b4e08ea40f6f164df21d14efeda6ddd25b50f6bc7dec32778b1f7ff738ae",
+    "model_pristine_sha256": "b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6",
+    "c3_preflight": {
+     "required_action_dim": 14,
+     "probe_window": [
+      31744,
+      31999
+     ],
+     "prismatic_action_dim": 7,
+     "probe_source_references_action_dim": false
+    }
+   },
+   "c5_recompute": "11/11 PASS",
+   "evidence": [
+    "evidence/r10_2/kv_gpu_20261020T164559Z/",
+    "report/R10_2_KV.md"
+   ],
+   "issues": [
+    "R8's 8/14 cannot be recomputed (no per-step logits were archived then); the protocol explanation (divergent histories) is supported, not proven"
+   ]
+  },
+  {
+   "id": "D",
+   "title": "collector audit + 42D deployment + 12-task scope + control/offline toolkits",
+   "status": "PARTIAL: D1/D3/D4/D5 VERIFIED_CPU, D2 collection BLOCKED_COLLECTOR",
+   "resource": "CPU",
+   "actual_commands": [
+    "python tests/test_r10_2_r42.py",
+    "python tests/test_r10_2_scope_control_offline.py",
+    "python tools/r10_2_task_scope.py --repo <RoboDojo> --out mission/TASK_SCOPE_V1.json",
+    "python tools/r10_2_control_timing.py evidence/r10_2/control_timing.json",
+    "python tools/r10_2_offline_eval.py evidence/r10_2/offline_eval.json"
+   ],
+   "exit_codes": {
+    "r42_tests": "22/22",
+    "scope_control_offline_tests": "20/20",
+    "task_scope": 0,
+    "control_timing": 0,
+    "offline_eval": 0
+   },
+   "collector_audit": {
+    "verdict": "BLOCKED_COLLECTOR",
+    "candidates": [
+     {
+      "file": "RoboDojo/k1_final_take_action.py",
+      "sha256": "98ddc82be654452945b1f93d9837859f3bbb0f4bbe03eb82b4b064b379323e52",
+      "verdict": "INAPPLICABLE",
+      "reason": "single-episode curobo experiment; writes only success/zeros/pose scalars; fixed output path; no cameras/instruction/state series"
+     },
+     {
+      "file": "RoboDojo/k1_ori2_full_push.py",
+      "sha256": "562f02056ea22c59960d881ee34cd5f3ac5e0f7c9e64e480c146d1bcabaa3f5e",
+      "verdict": "INAPPLICABLE",
+      "reason": "same writer/pattern"
+     }
+    ],
+    "ran_any_k1": false,
+    "episodes_collected": 0,
+    "episodes_frozen": 0,
+    "repo_collection_entry": "none (robodojo.sh has eval/server/client only)"
+   },
+   "r42_adapter": {
+    "module": "code/xpolicylab/policy/OpenVLA_R42/r42_adapter.py",
+    "tests": "22/22",
+    "defect_found_and_fixed": "history trimmed before feature computation -> Acc was always 0"
+   },
+   "task_scope": {
+    "file": "mission/TASK_SCOPE_V1.json",
+    "n_scope_tasks": 12,
+    "present_locally": 12,
+    "with_local_data": [
+     "push_T",
+     "stack_bowls",
+     "sweep_blocks"
+    ],
+    "unknown_kept_not_invented": true
+   },
+   "evidence": [
+    "evidence/r10_2/test_r10_2_r42.log",
+    "evidence/r10_2/test_r10_2_scope_control_offline.log",
+    "report/R10_2_COLLECTOR.md",
+    "report/R10_2_42D_DEPLOY.md",
+    "report/R10_2_12TASK.md",
+    "report/R10_2_CONTROL.md"
+   ],
+   "issues": [
+    "new FINAL set not available; frozen 5/20 could only be verified with synthetic data (VERIFIED_CPU_TESTED)"
+   ]
+  }
+ ],
+ "summary": {
+  "lanes_executed": [
+   "A executed",
+   "B VERIFIED_CPU_TESTED",
+   "C VERIFIED_GPU (1 run, 14/14)",
+   "D partial CPU, collection BLOCKED"
+  ],
+  "gates": {
+   "A.OWNER_PROVED": "PASS",
+   "A.EVIDENCE_SAFE": "PASS",
+   "A.NO_OTHER_CONSUMERS": "PASS",
+   "A.GRACEFUL_STOP": "PASS (SIGINT/SIGTERM only)",
+   "B.PR14_REGRESSION": "PASS",
+   "B.FREEZE_CLI_AUDIT": "PASS",
+   "C.DIAG_EXECUTED": "PASS",
+   "C.KV_EQUIVALENT": "PASS",
+   "C.ROOT_CAUSE_RESOLVED": "HYPOTHESIS_SUPPORTED",
+   "D.R42_ADAPTER_CPU": "PASS",
+   "D.TASK_SCOPE": "PASS",
+   "D.CONTROL_OFFLINE_TOOLKIT": "PASS",
+   "D.NEW_DATA_COLLECTION": "BLOCKED_COLLECTOR",
+   "D.FINAL_FREEZE_REAL": "BLOCKED (no real data)"
+  },
+  "optimizer_steps": 0,
+  "gpu_sessions_used": 1,
+  "main_untouched": true,
+  "historical_evidence_untouched": true,
+  "no_hdf5_or_weights_committed": true
+ },
+ "failures": [
+  "C3 patcher anchor not unique (twice) -> anchored on a unique line; tests added",
+  "R42 adapter: history trimmed before feature computation -> Acc always 0 (caught by CPU test, fixed)",
+  "offline L1 test expectation missed the 14-dim average (test fixed, not the metric)",
+  "TASK_SCOPE_V1: nested vision keys not visible via h.keys() -> read h['vision'].keys()"
+ ],
+ "next_authorisation_needed": [
+  "designate a concrete, audited push_T collection program (or authorise adapting one k1 script) + an exclusive GPU window, else NEW-DATA stays BLOCKED_COLLECTOR",
+  "R13 zero-optimizer-step 7B smoke proposal (<=20 min) would need its own GPU budget approval",
+  "any real 7B training needs a separate budget authorisation; KV_EQUIVALENT does not unlock it"
+ ]
+}
