@@ -1,0 +1,2 @@
+98ddc82be654452945b1f93d9837859f3bbb0f4bbe03eb82b4b064b379323e52  /home/T7/ojh/robot_actual/RoboDojo/k1_final_take_action.py
+562f02056ea22c59960d881ee34cd5f3ac5e0f7c9e64e480c146d1bcabaa3f5e  /home/T7/ojh/robot_actual/RoboDojo/k1_ori2_full_push.py

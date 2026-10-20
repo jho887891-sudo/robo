@@ -1,0 +1,22 @@
+[PASS] scope_has_12_tasks                             {}
+[PASS] scope_uses_spec_task_ids                       {}
+[PASS] scope_records_local_presence                   {"present": 12, "absent": 0}
+[PASS] pushT_has_local_data_and_module                {"eps": 100, "module": "task/RoboDojo/tasks/push_T.py"}
+[PASS] unknown_is_kept_not_invented                   {"unknown_fields": true}
+[PASS] route_raises_for_unregistered_task             {}
+[PASS] stats_only_from_train                          {}
+[PASS] stage_timeline_ordered                         {"total_ms": 110.0}
+[PASS] missing_stage_rejected                         {}
+[PASS] budget_overrun_reported                        {"overrun_ms": 70.0}
+[PASS] no_latency_claim_without_data                  {}
+[PASS] percentiles_correct                            {}
+[PASS] l1_frame_mean_exact                            {"l1": 1.785714285714286e-05}
+[PASS] episode_macro_exact                            {}
+[PASS] r2_perfect_is_one                              {}
+[PASS] r2_bad_is_negative                             {}
+[PASS] sign_agreement_full                            {"n": 2, "agreement": 1.0}
+[PASS] per_arm_groups_present                         {}
+[PASS] motion_strata_nonempty                         {}
+[PASS] clip_rate_exact                                {}
+
+20/20 checks passed

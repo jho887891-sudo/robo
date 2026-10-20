@@ -1,0 +1,123 @@
+{
+ "checks": [
+  {
+   "check": "scope_has_12_tasks",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "scope_uses_spec_task_ids",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "scope_records_local_presence",
+   "pass": true,
+   "detail": {
+    "present": 12,
+    "absent": 0
+   }
+  },
+  {
+   "check": "pushT_has_local_data_and_module",
+   "pass": true,
+   "detail": {
+    "eps": 100,
+    "module": "task/RoboDojo/tasks/push_T.py"
+   }
+  },
+  {
+   "check": "unknown_is_kept_not_invented",
+   "pass": true,
+   "detail": {
+    "unknown_fields": true
+   }
+  },
+  {
+   "check": "route_raises_for_unregistered_task",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "stats_only_from_train",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "stage_timeline_ordered",
+   "pass": true,
+   "detail": {
+    "total_ms": 110.0
+   }
+  },
+  {
+   "check": "missing_stage_rejected",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "budget_overrun_reported",
+   "pass": true,
+   "detail": {
+    "overrun_ms": 70.0
+   }
+  },
+  {
+   "check": "no_latency_claim_without_data",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "percentiles_correct",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "l1_frame_mean_exact",
+   "pass": true,
+   "detail": {
+    "l1": 1.785714285714286e-05
+   }
+  },
+  {
+   "check": "episode_macro_exact",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "r2_perfect_is_one",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "r2_bad_is_negative",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "sign_agreement_full",
+   "pass": true,
+   "detail": {
+    "n": 2,
+    "agreement": 1.0
+   }
+  },
+  {
+   "check": "per_arm_groups_present",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "motion_strata_nonempty",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "clip_rate_exact",
+   "pass": true,
+   "detail": {}
+  }
+ ],
+ "n_pass": 20,
+ "n_total": 20
+}

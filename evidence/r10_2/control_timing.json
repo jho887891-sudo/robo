@@ -1,0 +1,53 @@
+{
+ "frame_ms": 40.0,
+ "action_hold_ms_reference": 100.0,
+ "stages": [
+  "capture",
+  "queue",
+  "prefill",
+  "decode14",
+  "sim_step",
+  "hold"
+ ],
+ "example_schedule": {
+  "capture": {
+   "start_ms": 0.0,
+   "duration_ms": 8.0
+  },
+  "queue": {
+   "start_ms": 8.0,
+   "duration_ms": 2.0
+  },
+  "prefill": {
+   "start_ms": 10.0,
+   "duration_ms": 25.0
+  },
+  "decode14": {
+   "start_ms": 35.0,
+   "duration_ms": 30.0
+  },
+  "sim_step": {
+   "start_ms": 65.0,
+   "duration_ms": 5.0
+  },
+  "hold": {
+   "start_ms": 70.0,
+   "duration_ms": 40.0
+  },
+  "total_ms": 110.0
+ },
+ "budget": {
+  "total_ms": 110.0,
+  "frame_ms": 40.0,
+  "fits_frame": false,
+  "overrun_ms": 70.0,
+  "note": "fits_frame=false never implies the robot is unsafe: the action is held"
+ },
+ "real_latency": {
+  "label": "policy_step",
+  "status": "NOT_MEASURED",
+  "n": 0,
+  "note": "no real run in this round; nothing is claimed about timing"
+ },
+ "status": "IMPLEMENTED_NOT_MEASURED"
+}
