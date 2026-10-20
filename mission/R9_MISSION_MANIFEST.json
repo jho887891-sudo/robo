@@ -1,0 +1,340 @@
+{
+ "mission_id": "RD-R9-GATE-20261020-01",
+ "mission_atlas": {
+  "branch": "plan/r9-training-gate-atlas",
+  "sha": "fdb65da13fcf0ae5ae8d927b5864b0aedf2dd4d5",
+  "path": "missions/R9_COMPLETE_STAGE_EXECUTION_ATLAS.md",
+  "template": "missions/R9_MISSION_MANIFEST.template.json"
+ },
+ "executor": "deepseek",
+ "auditor": "chatgpt",
+ "decision_maker": "research_lead",
+ "executed_utc": "2026-10-20T14:00:00Z..2026-10-20T14:40:00Z",
+ "baseline": {
+  "audit_branch": "review/r8-three-lane-contract-audit",
+  "audit_sha": "52422372e5eacdcd0ee841ef2b91bdc5a71066c7",
+  "main_sha": "329614f54d3090b9b6ab120855ba50fbc93bdd1e",
+  "main_untouched": true,
+  "audit_base_untouched": true,
+  "previous_r8_evidence_untouched": true
+ },
+ "authorization_state": {
+  "cpu_work": "granted",
+  "real_hdf5_readonly": "granted",
+  "gpu_kv_diagnosis": "NOT_AUTHORIZED",
+  "data_download_or_collection": "NOT_AUTHORIZED",
+  "seven_b_training_any_step": "NOT_AUTHORIZED",
+  "merge_or_main_write": "NOT_AUTHORIZED"
+ },
+ "resource_use": {
+  "gpu_used": false,
+  "gpu_snapshot_start": "NVIDIA RTX A6000 49140 MiB total / 24414 MiB used by foreign PIDs 3111650,3451404,3469786",
+  "foreign_processes_disturbed": false,
+  "cpu_only": true,
+  "network_used": false,
+  "packages_under_2h_budget": true,
+  "fix_rounds": {
+   "A": {
+    "harness_defects": 2,
+    "criterion_refinement": 1,
+    "final": "9/9 + 15/15"
+   },
+   "B": {
+    "harness_defects": 2,
+    "criterion_refinement": 0,
+    "final": "11/11 + 16/16"
+   },
+   "C": {
+    "harness_defects": 2,
+    "methodology_correction": 1,
+    "final": "selfcheck PASS + 10/10"
+   },
+   "D": {
+    "harness_defects": 2,
+    "criterion_refinement": 0,
+    "final": "13/13 + inherited 6/6"
+   }
+  },
+  "note": "every failure iteration is archived per branch; gate criteria were never relaxed"
+ },
+ "gates": [
+  {
+   "gate": "A",
+   "title": "64 TRAIN-only frozen 42D/R contract",
+   "branch": "experiment/r9-freeze-64train",
+   "head_sha": "f7b8b39",
+   "base_sha": "5242237",
+   "status": "PASS",
+   "label": "VERIFIED_CPU_HDF5",
+   "device": "CPU + real HDF5",
+   "actually_ran": true,
+   "key_results": {
+    "split": "64 TRAIN / 16 DEV / 20 old holdout, episode-disjoint",
+    "train_names_sha256": "9216cb80e13b909e924977a43f79529ee435fa6bbe3f180c2fbce0bab619f2d7",
+    "quantile_rows_64_train": 19127,
+    "quantile_rows_80": 25313,
+    "quantile_recompute_max_abs_diff": {
+     "q01": 3.0174851506359346e-9,
+     "q99": 9.536742145987986e-9
+    },
+    "material_change_vs_80episode_fit_max_rel": 0.2929057662709994,
+    "frozen_contract_sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+    "codec_in_range_max_error": 0.00017164647579193115,
+    "codec_one_bin_step_max": 0.00017185891920235008,
+    "codec_out_of_range_fraction": 0.018026331979820353,
+    "distinguishable_motion_zero_bin_collisions": 0,
+    "old80_contract_rejected": {
+     "exit_code": 1,
+     "sha256": "b680d702ca95ce95c8a7aba62c29c1525c424b4ab7a81cd2151ea02d5e1d8862"
+    },
+    "cpu_contract_checks": "10/10",
+    "independent_verification": "9/9",
+    "regression_tests": "15/15 (7 negative controls)"
+   },
+   "evidence": [
+    "evidence/r9_gate_20261020/",
+    "report/R9_FROZEN_CONTRACT.md"
+   ],
+   "recompute": [
+    "bash scripts/r9_gate_a.sh",
+    "python tools/r9_contract_gate.py --contract evidence/r9_gate_20261020/frozen_contract_64train.json --repo . --out evidence/r9_gate_20261020",
+    "python tests/test_r9_contract_gate.py"
+   ],
+   "open_items": []
+  },
+  {
+   "gate": "B",
+   "title": "standard training entrypoint 42D/R trace (zero optimizer steps)",
+   "branch": "feature/r9-vla-trainer-contract",
+   "head_sha": "385ff4d",
+   "base_sha": "5242237",
+   "status": "PASS_CPU",
+   "label": "VERIFIED_CPU + MOCK_FORWARD + PENDING_GPU",
+   "device": "CPU only (no 7B load)",
+   "actually_ran": true,
+   "key_results": {
+    "trace_checks": "11/11",
+    "regression_tests": "16/16",
+    "supervised_positions": 15,
+    "prompt_positions_ignored": 36,
+    "token_range_on_sample": [
+     31859,
+     31892
+    ],
+    "target_identity_max_delta": 0,
+    "decode_in_range_max_error": 0.00015926361083984375,
+    "decode_one_bin_step_max": 0.00017185891920235008,
+    "mock_loss": 5.4939045906066895,
+    "mock_grad_abs_sum": 39.51126277446747,
+    "real_projector_params_llm4096": 16957440,
+    "optimizer_steps": 0,
+    "cuda_initialized": false,
+    "entrypoint_selfcheck": "PASS over 8 frames / 2 TRAIN episodes",
+    "authorization_guard": {
+     "exit_code": 1,
+     "message": "refusing to train: R9_TRAINING_AUTHORIZED is not set",
+     "output_dir_created": false
+    }
+   },
+   "risks": [
+    {
+     "id": "B11_constants",
+     "label": "HYPOTHESIS",
+     "detail": "prismatic constants resolve to LIBERO (ACTION_DIM=7, NUM_ACTIONS_CHUNK=8, PROPRIO_DIM=8) because detection scans sys.argv; the untouched evaluate() loops range(ACTION_DIM). The new 42D entrypoint never uses that constant. Any GPU run must assert the constants explicitly.",
+     "must_resolve_before": "any 7B training or evaluation"
+    }
+   ],
+   "evidence": [
+    "evidence/r9_trainer_trace_20261020/",
+    "report/R9_TRAIN_ENTRYPOINT_TRACE.md"
+   ],
+   "recompute": [
+    "python tools/r9_trainer_trace.py --contract evidence/r9_gate_20261020/frozen_contract_64train.json --out evidence/r9_trainer_trace_20261020",
+    "python training/r9_train_pushT_svacc.py --contract evidence/r9_gate_20261020/frozen_contract_64train.json --selfcheck",
+    "python tests/test_r9_trainer_contract.py"
+   ],
+   "open_items": [
+    "real 7B 42D forward/backward/loss (PENDING_GPU, not authorized)",
+    "constants assertion before any GPU run"
+   ]
+  },
+  {
+   "gate": "C",
+   "title": "KV-cache same-prefix diagnosis",
+   "branch": "diagnostics/r9-kv-same-prefix",
+   "head_sha": "02735bc",
+   "base_sha": "5242237",
+   "status": "PASS_CPU / BLOCKED_GPU",
+   "label": "VERIFIED_CPU + BLOCKED_WAITING_FOR_AUTHORIZATION",
+   "device": "CPU tiny model; GPU not used",
+   "actually_ran": true,
+   "key_results": {
+    "same_prefix_fp32": {
+     "n_match": 8,
+     "n_total": 8,
+     "noise_floor_max_abs_dlogit": 8.009374141693115e-8
+    },
+    "control_shifted_position_ids": {
+     "detected": true,
+     "median_max_abs_dlogit": 0.0017463713884353638
+    },
+    "control_cache_offset": {
+     "detected": true,
+     "n_match": 7,
+     "first_mismatch_step": 1,
+     "max_abs_dlogit": 0.028092071413993835
+    },
+    "bf16_vs_fp32": {
+     "max_abs_dlogit": 0.0021584704518318176,
+     "top1_minus_top2": 0.13330078125,
+     "flip_possible": false
+    },
+    "static_audit_of_r8_smoke": {
+     "pass": true,
+     "sha256": "0872f5f2bff57ca64a2c8cac1b4b3bb2f8c10905f8afebb7d5868227fdc4d9e1"
+    },
+    "regression_tests": "10/10",
+    "gpu_guard": {
+     "exit_code": 7,
+     "message": "refusing GPU KV diagnosis: R9_KV_GPU_AUTHORIZED is not set"
+    },
+    "archived_r8_failure": {
+     "kv": [
+      132,
+      102,
+      177,
+      176,
+      108,
+      130,
+      0,
+      0,
+      128,
+      128,
+      127,
+      114,
+      127,
+      128
+     ],
+     "full": [
+      132,
+      102,
+      121,
+      243,
+      135,
+      210,
+      0,
+      0,
+      128,
+      128,
+      126,
+      114,
+      139,
+      128
+     ],
+     "per_step_logits_archived": false
+    }
+   },
+   "methodology_note": "margin <= 2*max|dlogit| is necessarily true for a genuine argmax flip and cannot separate numeric from structural causes; a documented numeric-noise-floor classification is used instead and no root cause is claimed",
+   "evidence": [
+    "evidence/r9_kv_cpu_20261020/",
+    "report/R9_KV_DIAGNOSIS.md"
+   ],
+   "recompute": [
+    "python diagnostics/r9_kv_same_prefix.py --static-audit diagnostics/r8_smoke.py",
+    "python diagnostics/r9_kv_same_prefix.py --cpu-selfcheck --out evidence/r9_kv_cpu_20261020",
+    "python tests/test_r9_kv_same_prefix.py"
+   ],
+   "open_items": [
+    "one bounded GPU diagnosis (<=5 min, >=24 GB free) after authorization"
+   ]
+  },
+  {
+   "gate": "D",
+   "title": "new independent evaluation data preparation",
+   "branch": "research/r9-new-test-readiness",
+   "head_sha": "f8e43b0",
+   "base_sha": "5242237",
+   "status": "PASS_PREP / BLOCKED_DATA",
+   "label": "VERIFIED_CPU + BLOCKED_DATA_ACQUISITION_AUTHORIZATION",
+   "device": "CPU, read-only file stats + HDF5 structure probes",
+   "actually_ran": true,
+   "key_results": {
+    "existing_100": {
+     "n_episodes": 100,
+     "n_unique_content": 100,
+     "total_frames": 32304,
+     "dataset_sha256": "6757696397863af8058b296a80f9c50ccfc1ed824c43e8d6f6f122cbd610040a"
+    },
+    "disjoint_vs_split80": {
+     "ok": false,
+     "n_overlap_with_used": 100,
+     "n_duplicate_content": 0
+    },
+    "bytes_per_episode": 77793273,
+    "acquisition_options_gb": {
+     "official_increment_20_128": [
+      1.56,
+      9.96
+     ],
+     "new_collection_20_30": [
+      1.56,
+      2.33
+     ],
+     "cross_task_20": [
+      1.56
+     ]
+    },
+    "sources": {
+     "local_push_T_100": "USABLE_PUSH_T",
+     "robodojo_demo_arx_x5": "DIFFERENT_TASK",
+     "stack_bowls": "DIFFERENT_TASK",
+     "sweep_blocks": "DIFFERENT_TASK",
+     "openvla_offline_bundle_stage63": "PLACEHOLDER_FIXTURES"
+    },
+    "protocol_sha256": "e5836191ed4c90d2482211ec5e7266eb58444ad742f59cb66eab84972b889f24",
+    "extends_r8_protocol_sha256": "48ad7326f9ae938ecdd8d9e19e219297fcb594fbcbb823066cecc1163327aa55",
+    "regression_tests": "13/13 + inherited 6/6"
+   },
+   "evidence": [
+    "evidence/r9_eval_prep_20261020/",
+    "report/R9_INDEPENDENT_EVAL_PREP.md",
+    "protocol/r9_eval_protocol.json"
+   ],
+   "recompute": [
+    "python tools/r9_data_source_survey.py evidence/r9_eval_prep_20261020/r9_data_sources.json",
+    "python tools/r8_eval_manifest.py disjoint --manifest evidence/r9_eval_prep_20261020/manifest_existing100.json --split data/split80.json",
+    "python tests/test_r9_eval_prep.py"
+   ],
+   "open_items": [
+    "research-lead authorization for download or collection",
+    "g1-g6 freeze before any FINAL evaluation"
+   ]
+  }
+ ],
+ "summary": {
+  "gates_passed_cpu": [
+   "A",
+   "B",
+   "C-CPU",
+   "D-prep"
+  ],
+  "gates_blocked": [
+   "C-GPU (authorization)",
+   "D-data (authorization)",
+   "7B training (authorization + A/B/C-GPU)"
+  ],
+  "verdict": "technical CPU chain is closed; GPU KV verdict and independent data remain blocked; 7B training NOT AUTHORIZED"
+ },
+ "not_claimed": [
+  "closed-loop RoboDojo success rate",
+  "any 7B training result or generalization claim",
+  "that the R8 8/14 KV mismatch cause is known",
+  "that the old 20 holdout or the 100 used episodes are an independent final test",
+  "that the 42D entrypoint has ever run a training step"
+ ],
+ "next_permitted_actions": [
+  "one bounded GPU KV diagnosis, on explicit authorization (<=5 min incl. weights, >=24 GB free)",
+  "constants assertion + 42D projector wiring review before any GPU run",
+  "data acquisition only after research-lead authorization, then g1-g6"
+ ]
+}
