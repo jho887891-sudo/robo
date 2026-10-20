@@ -1,0 +1,3 @@
+file: /tmp/run_dbg2.log
+-rw-rw-r-- 1 dgut dgut 2179097387 10月 20 16:40 /tmp/run_dbg2.log
+5259701fd2e776ccd0ce0cdccf99449a790b71d9c664fea0ee7b1fb16be206c6  /tmp/run_dbg2.log

@@ -1,0 +1,4 @@
+### cmd: docker ps --format {{.ID}} {{.Names}} {{.Image}} {{.Status}} {{.Ports}}
+### start: 2026-10-20T16:40:05Z
+81be207a4a03 rd_setup nvcr.io/nvidia/isaac-sim:5.1.0 Up 2 days 
+### exit=0

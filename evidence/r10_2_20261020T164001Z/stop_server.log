@@ -1,0 +1,8 @@
+2026-10-20T16:42:59Z mode=server pid=3469786 expect_fingerprint='setup_policy_server.py'
+2026-10-20T16:42:59Z cmdline=/home/dgut/pusht_runtime/venv_oft/bin/python XPolicyLab/setup_policy_server.py --config_path XPolicyLab/policy/OpenVLA_Pure/deploy.yml --overrides port=6020 host=localhost bench_name=RoboDojo task_name=push_T policy_name=OpenVLA_Pure action_type=joint action_dim=14 env_cfg_type=arx_x5 seed=0 
+2026-10-20T16:42:59Z owner=dgut
+2026-10-20T16:42:59Z SIGINT rc=0 err=''
+2026-10-20T16:43:59Z still alive after 60s; sending SIGTERM
+2026-10-20T16:43:59Z SIGTERM rc=0 err=''
+2026-10-20T16:43:59Z exited after SIGTERM (0s)
+2026-10-20T16:43:59Z RESULT=EXITED_ON_SIGTERM

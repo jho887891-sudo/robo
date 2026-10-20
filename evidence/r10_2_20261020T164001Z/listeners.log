@@ -1,0 +1,23 @@
+### cmd: bash -c ss -ltnp 2>/dev/null | head -20
+### start: 2026-10-20T16:40:05Z
+State  Recv-Q Send-Q               Local Address:Port  Peer Address:PortProcess                                       
+LISTEN 0      511                      127.0.0.1:14320      0.0.0.0:*    users:(("MainThread",pid=1158266,fd=111))    
+LISTEN 0      128                      127.0.0.1:46379      0.0.0.0:*    users:(("code-7debcd0e2a",pid=15693,fd=11))  
+LISTEN 0      4096                     127.0.0.1:15721      0.0.0.0:*    users:(("cc-switch",pid=12244,fd=28))        
+LISTEN 0      2048                       0.0.0.0:8011       0.0.0.0:*                                                 
+LISTEN 0      128                      127.0.0.1:42939      0.0.0.0:*    users:(("code-6d62b1d5da",pid=1158148,fd=9)) 
+LISTEN 0      4096                       0.0.0.0:1200       0.0.0.0:*                                                 
+LISTEN 0      511                      127.0.0.1:42527      0.0.0.0:*    users:(("MainThread",pid=1421630,fd=72))     
+LISTEN 0      128                        0.0.0.0:22         0.0.0.0:*                                                 
+LISTEN 0      511                      127.0.0.1:44222      0.0.0.0:*    users:(("neo4j-desktop",pid=13963,fd=78))    
+LISTEN 0      511                      127.0.0.1:44223      0.0.0.0:*    users:(("neo4j-desktop",pid=13963,fd=80))    
+LISTEN 0      4096                 100.88.178.19:3080       0.0.0.0:*                                                 
+LISTEN 0      100                      127.0.0.1:6020       0.0.0.0:*    users:(("pt_main_thread",pid=3469786,fd=43)) 
+LISTEN 0      511                      127.0.0.1:38157      0.0.0.0:*    users:(("MainThread",pid=1158266,fd=36))     
+LISTEN 0      128                      127.0.0.1:38099      0.0.0.0:*    users:(("code-2a59476c9b",pid=1420889,fd=9)) 
+LISTEN 0      511                      127.0.0.1:40849      0.0.0.0:*    users:(("MainThread",pid=1423319,fd=59))     
+LISTEN 0      64                         0.0.0.0:49100      0.0.0.0:*                                                 
+LISTEN 0      128                      127.0.0.1:631        0.0.0.0:*                                                 
+LISTEN 0      511                      127.0.0.1:36265      0.0.0.0:*    users:(("MainThread",pid=1159835,fd=37))     
+LISTEN 0      128                      127.0.0.1:36209      0.0.0.0:*    users:(("code-e4c7e7b1d6",pid=2055341,fd=11))
+### exit=0

@@ -1,0 +1,5 @@
+### cmd: nvidia-smi --query-compute-apps=pid,ppid,process_name,used_memory --format=csv
+### start: 2026-10-20T16:40:01Z
+Field "ppid" is not a valid field to query.
+
+### exit=2

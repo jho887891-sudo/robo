@@ -1,0 +1,24 @@
+### cmd: bash -c for p in $(pgrep -f "eval_client/main.py|_run_client.sh|robodojo.sh client|eval_policy.sh|isaac-sim/kit" 2>/dev/null); do echo "== $p ppid=$(ps -o ppid= -p $p | tr -d " ") user=$(ps -o user= -p $p | tr -d " ")"; tr "\0" " " < /proc/$p/cmdline 2>/dev/null; echo; done
+### start: 2026-10-20T16:40:05Z
+== 1934957 ppid=1934659 user=dgut
+bash -c for p in $(pgrep -f "eval_client/main.py|_run_client.sh|robodojo.sh client|eval_policy.sh|isaac-sim/kit" 2>/dev/null); do echo "== $p ppid=$(ps -o ppid= -p $p | tr -d " ") user=$(ps -o user= -p $p | tr -d " ")"; tr "\0" " " < /proc/$p/cmdline 2>/dev/null; echo; done 
+== 1934958 ppid= user=
+bash: line 1: /proc/1934958/cmdline: No such file or directory
+
+== 3111650 ppid=3111578 user=1234
+/isaac-sim/kit/kit /isaac-sim/apps/isaacsim.exp.full.streaming.kit --no-window --/persistent/isaac/asset_root/default=https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1 --merge-config=/isaac-sim/config/open_endpoint.toml --allow-root sleep infinity 
+== 3451298 ppid=1 user=dgut
+bash -c echo jxljy@2403 | sudo -S -p '' docker exec -e ROBODOJO_PROGRESS_LABELS=t,target_t rd_setup bash /workspace/RoboDojo/_run_client.sh push_T OpenVLA_Pure 6020 1 
+== 3451305 ppid=3451298 user=root
+sudo -S -p  docker exec -e ROBODOJO_PROGRESS_LABELS=t,target_t rd_setup bash /workspace/RoboDojo/_run_client.sh push_T OpenVLA_Pure 6020 1 
+== 3451316 ppid=3451305 user=root
+docker exec -e ROBODOJO_PROGRESS_LABELS=t,target_t rd_setup bash /workspace/RoboDojo/_run_client.sh push_T OpenVLA_Pure 6020 1 
+== 3451345 ppid=3111549 user=1234
+bash /workspace/RoboDojo/_run_client.sh push_T OpenVLA_Pure 6020 1 
+== 3451351 ppid=3451345 user=1234
+bash scripts/robodojo.sh client --task push_T --policy-name OpenVLA_Pure --policy-host 127.0.0.1 --policy-port 6020 --eval-num 1 
+== 3451356 ppid=3451351 user=1234
+bash /workspace/RoboDojo/scripts/eval_policy.sh --dataset_name RoboDojo --task_name push_T --env_cfg_type arx_x5 --policy_name OpenVLA_Pure --host 127.0.0.1 --port 6020 --protocol ws --root_dir /workspace/RoboDojo --device_id 0 --additional_info ckpt_name=external,action_type=ee --seed 0 
+== 3451404 ppid=3111578 user=1234
+/isaac-sim/kit/python/bin/python3 -u src/eval_client/main.py --task_name push_T --env_cfg_type arx_x5 --num_envs 10 --enable_cameras --kit_args  --enable isaacsim.replicator.behavior --enable isaacsim.sensors.camera --device_id 0 --policy_name OpenVLA_Pure --port 6020 --protocol ws --policy_server_url ws://127.0.0.1:6020 --additional_info ckpt_name=external,action_type=ee --seed 0 --host 127.0.0.1 --headless 
+### exit=0

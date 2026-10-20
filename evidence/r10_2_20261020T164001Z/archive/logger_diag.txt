@@ -1,0 +1,6 @@
+14:57:12 first call: rm=RewardManager fp=Func_Parser lm=LayoutManager cnt=[0] seedmap={0: 0}
+16:10:23 first call: rm=RewardManager fp=Func_Parser lm=LayoutManager cnt=[0] seedmap={0: 0}
+04:10:40 first call: rm=RewardManager fp=Func_Parser lm=LayoutManager cnt=[0] labels=['t', 'target_t']
+11:49:51 first call: rm=RewardManager fp=Func_Parser lm=LayoutManager cnt=[0] labels=['t', 'target_t']
+12:14:19 first call: rm=RewardManager fp=Func_Parser lm=LayoutManager cnt=[1] labels=['bowl0', 'bowl1', 'bowl2']
+12:40:40 first call: rm=RewardManager fp=Func_Parser lm=LayoutManager cnt=[1] labels=['mug0', 'mug1', 'mug2', 'cup_holder']

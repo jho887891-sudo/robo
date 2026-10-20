@@ -1,0 +1,45 @@
+### cmd: bash -c cd /home/T7/ojh/robot_actual/submission && git rev-parse HEAD && git rev-parse --abbrev-ref HEAD && git show-ref | head -40
+### start: 2026-10-20T16:40:01Z
+8c7c62924edb31e1cdeabc094336e0bd3fb36494
+audit/r3-autoreg-training-fix
+3c2b84b623e1d7f7c86002f7fd30e099f1983f42 refs/heads/audit/pure-openvla-collapse
+d63ad8a74fb16df9f2f61f0b9b6d1b707f37caba refs/heads/audit/r2-action-codec-fix
+8c7c62924edb31e1cdeabc094336e0bd3fb36494 refs/heads/audit/r3-autoreg-training-fix
+5f24cc94a587d672403bc8ae9eab3e5bd72f7225 refs/heads/audit/r3-autoregressive-mask
+d945331128d936f867a105d9056963a4059bf1f7 refs/heads/audit/r3-pure-autoreg-input-fix
+808abfa3866f193c71ffddf9338e5c2e8a02aa72 refs/heads/audit/r4-unified-action-target-ab
+f974aeb8aba0afb4ed1186d24b57b8d6f6beca12 refs/heads/audit/r5-distribution-and-baseline-audit
+62088f76a36e4847f3c910f95f01a77f9c8de313 refs/heads/audit/r6-history-proprio-pilot
+77c470494f833252679fef8c686c799123743b69 refs/heads/audit/r7-state-dynamics-baseline
+a2b71805d8abb9314bcca5025aa9e449c525a08e refs/heads/audit/r8-pretraining-readiness
+02735bc2f16d60275ece01526f68860feafd5054 refs/heads/diagnostics/r9-kv-same-prefix
+22d0a95c9a27f1ef187cbce02edefd599f2f49d8 refs/heads/experiment/r8-motion-normalization
+f7b8b39e2394772ae6b2d8d929c7a0ba0fb10ed9 refs/heads/experiment/r9-freeze-64train
+6b1559772f5fd084e6ebde1a624a0cc8468c905a refs/heads/feature/r8-vla-42d-smoke
+1cd50f1ae447a73289fd3a2dfd24eb14e973681d refs/heads/feature/r9-vla-trainer-contract
+329614f54d3090b9b6ab120855ba50fbc93bdd1e refs/heads/main
+4af5d603c6410ec951ac8b1b138312bbdebb9c24 refs/heads/r10.2/42d-deploy-12task
+429e28affd67f9643a122bdb5bc0f958f9befa43 refs/heads/r10.2/final-freeze-audit
+4af5d603c6410ec951ac8b1b138312bbdebb9c24 refs/heads/r10.2/kv-diagnosis
+4af5d603c6410ec951ac8b1b138312bbdebb9c24 refs/heads/r10.2/resource-release
+4af5d603c6410ec951ac8b1b138312bbdebb9c24 refs/heads/r10/cpu-gates
+4f28417c18747bc2b208650b690b444f4d7a8678 refs/heads/research/r8-independent-evaluation
+f8e43b0ca6ccaa8a5711e338ba12e0f3be69328f refs/heads/research/r9-new-test-readiness
+3faed920421f02ac23e7a6a41050f4b5e93a762b refs/heads/review/r7-state-dynamics-audit-20261020
+3c2b84b623e1d7f7c86002f7fd30e099f1983f42 refs/remotes/origin/audit/pure-openvla-collapse
+d63ad8a74fb16df9f2f61f0b9b6d1b707f37caba refs/remotes/origin/audit/r2-action-codec-fix
+8c7c62924edb31e1cdeabc094336e0bd3fb36494 refs/remotes/origin/audit/r3-autoreg-training-fix
+5f24cc94a587d672403bc8ae9eab3e5bd72f7225 refs/remotes/origin/audit/r3-autoregressive-mask
+40d143a99bd6ba3696db224483b24f811f475e39 refs/remotes/origin/audit/r3-experiment-integrity-fix
+d945331128d936f867a105d9056963a4059bf1f7 refs/remotes/origin/audit/r3-pure-autoreg-input-fix
+808abfa3866f193c71ffddf9338e5c2e8a02aa72 refs/remotes/origin/audit/r4-unified-action-target-ab
+e68d0a2e86690afcb2913592f84a042d88b0847c refs/remotes/origin/audit/r5-direction-metrics-correction
+f974aeb8aba0afb4ed1186d24b57b8d6f6beca12 refs/remotes/origin/audit/r5-distribution-and-baseline-audit
+62088f76a36e4847f3c910f95f01a77f9c8de313 refs/remotes/origin/audit/r6-history-proprio-pilot
+781781650164827e670b2d6152a2b95ec99e6c23 refs/remotes/origin/audit/r6-oracle-claim-correction
+77c470494f833252679fef8c686c799123743b69 refs/remotes/origin/audit/r7-state-dynamics-baseline
+a2b71805d8abb9314bcca5025aa9e449c525a08e refs/remotes/origin/audit/r8-pretraining-readiness
+3ebadd0764cc94ad9007b08892899195a1dfc6cf refs/remotes/origin/audit/r8-pretraining-readiness-verification
+02acabc0130bb7b643ce2414e238d8dbb53107c0 refs/remotes/origin/audit/r8-proprio-scale-preflight
+02735bc2f16d60275ece01526f68860feafd5054 refs/remotes/origin/diagnostics/r9-kv-same-prefix
+### exit=0

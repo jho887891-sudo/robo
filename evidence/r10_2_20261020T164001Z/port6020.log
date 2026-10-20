@@ -1,0 +1,4 @@
+### cmd: bash -c ss -ltnp 2>/dev/null | grep -E ':6020' || echo no-listener-visible-from-host
+### start: 2026-10-20T16:40:05Z
+LISTEN 0      100                      127.0.0.1:6020       0.0.0.0:*    users:(("pt_main_thread",pid=3469786,fd=43)) 
+### exit=0
