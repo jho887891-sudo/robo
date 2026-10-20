@@ -1,0 +1,11 @@
+correction structure: corr(R, accel)=0.433  corr(R, -V)=0.178  |R|/|V|=0.254
+acceleration autocorrelation (holdout, per-episode mean)=0.442
+[SVAcc_R] L1=0.001204  vs cv: mean diff=-0.000561, improved 20/20 episodes, bootstrap P(improve)=1.000 CI[-0.000622,-0.000501]
+[SV_R] L1=0.001696  vs cv: mean diff=-0.000076, improved 14/20 episodes, bootstrap P(improve)=1.000 CI[-0.000119,-0.000036]
+  stratum tiny_lt_1e-3       n=  558 model=0.000456 cv=0.000445 rel_improvement=-2.5%
+  stratum small_1e-3_5e-3    n= 3505 model=0.000666 cv=0.000951 rel_improvement=+30.0%
+  stratum medium_5e-3_2e-2   n= 2010 model=0.001741 cv=0.002460 rel_improvement=+29.2%
+  stratum large_ge_2e-2      n=  618 model=0.003497 cv=0.005640 rel_improvement=+38.0%
+proprio kNN bound: knn_mean_R L1=0.001527  nearest-neighbour L1=0.002107  (MLP R L1=0.001233)
+residual: episode-offset variance explained (oracle upper bound)=0.003
+wrote /home/dgut/pusht_runtime/r7/probe_acc.json

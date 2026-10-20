@@ -1,0 +1,39 @@
+{
+ "gpu": "NVIDIA RTX A6000, 49140 MiB, 580.178.04",
+ "torch": "2.4.1+cu121",
+ "torch_threads": 32,
+ "python": "3.10.12",
+ "numpy": "1.26.4",
+ "device_used": "CPU only (no CUDA context created; no GPU job was touched)",
+ "protocol": {
+  "features": [
+   "SV",
+   "S",
+   "V",
+   "SVAcc"
+  ],
+  "targets": [
+   "R",
+   "delta"
+  ],
+  "hidden": [
+   128,
+   128
+  ],
+  "optimizer": "Adam lr=1e-3 batch=512",
+  "epochs_max": 400,
+  "early_stop_patience": 40,
+  "seeds": [
+   0,
+   1,
+   2
+  ],
+  "train_episodes": 64,
+  "dev_episodes": 16,
+  "holdout_episodes": 20,
+  "train_frames": 19191,
+  "dev_frames": 6202,
+  "holdout_frames": 6711
+ },
+ "note": "MLP fitting is deterministic given the seed; no model weights were uploaded"
+}
