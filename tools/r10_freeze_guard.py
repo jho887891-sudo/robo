@@ -36,6 +36,8 @@ BASE_DIM = 14
 JOINT_GROUPS = (("left_arm", 6), ("left_ee", 1), ("right_arm", 6), ("right_ee", 1))
 CAMERAS = ("cam_head", "cam_left_wrist", "cam_right_wrist")
 MIN_BYTES_PER_FILE = 100_000
+# Fixed r9.1 protocol: a change is a new research decision, not an implicit Gate relaxation.
+FROZEN_PROTOCOL_SHA256 = "e5836191ed4c90d2482211ec5e7266eb58444ad742f59cb66eab84972b889f24"
 
 
 def _c14(h, group):
@@ -199,6 +201,10 @@ def freeze_checked(res, protocol_path, git_sha, freeze_out):
         raise ValueError("refusing FINAL freeze: R10 gate not fully passed")
     if not re.fullmatch(r"[0-9a-fA-F]{40}", git_sha or ""):
         raise ValueError("refusing FINAL freeze: require full 40-character Git commit SHA")
+    actual_protocol_sha = hashlib.sha256(open(protocol_path, "rb").read()).hexdigest()
+    if (actual_protocol_sha != FROZEN_PROTOCOL_SHA256
+            or res.get("protocol_sha256") != FROZEN_PROTOCOL_SHA256):
+        raise ValueError("refusing FINAL freeze: unapproved r9.1 protocol drift")
     if os.path.lexists(freeze_out):
         raise FileExistsError("refusing FINAL freeze: output already exists: " + freeze_out)
     episodes = res["manifest"]["episodes"]
