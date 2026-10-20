@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Negative controls for R9 cross-dataset content-hash leakage."""
+import os
+import sys
 import unittest
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
 from r9_final_disjoint import check
 
 P = {'splits': {'dev_episodes': 5, 'final_episodes_min': 15},
