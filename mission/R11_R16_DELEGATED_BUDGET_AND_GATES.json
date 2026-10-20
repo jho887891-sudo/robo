@@ -1,0 +1,284 @@
+{
+  "schema_version": "1.0",
+  "mission_id": "RD-R11-R16-DELEGATION-20261021-01",
+  "authored_date": "2026-10-21",
+  "status": "PROPOSED_AUTHORIZATION_NOT_EXECUTED",
+  "authorization_activation": "Research lead forwarding the exact authorization prompt/spec to DeepSeek constitutes approval of these finite resource ceilings; committed spec alone does not.",
+  "scope": "Push-T OpenVLA-7B 42D/R M1 controlled training + closed-loop, 12-task CPU prep, optional verified two-task pilot",
+  "repo": "jho887891-sudo/robo",
+  "baseline_refs": {
+    "main": "329614f54d3090b9b6ab120855ba50fbc93bdd1e",
+    "r10_2_A": "a3396eb052c62a64ddc7813f86f6b44c55e1c9b2",
+    "r10_2_B": "8d86a25993cc6bc7a1f7f44f6c14a477623e6c70",
+    "r10_2_C": "3e1d56b83703988201d7886535242db4ed135ea4",
+    "r10_2_D": "e7cd9bb3cd8c7ec727c6ddd863b77a24c2fb7b30",
+    "r10_freeze_review": "429e28affd67f9643a122bdb5bc0f958f9befa43"
+  },
+  "budgets": {
+    "new_single_gpu_seconds_total": 115200,
+    "record_utc_wallclock_and_pid": true,
+    "one_gpu_lane_at_a_time": true,
+    "concurrent_heavy_gpu_jobs_max": 1,
+    "light_cpu_worktrees_max": 4,
+    "new_pushT_episode_attempts_max": 40,
+    "valid_episode_target": 25,
+    "offline_new_dev_episodes": 5,
+    "offline_new_final_episodes": 20,
+    "collector_new_bytes_max": 16106127360,
+    "dev_sim_rollouts_max": 20,
+    "once_only_sim_final_rollouts_max": 30,
+    "formal_optimizer_steps_total_max": 3000,
+    "overfit_optimizer_steps_total_max": 100,
+    "other_tasks_data_collection_or_downloads_max": 0,
+    "buckets": [
+      {
+        "id": "COLLECTOR",
+        "cap_s": 14400,
+        "trigger": "verified expert backend and source SHA, 25Hz real HDF5",
+        "gpu": false,
+        "details": "<=40 attempts; first 25 valid, 5 DEV/20 offline FINAL; new data max 15GiB",
+        "seconds_used": 0,
+        "status": "PLANNED",
+        "job_ids": [],
+        "commits": [],
+        "evidence": []
+      },
+      {
+        "id": "R13_7B_ZERO_STEP",
+        "cap_s": 1800,
+        "trigger": "P0 train-deploy CPU & frozen input contract pass",
+        "gpu": true,
+        "details": "real 7B forward/backward, LoRA/projector, checkpoint reload; 0 optimizer",
+        "seconds_used": 0,
+        "status": "PLANNED",
+        "job_ids": [],
+        "commits": [],
+        "evidence": []
+      },
+      {
+        "id": "R14_TRAIN_OVERFIT",
+        "cap_s": 3600,
+        "trigger": "R13 verified",
+        "gpu": true,
+        "details": "<=100 overfit optimizer steps, only TRAIN",
+        "seconds_used": 0,
+        "status": "PLANNED",
+        "job_ids": [],
+        "commits": [],
+        "evidence": []
+      },
+      {
+        "id": "R15_TRAIN_FORMAL",
+        "cap_s": 50400,
+        "trigger": "R14 train signal pass",
+        "gpu": true,
+        "details": "<=3000 cumulative formal optimizer steps, 300/1000/3000 gates",
+        "seconds_used": 0,
+        "status": "PLANNED",
+        "job_ids": [],
+        "commits": [],
+        "evidence": []
+      },
+      {
+        "id": "R16_SIM_DEV",
+        "cap_s": 14400,
+        "trigger": "R15 valid checkpoint and action safety",
+        "gpu": true,
+        "details": "<=20 cumulative PushT DEV sim rollouts, 1->5->20 gates",
+        "seconds_used": 0,
+        "status": "PLANNED",
+        "job_ids": [],
+        "commits": [],
+        "evidence": []
+      },
+      {
+        "id": "R16_SIM_FINAL",
+        "cap_s": 21600,
+        "trigger": "locked checkpoint/protocol/seeds; meaningful DEV progress, no safety faults",
+        "gpu": true,
+        "details": "<=30 new sim FINAL seeds, exactly one model/protocol once-only",
+        "seconds_used": 0,
+        "status": "PLANNED",
+        "job_ids": [],
+        "commits": [],
+        "evidence": []
+      },
+      {
+        "id": "TWO_TASK_PILOT",
+        "cap_s": 7200,
+        "trigger": "M1 confirmed progress and trustworthy local second task data",
+        "gpu": true,
+        "details": "optional two-task bounded GPU, steps count within R15 3000 formal total",
+        "seconds_used": 0,
+        "status": "PLANNED",
+        "job_ids": [],
+        "commits": [],
+        "evidence": []
+      },
+      {
+        "id": "RESERVE",
+        "cap_s": 1800,
+        "trigger": "only same approved task mechanical repair",
+        "gpu": true,
+        "details": "not another KV probe, not new experiment",
+        "seconds_used": 0,
+        "status": "PLANNED",
+        "job_ids": [],
+        "commits": [],
+        "evidence": []
+      }
+    ]
+  },
+  "action_permissions": {
+    "real_7b_train_lora_and_r42_projector": true,
+    "real_sim_pushT_collection": true,
+    "write_new_compliant_collector_with_audited_expert_backend": true,
+    "real_sim_dev_and_once_only_final": true,
+    "optional_two_task_training_if_gate_pass": true,
+    "stop_other_processes": false,
+    "modify_main": false,
+    "merge_pr": false,
+    "delete_overwrite_old_hdf5_weights_logs": false,
+    "new_external_paid_gpu": false,
+    "download_new_other_task_data": false,
+    "change_official_success_or_rewards": false,
+    "full_parameter_7b_training": false,
+    "real_hardware_deployment": false,
+    "second_kv_gpu_probe": false
+  },
+  "gates": [
+    {
+      "id": "G0_P0_CPU",
+      "status": "NOT_RUN",
+      "requirements": [
+        "codec full256 match",
+        "RGB3 not implicit RGBA",
+        "timestamp monotonic",
+        "joint clamp after rate",
+        "14-token+EOS causal shift",
+        "64TRAIN normalizer",
+        "train-deploy exact preprocessing",
+        "legacy dimension 7 guarded"
+      ]
+    },
+    {
+      "id": "G1_COLLECTOR",
+      "status": "NOT_RUN",
+      "requirements": [
+        "real expert backend",
+        "new unique 25Hz RGB3 state/action14 HDF5",
+        "<=40 attempts",
+        "25 valid disjoint scenes",
+        "new 5/20 freeze hash"
+      ]
+    },
+    {
+      "id": "G2_7B_SMOKE",
+      "status": "NOT_RUN",
+      "requirements": [
+        "0 updates",
+        "pristine base",
+        "42D LoRA/proj real gradient",
+        "checkpoint roundtrip",
+        "14-token inference",
+        "no 7D fallback"
+      ]
+    },
+    {
+      "id": "G3_OVERFIT",
+      "status": "NOT_RUN",
+      "requirements": [
+        "<=100 TRAIN updates",
+        "loss decreases",
+        "generated legal physical actions",
+        "conditioning audit"
+      ]
+    },
+    {
+      "id": "G4_TRAIN_300",
+      "status": "NOT_RUN",
+      "requirements": [
+        "<=300 formal cumulative steps",
+        "finite loss",
+        "motion improvement",
+        "DEV no collapse"
+      ]
+    },
+    {
+      "id": "G5_TRAIN_1000",
+      "status": "NOT_RUN",
+      "requirements": [
+        "<=1000 formal cumulative steps",
+        "DEV L1 >=5% vs CV or >=3 motion strata stable improvement",
+        "no action collapse"
+      ]
+    },
+    {
+      "id": "G6_TRAIN_3000",
+      "status": "NOT_RUN",
+      "requirements": [
+        "<=3000 formal cumulative steps",
+        "same sample fair metrics",
+        "DEV checkpoint selection"
+      ]
+    },
+    {
+      "id": "G7_CLOSED_LOOP_DEV",
+      "status": "NOT_RUN",
+      "requirements": [
+        "1->5->20 cumulative sim DEV",
+        "actual object progress",
+        "latency trace",
+        "no interface/safety faults"
+      ]
+    },
+    {
+      "id": "G8_SIM_FINAL",
+      "status": "NOT_RUN",
+      "requirements": [
+        "prior locked checkpoint/protocol/seeds",
+        "30 seed cap",
+        "once only no hyperparameter changes",
+        "official success/CI and videos"
+      ]
+    },
+    {
+      "id": "G9_M2_CPU",
+      "status": "NOT_RUN",
+      "requirements": [
+        "12 TaskSpec provenance",
+        "only 3 local dataset inventory",
+        "explicit unknown fields"
+      ]
+    },
+    {
+      "id": "G10_INDEPENDENT_REVIEW",
+      "status": "NOT_RUN",
+      "requirements": [
+        "source SHA and raw stdout/stderr",
+        "train/dev/final hash disjoint",
+        "R10 history kept",
+        "independent recompute"
+      ]
+    }
+  ],
+  "results": {
+    "new_gpu_seconds_used": 0,
+    "formal_optimizer_steps_used": 0,
+    "overfit_optimizer_steps_used": 0,
+    "collector_attempts": 0,
+    "new_valid_episodes": 0,
+    "dev_rollouts": 0,
+    "sim_final_rollouts": 0,
+    "first_gpu_job_utc": null,
+    "last_gpu_job_utc": null,
+    "actual_m1_successes": null,
+    "actual_m1_rollouts": null
+  },
+  "notes": [
+    "Every bucket and aggregate limit both apply; unused buckets cannot be reassigned without fresh approval.",
+    "Data acquisition uses a real already auditable expert, never zero trajectory or copies.",
+    "New 20 offline final episodes are not training data and not same as 30 sim final rollout seeds.",
+    "Status changes require raw evidence and independent re-evaluation."
+  ]
+}
