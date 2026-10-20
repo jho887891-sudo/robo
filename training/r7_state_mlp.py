@@ -82,6 +82,30 @@ def build_xy(blob, feature, target="R"):
     return X.astype(np.float32), R.astype(np.float32)
 
 
+def reconstruct_prediction(raw_prediction, blob, target="R"):
+    """Return A_hat, predicted R, and ground-truth R for either target.
+
+    For target=delta, raw_prediction estimates A-S, not R=A-S-V.
+    Both target modes must use the SAME true correction for R² and sign tests.
+    """
+    S, V, A = blob["S"], blob["V"], blob["A"]
+    if target == "R":
+        R_hat = raw_prediction
+    elif target == "delta":
+        R_hat = raw_prediction - V
+    else:
+        raise ValueError("unknown prediction target: " + str(target))
+    return S + V + R_hat, R_hat, (A - S) - V
+
+
+def choose_hybrid_dims_on_dev(dev_command, dev_blob):
+    """Select model-corrected channels from DEV only, not the holdout set."""
+    cv = dev_blob["S"] + dev_blob["V"]
+    model_error = np.abs(dev_command - dev_blob["A"]).mean(axis=0)
+    cv_error = np.abs(cv - dev_blob["A"]).mean(axis=0)
+    return [int(i) for i in np.flatnonzero(model_error < cv_error)]
+
+
 # ------------------------------------------------------------------------ model
 def make_mlp(n_in, hidden, seed, torch):
     g = torch.Generator().manual_seed(seed)
@@ -102,7 +126,7 @@ def make_mlp(n_in, hidden, seed, torch):
 
 
 def train_mlp(Xtr, Rtr, Xdev, Rdev, seed, hidden=(128, 128), epochs=400, lr=1e-3,
-              batch=512, patience=40, torch=None):
+              batch=512, patience=40, torch=None, select_best=True):
     """Full-batch-ish Adam on physical L1(R_hat, R); early stop on dev L1."""
     torch.set_num_threads(max(1, min(8, os.cpu_count() or 1)))
     mu_x, sd_x = Xtr.mean(0), Xtr.std(0) + 1e-8
@@ -139,9 +163,14 @@ def train_mlp(Xtr, Rtr, Xdev, Rdev, seed, hidden=(128, 128), epochs=400, lr=1e-3
                     "state": {k: v.clone() for k, v in net.state_dict().items()}}
         elif ep - best["epoch"] >= patience:
             break
-    net.load_state_dict(best["state"])
+    if select_best:
+        net.load_state_dict(best["state"])
+    # The 200-frame ablation is a fixed-budget experiment, not training
+    # checkpoint selection against the same 200 training frames.
     net.eval()
-    return net, {"best_epoch": best["epoch"], "dev_best_L1": best["dev_L1"],
+    return net, {"best_epoch": best["epoch"] if select_best else len(hist),
+                 "checkpoint_selection": "dev_best" if select_best else "last",
+                 "dev_best_L1": best["dev_L1"],
                  "x_mean": mu_x, "x_std": sd_x, "history": hist}
 
 
@@ -253,17 +282,28 @@ def main():
             net, stats = train_mlp(Xtr, Rtr, Xdev, Rdev, seed, tuple(args.hidden),
                                    args.epochs, args.lr, args.batch, args.patience, torch=torch)
             out_hat = predict(net, Xva, stats, torch).astype(np.float32)
-            R_hat = out_hat - val_blob["V"] if tgt == "delta" else out_hat
-            cmd = val_blob["S"] + val_blob["V"] + R_hat
+            cmd, R_hat, R_gt = reconstruct_prediction(out_hat, val_blob, tgt)
             ev = M.evaluate(cmd, val_blob["A"], val_blob["S"], val_blob["V"], val_blob["episode"])
-            ev["correction"] = M.evaluate_correction(R_hat, Rva)
+            ev["correction"] = M.evaluate_correction(R_hat, R_gt)
             ev["seed"] = int(seed)
             ev["target"] = tgt
             ev["best_epoch"] = int(stats["best_epoch"])
             ev["dev_best_R_L1"] = float(stats["dev_best_L1"])
             ev["seconds"] = round(time.time() - t0, 1)
-            ev["dev"] = M.evaluate(dev_blob["S"] + dev_blob["V"] + predict(net, Xdev, stats, torch),
-                                   dev_blob["A"], dev_blob["S"], dev_blob["V"], dev_blob["episode"])
+            dev_command, _, _ = reconstruct_prediction(
+                predict(net, Xdev, stats, torch), dev_blob, tgt)
+            ev["dev"] = M.evaluate(
+                dev_command, dev_blob["A"], dev_blob["S"], dev_blob["V"], dev_blob["episode"])
+            if feat == "SVAcc" and tgt == "R":
+                # Holdout-selected gripper gating is exploratory. Choose which
+                # channels to correct on DEV; then evaluate once on HOLDOUT.
+                selected = choose_hybrid_dims_on_dev(dev_command, dev_blob)
+                cv_holdout = val_blob["S"] + val_blob["V"]
+                hybrid = cv_holdout.copy()
+                hybrid[:, selected] = cmd[:, selected]
+                ev["hybrid_dev_selected_model_dims"] = selected
+                ev["hybrid_holdout_L1"] = float(np.abs(
+                    hybrid - val_blob["A"]).mean())
             if feat in ("SV", "SVAcc") and tgt == "R":
                 side = os.path.join(os.path.dirname(os.path.abspath(args.out)),
                                     "pred_%s_%s_%d.npz" % (feat, tgt, seed))
@@ -309,15 +349,24 @@ def main():
         for seed in args.seeds:
             net, stats = train_mlp(Xp, Rp, Xp, Rp, seed, tuple(args.hidden),
                                    fixed_epochs, args.lr, min(args.batch, len(Xp)),
-                                   10 ** 9, torch=torch)
+                                   10 ** 9, torch=torch, select_best=False)
             out_hat = predict(net, Xva, stats, torch).astype(np.float32)
-            R_hat = out_hat - val_blob["V"] if tgt == "delta" else out_hat
-            cmd = val_blob["S"] + val_blob["V"] + R_hat
+            # The pilot is trained on R even if the last grid target is
+            # "delta": never use the stale outer loop variable `tgt` here.
+            cmd, R_hat, R_gt = reconstruct_prediction(out_hat, val_blob, "R")
             ev = M.evaluate(cmd, val_blob["A"], val_blob["S"], val_blob["V"], val_blob["episode"])
-            ev["correction"] = M.evaluate_correction(R_hat, Rva)
+            ev["correction"] = M.evaluate_correction(R_hat, R_gt)
             ev["seed"] = int(seed)
             ev["n_train_frames"] = int(len(Xp))
             ev["episodes_covered"] = int(len(set(pilot_blob["episode"].tolist())))
+            ev["checkpoint_selection"] = stats["checkpoint_selection"]
+            ev["fixed_epochs_executed"] = int(len(stats["history"]))
+            side = os.path.join(os.path.dirname(os.path.abspath(args.out)),
+                                "pred_pilot200_R_%d.npz" % seed)
+            np.savez_compressed(side, R_hat=R_hat, R_gt=R_gt, cmd=cmd,
+                                gt=val_blob["A"], state=val_blob["S"],
+                                V=val_blob["V"], episode=val_blob["episode"],
+                                frame=val_blob["frame"])
             result["pilot200"].setdefault("per_seed", []).append(ev)
             print("[pilot200 seed=%d] holdout L1=%.6f | R_corr=%+.3f (trained on %d frames / %d episodes)"
                   % (seed, ev["L1"], ev["correction"]["corr"] or float("nan"),

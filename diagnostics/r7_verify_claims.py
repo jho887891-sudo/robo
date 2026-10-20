@@ -75,10 +75,18 @@ def main():
     acc_json = json.load(open(args.acc_json))
     per_seed = acc_json["runs"]["SVAcc_R"]["per_seed"]
     sidecar_L1 = {}
+    expected_seeds = sorted(int(seed["seed"]) for seed in per_seed)
+    missing_sidecars = [
+        seed for seed in expected_seeds
+        if not os.path.isfile(os.path.join(args.run_dir, "pred_SVAcc_R_%d.npz" % seed))
+    ]
+    check("prediction_sidecars_exist_for_all_seeds",
+          not missing_sidecars and len(expected_seeds) >= 3,
+          {"seeds": expected_seeds, "missing": missing_sidecars})
+    if missing_sidecars:
+        raise FileNotFoundError("Missing seed prediction sidecars: %s" % missing_sidecars)
     for s in per_seed:
         p = os.path.join(args.run_dir, "pred_SVAcc_R_%d.npz" % s["seed"])
-        if not os.path.isfile(p):
-            continue
         z = np.load(p)
         l1 = float(np.abs(z["cmd"] - z["gt"]).mean())
         cvc = float(np.abs(z["state"] + z["V"] - z["gt"]).mean())
@@ -100,12 +108,33 @@ def main():
     hybrid = z0["cmd"].copy()
     for d in worse:
         hybrid[:, d] = (z0["state"] + z0["V"])[:, d]
-    check("gripper_channels_prefer_copy_V_arm_channels_prefer_model",
+    check("exploratory_holdout_channel_diagnostics_NOT_a_selection_gate",
           worse == [6, 13],
           {"dims_worse_than_cv": worse,
            "model_L1": float(err_m.mean()),
            "hybrid_arm_model_gripper_cv_L1": float(np.abs(hybrid - z0["gt"]).mean()),
            "cv_L1": float(err_cv0.mean())})
+
+    # The old hybrid selected channels after inspecting holdout labels.
+    # Verify the truly prospective variant: select channels on DEV, then apply
+    # those frozen indices to holdout without consulting holdout errors.
+    selected = per_seed[0].get("hybrid_dev_selected_model_dims")
+    valid_selection = (
+        isinstance(selected, list) and len(set(selected)) == len(selected)
+        and all(isinstance(i, int) and 0 <= i < 14 for i in selected)
+    )
+    cv0 = z0["state"] + z0["V"]
+    hybrid_dev_selected = cv0.copy()
+    if valid_selection:
+        hybrid_dev_selected[:, selected] = z0["cmd"][:, selected]
+        hybrid_err = float(np.abs(hybrid_dev_selected - z0["gt"]).mean())
+    else:
+        hybrid_err = float("nan")
+    check("dev_selected_hybrid_matches_reconstructed_holdout",
+          valid_selection and abs(hybrid_err
+              - per_seed[0].get("hybrid_holdout_L1", float("nan"))) < 1e-9,
+          {"dev_selected_dims": selected, "holdout_L1": hybrid_err,
+           "logged_L1": per_seed[0].get("hybrid_holdout_L1")})
 
     # ---- claim 3: paired per-episode consistency from the sidecar itself
     z = np.load(os.path.join(args.run_dir, "pred_SVAcc_R_%d.npz" % per_seed[0]["seed"]))
@@ -132,9 +161,35 @@ def main():
                 {"SV_R": sv_r, "SV_delta": sv_d, "improvement": 1 - sv_r / sv_d})
 
     # ---- claim 5: full-frame training beats the 200-frame regime
+    pilot_runs = main_json["pilot200"]["per_seed"]
+    pilot_valid = True
+    pilot_details = {}
+    for run in pilot_runs:
+        seed = int(run["seed"])
+        path = os.path.join(args.run_dir, "pred_pilot200_R_%d.npz" % seed)
+        if not os.path.isfile(path):
+            pilot_valid = False
+            pilot_details[seed] = {"missing": path}
+            continue
+        sidecar = np.load(path)
+        true_R = (sidecar["gt"] - sidecar["state"]) - sidecar["V"]
+        err = float(np.abs(sidecar["cmd"] - sidecar["gt"]).mean())
+        reconstruction_ok = np.allclose(
+            sidecar["cmd"], sidecar["state"] + sidecar["V"] + sidecar["R_hat"],
+            rtol=0, atol=1e-6)
+        pilot_valid &= (reconstruction_ok
+            and np.allclose(sidecar["R_gt"], true_R, rtol=0, atol=1e-6)
+            and abs(err - run["L1"]) < 1e-9
+            and run.get("checkpoint_selection") == "last"
+            and run.get("fixed_epochs_executed") == main_json["pilot200"]["fixed_epochs_from_full_run"])
+        pilot_details[seed] = {"L1_from_sidecar": err, "logged": run["L1"],
+                               "reconstruction_ok": bool(reconstruction_ok)}
+    check("pilot200_R_and_fixed_budget_verified_all_seeds",
+          pilot_valid and len(pilot_runs) >= 3, pilot_details)
     p200 = main_json["pilot200"]["aggregate"]["L1"]["mean"]
     check("full_frame_MLP_beats_200_frame_regime", p200 > 5 * sv_r,
-                {"full_frame_SV_R": sv_r, "pilot200": p200, "ratio": p200 / sv_r})
+                {"full_frame_SV_R": sv_r, "pilot200": p200, "ratio": p200 / sv_r,
+                 "note": "observational coverage comparison; pilot sampled 80 episodes, full training uses 64"})
 
     # ---- claim 6: no episode leakage between train/dev/holdout
     tr = set(main_json["splits"]["train_episodes"]); dv = set(main_json["splits"]["dev_episodes"])
@@ -145,7 +200,7 @@ def main():
 
     # ---- claim 7: inputs are strictly past-only (recompute X and compare to the sidecar link)
     n_checked, label_is_next_state, max_label_diff = 0, True, 0.0
-    for name in sorted(split["val"])[:3]:
+    for name in sorted(split["val"]):
         ep = D.load_episode(name)
         t = D.valid_frames(len(ep["state"]))
         diff = float(np.abs(ep["action"][t] - ep["state"][t + 1]).max())
@@ -153,7 +208,7 @@ def main():
         label_is_next_state = label_is_next_state and (diff == 0.0)
         n_checked += 1
     check("action_is_next_observation_and_inputs_are_past_only",
-          label_is_next_state and n_checked == 3,
+          label_is_next_state and n_checked == len(split["val"]),
           {"episodes_checked": n_checked, "max_abs_action_minus_next_state": max_label_diff,
            "statement": "X_t uses S_t and S_(t-1) only; the label A_t equals S_(t+1)"})
 

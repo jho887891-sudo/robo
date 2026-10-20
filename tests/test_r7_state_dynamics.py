@@ -52,6 +52,38 @@ class TestTargetsAndFeatures(unittest.TestCase):
         np.testing.assert_array_equal(X1, X2)
 
 
+    def test_delta_and_residual_targets_reconstruct_same_physical_command(self):
+        b = fake_blob(n=40)
+        true_R = (b["A"] - b["S"]) - b["V"]
+        delta_pred = true_R + b["V"]
+        cmd_R, correction_R, gt_R = T.reconstruct_prediction(true_R, b, "R")
+        cmd_delta, correction_delta, gt_delta = T.reconstruct_prediction(
+            delta_pred, b, "delta")
+        np.testing.assert_allclose(cmd_R, b["A"], atol=1e-6)
+        np.testing.assert_allclose(cmd_delta, b["A"], atol=1e-6)
+        np.testing.assert_allclose(correction_R, correction_delta, atol=1e-6)
+        np.testing.assert_allclose(gt_delta, true_R, atol=1e-6)
+        np.testing.assert_allclose(gt_R, true_R, atol=1e-6)
+        with self.assertRaises(ValueError):
+            T.reconstruct_prediction(delta_pred, b, "unknown")
+
+    def test_pilot_R_is_never_interpreted_as_delta(self):
+        b = fake_blob(n=20)
+        R_prediction = (b["A"] - b["S"]) - b["V"]
+        correct_cmd, _, _ = T.reconstruct_prediction(R_prediction, b, "R")
+        old_wrong = b["S"] + R_prediction
+        self.assertGreater(float(np.abs(old_wrong - b["A"]).mean()), 1e-4)
+        self.assertLess(float(np.abs(correct_cmd - b["A"]).mean()), 1e-6)
+
+    def test_hybrid_channel_selection_is_based_on_dev_only(self):
+        dev = fake_blob(n=32)
+        cv = dev["S"] + dev["V"]
+        cmd = cv.copy()
+        cmd[:, 0] = dev["A"][:, 0]  # model improves dim 0
+        cmd[:, 6] = cv[:, 6] + 0.1  # model worsens gripper
+        self.assertEqual(T.choose_hybrid_dims_on_dev(cmd, dev), [0])
+
+
 class TestSplits(unittest.TestCase):
     def test_episode_split_is_disjoint_and_deterministic(self):
         eps = ["ep%02d" % i for i in range(80)]
@@ -112,6 +144,19 @@ class TestMetrics(unittest.TestCase):
 
 
 class TestTrainer(unittest.TestCase):
+    def test_fixed_epoch_ablation_uses_last_checkpoint_not_train_best(self):
+        import torch
+        rng = np.random.default_rng(12)
+        X = rng.normal(size=(40, 28)).astype(np.float32)
+        R = (0.03 * X[:, :14]).astype(np.float32)
+        _, stats = T.train_mlp(
+            X, R, X, R, seed=0, hidden=(16,), epochs=5,
+            lr=1e-3, batch=20, patience=10**9, torch=torch,
+            select_best=False)
+        self.assertEqual(stats["checkpoint_selection"], "last")
+        self.assertEqual(stats["best_epoch"], 5)
+        self.assertEqual(len(stats["history"]), 5)
+
     def test_mlp_learns_a_linear_correction(self):
         import torch
         rng = np.random.default_rng(5)
