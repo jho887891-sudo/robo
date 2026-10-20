@@ -1,0 +1,23 @@
+[PASS] positive_freeze_written                              {"rc": 0, "bytes": 15889}
+[PASS] frozen_seals_25_episodes                             {"n": 25}
+[PASS] frozen_seals_5_dev_20_final                          {"dev": 5, "final": 20}
+[PASS] frozen_records_carry_both_hashes                     {}
+[PASS] frozen_records_carry_seed_protocol_usedgit           {"seed": "r10-dev-v1", "protocol": "e5836191ed4c", "git_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+[PASS] frozen_manifest_sha256_recorded                      {}
+[PASS] renamed_used_episode                                 {"rc": 9, "freeze_file_absent": true}
+[PASS] instruction_only_change                              {"rc": 9, "freeze_file_absent": true}
+[PASS] placeholder_9kb                                      {"rc": 9, "freeze_file_absent": true}
+[PASS] missing_camera                                       {"rc": 9, "freeze_file_absent": true}
+[PASS] rgb_channel_anomaly                                  {"rc": 9, "freeze_file_absent": true}
+[PASS] wrong_frequency_30hz                                 {"rc": 9, "freeze_file_absent": true}
+[PASS] too_few_frames                                       {"rc": 9, "freeze_file_absent": true}
+[PASS] wrong_task                                           {"rc": 9, "freeze_file_absent": true}
+[PASS] wrong_episode_count_24                               {"rc": 9}
+[PASS] internal_duplicate                                   {"rc": 9, "freeze_file_absent": true}
+[PASS] protocol_drift                                       {"rc": 9, "freeze_file_absent": true}
+[PASS] test_only_override                                   {"rc": 9, "freeze_file_absent": true}
+[PASS] freeze_path_exists                                   {"rc": 9, "preexisting_untouched": true}
+[PASS] unbuildable_manifest                                 {"rc": 9, "freeze_file_absent": true}
+[PASS] corrupt_truncated_hdf5                               {"rc": 9, "freeze_file_absent": true}
+
+21/21 checks passed -> PASS

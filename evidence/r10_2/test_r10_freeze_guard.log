@@ -1,0 +1,12 @@
+[PASS] synthetic_set_passes_all_gates               {"schema": true, "build": true, "cross_set_disjoint": true, "counts": true, "split_assignment": true, "verify": true}
+[PASS] split_assignment_is_disjoint_and_deterministic {"dev_sha": "2c4b696a5219919f"}
+[PASS] guard_is_recomputable                        {}
+[PASS] detects_renamed_used_episode                 {"overlap": 1}
+[PASS] detects_same_trajectory_new_instruction      {"dups": 1}
+[PASS] rejects_placeholder_file                     {}
+[PASS] rejects_wrong_frequency                      {}
+[PASS] rejects_missing_camera                       {}
+[PASS] rejects_wrong_episode_count                  {}
+[PASS] freeze_requires_guard_pass                   {}
+
+10/10 checks passed

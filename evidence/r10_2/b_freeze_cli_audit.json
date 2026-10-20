@@ -1,0 +1,168 @@
+{
+ "checks": [
+  {
+   "check": "positive_freeze_written",
+   "pass": true,
+   "detail": {
+    "rc": 0,
+    "bytes": 15889
+   }
+  },
+  {
+   "check": "frozen_seals_25_episodes",
+   "pass": true,
+   "detail": {
+    "n": 25
+   }
+  },
+  {
+   "check": "frozen_seals_5_dev_20_final",
+   "pass": true,
+   "detail": {
+    "dev": 5,
+    "final": 20
+   }
+  },
+  {
+   "check": "frozen_records_carry_both_hashes",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "frozen_records_carry_seed_protocol_usedgit",
+   "pass": true,
+   "detail": {
+    "seed": "r10-dev-v1",
+    "protocol": "e5836191ed4c",
+    "git_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "check": "frozen_manifest_sha256_recorded",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "renamed_used_episode",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "instruction_only_change",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "placeholder_9kb",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "missing_camera",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "rgb_channel_anomaly",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "wrong_frequency_30hz",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "too_few_frames",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "wrong_task",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "wrong_episode_count_24",
+   "pass": true,
+   "detail": {
+    "rc": 9
+   }
+  },
+  {
+   "check": "internal_duplicate",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "protocol_drift",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "test_only_override",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "freeze_path_exists",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "preexisting_untouched": true
+   }
+  },
+  {
+   "check": "unbuildable_manifest",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  },
+  {
+   "check": "corrupt_truncated_hdf5",
+   "pass": true,
+   "detail": {
+    "rc": 9,
+    "freeze_file_absent": true
+   }
+  }
+ ],
+ "n_pass": 21,
+ "n_total": 21,
+ "note": "synthetic HDF5 only; outcome is VERIFIED_CPU_TESTED, not new FINAL ready"
+}

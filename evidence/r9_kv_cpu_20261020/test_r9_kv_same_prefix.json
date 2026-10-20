@@ -57,6 +57,20 @@
    "detail": {}
   },
   {
+   "check": "authorized_wrapper_does_not_fake_gpu_pass",
+   "pass": true,
+   "detail": {
+    "exit": 8
+   }
+  },
+  {
+   "check": "unauthorized_wrapper_still_fails_closed",
+   "pass": true,
+   "detail": {
+    "exit": 7
+   }
+  },
+  {
    "check": "static_audit_real_probe_passes",
    "pass": true,
    "detail": {
@@ -70,6 +84,6 @@
    "detail": {}
   }
  ],
- "n_pass": 10,
- "n_total": 10
+ "n_pass": 12,
+ "n_total": 12
 }

@@ -1,0 +1,17 @@
+/home/T7/ojh/robot_actual/r102_B/tests/test_r10_freeze_execution_audit.py:41: ResourceWarning: unclosed file <_io.BufferedReader name='/home/T7/ojh/robot_actual/r102_B/protocol/r9_eval_protocol.json'>
+  self.assertEqual(hashlib.sha256(open(self.proto, "rb").read()).hexdigest(),
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+../home/T7/ojh/robot_actual/r102_B/tools/r10_freeze_guard.py:208: ResourceWarning: unclosed file <_io.BufferedReader name='/home/T7/ojh/robot_actual/r102_B/protocol/r9_eval_protocol.json'>
+  actual_protocol_sha = hashlib.sha256(open(protocol_path, "rb").read()).hexdigest()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+....../home/T7/ojh/robot_actual/r102_B/tools/r10_freeze_guard.py:208: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmpk6wtndph/changed.json'>
+  actual_protocol_sha = hashlib.sha256(open(protocol_path, "rb").read()).hexdigest()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+../home/T7/ojh/robot_actual/r102_B/tools/r10_freeze_guard.py:232: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/T7/ojh/robot_actual/r102_B/protocol/r9_eval_protocol.json' mode='r' encoding='UTF-8'>
+  return M.freeze(sealed, json.load(open(protocol_path)), git_sha, freeze_out, protocol_path)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.
+----------------------------------------------------------------------
+Ran 11 tests in 0.754s
+
+OK
