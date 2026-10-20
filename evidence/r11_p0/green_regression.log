@@ -20,4 +20,4 @@ tests/test_r8_vla_adapter.py::TestProjectorClass::test_real_projector_width_and_
     _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-250 passed, 3 skipped, 4 warnings, 5 subtests passed in 47.74s
+250 passed, 3 skipped, 4 warnings, 5 subtests passed in 45.30s
