@@ -27,7 +27,7 @@ def fake_result():
     return {"pass": True, "checks": checks,
             "manifest": {"episodes": episodes, "n_episodes": 25,
                          "n_unique_content": 25, "task_filter": "push"},
-            "protocol_sha256": "preregistered-protocol-hash",
+            "protocol_sha256": G.FROZEN_PROTOCOL_SHA256,
             "used_manifest_sha256": "old100-content-manifest-hash"}
 
 
@@ -35,11 +35,9 @@ class FreezeAudit(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.proto = os.path.join(self.temp.name, "protocol.json")
-        with open(self.proto, "w") as fh:
-            json.dump({"splits": {"dev_episodes": 5, "final_episodes_min": 15},
-                       "gates": {"g1_build": "", "g2_verify": "", "g3_disjoint": "",
-                                 "g4_size": "", "g5_freeze": "", "g6_no_peek": ""}}, fh)
+        self.proto = os.path.join(REPO, "protocol", "r9_eval_protocol.json")
+        self.assertEqual(hashlib.sha256(open(self.proto, "rb").read()).hexdigest(),
+                         G.FROZEN_PROTOCOL_SHA256)
         self.freeze = os.path.join(self.temp.name, "frozen.json")
         self.sha = "a" * 40
 
@@ -65,6 +63,14 @@ class FreezeAudit(unittest.TestCase):
         for sha in ("", "abc"):
             with self.assertRaises(ValueError):
                 G.freeze_checked(fake_result(), self.proto, sha, self.freeze)
+        self.assertFalse(os.path.exists(self.freeze))
+
+    def test_rejects_protocol_drift(self):
+        bad_protocol = os.path.join(self.temp.name, "changed.json")
+        with open(bad_protocol, "w") as fh:
+            json.dump({"splits": {"dev_episodes": 5}}, fh)
+        with self.assertRaises(ValueError):
+            G.freeze_checked(fake_result(), bad_protocol, self.sha, self.freeze)
         self.assertFalse(os.path.exists(self.freeze))
 
     def test_rejects_missing_episode(self):
