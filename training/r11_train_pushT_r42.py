@@ -1,0 +1,571 @@
+#!/usr/bin/env python3
+"""R11 42D/R OpenVLA-7B entry: ZERO-UPDATE smoke (R13), bounded overfit (R14) and staged formal
+training (R15) on a single A6000, with a machine-readable GPU budget ledger.
+
+Guarantees (all fail-closed, all covered by tests/test_r11_p0_*.py):
+  * the prismatic platform constants are forced to ARX *before* the model modules import, and
+    r42_adapter.assert_runtime_contract() aborts if ACTION_DIM != 14 / window != 31743..31999,
+  * 42D [S,V,Acc] from observed history only, R=(A-S)-V with A[t]==S[t+1],
+  * one 14-token action block per sample, labels = -100*prompt + 14 tokens + STOP(2),
+  * no prismatic 7D/8D/chunk default and no 14D projector is ever used,
+  * --smoke does forward+backward+14-token inference+checkpoint roundtrip with optimizer_steps==0,
+  * every GPU second is booked into the ledger bucket, and a negative balance aborts the job.
+
+Never overwrites an existing run directory, never resumes a legacy adapter, never trains on DEV.
+"""
+import argparse
+import hashlib
+import json
+import os
+import random
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+
+import numpy as np
+
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+for _sub in ("training", "diagnostics", "code/xpolicylab/policy/OpenVLA_Pure",
+             "code/xpolicylab/policy/OpenVLA_R42"):
+    _p = os.path.join(REPO, _sub)
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+import r42_adapter as R            # noqa: E402
+import r42_train_contract as TC    # noqa: E402
+
+RT = os.environ.get("PUSHT_RUNTIME", "/home/dgut/pusht_runtime")
+MODEL = os.environ.get("PUSHT_MODEL", RT + "/model_cache/openvla-7b-pristine")
+HDF5_DIR = os.environ.get("PUSHT_HDF5",
+                          "/home/T7/ojh/robot_actual/data/data/hdf5/push_T/arx_x5/data")
+OFT = os.environ.get("PUSHT_OFT", RT + "/openvla_oft_src")
+BOUNDS = os.environ.get("PUSHT_BOUNDS", os.path.join(REPO, "data", "push_T_bounds.npz"))
+SPLIT = os.environ.get("PUSHT_SPLIT", os.path.join(REPO, "data", "split80.json"))
+CONTRACT = os.environ.get("PUSHT_CONTRACT",
+                          os.path.join(REPO, "evidence", "r9_gate_20261020",
+                                       "frozen_contract_64train.json"))
+LEDGER = os.environ.get("R11_LEDGER", os.path.join(REPO, "mission", "R11_R16_BUDGET_LEDGER.json"))
+INSTR = "Push the T-shaped block to align it precisely with the gray T-shaped pad."
+
+
+def log(msg):
+    print("[%s] %s" % (datetime.now(timezone.utc).strftime("%H:%M:%S"), msg), flush=True)
+
+
+def utcnow():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+# ------------------------------------------------------------------------------- ledger
+def load_ledger(path=None):
+    with open(path or LEDGER) as fh:
+        return json.load(fh)
+
+
+def ledger_budget(bucket, requested):
+    led = load_ledger()
+    b = led["buckets"][bucket]
+    left_bucket = float(b["cap_s"]) - float(b.get("seconds_used", 0.0))
+    left_total = float(led["aggregate"]["cap_s"]) - float(
+        led["aggregate"].get("new_gpu_seconds_used", 0.0))
+    return max(0.0, min(float(requested), left_bucket, left_total))
+
+
+def ledger_book(bucket, seconds, event, note="", extra=None):
+    """Only ever ADD to the ledger; a negative remaining balance aborts the job."""
+    led = load_ledger()
+    b = led["buckets"][bucket]
+    b["seconds_used"] = float(b.get("seconds_used", 0.0)) + float(seconds)
+    agg = led["aggregate"]
+    agg["new_gpu_seconds_used"] = float(agg.get("new_gpu_seconds_used", 0.0)) + float(seconds)
+    remaining_total = float(agg["cap_s"]) - agg["new_gpu_seconds_used"]
+    remaining_bucket = float(b["cap_s"]) - b["seconds_used"]
+    led.setdefault("events", []).append({"utc": utcnow(), "bucket": bucket, "event": event,
+                                         "seconds": round(float(seconds), 3), "note": note,
+                                         "extra": extra or {}})
+    if len(led["events"]) > 4000:
+        del led["events"][:-4000]
+    with open(LEDGER, "w") as fh:
+        json.dump(led, fh, indent=1)
+    log("ledger %s %+.1fs -> bucket %s used %.1fs (left %.1fs), total left %.1fs"
+        % (event, seconds, bucket, b["seconds_used"], remaining_bucket, remaining_total))
+    if remaining_total < -1e-6 or remaining_bucket < -1e-6:
+        raise SystemExit("BUDGET_EXCEEDED: refusing to continue (%s)" % bucket)
+    return {"remaining_total": remaining_total, "remaining_bucket": remaining_bucket}
+
+
+# -------------------------------------------------------------------- environment guard
+def force_arx_platform():
+    """prismatic picks ACTION_DIM from sys.argv; the R42 path needs the ARX 14D table."""
+    joined = " ".join(sys.argv).lower()
+    if "arx" not in joined and "goai" not in joined:
+        sys.argv = list(sys.argv) + ["arx_x5_push_T"]
+    return " ".join(sys.argv)
+
+
+def gpu_snapshot():
+    try:
+        out = subprocess.run(["nvidia-smi", "--query-gpu=index,memory.used,memory.total,utilization.gpu",
+                              "--format=csv,noheader"], capture_output=True, text=True, timeout=30)
+        return out.stdout.strip().splitlines()
+    except Exception as exc:  # diagnostics only
+        return ["nvidia-smi failed: %r" % (exc,)]
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+# -------------------------------------------------------------------------------- data
+def load_splits():
+    import r9_trainer_contract as RC
+    contract, meta = RC.load_frozen_contract(CONTRACT)
+    splits = RC.select_splits(SPLIT)
+    if set(splits["train"]) & set(splits["dev"]):
+        raise SystemExit("TRAIN/DEV overlap")
+    return contract, meta, splits
+
+
+def read_episode(name):
+    import h5py
+    with h5py.File(os.path.join(HDF5_DIR, name), "r") as h:
+        return TC.read14(h, "state"), TC.read14(h, "action")
+
+
+def sample_row(state, action, t, contract):
+    """Fail-closed row construction (P0-5), same assertions the CPU tests exercise."""
+    row = TC.build_training_row(state, action, t, contract)
+    TC.assert_no_future_leakage(state, action, t, contract)
+    return row
+
+
+# ------------------------------------------------------------------------------- model
+def build_model(cams=3):
+    import torch
+    from transformers import (AutoModelForVision2Seq, AutoProcessor, AutoConfig,
+                             AutoImageProcessor)
+    from prismatic.extern.hf.configuration_prismatic import OpenVLAConfig
+    from prismatic.extern.hf.processing_prismatic import PrismaticImageProcessor, PrismaticProcessor
+    AutoConfig.register("openvla", OpenVLAConfig)
+    AutoImageProcessor.register(OpenVLAConfig, PrismaticImageProcessor)
+    AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
+    runtime = R.assert_runtime_contract()
+    log("runtime contract: %s" % json.dumps(runtime, sort_keys=True))
+
+    from peft import LoraConfig, get_peft_model
+    from pure_autoreg_mode import enable_pure_autoreg
+    import r8_vla_adapter as A
+    import inspect
+
+    proc = AutoProcessor.from_pretrained(MODEL, trust_remote_code=True)
+    vla = AutoModelForVision2Seq.from_pretrained(MODEL, torch_dtype=torch.bfloat16,
+                                                low_cpu_mem_usage=True,
+                                                trust_remote_code=True).to("cuda")
+    reference = os.path.join(REPO, "code", "openvla_dynamic_modules", "modeling_prismatic.py")
+    active = inspect.getfile(type(vla))
+    if not os.path.isfile(reference):
+        raise SystemExit("pristine reference source missing: %s" % reference)
+    if sha256_file(active) != sha256_file(reference):
+        raise SystemExit("R11 requires the pristine dynamic model source: %s" % active)
+    log("pristine modeling sha256=%s" % sha256_file(active))
+    vla.vision_backbone.set_num_images_in_input(cams)
+    enable_pure_autoreg(vla)
+    cfg = LoraConfig(r=32, lora_alpha=16, lora_dropout=0.0, target_modules="all-linear",
+                     init_lora_weights="gaussian")
+    vla = get_peft_model(vla, cfg)
+    proj = A.build_projector(int(vla.llm_dim), device="cuda")
+    R.assert_projector_width(proj.fc1.weight.shape, expected=42)
+    n_lora = sum(p.numel() for p in vla.parameters() if p.requires_grad)
+    n_proj = sum(p.numel() for p in proj.parameters())
+    log("LoRA trainable=%.2fM | 42D projector=%.3fM | llm_dim=%d | modeling_sha256=%s"
+        % (n_lora / 1e6, n_proj / 1e6, int(vla.llm_dim), sha256_file(active)))
+    return proc, vla, proj, sha256_file(active)
+
+
+def make_prompt(proc):
+    from prismatic.models.backbones.llm.prompting import PurePromptBuilder
+    b = PurePromptBuilder("openvla")
+    b.add_turn("human", "What action should the robot take to " + INSTR + "?")
+    ids = proc.tokenizer(b.get_prompt(), return_tensors="np").input_ids
+    return R.normalize_prompt_ids(ids.reshape(-1).tolist())
+
+
+def episode_images(proc, name, t, cams=3):
+    import h5py
+    import cv2
+    import torch
+    from PIL import Image
+    tiles = []
+    with h5py.File(os.path.join(HDF5_DIR, name), "r") as h:
+        for cam in R.CAMERA_ORDER[:cams]:
+            buf = h["vision/" + cam + "/colors"][t]
+            img = cv2.imdecode(np.frombuffer(bytes(buf), np.uint8), cv2.IMREAD_COLOR)[..., ::-1]
+            tiles.append(proc.image_processor.apply_transform(
+                Image.fromarray(np.ascontiguousarray(img))))
+    return torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to("cuda")
+
+
+def inference_14_tokens(vla, proj, pixel_values, prompt, proprio):
+    """Greedy legal 14-token decode; the argmax is restricted to 31744..31999."""
+    import torch
+    ids, bins = [], []
+    with torch.no_grad():
+        for _k in range(R.N_ACTIONS):
+            inp = torch.tensor([prompt + ids], dtype=torch.long, device="cuda")
+            with torch.autocast("cuda", dtype=torch.bfloat16):
+                out = vla(input_ids=inp, attention_mask=torch.ones_like(inp),
+                          pixel_values=pixel_values, proprio=proprio, proprio_projector=proj)
+            lg = out.logits[0, -1].float()
+            cand = lg[R.TOKEN_BEGIN_IDX + 1: R.TOKEN_BEGIN_IDX + 1 + 256]
+            k = int(torch.argmax(cand).item())
+            bins.append(k)
+            ids.append(R.TOKEN_BEGIN_IDX + 1 + k)
+    return np.asarray(bins, np.int64), np.asarray(ids, np.int64)
+
+
+def common_prefix_check(vla, proj, pixel_values, prompt, proprio, extra=3):
+    """Full-path common prefix: appending tokens must not change earlier logits."""
+    import torch
+    with torch.no_grad():
+        a = torch.tensor([prompt], dtype=torch.long, device="cuda")
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            la = vla(input_ids=a, attention_mask=torch.ones_like(a), pixel_values=pixel_values,
+                     proprio=proprio, proprio_projector=proj).logits[0, -1].float()
+        b = torch.tensor([prompt + [31744] * extra], dtype=torch.long, device="cuda")
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            lb = vla(input_ids=b, attention_mask=torch.ones_like(b), pixel_values=pixel_values,
+                     proprio=proprio, proprio_projector=proj).logits[0, -1 - extra].float()
+    d = (la - lb).abs().max().item()
+    win = la[R.TOKEN_BEGIN_IDX + 1: R.TOKEN_BEGIN_IDX + 1 + 256]
+    win2 = lb[R.TOKEN_BEGIN_IDX + 1: R.TOKEN_BEGIN_IDX + 1 + 256]
+    argmax_same = int(torch.argmax(win).item()) == int(torch.argmax(win2).item())
+    return {"max_abs_logit_delta": float(d), "window_argmax_identical": bool(argmax_same),
+            "n_extra_tokens": int(extra)}
+
+
+# -------------------------------------------------------------------------------- smoke
+def run_smoke(args):
+    import torch
+    bucket = args.bucket
+    budget = ledger_budget(bucket, args.time_budget)
+    if budget <= 30:
+        raise SystemExit("no budget left in bucket %s" % bucket)
+    ledger_book(bucket, 0.0, "start", note=args.out, extra={"budget_s": budget})
+    t0 = time.time()
+    gpu_before = gpu_snapshot()
+    out = args.out
+    if os.path.exists(out) and os.listdir(out):
+        raise SystemExit("output directory must be NEW and empty: %s" % out)
+    os.makedirs(out + "/checkpoints", exist_ok=True)
+
+    prompt_env = force_arx_platform()
+    contract, meta, splits = load_splits()
+    q01 = np.asarray(meta["q01"], np.float32)
+    q99 = np.asarray(meta["q99"], np.float32)
+    norm = R.normalizer_payload(
+        normalization_mode=meta["normalization_mode"], pmin=meta["pmin"], pmax=meta["pmax"],
+        q01=meta["q01"], q99=meta["q99"], v_scale=meta["v_scale"], a_scale=meta["a_scale"],
+        motion_quantile=meta.get("motion_quantile"),
+        n_train_episodes=meta["frozen_from"]["n_train_episodes_for_quantiles"],
+        n_dev_episodes_excluded=meta["frozen_from"]["n_dev_episodes_excluded"])
+    nb = np.load(BOUNDS)
+    ev = {"mode": "smoke", "utc_start": utcnow(), "argv": prompt_env, "out": out,
+          "bucket": bucket, "delta_contract_sha256": sha256_file(CONTRACT),
+          "split_sha256": sha256_file(SPLIT), "bounds_sha256": sha256_file(BOUNDS),
+          "hdf5_dir": HDF5_DIR, "optimizer_steps": 0, "gpu_before": gpu_before,
+          "cuda_used": True, "base_model": MODEL}
+    ledger_book(bucket, 0.0, "model_build_begin")
+
+    proc, vla, proj, modeling_sha = build_model(args.cams)
+    ev["modeling_sha256"] = modeling_sha
+    prompt = make_prompt(proc)
+    ev["prompt_len"] = len(prompt)
+    ev["prompt_tail"] = prompt[-2:]
+    ledger_book(bucket, 0.0, "model_build_done")
+
+    # ---- real batch from 64 TRAIN only
+    name = sorted(splits["train"])[args.train_index]
+    state, action = read_episode(name)
+    TC.assert_a_equals_next_state(state, action)
+    t = 5
+    row = sample_row(state, action, t, contract)
+    pv = episode_images(proc, name, t, args.cams)
+    pr = torch.from_numpy(row["features"]).reshape(1, 42).to("cuda")
+    lab = R.build_labels(prompt, row["residual"], q01, q99)
+    inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
+    tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
+    ev["sample"] = {"episode": name, "t": int(t), "n_prompt": lab["n_prompt"],
+                    "n_supervised": lab["n_supervised"], "input_len": int(inp.shape[1]),
+                    "action_token_range": [int(min(lab["action_ids"])), int(max(lab["action_ids"]))],
+                    "pixel_values_shape": list(pv.shape), "proprio_shape": list(pr.shape)}
+
+    vla.train()
+    proj.train()
+    opt = torch.optim.AdamW(list(vla.parameters()) + list(proj.parameters()), lr=0.0)
+    opt.zero_grad(set_to_none=True)
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        o = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
+                labels=tgt, proprio=pr, proprio_projector=proj)
+        loss = o.loss
+    if not torch.isfinite(loss):
+        raise SystemExit("smoke loss is not finite: %r" % (float(loss),))
+    loss.backward()
+    lora_gn = float(torch.nn.utils.clip_grad_norm_(
+        [p for p in vla.parameters() if p.requires_grad], 1.0))
+    proj_gn = float(torch.nn.utils.clip_grad_norm_(list(proj.parameters()), 1.0))
+    ev["teacher_forced"] = {"loss": float(loss), "lora_grad_norm": lora_gn,
+                            "projector_grad_norm": proj_gn,
+                            "lora_has_grad": lora_gn > 0.0, "projector_has_grad": proj_gn > 0.0}
+    if not opt.state_dict()["state"]:
+        ev["teacher_forced"]["optimizer_state_empty"] = True
+    log("smoke loss=%.4f lora_gn=%.3f proj_gn=%.4f (optimizer_steps=0)"
+        % (float(loss), lora_gn, proj_gn))
+    # discard the gradients: this branch must not update anything
+    opt.zero_grad(set_to_none=True)
+    ev["optimizer_steps"] = 0
+    ev["optimizer_stepped"] = False
+    ledger_book(bucket, 0.0, "forward_backward_done")
+
+    # ---- legal 14-token inference + physical decode
+    vla.eval()
+    proj.eval()
+    bins, ids = inference_14_tokens(vla, proj, pv, prompt, pr)
+    v = row["velocity"]
+    action_out, residual_hat, sinfo = R.decode_with_metadata(
+        {"task_id": "push_T", "base_model_sha256": "0" * 64, "lora_sha256": "0" * 64,
+         "projector_sha256": "0" * 64, "proprio_dim": 42,
+         "proprio_layout": "[state14, velocity14, acceleration14]",
+         "history_policy": "V=0,Acc=0 at t0; Acc=0 at t1; per-env isolated, observed only",
+         "camera_order": list(R.CAMERA_ORDER), "prompt_source": "tokenizer_prompt",
+         "frozen_contract_sha256": sha256_file(CONTRACT), "split_sha256": sha256_file(SPLIT),
+         "codec_mode": "fixed", "action_token_window": list(R.CODEC_WINDOW),
+         "target_representation": R.TARGET, "train_steps": 0, "seed": args.seed,
+         "gripper_policy": meta["gripper_policy"],
+         "safety_limits": {"amin": nb["amin"].astype(np.float32).tolist(),
+                           "amax": nb["amax"].astype(np.float32).tolist()},
+         "alignment_version": R.ALIGNMENT_VERSION, "normalizer": norm,
+         "normalizer_sha256": R.normalizer_sha256(norm)},
+        bins, row["state"], v)
+    ev["inference"] = {"bins": [int(x) for x in bins], "ids": [int(x) for x in ids],
+                       "unique_bins": int(len(set(int(x) for x in bins))),
+                       "action": [float(x) for x in action_out],
+                       "in_bounds": bool((action_out >= nb["amin"] - 1e-6).all()
+                                         and (action_out <= nb["amax"] + 1e-6).all()),
+                       "decode_info": sinfo}
+    ev["common_prefix"] = common_prefix_check(vla, proj, pv, prompt, pr)
+    ledger_book(bucket, 0.0, "inference_done")
+
+    # ---- checkpoint save + reload roundtrip (same process, no second 7B load)
+    ck = out + "/checkpoints/step0"
+    os.makedirs(ck, exist_ok=True)
+    vla.save_pretrained(ck + "/lora_adapter")
+    torch.save(proj.state_dict(), ck + "/proprio_projector_42.pt")
+    before = inference_14_tokens(vla, proj, pv, prompt, pr)[0]
+    lora_file = os.path.join(ck, "lora_adapter", "adapter_model.safetensors")
+    proj_file = os.path.join(ck, "proprio_projector_42.pt")
+    md = R.build_metadata(
+        "push_T", sha256_file(os.path.join(MODEL, "config.json")), sha256_file(lora_file),
+        sha256_file(proj_file), sha256_file(CONTRACT), sha256_file(SPLIT), train_steps=0,
+        seed=args.seed, gripper_policy=meta["gripper_policy"],
+        safety_limits={"amin": nb["amin"].astype(np.float32).tolist(),
+                       "amax": nb["amax"].astype(np.float32).tolist(),
+                       "max_rate": [0.5] * 14}, normalizer=norm)
+    md_sha = R.save_metadata(os.path.join(ck, "r42_metadata.json"), md)
+    from safetensors.torch import load_file
+    from peft.utils.save_and_load import set_peft_model_state_dict
+    sd = load_file(lora_file)
+    with torch.no_grad():
+        for p in proj.parameters():
+            p.zero_()
+    set_peft_model_state_dict(vla, sd)
+    proj.load_state_dict(torch.load(proj_file, map_location="cpu"))
+    proj.to("cuda")
+    R.assert_projector_width(proj.fc1.weight.shape, expected=42)
+    after = inference_14_tokens(vla, proj, pv, prompt, pr)[0]
+    reloaded = R.load_metadata(os.path.join(ck, "r42_metadata.json"), expect_task="push_T")
+    ev["checkpoint"] = {"dir": ck, "lora_sha256": md["lora_sha256"],
+                        "projector_sha256": md["projector_sha256"],
+                        "metadata_sha256": md_sha,
+                        "normalizer_sha256": md["normalizer_sha256"],
+                        "tokens_after_reload_identical": bool(np.array_equal(before, after)),
+                        "metadata_roundtrip_equal": bool(reloaded == md)}
+    if not np.array_equal(before, after):
+        raise SystemExit("checkpoint roundtrip changed the 14 action tokens")
+
+    ev["utc_end"] = utcnow()
+    ev["wall_clock_s"] = round(time.time() - t0, 1)
+    ev["gpu_after"] = gpu_snapshot()
+    ev["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+    ev["verdict"] = ("VERIFIED_GPU_ZERO_UPDATE"
+                     if (ev["teacher_forced"]["lora_has_grad"]
+                         and ev["teacher_forced"]["projector_has_grad"]
+                         and ev["inference"]["in_bounds"]
+                         and ev["checkpoint"]["tokens_after_reload_identical"])
+                     else "FAILED_GPU_ZERO_UPDATE")
+    with open(os.path.join(out, "smoke_evidence.json"), "w") as fh:
+        json.dump(ev, fh, indent=1)
+    ledger_book(bucket, ev["wall_clock_s"], "end", note=ev["verdict"],
+                extra={"wall_clock_s": ev["wall_clock_s"]})
+    log("SMOKE %s in %.1fs (peak %.2f GB)" % (ev["verdict"], ev["wall_clock_s"],
+                                             ev["peak_mem_gb"]))
+    return ev
+
+
+# ------------------------------------------------------------------------------ training
+def run_train(args):
+    import torch
+    bucket = args.bucket
+    budget = ledger_budget(bucket, args.time_budget)
+    if budget <= 30:
+        raise SystemExit("no budget left in bucket %s" % bucket)
+    out = args.out
+    if os.path.exists(out) and os.listdir(out):
+        raise SystemExit("output directory must be NEW and empty: %s" % out)
+    os.makedirs(out + "/checkpoints", exist_ok=True)
+    ledger_book(bucket, 0.0, "start", note=out, extra={"budget_s": budget})
+    t0 = time.time()
+    gpu_before = gpu_snapshot()
+
+    prompt_env = force_arx_platform()
+    contract, meta, splits = load_splits()
+    q01 = np.asarray(meta["q01"], np.float32)
+    q99 = np.asarray(meta["q99"], np.float32)
+    norm = R.normalizer_payload(
+        normalization_mode=meta["normalization_mode"], pmin=meta["pmin"], pmax=meta["pmax"],
+        q01=meta["q01"], q99=meta["q99"], v_scale=meta["v_scale"], a_scale=meta["a_scale"],
+        motion_quantile=meta.get("motion_quantile"),
+        n_train_episodes=meta["frozen_from"]["n_train_episodes_for_quantiles"],
+        n_dev_episodes_excluded=meta["frozen_from"]["n_dev_episodes_excluded"])
+    nb = np.load(BOUNDS)
+    proc, vla, proj, modeling_sha = build_model(args.cams)
+    prompt = make_prompt(proc)
+    params = [p for p in vla.parameters() if p.requires_grad] + list(proj.parameters())
+    opt = torch.optim.AdamW(params, lr=args.lr, weight_decay=0.0)
+    sched = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=[max(1, args.lr_milestone)],
+                                                 gamma=0.1)
+    run = {"mode": "train", "utc_start": utcnow(), "argv": prompt_env, "out": out,
+           "bucket": bucket, "steps_requested": args.steps, "optimizer_steps": 0,
+           "gpu_before": gpu_before, "modeling_sha256": modeling_sha,
+           "delta_contract_sha256": sha256_file(CONTRACT), "split_sha256": sha256_file(SPLIT),
+           "mode_train_only": True, "dev_used_for_gradients": False,
+           "lr": args.lr, "batch": 1, "seed": args.seed, "cams": args.cams,
+           "frame_pool": "t in [2, T-2]", "log": []}
+    with open(os.path.join(out, "run_meta.json"), "w") as fh:
+        json.dump(run, fh, indent=1)
+    if args.init_lora:
+        raise SystemExit("R11 must start from the pristine base (no legacy adapter resume)")
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    vla.train()
+    proj.train()
+    losses = []
+    for step in range(1, args.steps + 1):
+        elapsed = time.time() - t0
+        if elapsed > budget - args.time_margin:
+            log("stopping at step %d: %.0fs of a %.0fs bucket used" % (step, elapsed, budget))
+            break
+        name = random.choice(splits["train"])
+        state, action = read_episode(name)
+        t = int(random.randrange(2, len(state) - 1))
+        row = sample_row(state, action, t, contract)
+        pv = episode_images(proc, name, t, args.cams)
+        pr = torch.from_numpy(row["features"]).reshape(1, 42).to("cuda")
+        lab = R.build_labels(prompt, row["residual"], q01, q99)
+        inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
+        tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
+        opt.zero_grad(set_to_none=True)
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            o = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
+                    labels=tgt, proprio=pr, proprio_projector=proj)
+            loss = o.loss
+        if not torch.isfinite(loss):
+            with open(os.path.join(out, "FAILURES.md"), "w") as fh:
+                fh.write("# training stopped\n\nnon-finite loss at step %d (%s t=%d)\n"
+                         % (step, name, t))
+            raise SystemExit("non-finite loss at step %d" % step)
+        loss.backward()
+        gn = float(torch.nn.utils.clip_grad_norm_(params, 1.0))
+        opt.step()
+        sched.step()
+        losses.append(float(loss))
+        if step <= 3 or step % args.log_every == 0:
+            log("step=%d loss=%.4f gnorm=%.2f mem=%.2fGB %.0fs"
+                % (step, float(loss), gn, torch.cuda.max_memory_allocated() / 1e9,
+                   time.time() - t0))
+            run["log"].append({"step": step, "loss": float(loss), "grad_norm": gn,
+                               "episode": name, "t": t, "utc": utcnow()})
+            with open(os.path.join(out, "run_meta.json"), "w") as fh:
+                json.dump(run, fh, indent=1)
+        run["optimizer_steps"] = step
+        if args.save_every and (step % args.save_every == 0):
+            ck = out + "/checkpoints/step%d" % step
+            os.makedirs(ck, exist_ok=True)
+            vla.save_pretrained(ck + "/lora_adapter")
+            torch.save(proj.state_dict(), ck + "/proprio_projector_42.pt")
+            md = R.build_metadata(
+                "push_T", sha256_file(os.path.join(MODEL, "config.json")),
+                sha256_file(os.path.join(ck, "lora_adapter", "adapter_model.safetensors")),
+                sha256_file(os.path.join(ck, "proprio_projector_42.pt")),
+                sha256_file(CONTRACT), sha256_file(SPLIT), train_steps=step, seed=args.seed,
+                gripper_policy=meta["gripper_policy"],
+                safety_limits={"amin": nb["amin"].astype(np.float32).tolist(),
+                               "amax": nb["amax"].astype(np.float32).tolist(),
+                               "max_rate": [0.5] * 14}, normalizer=norm)
+            R.save_metadata(os.path.join(ck, "r42_metadata.json"), md)
+            run.setdefault("checkpoints", []).append(
+                {"step": step, "lora_sha256": md["lora_sha256"],
+                 "projector_sha256": md["projector_sha256"], "dir": ck})
+            log("saved %s" % ck)
+    run["utc_end"] = utcnow()
+    run["wall_clock_s"] = round(time.time() - t0, 1)
+    run["gpu_after"] = gpu_snapshot()
+    run["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+    run["first_loss"] = losses[0] if losses else None
+    run["last_loss"] = losses[-1] if losses else None
+    run["loss_head"] = losses[:5]
+    run["loss_tail"] = losses[-5:]
+    run["steps_per_second"] = round(len(losses) / max(1e-9, run["wall_clock_s"]), 4)
+    with open(os.path.join(out, "run_meta.json"), "w") as fh:
+        json.dump(run, fh, indent=1)
+    ledger_book(bucket, run["wall_clock_s"], "end", note="steps=%d" % run["optimizer_steps"],
+                extra={"steps": run["optimizer_steps"]})
+    log("TRAIN_DONE steps=%d wall=%.1fs peak=%.2fGB first=%.4f last=%.4f"
+        % (run["optimizer_steps"], run["wall_clock_s"], run["peak_mem_gb"],
+           run["first_loss"] or -1, run["last_loss"] or -1))
+    return run
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--steps", type=int, default=0)
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--bucket", default="R13_7B_ZERO_STEP")
+    ap.add_argument("--time_budget", type=float, default=1800.0)
+    ap.add_argument("--time_margin", type=float, default=90.0)
+    ap.add_argument("--lr", type=float, default=5e-4)
+    ap.add_argument("--lr_milestone", type=int, default=1000)
+    ap.add_argument("--save_every", type=int, default=0)
+    ap.add_argument("--log_every", type=int, default=10)
+    ap.add_argument("--cams", type=int, default=3)
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--train_index", type=int, default=0)
+    ap.add_argument("--init_lora", default="")
+    args = ap.parse_args()
+    if args.smoke:
+        run_smoke(args)
+        return 0
+    if args.steps <= 0:
+        raise SystemExit("--steps must be > 0 (or pass --smoke)")
+    run_train(args)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

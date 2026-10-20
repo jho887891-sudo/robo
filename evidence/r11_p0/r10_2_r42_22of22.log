@@ -1,0 +1,24 @@
+[PASS] t0_motion_slots_are_zero                       {"max": 0.0}
+[PASS] t1_velocity_matches_manual_and_acc_zero        {"v_max_delta": 0.0}
+[PASS] t2_acceleration_matches_manual                 {"acc_max_delta": 0.0}
+[PASS] feature_is_42d_finite                          {}
+[PASS] envs_are_isolated                              {}
+[PASS] reset_clears_env                               {}
+[PASS] timestamp_backwards_rejected                   {}
+[PASS] camera_order_enforced                          {"ok": true}
+[PASS] camera_order_wrong_rejected                    {}
+[PASS] wrong_dtype_rejected                           {}
+[PASS] token_ids_in_window                            {"window": [31744, 31999], "min": 31801, "max": 31927}
+[PASS] labels_mask_prompt                             {"n_supervised": 15}
+[PASS] decode_is_S_plus_V_plus_Rhat                   {"max_arm_delta": 0.0}
+[PASS] gripper_uses_constant_velocity_fallback        {"gripper": [0.008789809420704842, 0.0016847648657858372]}
+[PASS] rate_limit_actually_applied                    {"rate_limited": 8}
+[PASS] metadata_valid                                 {"proprio_dim": 42, "window": [31744, 31999]}
+[PASS] metadata_roundtrip_sha                         {}
+[PASS] rejects_28d_metadata                           {}
+[PASS] rejects_prismatic_7d_metadata                  {}
+[PASS] rejects_wrong_token_window                     {}
+[PASS] rejects_missing_field                          {}
+[PASS] rejects_task_mismatch                          {}
+
+22/22 checks passed

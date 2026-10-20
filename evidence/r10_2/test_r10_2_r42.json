@@ -1,0 +1,148 @@
+{
+ "checks": [
+  {
+   "check": "t0_motion_slots_are_zero",
+   "pass": true,
+   "detail": {
+    "max": 0.0
+   }
+  },
+  {
+   "check": "t1_velocity_matches_manual_and_acc_zero",
+   "pass": true,
+   "detail": {
+    "v_max_delta": 0.0
+   }
+  },
+  {
+   "check": "t2_acceleration_matches_manual",
+   "pass": true,
+   "detail": {
+    "acc_max_delta": 0.0
+   }
+  },
+  {
+   "check": "feature_is_42d_finite",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "envs_are_isolated",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "reset_clears_env",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "timestamp_backwards_rejected",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "camera_order_enforced",
+   "pass": true,
+   "detail": {
+    "ok": true
+   }
+  },
+  {
+   "check": "camera_order_wrong_rejected",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "wrong_dtype_rejected",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "token_ids_in_window",
+   "pass": true,
+   "detail": {
+    "window": [
+     31744,
+     31999
+    ],
+    "min": 31801,
+    "max": 31927
+   }
+  },
+  {
+   "check": "labels_mask_prompt",
+   "pass": true,
+   "detail": {
+    "n_supervised": 15
+   }
+  },
+  {
+   "check": "decode_is_S_plus_V_plus_Rhat",
+   "pass": true,
+   "detail": {
+    "max_arm_delta": 0.0
+   }
+  },
+  {
+   "check": "gripper_uses_constant_velocity_fallback",
+   "pass": true,
+   "detail": {
+    "gripper": [
+     0.008789809420704842,
+     0.0016847648657858372
+    ]
+   }
+  },
+  {
+   "check": "rate_limit_actually_applied",
+   "pass": true,
+   "detail": {
+    "rate_limited": 8
+   }
+  },
+  {
+   "check": "metadata_valid",
+   "pass": true,
+   "detail": {
+    "proprio_dim": 42,
+    "window": [
+     31744,
+     31999
+    ]
+   }
+  },
+  {
+   "check": "metadata_roundtrip_sha",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "rejects_28d_metadata",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "rejects_prismatic_7d_metadata",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "rejects_wrong_token_window",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "rejects_missing_field",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "rejects_task_mismatch",
+   "pass": true,
+   "detail": {}
+  }
+ ],
+ "n_pass": 22,
+ "n_total": 22
+}
