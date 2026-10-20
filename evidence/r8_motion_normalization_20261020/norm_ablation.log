@@ -1,0 +1,21 @@
+[data] train=19127 dev=6186 holdout=6691 | cv holdout=0.001795
+[A_legacy_position seed=0] DEV L1=0.001192 | holdout L1=0.001271 R2=0.463 cos=0.9539 sign=0.9720 wins=20/20
+[A_legacy_position seed=1] DEV L1=0.001154 | holdout L1=0.001208 R2=0.503 cos=0.9551 sign=0.9724 wins=20/20
+[A_legacy_position seed=2] DEV L1=0.001153 | holdout L1=0.001212 R2=0.485 cos=0.9565 sign=0.9725 wins=20/20
+[A_noclip_offset seed=0] DEV L1=0.001127 | holdout L1=0.001193 R2=0.542 cos=0.9588 sign=0.9729 wins=20/20
+[A_noclip_offset seed=1] DEV L1=0.001131 | holdout L1=0.001202 R2=0.552 cos=0.9581 sign=0.9733 wins=20/20
+[A_noclip_offset seed=2] DEV L1=0.001112 | holdout L1=0.001173 R2=0.508 cos=0.9576 sign=0.9735 wins=20/20
+[B99_signed seed=0] DEV L1=0.001108 | holdout L1=0.001173 R2=0.580 cos=0.9598 sign=0.9734 wins=20/20
+[B99_signed seed=1] DEV L1=0.001126 | holdout L1=0.001193 R2=0.580 cos=0.9597 sign=0.9728 wins=20/20
+[B99_signed seed=2] DEV L1=0.001106 | holdout L1=0.001170 R2=0.523 cos=0.9585 sign=0.9738 wins=20/20
+[B999_signed seed=0] DEV L1=0.001149 | holdout L1=0.001198 R2=0.546 cos=0.9588 sign=0.9724 wins=20/20
+[B999_signed seed=1] DEV L1=0.001144 | holdout L1=0.001210 R2=0.549 cos=0.9585 sign=0.9724 wins=20/20
+[B999_signed seed=2] DEV L1=0.001117 | holdout L1=0.001170 R2=0.508 cos=0.9584 sign=0.9738 wins=20/20
+
+=== DEV selection ===
+  A_legacy_position    DEV=0.001166 [0.001153,0.001192] | holdout=0.001230 (x cv 0.685) | V floor share=0.3067
+  A_noclip_offset      DEV=0.001123 [0.001112,0.001131] | holdout=0.001190 (x cv 0.663) | V floor share=0.3067
+  B99_signed           DEV=0.001113 [0.001106,0.001126] | holdout=0.001179 (x cv 0.657) | V floor share=0.0082
+  B999_signed          DEV=0.001137 [0.001117,0.001149] | holdout=0.001192 (x cv 0.664) | V floor share=0.0035
+selected by DEV: B99_signed
+wrote /home/dgut/pusht_runtime/r8_norm/norm_ablation.json

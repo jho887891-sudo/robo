@@ -1,0 +1,9 @@
+{
+ "diagnostics/r8_scale_audit.py": "9e933054ed22e3f83953611dd9a86c48e35e40cdad7990b7cceb786c235bf868",
+ "diagnostics/r8_norm_diagnostics.py": "d23e010b8eb271f17f5bc0bfb992f5dd5f4545e4bd89e40241418f52deef6193",
+ "code/xpolicylab/policy/OpenVLA_Pure/r8_normalization.py": "08bab376c891b660f07ea6dc6b0d21e817b19bba94d721806c098342cb42f26a",
+ "training/r8_norm_ablation.py": "b2cab621067a08b1753e761aa7e3a3e824da2d125c14afee84f7c74a9618ccdb",
+ "tests/test_r8_normalization.py": "83a48fc2ff930c539ffa22ab6ada8f7e23ed839f356bc7362437b5dd5491af7a",
+ "push_T_bounds.npz": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+ "audit_base_sha": "02acabc0130bb7b643ce2414e238d8dbb53107c0"
+}
