@@ -1,0 +1,33 @@
+{
+ "file": "/home/T7/ojh/robot_actual/r9_C/diagnostics/r8_smoke.py",
+ "sha256": "0872f5f2bff57ca64a2c8cac1b4b3bb2f8c10905f8afebb7d5868227fdc4d9e1",
+ "required": {
+  "cache_is_threaded": {
+   "found": true,
+   "pattern": "past_key_values\\s*=\\s*cached"
+  },
+  "teacher_forces_full_token": {
+   "found": true,
+   "pattern": "\\[\\[W0 \\+ tf\\]\\]"
+  },
+  "step0_uses_prefix_only": {
+   "found": true,
+   "pattern": "if k == 0"
+  },
+  "window_is_256_action_tokens": {
+   "found": true,
+   "pattern": "W0:W0 \\+ BINS"
+  },
+  "nonzero_exit_on_mismatch": {
+   "found": true,
+   "pattern": "else 6"
+  }
+ },
+ "forbidden": {
+  "advance_cache_with_cached_token": {
+   "found": false,
+   "pattern": "\\[\\[W0 \\+ tk\\]\\]"
+  }
+ },
+ "pass": true
+}

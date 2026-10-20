@@ -1,0 +1,71 @@
+{
+ "same_prefix_fp32": {
+  "n_match": 8,
+  "n_total": 8,
+  "first_mismatch_step": null,
+  "mismatches_compatible_with_delta": true,
+  "median_margin": 0.0372910350561142,
+  "median_max_dlogit": 8.009374141693115e-08,
+  "verdict": "SAME_PREFIX_EQUIVALENT",
+  "mismatch_class": "none",
+  "max_abs_dlogit_at_mismatch": 0.0,
+  "numeric_floor": 0.05,
+  "precision_note": "fp32 CPU tiny Llama, identical prefix",
+  "same_prefix_teacher_forced": true
+ },
+ "shifted_position_ids": {
+  "n_match": 8,
+  "n_total": 8,
+  "first_mismatch_step": null,
+  "mismatches_compatible_with_delta": true,
+  "median_margin": 0.0372910350561142,
+  "median_max_dlogit": 0.0017463713884353638,
+  "verdict": "SAME_PREFIX_EQUIVALENT",
+  "mismatch_class": "none",
+  "max_abs_dlogit_at_mismatch": 0.0,
+  "numeric_floor": 0.05,
+  "precision_note": "negative control (protocol violation)",
+  "same_prefix_teacher_forced": true
+ },
+ "cache_offset_injection": {
+  "n_match": 7,
+  "n_total": 8,
+  "first_mismatch_step": 1,
+  "mismatches_compatible_with_delta": true,
+  "median_margin": 0.0372910350561142,
+  "median_max_dlogit": 0.028092071413993835,
+  "verdict": "OPEN_NUMERIC_PLAUSIBLE: flip within measured delta (<= 0.050); bf16 plausible NOT proven",
+  "mismatch_class": "numeric_plausible",
+  "max_abs_dlogit_at_mismatch": 0.04394346475601196,
+  "numeric_floor": 0.05,
+  "precision_note": "negative control (protocol violation)",
+  "same_prefix_teacher_forced": true
+ },
+ "bf16_vs_fp32_precision": {
+  "max_abs_dlogit": 0.0021584704518318176,
+  "mean_abs_dlogit": 0.0009222188964486122,
+  "top1_minus_top2": 0.13330078125,
+  "flip_possible": false,
+  "verdict": "compatibility only - NOT a root cause"
+ },
+ "controls": {
+  "shifted_position_ids": {
+   "detected": true,
+   "n_match": 8,
+   "median_max_dlogit": 0.0017463713884353638,
+   "noise_floor": 8.009374141693115e-08
+  },
+  "cache_offset_injection": {
+   "detected": true,
+   "n_match": 7,
+   "median_max_dlogit": 0.028092071413993835,
+   "noise_floor": 8.009374141693115e-08
+  }
+ },
+ "pass": true,
+ "window": {
+  "start": 0,
+  "size": 8
+ },
+ "torch": "2.4.1+cu121"
+}

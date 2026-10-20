@@ -1,0 +1,318 @@
+{
+ "same_prefix_fp32": {
+  "n_match": 8,
+  "n_total": 8,
+  "first_mismatch_step": null,
+  "mismatches_compatible_with_delta": true,
+  "median_margin": 0.0372910350561142,
+  "median_max_dlogit": 8.009374141693115e-08,
+  "verdict": "SAME_PREFIX_EQUIVALENT",
+  "mismatch_class": "none",
+  "max_abs_dlogit_at_mismatch": 0.0,
+  "numeric_floor": 0.05,
+  "precision_note": "fp32 CPU tiny Llama, identical prefix",
+  "steps": [
+   {
+    "step": 0,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.0,
+    "mean_abs_dlogit": 0.0,
+    "top1_minus_top2_full": 0.13247906416654587,
+    "prefix_len": 6
+   },
+   {
+    "step": 1,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 6.146728992462158e-08,
+    "mean_abs_dlogit": 2.270098775625229e-08,
+    "top1_minus_top2_full": 0.015600055456161499,
+    "prefix_len": 7
+   },
+   {
+    "step": 2,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 4.0978193283081055e-08,
+    "mean_abs_dlogit": 1.3154931366443634e-08,
+    "top1_minus_top2_full": 0.021808117628097534,
+    "prefix_len": 8
+   },
+   {
+    "step": 3,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 1.1920928955078125e-07,
+    "mean_abs_dlogit": 3.923196345567703e-08,
+    "top1_minus_top2_full": 0.028918445110321045,
+    "prefix_len": 9
+   },
+   {
+    "step": 4,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 1.1920928955078125e-07,
+    "mean_abs_dlogit": 4.644971340894699e-08,
+    "top1_minus_top2_full": 0.03495362401008606,
+    "prefix_len": 10
+   },
+   {
+    "step": 5,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 1.1362135410308838e-07,
+    "mean_abs_dlogit": 5.7392753660678864e-08,
+    "top1_minus_top2_full": 0.039628446102142334,
+    "prefix_len": 11
+   },
+   {
+    "step": 6,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 7.078051567077637e-08,
+    "mean_abs_dlogit": 4.2506144382059574e-08,
+    "top1_minus_top2_full": 0.04355210065841675,
+    "prefix_len": 12
+   },
+   {
+    "step": 7,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 8.940696716308594e-08,
+    "mean_abs_dlogit": 3.253808245062828e-08,
+    "top1_minus_top2_full": 0.047298938035964966,
+    "prefix_len": 13
+   }
+  ],
+  "same_prefix_teacher_forced": true
+ },
+ "shifted_position_ids": {
+  "n_match": 8,
+  "n_total": 8,
+  "first_mismatch_step": null,
+  "mismatches_compatible_with_delta": true,
+  "median_margin": 0.0372910350561142,
+  "median_max_dlogit": 0.0017463713884353638,
+  "verdict": "SAME_PREFIX_EQUIVALENT",
+  "mismatch_class": "none",
+  "max_abs_dlogit_at_mismatch": 0.0,
+  "numeric_floor": 0.05,
+  "precision_note": "negative control (protocol violation)",
+  "steps": [
+   {
+    "step": 0,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.0,
+    "mean_abs_dlogit": 0.0,
+    "top1_minus_top2_full": 0.13247906416654587,
+    "prefix_len": 6
+   },
+   {
+    "step": 1,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.005492463707923889,
+    "mean_abs_dlogit": 0.001986719318665564,
+    "top1_minus_top2_full": 0.015600055456161499,
+    "prefix_len": 7
+   },
+   {
+    "step": 2,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.002696271985769272,
+    "mean_abs_dlogit": 0.0016057657776400447,
+    "top1_minus_top2_full": 0.021808117628097534,
+    "prefix_len": 8
+   },
+   {
+    "step": 3,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.0015857778489589691,
+    "mean_abs_dlogit": 0.0006752087501809001,
+    "top1_minus_top2_full": 0.028918445110321045,
+    "prefix_len": 9
+   },
+   {
+    "step": 4,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.0017169415950775146,
+    "mean_abs_dlogit": 0.000643576611764729,
+    "top1_minus_top2_full": 0.03495362401008606,
+    "prefix_len": 10
+   },
+   {
+    "step": 5,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.0015430748462677002,
+    "mean_abs_dlogit": 0.0008102612337097526,
+    "top1_minus_top2_full": 0.039628446102142334,
+    "prefix_len": 11
+   },
+   {
+    "step": 6,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.0019097328186035156,
+    "mean_abs_dlogit": 0.0006867536721983925,
+    "top1_minus_top2_full": 0.04355210065841675,
+    "prefix_len": 12
+   },
+   {
+    "step": 7,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.0017758011817932129,
+    "mean_abs_dlogit": 0.0008459267555736005,
+    "top1_minus_top2_full": 0.047298938035964966,
+    "prefix_len": 13
+   }
+  ],
+  "same_prefix_teacher_forced": true
+ },
+ "cache_offset_injection": {
+  "n_match": 7,
+  "n_total": 8,
+  "first_mismatch_step": 1,
+  "mismatches_compatible_with_delta": true,
+  "median_margin": 0.0372910350561142,
+  "median_max_dlogit": 0.028092071413993835,
+  "verdict": "OPEN_NUMERIC_PLAUSIBLE: flip within measured delta (<= 0.050); bf16 plausible NOT proven",
+  "mismatch_class": "numeric_plausible",
+  "max_abs_dlogit_at_mismatch": 0.04394346475601196,
+  "numeric_floor": 0.05,
+  "precision_note": "negative control (protocol violation)",
+  "steps": [
+   {
+    "step": 0,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.0,
+    "mean_abs_dlogit": 0.0,
+    "top1_minus_top2_full": 0.13247906416654587,
+    "prefix_len": 6
+   },
+   {
+    "step": 1,
+    "token_kv": 2,
+    "token_full": 3,
+    "match": false,
+    "max_abs_dlogit": 0.04394346475601196,
+    "mean_abs_dlogit": 0.013111162814311683,
+    "top1_minus_top2_full": 0.015600055456161499,
+    "prefix_len": 7
+   },
+   {
+    "step": 2,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.03857332468032837,
+    "mean_abs_dlogit": 0.012020815047435462,
+    "top1_minus_top2_full": 0.021808117628097534,
+    "prefix_len": 8
+   },
+   {
+    "step": 3,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.03391408920288086,
+    "mean_abs_dlogit": 0.010886426432989538,
+    "top1_minus_top2_full": 0.028918445110321045,
+    "prefix_len": 9
+   },
+   {
+    "step": 4,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.029889583587646484,
+    "mean_abs_dlogit": 0.009563731378875673,
+    "top1_minus_top2_full": 0.03495362401008606,
+    "prefix_len": 10
+   },
+   {
+    "step": 5,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.026294559240341187,
+    "mean_abs_dlogit": 0.00839637138415128,
+    "top1_minus_top2_full": 0.039628446102142334,
+    "prefix_len": 11
+   },
+   {
+    "step": 6,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.02329161763191223,
+    "mean_abs_dlogit": 0.007623117897310294,
+    "top1_minus_top2_full": 0.04355210065841675,
+    "prefix_len": 12
+   },
+   {
+    "step": 7,
+    "token_kv": 3,
+    "token_full": 3,
+    "match": true,
+    "max_abs_dlogit": 0.02107909321784973,
+    "mean_abs_dlogit": 0.007225991750601679,
+    "top1_minus_top2_full": 0.047298938035964966,
+    "prefix_len": 13
+   }
+  ],
+  "same_prefix_teacher_forced": true
+ },
+ "bf16_vs_fp32_precision": {
+  "max_abs_dlogit": 0.0021584704518318176,
+  "mean_abs_dlogit": 0.0009222188964486122,
+  "top1_minus_top2": 0.13330078125,
+  "flip_possible": false,
+  "verdict": "compatibility only - NOT a root cause",
+  "steps": []
+ },
+ "controls": {
+  "shifted_position_ids": {
+   "detected": true,
+   "n_match": 8,
+   "median_max_dlogit": 0.0017463713884353638,
+   "noise_floor": 8.009374141693115e-08
+  },
+  "cache_offset_injection": {
+   "detected": true,
+   "n_match": 7,
+   "median_max_dlogit": 0.028092071413993835,
+   "noise_floor": 8.009374141693115e-08
+  }
+ },
+ "pass": true,
+ "window": {
+  "start": 0,
+  "size": 8
+ },
+ "torch": "2.4.1+cu121"
+}

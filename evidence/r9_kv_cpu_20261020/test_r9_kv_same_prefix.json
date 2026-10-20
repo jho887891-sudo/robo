@@ -1,0 +1,75 @@
+{
+ "checks": [
+  {
+   "check": "clean_run_is_equivalent",
+   "pass": true,
+   "detail": {
+    "verdict": "SAME_PREFIX_EQUIVALENT",
+    "n_match": 5
+   }
+  },
+  {
+   "check": "exit_code_zero_on_match",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "teacher_forcing_uses_full_tokens",
+   "pass": true,
+   "detail": {
+    "fed": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "check": "prefix_len_grows_by_one",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "small_delta_classed_numeric_plausible",
+   "pass": true,
+   "detail": {
+    "class": "numeric_plausible",
+    "delta": 0.015
+   }
+  },
+  {
+   "check": "exit_code_nonzero_on_mismatch",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "huge_delta_classed_structural",
+   "pass": true,
+   "detail": {
+    "class": "structural_suspect",
+    "delta": 5.91
+   }
+  },
+  {
+   "check": "window_slice",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "static_audit_real_probe_passes",
+   "pass": true,
+   "detail": {
+    "missing": [],
+    "forbidden_found": []
+   }
+  },
+  {
+   "check": "static_audit_detects_old_bug",
+   "pass": true,
+   "detail": {}
+  }
+ ],
+ "n_pass": 10,
+ "n_total": 10
+}
