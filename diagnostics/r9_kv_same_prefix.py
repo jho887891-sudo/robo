@@ -253,9 +253,10 @@ def main():
             print("refusing GPU KV diagnosis: R9_KV_GPU_AUTHORIZED is not set by the research lead",
                   file=sys.stderr)
             return 7
-        print("authorised: run diagnostics/r8_smoke.py --kv-diagnose (bounded, one window)",
+        print("authorization present, but no GPU probe was run by this wrapper; "
+              "run diagnostics/r8_smoke.py --kv-diagnose directly and verify its result JSON",
               file=sys.stderr)
-        return 0
+        return 8  # fail closed: authorization alone is not execution
     return rc
 
 

@@ -86,6 +86,22 @@ def main():
     ok("window_slice", np.array_equal(K._window(np.arange(16.0), (4, 3)),
                                       np.array([4.0, 5.0, 6.0])))
 
+    # Authorization token alone must never be mistaken for successful GPU execution.
+    import subprocess
+    wrapper = os.path.join(REPO, "diagnostics", "r9_kv_same_prefix.py")
+    env_yes = dict(os.environ, R9_KV_GPU_AUTHORIZED="1")
+    p_yes = subprocess.run([sys.executable, wrapper, "--gpu-diagnose"],
+                           env=env_yes, capture_output=True, text=True)
+    ok("authorized_wrapper_does_not_fake_gpu_pass",
+       p_yes.returncode == 8 and "no GPU probe was run" in p_yes.stderr,
+       {"exit": p_yes.returncode})
+    env_no = dict(os.environ)
+    env_no.pop("R9_KV_GPU_AUTHORIZED", None)
+    p_no = subprocess.run([sys.executable, wrapper, "--gpu-diagnose"],
+                          env=env_no, capture_output=True, text=True)
+    ok("unauthorized_wrapper_still_fails_closed",
+       p_no.returncode == 7, {"exit": p_no.returncode})
+
     audit = K.static_audit(os.path.join(REPO, "diagnostics", "r8_smoke.py"))
     ok("static_audit_real_probe_passes", audit["pass"],
        {"missing": [k for k, v in audit["required"].items() if not v["found"]],
