@@ -196,9 +196,13 @@ def freeze_checked(res, protocol_path, git_sha, freeze_out):
     unpinned commit identity, and accidental overwrites of previous evidence.
     """
     import re
-    if not res.get("pass") or not res.get("checks") or not all(
-            c.get("pass") is True for c in res["checks"].values()):
-        raise ValueError("refusing FINAL freeze: R10 gate not fully passed")
+    checks = res.get("checks", {})
+    required = {"schema", "build", "cross_set_disjoint", "counts", "split_assignment", "verify"}
+    if (not res.get("pass") or not required.issubset(checks)
+            or not all(c.get("pass") is True for c in checks.values())
+            or checks["cross_set_disjoint"].get("small_set_override") is not False
+            or checks["counts"].get("expect_total") != 25):
+        raise ValueError("refusing FINAL freeze: production R10 gates not fully passed")
     if not re.fullmatch(r"[0-9a-fA-F]{40}", git_sha or ""):
         raise ValueError("refusing FINAL freeze: require full 40-character Git commit SHA")
     actual_protocol_sha = hashlib.sha256(open(protocol_path, "rb").read()).hexdigest()
