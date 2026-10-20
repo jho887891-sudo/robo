@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "mission_id": "RD-R9-GATE-20261020-01",
+  "kind": "STAGE_EXECUTION_OUTPUT_MANIFEST_TEMPLATE",
+  "stage_status": "PLANNED_NOT_EXECUTED",
+  "baseline_sha": "52422372e5eacdcd0ee841ef2b91bdc5a71066c7",
+  "research_scope": "OpenVLA / RoboDojo / Push-T only",
+  "authorizations": {
+    "cpu": true,
+    "real_hdf5_read_only": true,
+    "gpu_kv_diagnose": false,
+    "new_data_download_or_collection": false,
+    "openvla_training_optimizer_steps": 0,
+    "merge_main": false,
+    "production_deployment": false
+  },
+  "gates": [
+    {
+      "id": "A",
+      "name": "64-TRAIN-only freeze and HDF5 contract",
+      "status": "NOT_STARTED",
+      "repo_sha": null,
+      "evidence_paths": [],
+      "tests": [],
+      "blockers": []
+    },
+    {
+      "id": "B",
+      "name": "real standard data-to-trainer R8 42D/R trace",
+      "status": "NOT_STARTED",
+      "repo_sha": null,
+      "evidence_paths": [],
+      "tests": [],
+      "blockers": []
+    },
+    {
+      "id": "C_CPU",
+      "name": "KV common-prefix diagnostic contract",
+      "status": "NOT_STARTED",
+      "repo_sha": null,
+      "evidence_paths": [],
+      "tests": [],
+      "blockers": []
+    },
+    {
+      "id": "C_GPU",
+      "name": "bounded one-shot genuine 7B KV diagnostic",
+      "status": "BLOCKED_PERMISSION",
+      "repo_sha": null,
+      "evidence_paths": [],
+      "tests": [],
+      "blockers": [
+        "Explicit research-leader GPU authorization required"
+      ]
+    },
+    {
+      "id": "D",
+      "name": "independent Push-T eval data readiness",
+      "status": "NOT_STARTED",
+      "repo_sha": null,
+      "evidence_paths": [],
+      "tests": [],
+      "blockers": [
+        "New dataset retrieval/collection requires explicit authorization"
+      ]
+    }
+  ],
+  "branch_commits": [],
+  "data_provenance": [],
+  "raw_logs": [],
+  "failures": [],
+  "review": {
+    "status": "PENDING_CHATGPT",
+    "auditor_commit": null,
+    "verified_results": [],
+    "open_questions": []
+  }
+}
