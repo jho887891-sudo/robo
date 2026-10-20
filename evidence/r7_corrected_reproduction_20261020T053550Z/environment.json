@@ -1,0 +1,10 @@
+{
+ "gpu": "NVIDIA RTX A6000, 49140 MiB, 580.178.04",
+ "gpu_compute_apps": "3111650, 2486 MiB\n3451404, 5604 MiB\n3469786, 16200 MiB",
+ "torch": "2.4.1+cu121",
+ "python": "3.10.12",
+ "numpy": "1.26.4",
+ "device": "CPU only; no CUDA context created; foreign GPU processes untouched",
+ "audit_review_sha": "3faed920421f02ac23e7a6a41050f4b5e93a762b",
+ "r7_runs": "/home/dgut/pusht_runtime/r7_review_r7_corrected_verified_20261020T053550Z"
+}

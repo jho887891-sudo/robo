@@ -1,0 +1,314 @@
+{
+ "n_train_frames": 25313,
+ "n_holdout_frames": 6691,
+ "note": "acceleration-defined frames (t>=2) so every comparison uses one frame set",
+ "correction_structure": {
+  "corr_R_with_past_acceleration": 0.4325482872555109,
+  "corr_R_with_negative_velocity": 0.1777466247712416,
+  "corr_R_with_velocity": -0.1777466247712416,
+  "corr_past_acceleration_with_current_acceleration": 0.4325482872555109,
+  "mean_abs_R": 0.001794955589196604,
+  "mean_abs_V": 0.007064132221092716,
+  "ratio_R_over_V": 0.25409427977338406,
+  "corr_R_per_arm": {
+   "left": 0.44073855517288374,
+   "right": 0.41769819457306145
+  },
+  "velocity_autocorrelation": {
+   "per_episode_mean": 0.9437721732531402,
+   "min": 0.9227343913037616,
+   "max": 0.9554559489845528
+  },
+  "acceleration_autocorrelation": {
+   "per_episode_mean": 0.4422097545231692,
+   "min": 0.36311537397286114,
+   "max": 0.5698425430397405,
+   "interpretation": "how much of tomorrow's acceleration is already visible in today's"
+  }
+ },
+ "paired_vs_constant_velocity": {
+  "SV_R": {
+   "L1_mean_over_seeds": 0.001726876221250639,
+   "vs_cv": {
+    "n_episodes": 20,
+    "mean_diff": -9.489901911990375e-05,
+    "median_diff": -9.70515815284979e-05,
+    "episodes_improved": 14,
+    "episodes_worse": 6,
+    "bootstrap_ci95": [
+     -0.00014158090718373437,
+     -4.808094741525955e-05
+    ],
+    "bootstrap_prob_improvement": 1.0,
+    "per_episode_diff": {
+     "episode_0000001.hdf5": 4.451370505318677e-05,
+     "episode_0000002.hdf5": -0.00017524811856400326,
+     "episode_0000007.hdf5": 3.200083289961052e-05,
+     "episode_0000008.hdf5": 2.0187931849511903e-05,
+     "episode_0000011.hdf5": -1.7220632799566735e-05,
+     "episode_0000013.hdf5": -0.00012292997870479378,
+     "episode_0000016.hdf5": -0.0002930915801737091,
+     "episode_0000023.hdf5": -3.7947682252892617e-06,
+     "episode_0000041.hdf5": -0.00010885256190815216,
+     "episode_0000047.hdf5": -0.00014821240157268482,
+     "episode_0000048.hdf5": 2.8474191310040847e-05,
+     "episode_0000052.hdf5": -0.0003223873250802346,
+     "episode_0000054.hdf5": 1.8574901929111192e-05,
+     "episode_0000063.hdf5": -8.37479861477931e-05,
+     "episode_0000066.hdf5": -0.00018838353361977237,
+     "episode_0000078.hdf5": -0.00018189039246434475,
+     "episode_0000080.hdf5": -0.0001872598256120097,
+     "episode_0000087.hdf5": -0.0001357800779501928,
+     "episode_0000091.hdf5": -8.525060114884363e-05,
+     "episode_0000094.hdf5": 1.2317838531853732e-05
+    }
+   },
+   "vs_identity": {
+    "n_episodes": 20,
+    "mean_diff": -0.005303392041805504,
+    "median_diff": -0.005371084428637224,
+    "episodes_improved": 20,
+    "episodes_worse": 0,
+    "bootstrap_ci95": [
+     -0.005665062666292555,
+     -0.0049559374461332585
+    ],
+    "bootstrap_prob_improvement": 1.0,
+    "per_episode_diff": {
+     "episode_0000001.hdf5": -0.004891264784932282,
+     "episode_0000002.hdf5": -0.00569716367182379,
+     "episode_0000007.hdf5": -0.005472808376937411,
+     "episode_0000008.hdf5": -0.004346157731551148,
+     "episode_0000011.hdf5": -0.00498143629139456,
+     "episode_0000013.hdf5": -0.004073752112584489,
+     "episode_0000016.hdf5": -0.0076462136825808606,
+     "episode_0000023.hdf5": -0.003660723251078306,
+     "episode_0000041.hdf5": -0.005408046380032028,
+     "episode_0000047.hdf5": -0.0053726169526715425,
+     "episode_0000048.hdf5": -0.005369551904602905,
+     "episode_0000052.hdf5": -0.005575412965393613,
+     "episode_0000054.hdf5": -0.006037579132594665,
+     "episode_0000063.hdf5": -0.004643084492883559,
+     "episode_0000066.hdf5": -0.004975047302127517,
+     "episode_0000078.hdf5": -0.004960360798308477,
+     "episode_0000080.hdf5": -0.00534717612139313,
+     "episode_0000087.hdf5": -0.005596780789086409,
+     "episode_0000091.hdf5": -0.0056704880156458635,
+     "episode_0000094.hdf5": -0.006342176078487522
+    }
+   }
+  },
+  "V_R": {
+   "L1_mean_over_seeds": 0.00176050037099961,
+   "vs_cv": {
+    "n_episodes": 20,
+    "mean_diff": -4.017550336676164e-05,
+    "median_diff": -5.262571843800358e-05,
+    "episodes_improved": 13,
+    "episodes_worse": 7,
+    "bootstrap_ci95": [
+     -7.630199140746007e-05,
+     -3.7059079352891987e-06
+    ],
+    "bootstrap_prob_improvement": 0.984,
+    "per_episode_diff": {
+     "episode_0000001.hdf5": 0.00010700163030782374,
+     "episode_0000002.hdf5": -0.0001245820785785686,
+     "episode_0000007.hdf5": 3.514330847606507e-05,
+     "episode_0000008.hdf5": 6.587814233621802e-05,
+     "episode_0000011.hdf5": 4.931738071137725e-05,
+     "episode_0000013.hdf5": -9.875365858638425e-06,
+     "episode_0000016.hdf5": -0.0001416777651027045,
+     "episode_0000023.hdf5": 2.3749839259297684e-05,
+     "episode_0000041.hdf5": -0.00011451475612671855,
+     "episode_0000047.hdf5": -3.8113417541288646e-05,
+     "episode_0000048.hdf5": -0.00011438059822628109,
+     "episode_0000052.hdf5": -0.00017853151428354848,
+     "episode_0000054.hdf5": 8.299660931596151e-06,
+     "episode_0000063.hdf5": -6.056487930634685e-05,
+     "episode_0000066.hdf5": -4.468655756966031e-05,
+     "episode_0000078.hdf5": -0.00011265430135164742,
+     "episode_0000080.hdf5": -0.0001238568816989314,
+     "episode_0000087.hdf5": 0.00011637275167071396,
+     "episode_0000091.hdf5": -6.180214512812427e-05,
+     "episode_0000094.hdf5": -8.403252025586611e-05
+    }
+   },
+   "vs_identity": {
+    "n_episodes": 20,
+    "mean_diff": -0.005248668526052361,
+    "median_diff": -0.005314200568472777,
+    "episodes_improved": 20,
+    "episodes_worse": 0,
+    "bootstrap_ci95": [
+     -0.00560735600676432,
+     -0.004903530252868564
+    ],
+    "bootstrap_prob_improvement": 1.0,
+    "per_episode_diff": {
+     "episode_0000001.hdf5": -0.004828776859677645,
+     "episode_0000002.hdf5": -0.005646497631838355,
+     "episode_0000007.hdf5": -0.005469665901360957,
+     "episode_0000008.hdf5": -0.004300467521064441,
+     "episode_0000011.hdf5": -0.004914898277883616,
+     "episode_0000013.hdf5": -0.003960697499738334,
+     "episode_0000016.hdf5": -0.0074947998675098555,
+     "episode_0000023.hdf5": -0.003633178643593719,
+     "episode_0000041.hdf5": -0.005413708574250595,
+     "episode_0000047.hdf5": -0.005262517968640147,
+     "episode_0000048.hdf5": -0.005512406694139227,
+     "episode_0000052.hdf5": -0.005431557154596927,
+     "episode_0000054.hdf5": -0.00604785437359218,
+     "episode_0000063.hdf5": -0.004619901386042113,
+     "episode_0000066.hdf5": -0.0048313503260774045,
+     "episode_0000078.hdf5": -0.00489112470719578,
+     "episode_0000080.hdf5": -0.005283773177480052,
+     "episode_0000087.hdf5": -0.005344627959465502,
+     "episode_0000091.hdf5": -0.005647039559625144,
+     "episode_0000094.hdf5": -0.006438526437275242
+    }
+   }
+  },
+  "SV_delta": {
+   "L1_mean_over_seeds": 0.001786933132010773,
+   "vs_cv": {
+    "n_episodes": 20,
+    "mean_diff": -1.2226644061632034e-05,
+    "median_diff": 2.3980482361820026e-07,
+    "episodes_improved": 10,
+    "episodes_worse": 10,
+    "bootstrap_ci95": [
+     -6.106453014050541e-05,
+     3.9071721870716495e-05
+    ],
+    "bootstrap_prob_improvement": 0.6955,
+    "per_episode_diff": {
+     "episode_0000001.hdf5": 0.00016348941470790707,
+     "episode_0000002.hdf5": -0.00013134485923616684,
+     "episode_0000007.hdf5": 0.00014382225776077848,
+     "episode_0000008.hdf5": 0.00019149917818135826,
+     "episode_0000011.hdf5": 3.478766076349046e-05,
+     "episode_0000013.hdf5": 3.623841495350565e-05,
+     "episode_0000016.hdf5": -0.00013808589627207091,
+     "episode_0000023.hdf5": 6.863035800034169e-05,
+     "episode_0000041.hdf5": -5.7334168101347976e-05,
+     "episode_0000047.hdf5": -0.00012018343530431999,
+     "episode_0000048.hdf5": 7.627338633682318e-05,
+     "episode_0000052.hdf5": -0.00022379407218750362,
+     "episode_0000054.hdf5": 6.884800439386227e-05,
+     "episode_0000063.hdf5": -1.4731080014837453e-05,
+     "episode_0000066.hdf5": -0.00011548385653857183,
+     "episode_0000078.hdf5": -0.00013431356421333583,
+     "episode_0000080.hdf5": -0.00015063019455810824,
+     "episode_0000087.hdf5": 1.5210689662073854e-05,
+     "episode_0000091.hdf5": -3.598488648555746e-05,
+     "episode_0000094.hdf5": 7.855376691903856e-05
+    }
+   },
+   "vs_identity": {
+    "n_episodes": 20,
+    "mean_diff": -0.005220719666747233,
+    "median_diff": -0.00533317034798965,
+    "episodes_improved": 20,
+    "episodes_worse": 0,
+    "bootstrap_ci95": [
+     -0.005578282477041776,
+     -0.004870082102445441
+    ],
+    "bootstrap_prob_improvement": 1.0,
+    "per_episode_diff": {
+     "episode_0000001.hdf5": -0.004772289075277562,
+     "episode_0000002.hdf5": -0.005653260412495954,
+     "episode_0000007.hdf5": -0.005360986952076243,
+     "episode_0000008.hdf5": -0.004174846485219302,
+     "episode_0000011.hdf5": -0.004929427997831503,
+     "episode_0000013.hdf5": -0.0039145837189261895,
+     "episode_0000016.hdf5": -0.007491207998679222,
+     "episode_0000023.hdf5": -0.0035882981248526753,
+     "episode_0000041.hdf5": -0.0053565279862252246,
+     "episode_0000047.hdf5": -0.0053445879864031775,
+     "episode_0000048.hdf5": -0.005321752709576123,
+     "episode_0000052.hdf5": -0.005476819712500882,
+     "episode_0000054.hdf5": -0.005987306030129914,
+     "episode_0000063.hdf5": -0.004574067586750604,
+     "episode_0000066.hdf5": -0.004902147625046316,
+     "episode_0000078.hdf5": -0.004912783970057469,
+     "episode_0000080.hdf5": -0.005310546490339229,
+     "episode_0000087.hdf5": -0.005445790021474143,
+     "episode_0000091.hdf5": -0.005621222300982578,
+     "episode_0000094.hdf5": -0.006275940150100337
+    }
+   }
+  }
+ },
+ "prediction_file_used": "pred_SVAcc_R_0.npz",
+ "motion_strata": {
+  "tiny_lt_1e-3": {
+   "n": 558,
+   "share": 0.08339560603796144,
+   "model_L1": 0.00045606111300281274,
+   "cv_L1": 0.00044493580891551376,
+   "improvement": -1.1125304087298974e-05,
+   "relative_improvement": -0.025004287898093613,
+   "R_corr": 0.7025860269621834
+  },
+  "small_1e-3_5e-3": {
+   "n": 3505,
+   "share": 0.5238379913316396,
+   "model_L1": 0.0006655529129763619,
+   "cv_L1": 0.0009505077630402116,
+   "improvement": 0.00028495485006384974,
+   "relative_improvement": 0.29979223931072974,
+   "R_corr": 0.7936711111414967
+  },
+  "medium_5e-3_2e-2": {
+   "n": 2010,
+   "share": 0.3004035271259901,
+   "model_L1": 0.0017405560693821928,
+   "cv_L1": 0.002459963598444503,
+   "improvement": 0.0007194075290623103,
+   "relative_improvement": 0.2924464127130838,
+   "R_corr": 0.6428445380985475
+  },
+  "large_ge_2e-2": {
+   "n": 618,
+   "share": 0.0923628755044089,
+   "model_L1": 0.0034970537125810653,
+   "cv_L1": 0.0056403189702430925,
+   "improvement": 0.0021432652576620272,
+   "relative_improvement": 0.3799900802754892,
+   "R_corr": 0.773008213320199
+  }
+ },
+ "per_arm": {
+  "left": {
+   "model_L1": 0.0015002833461875151,
+   "cv_L1": 0.002333594378892882,
+   "identity_L1": 0.009299519744058463,
+   "relative_improvement_vs_cv": 0.35709334959215067,
+   "R_corr": 0.7113974511381113,
+   "R_sign_at_1e-4": 0.8277139681363468
+  },
+  "right": {
+   "model_L1": 0.0009648016799284686,
+   "cv_L1": 0.001256316799500327,
+   "identity_L1": 0.004730702233299233,
+   "relative_improvement_vs_cv": 0.23203949868039875,
+   "R_corr": 0.7268802814107943,
+   "R_sign_at_1e-4": 0.8215725067780465
+  }
+ },
+ "residual_structure": {
+  "residual_L1": 0.001232542513057992,
+  "residual_variance": 1.7748271274865906e-05,
+  "episode_offset_variance_explained": 0.0027680141119994506,
+  "episode_offset_is_an_oracle_upper_bound": true,
+  "interpretation": "a large episode-offset share means the remaining error is configuration-specific (object pose / contact), i.e. exactly what an image-conditioned model could resolve -- an upper bound, because the offsets are fitted on the holdout itself"
+ },
+ "proprio_knn_bound": {
+  "knn_mean_R_L1": 0.0015272531092681474,
+  "nearest_neighbour_R_L1": 0.002106564163367698,
+  "k": 32,
+  "mlp_R_L1_for_reference": 0.001232542513057992
+ }
+}

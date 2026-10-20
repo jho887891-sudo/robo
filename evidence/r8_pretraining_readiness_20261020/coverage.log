@@ -1,0 +1,33 @@
+[pool] 19127 legal t>=2 frames from 64 train episodes; motion-bin edges [0.00213, 0.00386, 0.00745]
+[data] dev frames=6186 holdout frames=6691 | copy-V holdout L1=0.001795
+[size   200] episodes=64 frames/ep_min=3 motion mean=0.00662 p10=0.00106 p90=0.01717
+[200_equal_updates seed=0] holdout L1=0.013540 (cv 0.001795) | R^2=-17.340 corr=+0.070 sign=0.559 | steps=8000 epochs=8000 dev_R=0.011474 | 29s
+[200_equal_updates seed=1] holdout L1=0.014503 (cv 0.001795) | R^2=-21.379 corr=+0.065 sign=0.555 | steps=8000 epochs=8000 dev_R=0.012422 | 20s
+[200_equal_updates seed=2] holdout L1=0.012983 (cv 0.001795) | R^2=-16.642 corr=+0.067 sign=0.564 | steps=8000 epochs=8000 dev_R=0.011193 | 21s
+[200_equal_epochs seed=0] holdout L1=0.042044 (cv 0.001795) | R^2=-220.511 corr=+0.032 sign=0.533 | steps=200 epochs=200 dev_R=0.036109 | 1s
+[200_equal_epochs seed=1] holdout L1=0.047917 (cv 0.001795) | R^2=-317.290 corr=+0.007 sign=0.522 | steps=200 epochs=200 dev_R=0.040319 | 1s
+[200_equal_epochs seed=2] holdout L1=0.044353 (cv 0.001795) | R^2=-257.098 corr=+0.032 sign=0.523 | steps=200 epochs=200 dev_R=0.037791 | 0s
+[200_dev_selected seed=0] holdout L1=0.037474 (cv 0.001795) | R^2=-178.513 corr=+0.035 sign=0.535 | steps=400 epochs=400 dev_R=0.032109 | 1s
+[200_dev_selected seed=1] holdout L1=0.042187 (cv 0.001795) | R^2=-250.859 corr=+0.013 sign=0.522 | steps=400 epochs=400 dev_R=0.035441 | 1s
+[200_dev_selected seed=2] holdout L1=0.039381 (cv 0.001795) | R^2=-205.471 corr=+0.032 sign=0.532 | steps=400 epochs=400 dev_R=0.033395 | 1s
+[size  2000] episodes=64 frames/ep_min=31 motion mean=0.00695 p10=0.00108 p90=0.01922
+[2000_equal_updates seed=0] holdout L1=0.002477 (cv 0.001795) | R^2=-0.153 corr=+0.492 sign=0.767 | steps=8000 epochs=2000 dev_R=0.002193 | 15s
+[2000_equal_updates seed=1] holdout L1=0.002642 (cv 0.001795) | R^2=-0.270 corr=+0.474 sign=0.766 | steps=8000 epochs=2000 dev_R=0.002367 | 15s
+[2000_equal_updates seed=2] holdout L1=0.002399 (cv 0.001795) | R^2=-0.205 corr=+0.507 sign=0.778 | steps=8000 epochs=2000 dev_R=0.002204 | 15s
+[2000_equal_epochs seed=0] holdout L1=0.005288 (cv 0.001795) | R^2=-2.252 corr=+0.263 sign=0.644 | steps=800 epochs=200 dev_R=0.004572 | 2s
+[2000_equal_epochs seed=1] holdout L1=0.005615 (cv 0.001795) | R^2=-3.390 corr=+0.224 sign=0.652 | steps=800 epochs=200 dev_R=0.005262 | 2s
+[2000_equal_epochs seed=2] holdout L1=0.005105 (cv 0.001795) | R^2=-2.632 corr=+0.269 sign=0.667 | steps=800 epochs=200 dev_R=0.004698 | 2s
+[2000_dev_selected seed=0] holdout L1=0.003839 (cv 0.001795) | R^2=-1.098 corr=+0.341 sign=0.696 | steps=1600 epochs=400 dev_R=0.003483 | 3s
+[2000_dev_selected seed=1] holdout L1=0.004265 (cv 0.001795) | R^2=-1.644 corr=+0.298 sign=0.693 | steps=1600 epochs=400 dev_R=0.003927 | 4s
+[2000_dev_selected seed=2] holdout L1=0.003777 (cv 0.001795) | R^2=-1.244 corr=+0.346 sign=0.713 | steps=1600 epochs=400 dev_R=0.003496 | 3s
+[size 19127] episodes=64 frames/ep_min=153 motion mean=0.00698 p10=0.00111 p90=0.01868
+[19127_equal_updates seed=0] holdout L1=0.001234 (cv 0.001795) | R^2=0.520 corr=+0.721 sign=0.825 | steps=8000 epochs=211 dev_R=0.001184 | 13s
+[19127_equal_updates seed=1] holdout L1=0.001303 (cv 0.001795) | R^2=0.515 corr=+0.718 sign=0.823 | steps=8000 epochs=211 dev_R=0.001186 | 13s
+[19127_equal_updates seed=2] holdout L1=0.001201 (cv 0.001795) | R^2=0.497 corr=+0.705 sign=0.837 | steps=8000 epochs=211 dev_R=0.001142 | 13s
+[19127_equal_epochs seed=0] holdout L1=0.001258 (cv 0.001795) | R^2=0.511 corr=+0.715 sign=0.823 | steps=7600 epochs=200 dev_R=0.001188 | 12s
+[19127_equal_epochs seed=1] holdout L1=0.001274 (cv 0.001795) | R^2=0.515 corr=+0.718 sign=0.824 | steps=7600 epochs=200 dev_R=0.001206 | 13s
+[19127_equal_epochs seed=2] holdout L1=0.001193 (cv 0.001795) | R^2=0.496 corr=+0.705 sign=0.837 | steps=7600 epochs=200 dev_R=0.001152 | 12s
+[19127_dev_selected seed=0] holdout L1=0.001204 (cv 0.001795) | R^2=0.544 corr=+0.738 sign=0.828 | steps=13490 epochs=355 dev_R=0.001144 | 22s
+[19127_dev_selected seed=1] holdout L1=0.001212 (cv 0.001795) | R^2=0.537 corr=+0.733 sign=0.831 | steps=11324 epochs=298 dev_R=0.001151 | 19s
+[19127_dev_selected seed=2] holdout L1=0.001142 (cv 0.001795) | R^2=0.527 corr=+0.726 sign=0.840 | steps=15200 epochs=400 dev_R=0.001094 | 24s
+wrote /home/dgut/pusht_runtime/r8_ablation/coverage_ablation.json

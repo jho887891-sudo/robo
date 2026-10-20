@@ -1,0 +1,21 @@
+test_constant_velocity_is_exact (__main__.TestMetrics) ... ok
+test_correction_metrics (__main__.TestMetrics) ... ok
+test_direction_metrics_on_perfect_prediction (__main__.TestMetrics) ... ok
+test_nan_rejected (__main__.TestMetrics) ... ok
+test_per_episode_present_and_shapes (__main__.TestMetrics) ... ok
+test_rejects_shape_and_length_mismatch (__main__.TestMetrics) ... ok
+test_episode_split_is_disjoint_and_deterministic (__main__.TestSplits) ... ok
+test_R_is_delta_minus_velocity (__main__.TestTargetsAndFeatures) ... ok
+test_delta_and_residual_targets_reconstruct_same_physical_command (__main__.TestTargetsAndFeatures) ... ok
+test_delta_target_is_delta (__main__.TestTargetsAndFeatures) ... ok
+test_feature_shapes (__main__.TestTargetsAndFeatures) ... ok
+test_features_do_not_use_the_label (__main__.TestTargetsAndFeatures) ... ok
+test_hybrid_channel_selection_is_based_on_dev_only (__main__.TestTargetsAndFeatures) ... ok
+test_pilot_R_is_never_interpreted_as_delta (__main__.TestTargetsAndFeatures) ... ok
+test_fixed_epoch_ablation_uses_last_checkpoint_not_train_best (__main__.TestTrainer) ... ok
+test_mlp_learns_a_linear_correction (__main__.TestTrainer) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 2.701s
+
+OK

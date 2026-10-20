@@ -1,0 +1,10 @@
+test_best_grid_can_beat_floor_encoder (__main__.TestRepresentableBound) ... ok
+test_extreme_clipping (__main__.TestRepresentableBound) ... ok
+test_invalid_statistics (__main__.TestRepresentableBound) ... ok
+test_legacy_floor_vs_best_per_dim (__main__.TestRepresentableBound) ... ok
+test_nearest_matches_exhaustive_grid (__main__.TestRepresentableBound) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.028s
+
+OK

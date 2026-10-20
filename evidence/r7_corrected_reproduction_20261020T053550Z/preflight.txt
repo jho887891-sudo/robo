@@ -1,0 +1,20 @@
+[preflight] branch=audit/r8-pretraining-readiness head=3faed920421f02ac23e7a6a41050f4b5e93a762b
+[preflight] dirty_tracked=7
+[hdf5] episodes=100 bytes=7779356005
+[git] frozen sources:
+  b97e768afe6204db  training/r7_state_mlp.py
+  9d7921f1243ce246  training/r7_metrics.py
+  f1a82bd8e1277434  diagnostics/r7_verify_claims.py
+  fa0325c846fadb1d  diagnostics/r7_dynamics_probe.py
+  300ff9a6f2fdd102  diagnostics/r7_oracle_compare.py
+  feec772574aa896e  diagnostics/r6_representable_oracle.py
+  308e6aeaae0e3812  scripts/run_r7.sh
+[split] train=64 dev=16 holdout=20
+[split] train&dev=0 train&holdout=0 dev&holdout=0
+[split] union==all episodes: True
+[split] holdout==declared val: True
+[split] same as original R7 split: True
+[gpu] other processes (must not change):
+3111650, 2486 MiB
+3451404, 5604 MiB
+3469786, 16200 MiB
