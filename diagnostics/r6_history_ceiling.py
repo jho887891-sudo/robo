@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""R6: how much of the expert delta can history explain? (non-parametric ceiling, CPU)
+"""R6: evaluate selected history-only predictors, NOT an information ceiling (CPU).
 
 Phase 1 showed a per-dimension affine map of V_t cannot beat plain V_t. This script
 pushes harder: k-nearest-neighbour regression and a quadratic-feature ridge on the 14D
 past motion, fitted on TRAIN frames and evaluated on VAL frames, against the trivial
-baselines. If nothing beats "delta = V_t", the history information is exhausted by the
-copy-velocity rule, and any further gain must come from images / task semantics rather
-than from history alone.
+baselines. If tested models fail to beat copy-V, this establishes a strong
+observed benchmark, NOT a mathematical or information-theoretic ceiling.
 
-kNN is evaluated on a deterministic 2,000-frame subsample of the 6,711 validation
-frames to keep the CPU cost bounded; the fitted models are scored on all 6,711.
+kNN, joint-linear, and quadratic ridge are evaluated on a deterministic 2,000-frame
+subsample of the 6,711 validation frames. The per-dimension linear is also scored
+on all held-out frames separately, never directly compared to the 2,000-frame CV.
 """
 import argparse
 import json
@@ -103,14 +103,20 @@ def run():
     res["models"]["joint_linear_14x14"] = float(np.abs(joint - D_knn).mean())
 
     cv = res["baselines"]["constant_velocity_copy_V"]
-    best = min(res["models"], key=res["models"].get)
+    # Compare models on identical 2,000 held-out frames, not mixed validation sets.
+    same_sample_models = {k: v for k, v in res["models"].items()
+                          if k != "per_dim_linear_all_val"}
+    best = min(same_sample_models, key=same_sample_models.get)
     res["best_model"] = best
-    res["best_model_L1"] = res["models"][best]
+    res["best_model_L1"] = same_sample_models[best]
+    res["best_model_eval_n"] = int(len(V_knn))
     res["constant_velocity_L1_knn_set"] = cv
-    res["best_vs_copy_velocity_ratio"] = res["models"][best] / (cv + 1e-12)
-    res["interpretation"] = ("no fitted history-only model beats copying the past velocity"
-                             if res["best_vs_copy_velocity_ratio"] >= 0.99 else
-                             "a fitted history-only model beats copying the past velocity")
+    res["best_vs_copy_velocity_ratio"] = same_sample_models[best] / (cv + 1e-12)
+    res["information_ceiling_proven"] = False
+    res["interpretation"] = (
+        "none of these tested models beats copy-V on the matched validation subset"
+        if res["best_vs_copy_velocity_ratio"] >= 1.0 else
+        "at least one tested model beats copy-V on the matched validation subset")
 
     m = np.abs(D_va).mean(axis=1) >= 5e-3
     mv, md = V_va[m][:400], D_va[m][:400]
@@ -132,7 +138,10 @@ def main():
     print("baselines on kNN set: hold=%.6f  copy_V=%.6f" % (b["hold_state_zero_delta"],
                                                            b["constant_velocity_copy_V"]))
     for k, v in sorted(res["models"].items(), key=lambda kv: kv[1]):
-        print("  %-26s %.6f  (x copy_V = %.3f)" % (k, v, v / (b["constant_velocity_copy_V"] + 1e-12)))
+        if k == "per_dim_linear_all_val":
+            print("  %-26s %.6f  (full heldout set; NOT same subset as copy-V below)" % (k, v))
+        else:
+            print("  %-26s %.6f  (x copy_V = %.3f)" % (k, v, v / (b["constant_velocity_copy_V"] + 1e-12)))
     print("best=%s %.6f -> %s" % (res["best_model"], res["best_model_L1"], res["interpretation"]))
     m = res["motion_rich_subset"]
     print("motion-rich subset n=%d (%.1f%%): hold=%.6f cv=%.6f knn10=%.6f" % (
