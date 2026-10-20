@@ -1,0 +1,137 @@
+{
+ "mode": "smoke",
+ "utc_start": "2026-10-20T19:39:15Z",
+ "argv": "training/r11_train_pushT_r42.py --smoke --out runs/r13_smoke_20261020T193912Z --bucket R13_7B_ZERO_STEP --time_budget 1400 arx_x5_push_T",
+ "out": "runs/r13_smoke_20261020T193912Z",
+ "bucket": "R13_7B_ZERO_STEP",
+ "delta_contract_sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+ "split_sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2",
+ "bounds_sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+ "hdf5_dir": "/home/T7/ojh/robot_actual/data/data/hdf5/push_T/arx_x5/data",
+ "optimizer_steps": 0,
+ "gpu_before": [
+  "0, 2562 MiB, 49140 MiB, 20 %"
+ ],
+ "cuda_used": true,
+ "base_model": "/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine",
+ "modeling_sha256": "b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6",
+ "prompt_len": 36,
+ "prompt_tail": [
+  29901,
+  29871
+ ],
+ "sample": {
+  "episode": "episode_0000003.hdf5",
+  "t": 5,
+  "n_prompt": 36,
+  "n_supervised": 15,
+  "input_len": 51,
+  "action_token_range": [
+   31766,
+   31999
+  ],
+  "pixel_values_shape": [
+   1,
+   18,
+   224,
+   224
+  ],
+  "proprio_shape": [
+   1,
+   42
+  ]
+ },
+ "teacher_forced": {
+  "loss": 14.427783012390137,
+  "lora_grad_norm": 56.75,
+  "projector_grad_norm": 16.165359497070312,
+  "lora_has_grad": true,
+  "projector_has_grad": true,
+  "optimizer_state_empty": true
+ },
+ "optimizer_stepped": false,
+ "inference": {
+  "bins": [
+   129,
+   123,
+   178,
+   144,
+   121,
+   129,
+   0,
+   128,
+   128,
+   128,
+   127,
+   118,
+   121,
+   128
+  ],
+  "ids": [
+   31873,
+   31867,
+   31922,
+   31888,
+   31865,
+   31873,
+   31744,
+   31872,
+   31872,
+   31872,
+   31871,
+   31862,
+   31865,
+   31872
+  ],
+  "unique_bins": 9,
+  "action": [
+   -0.0015360070392489433,
+   -7.699453999521211e-05,
+   0.007040137425065041,
+   0.00221150740981102,
+   -0.0014285668730735779,
+   -0.000867093913257122,
+   1.0,
+   -0.2295144498348236,
+   0.6174252033233643,
+   0.40533819794654846,
+   -0.3314799666404724,
+   -0.31286412477493286,
+   -0.14946898818016052,
+   1.0
+  ],
+  "in_bounds": true,
+  "decode_info": {
+   "clipped_joint": 1,
+   "rate_limited": 0,
+   "gripper_fallback_dims": [
+    6,
+    13
+   ],
+   "rate_conflict_dims": [],
+   "unsafe": null,
+   "dt": null
+  }
+ },
+ "common_prefix": {
+  "max_abs_logit_delta": 0.0,
+  "window_argmax_identical": true,
+  "n_extra_tokens": 3
+ },
+ "checkpoint": {
+  "dir": "runs/r13_smoke_20261020T193912Z/checkpoints/step0",
+  "lora_sha256": "94379ba33bb11df8938b646f5184cb0059e73c2e3d3580a2414e0cdddf373759",
+  "projector_sha256": "80c26bce4cb63f5219fe1bbb5ce332186fcabf63b6c1d682ccb8a64527ad461f",
+  "metadata_sha256": "60bb9ceebfd5288be12f4b75484e0ca13617d4157903a2797db74b89f3a4f2d7",
+  "normalizer_sha256": "13a80f91780499b121430aa9ec6b60e7327a6f317179700b0850aafe8ce18512",
+  "tokens_after_reload_identical": true,
+  "metadata_roundtrip_equal": true
+ },
+ "utc_end": "2026-10-20T19:40:55Z",
+ "wall_clock_s": 99.7,
+ "gpu_after": [
+  "0, 24615 MiB, 49140 MiB, 58 %"
+ ],
+ "peak_mem_gb": 22.161,
+ "verdict": "VERIFIED_GPU_ZERO_UPDATE"
+}

@@ -128,8 +128,12 @@ def assert_projector_width(width_or_state, expected=N42):
         if "fc1.weight" not in w:
             raise R42Error("projector state dict lacks fc1.weight")
         w = w["fc1.weight"].shape
-    if hasattr(w, "shape"):
+    shape = None
+    if hasattr(w, "shape"):                      # torch.Tensor (torch.Size is a tuple subclass)
         shape = tuple(int(x) for x in w.shape)
+    elif isinstance(w, (tuple, list)):           # torch.Size / a plain shape tuple
+        shape = tuple(int(x) for x in w)
+    if shape is not None:
         if len(shape) < 2:
             raise R42Error("projector weights must be at least 2D, got %s" % (shape,))
         w = shape[1]

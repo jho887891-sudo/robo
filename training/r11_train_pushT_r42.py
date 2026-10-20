@@ -46,6 +46,9 @@ CONTRACT = os.environ.get("PUSHT_CONTRACT",
                           os.path.join(REPO, "evidence", "r9_gate_20261020",
                                        "frozen_contract_64train.json"))
 LEDGER = os.environ.get("R11_LEDGER", os.path.join(REPO, "mission", "R11_R16_BUDGET_LEDGER.json"))
+for _p in (OFT, os.path.join(OFT, "vla-scripts")):
+    if os.path.isdir(_p) and _p not in sys.path:
+        sys.path.insert(0, _p)
 INSTR = "Push the T-shaped block to align it precisely with the gray T-shaped pad."
 
 
@@ -211,7 +214,12 @@ def episode_images(proc, name, t, cams=3):
 
 
 def inference_14_tokens(vla, proj, pixel_values, prompt, proprio):
-    """Greedy legal 14-token decode; the argmax is restricted to 31744..31999."""
+    """Greedy legal 14-token decode; the argmax is restricted to 31744..31999.
+
+    `labels=input_ids` is required because enable_pure_autoreg() replaces
+    _process_action_masks() with a version that needs labels; the returned loss is ignored and no
+    gradient is ever taken here (torch.no_grad()).
+    """
     import torch
     ids, bins = [], []
     with torch.no_grad():
@@ -219,7 +227,8 @@ def inference_14_tokens(vla, proj, pixel_values, prompt, proprio):
             inp = torch.tensor([prompt + ids], dtype=torch.long, device="cuda")
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 out = vla(input_ids=inp, attention_mask=torch.ones_like(inp),
-                          pixel_values=pixel_values, proprio=proprio, proprio_projector=proj)
+                          pixel_values=pixel_values, proprio=proprio, proprio_projector=proj,
+                          labels=inp.clone())
             lg = out.logits[0, -1].float()
             cand = lg[R.TOKEN_BEGIN_IDX + 1: R.TOKEN_BEGIN_IDX + 1 + 256]
             k = int(torch.argmax(cand).item())
@@ -235,11 +244,13 @@ def common_prefix_check(vla, proj, pixel_values, prompt, proprio, extra=3):
         a = torch.tensor([prompt], dtype=torch.long, device="cuda")
         with torch.autocast("cuda", dtype=torch.bfloat16):
             la = vla(input_ids=a, attention_mask=torch.ones_like(a), pixel_values=pixel_values,
-                     proprio=proprio, proprio_projector=proj).logits[0, -1].float()
+                     proprio=proprio, proprio_projector=proj,
+                     labels=a.clone()).logits[0, -1].float()
         b = torch.tensor([prompt + [31744] * extra], dtype=torch.long, device="cuda")
         with torch.autocast("cuda", dtype=torch.bfloat16):
             lb = vla(input_ids=b, attention_mask=torch.ones_like(b), pixel_values=pixel_values,
-                     proprio=proprio, proprio_projector=proj).logits[0, -1 - extra].float()
+                     proprio=proprio, proprio_projector=proj,
+                     labels=b.clone()).logits[0, -1 - extra].float()
     d = (la - lb).abs().max().item()
     win = la[R.TOKEN_BEGIN_IDX + 1: R.TOKEN_BEGIN_IDX + 1 + 256]
     win2 = lb[R.TOKEN_BEGIN_IDX + 1: R.TOKEN_BEGIN_IDX + 1 + 256]
@@ -336,21 +347,16 @@ def run_smoke(args):
     proj.eval()
     bins, ids = inference_14_tokens(vla, proj, pv, prompt, pr)
     v = row["velocity"]
-    action_out, residual_hat, sinfo = R.decode_with_metadata(
-        {"task_id": "push_T", "base_model_sha256": "0" * 64, "lora_sha256": "0" * 64,
-         "projector_sha256": "0" * 64, "proprio_dim": 42,
-         "proprio_layout": "[state14, velocity14, acceleration14]",
-         "history_policy": "V=0,Acc=0 at t0; Acc=0 at t1; per-env isolated, observed only",
-         "camera_order": list(R.CAMERA_ORDER), "prompt_source": "tokenizer_prompt",
-         "frozen_contract_sha256": sha256_file(CONTRACT), "split_sha256": sha256_file(SPLIT),
-         "codec_mode": "fixed", "action_token_window": list(R.CODEC_WINDOW),
-         "target_representation": R.TARGET, "train_steps": 0, "seed": args.seed,
-         "gripper_policy": meta["gripper_policy"],
-         "safety_limits": {"amin": nb["amin"].astype(np.float32).tolist(),
-                           "amax": nb["amax"].astype(np.float32).tolist()},
-         "alignment_version": R.ALIGNMENT_VERSION, "normalizer": norm,
-         "normalizer_sha256": R.normalizer_sha256(norm)},
-        bins, row["state"], v)
+    decode_meta = R.build_metadata(
+        "push_T", sha256_file(os.path.join(MODEL, "config.json")), "0" * 64, "0" * 64,
+        sha256_file(CONTRACT), sha256_file(SPLIT), train_steps=0, seed=args.seed,
+        gripper_policy=meta["gripper_policy"],
+        safety_limits={"amin": nb["amin"].astype(np.float32).tolist(),
+                       "amax": nb["amax"].astype(np.float32).tolist()},
+        normalizer=norm)
+    decode_meta["lora_sha256"] = decode_meta["base_model_sha256"]
+    decode_meta["projector_sha256"] = decode_meta["base_model_sha256"]
+    action_out, residual_hat, sinfo = R.decode_with_metadata(decode_meta, bins, row["state"], v)
     ev["inference"] = {"bins": [int(x) for x in bins], "ids": [int(x) for x in ids],
                        "unique_bins": int(len(set(int(x) for x in bins))),
                        "action": [float(x) for x in action_out],
@@ -541,6 +547,213 @@ def run_train(args):
     return run
 
 
+# ------------------------------------------------------------------- R14 overfit mode
+def fixed_overfit_frames(splits, n_frames, seed=0):
+    """Deterministically pick one frame from each of n distinct TRAIN episodes."""
+    eps = sorted(splits["train"])
+    if n_frames > len(eps):
+        raise SystemExit("cannot take %d diverse frames from %d TRAIN episodes"
+                         % (n_frames, len(eps)))
+    rs = np.random.RandomState(seed)
+    picks = []
+    for i in range(n_frames):
+        name = eps[i]
+        state, _action = read_episode(name)
+        pool = np.arange(2, len(state) - 1)
+        picks.append((name, int(pool[rs.randint(len(pool))])))
+    return picks
+
+
+def prompt_only_window(vla, proj, pv, prompt, pr):
+    """Logits for the FIRST supervised position (the last prompt token), 256-wide window."""
+    import torch
+    with torch.no_grad():
+        inp = torch.tensor([prompt], dtype=torch.long, device="cuda")
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            out = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
+                      proprio=pr, proprio_projector=proj, labels=inp.clone())
+    lg = out.logits[0, -1].float()
+    return lg[R.TOKEN_BEGIN_IDX + 1: R.TOKEN_BEGIN_IDX + 1 + 256].cpu().numpy()
+
+
+def teacher_forced_ce(vla, proj, pv, prompt, residual, pr, q01, q99):
+    import torch
+    lab = R.build_labels(prompt, residual, q01, q99)
+    inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
+    tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
+    with torch.no_grad():
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            o = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
+                    labels=tgt, proprio=pr, proprio_projector=proj)
+    return float(o.loss)
+
+
+def run_overfit(args):
+    """R14: <=100 TRAIN-only updates on a fixed diverse frame set, with milestone archives."""
+    import torch
+    bucket = args.bucket
+    if args.steps > 100:
+        raise SystemExit("R14 is capped at 100 optimizer steps, requested %d" % args.steps)
+    budget = ledger_budget(bucket, args.time_budget)
+    if budget <= 60:
+        raise SystemExit("no budget left in bucket %s" % bucket)
+    out = args.out
+    if os.path.exists(out) and os.listdir(out):
+        raise SystemExit("output directory must be NEW and empty: %s" % out)
+    os.makedirs(out + "/checkpoints", exist_ok=True)
+    ledger_book(bucket, 0.0, "start", note=out, extra={"budget_s": budget})
+    t0 = time.time()
+    gpu_before = gpu_snapshot()
+
+    prompt_env = force_arx_platform()
+    contract, meta, splits = load_splits()
+    q01 = np.asarray(meta["q01"], np.float32)
+    q99 = np.asarray(meta["q99"], np.float32)
+    norm = R.normalizer_payload(
+        normalization_mode=meta["normalization_mode"], pmin=meta["pmin"], pmax=meta["pmax"],
+        q01=meta["q01"], q99=meta["q99"], v_scale=meta["v_scale"], a_scale=meta["a_scale"],
+        motion_quantile=meta.get("motion_quantile"),
+        n_train_episodes=meta["frozen_from"]["n_train_episodes_for_quantiles"],
+        n_dev_episodes_excluded=meta["frozen_from"]["n_dev_episodes_excluded"])
+    nb = np.load(BOUNDS)
+    limits = {"amin": nb["amin"].astype(np.float32).tolist(),
+              "amax": nb["amax"].astype(np.float32).tolist(), "max_rate": [0.5] * 14}
+    frames = fixed_overfit_frames(splits, args.overfit_frames, seed=args.seed)
+    proc, vla, proj, modeling_sha = build_model(args.cams)
+    prompt = make_prompt(proc)
+    ev = {"mode": "overfit", "utc_start": utcnow(), "argv": prompt_env, "out": out,
+          "bucket": bucket, "steps_cap": 100, "steps_requested": args.steps,
+          "n_fixed_frames": len(frames), "fixed_frames": [[e, t] for e, t in frames],
+          "fixed_frames_distinct_episodes": len({e for e, _t in frames}),
+          "train_only": True, "dev_used_for_gradients": False,
+          "modeling_sha256": modeling_sha, "delta_contract_sha256": sha256_file(CONTRACT),
+          "split_sha256": sha256_file(SPLIT), "gpu_before": gpu_before, "lr": args.lr,
+          "seed": args.seed, "milestones": [], "log": []}
+    with open(os.path.join(out, "overfit_evidence.json"), "w") as fh:
+        json.dump(ev, fh, indent=1)
+
+    params = [p for p in vla.parameters() if p.requires_grad] + list(proj.parameters())
+    opt = torch.optim.AdamW(params, lr=args.lr, weight_decay=0.0)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
+    def snapshot(step, loss_curve):
+        ck = out + "/checkpoints/step%d" % step
+        os.makedirs(ck, exist_ok=True)
+        vla.save_pretrained(ck + "/lora_adapter")
+        torch.save(proj.state_dict(), ck + "/proprio_projector_42.pt")
+        md = R.build_metadata(
+            "push_T", sha256_file(os.path.join(MODEL, "config.json")),
+            sha256_file(os.path.join(ck, "lora_adapter", "adapter_model.safetensors")),
+            sha256_file(os.path.join(ck, "proprio_projector_42.pt")),
+            sha256_file(CONTRACT), sha256_file(SPLIT), train_steps=step, seed=args.seed,
+            gripper_policy=meta["gripper_policy"], safety_limits=limits, normalizer=norm)
+        R.save_metadata(os.path.join(ck, "r42_metadata.json"), md)
+        ces, windows = [], []
+        for name, t in frames:
+            state, action = read_episode(name)
+            row = TC.build_training_row(state, action, t, contract)
+            pv = episode_images(proc, name, t, args.cams)
+            pr = torch.from_numpy(row["features"]).reshape(1, 42).to("cuda")
+            ces.append(teacher_forced_ce(vla, proj, pv, prompt, row["residual"], pr, q01, q99))
+            if len(windows) < args.pred_frames:
+                windows.append(prompt_only_window(vla, proj, pv, prompt, pr).tolist())
+        rec = {"step": step, "lora_sha256": md["lora_sha256"],
+               "projector_sha256": md["projector_sha256"],
+               "ce_mean": float(np.mean(ces)), "ce_per_frame": [round(c, 5) for c in ces],
+               "first_position_argmax_bins": [int(np.argmax(w)) for w in windows],
+               "first_position_window_logits": windows,
+               "loss_tail": [round(x, 5) for x in loss_curve[-10:]],
+               "utc": utcnow()}
+        if step == 0 or step == args.steps:
+            name, t = frames[0]
+            state, action = read_episode(name)
+            row = TC.build_training_row(state, action, t, contract)
+            pv = episode_images(proc, name, t, args.cams)
+            pr = torch.from_numpy(row["features"]).reshape(1, 42).to("cuda")
+            bins, _ids = inference_14_tokens(vla, proj, pv, prompt, pr)
+            rec["greedy_bins"] = [int(x) for x in bins]
+            rec["greedy_unique"] = int(len(set(int(x) for x in bins)))
+        ev["milestones"].append(rec)
+        with open(os.path.join(out, "overfit_evidence.json"), "w") as fh:
+            json.dump(ev, fh, indent=1)
+        log("milestone step=%d CE=%.4f" % (step, rec["ce_mean"]))
+
+    vla.train()
+    proj.train()
+    milestones = [int(x) for x in str(args.milestones).split(",") if str(x).strip() != ""]
+    loss_curve = []
+    if 0 in milestones:
+        snapshot(0, loss_curve)
+    for step in range(1, args.steps + 1):
+        if time.time() - t0 > budget - args.time_margin:
+            log("stopping at step %d: bucket budget reached" % step)
+            break
+        name, t = frames[(step - 1) % len(frames)]
+        state, action = read_episode(name)
+        row = sample_row(state, action, t, contract)
+        pv = episode_images(proc, name, t, args.cams)
+        pr = torch.from_numpy(row["features"]).reshape(1, 42).to("cuda")
+        lab = R.build_labels(prompt, row["residual"], q01, q99)
+        inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
+        tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
+        opt.zero_grad(set_to_none=True)
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            o = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
+                    labels=tgt, proprio=pr, proprio_projector=proj)
+            loss = o.loss
+        if not torch.isfinite(loss):
+            with open(os.path.join(out, "FAILURES.md"), "w") as fh:
+                fh.write("# R14 stopped\n\nnon-finite loss at step %d (%s t=%d)\n"
+                         % (step, name, t))
+            raise SystemExit("non-finite loss at step %d" % step)
+        loss.backward()
+        gn = float(torch.nn.utils.clip_grad_norm_(params, 1.0))
+        opt.step()
+        loss_curve.append(float(loss))
+        ev["log"].append({"step": step, "loss": round(float(loss), 5), "grad_norm": round(gn, 4),
+                          "episode": name, "t": t, "utc": utcnow()})
+        if step <= 3 or step % 10 == 0 or step == args.steps:
+            log("step=%d loss=%.4f gnorm=%.2f mem=%.2fGB %.0fs"
+                % (step, float(loss), gn, torch.cuda.max_memory_allocated() / 1e9,
+                   time.time() - t0))
+            with open(os.path.join(out, "overfit_evidence.json"), "w") as fh:
+                json.dump(ev, fh, indent=1)
+        if step in milestones:
+            snapshot(step, loss_curve)
+    ev["optimizer_steps"] = len(loss_curve)
+    ev["loss_first"] = loss_curve[0] if loss_curve else None
+    ev["loss_last"] = loss_curve[-1] if loss_curve else None
+    ev["loss_head_mean"] = float(np.mean(loss_curve[:10])) if loss_curve else None
+    ev["loss_tail_mean"] = float(np.mean(loss_curve[-10:])) if loss_curve else None
+    ev["utc_end"] = utcnow()
+    ev["wall_clock_s"] = round(time.time() - t0, 1)
+    ev["gpu_after"] = gpu_snapshot()
+    ev["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+    ms = {m["step"]: m for m in ev["milestones"]}
+    ev["ce_decreased"] = bool(ms and max(ms) > 0 and ms[max(ms)]["ce_mean"] < ms[min(ms)]["ce_mean"])
+    last = ms.get(max(ms)) if ms else None
+    ev["decodable_nonzero"] = bool(last and last.get("greedy_unique", 0) > 1)
+    ev["verdict"] = ("OVERFIT_SIGNAL_PASS"
+                     if (ev["ce_decreased"] and ev["decodable_nonzero"]
+                         and ev["loss_tail_mean"] < ev["loss_head_mean"])
+                     else "OVERFIT_SIGNAL_FAIL")
+    with open(os.path.join(out, "overfit_evidence.json"), "w") as fh:
+        json.dump(ev, fh, indent=1)
+    led = load_ledger()
+    led["results"]["overfit_optimizer_steps_used"] = int(
+        led["results"].get("overfit_optimizer_steps_used", 0)) + ev["optimizer_steps"]
+    with open(LEDGER, "w") as fh:
+        json.dump(led, fh, indent=1)
+    ledger_book(bucket, ev["wall_clock_s"], "end", note=ev["verdict"],
+                extra={"steps": ev["optimizer_steps"], "peak_mem_gb": ev["peak_mem_gb"]})
+    log("OVERFIT %s steps=%d wall=%.1fs head=%.4f tail=%.4f"
+        % (ev["verdict"], ev["optimizer_steps"], ev["wall_clock_s"],
+           ev["loss_head_mean"] or -1, ev["loss_tail_mean"] or -1))
+    return ev
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
@@ -557,14 +770,27 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--train_index", type=int, default=0)
     ap.add_argument("--init_lora", default="")
+    ap.add_argument("--overfit_frames", type=int, default=0,
+                    help="R14: fixed diverse TRAIN frame count (0 = plain random sampling)")
+    ap.add_argument("--milestones", default="0,20,40,60,80,100")
+    ap.add_argument("--pred_frames", type=int, default=8)
     args = ap.parse_args()
-    if args.smoke:
-        run_smoke(args)
+    t_start = time.time()
+    try:
+        if args.smoke:
+            run_smoke(args)
+            return 0
+        if args.steps <= 0:
+            raise SystemExit("--steps must be > 0 (or pass --smoke)")
+        if args.overfit_frames > 0:
+            run_overfit(args)
+            return 0
+        run_train(args)
         return 0
-    if args.steps <= 0:
-        raise SystemExit("--steps must be > 0 (or pass --smoke)")
-    run_train(args)
-    return 0
+    except BaseException as exc:
+        # A crash still consumed real GPU seconds: book them instead of leaving a silent debt.
+        ledger_book(args.bucket, time.time() - t_start, "abort", note=repr(exc)[:300])
+        raise
 
 
 if __name__ == "__main__":
