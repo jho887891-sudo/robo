@@ -35,13 +35,14 @@
         "id": "COLLECTOR",
         "cap_s": 14400,
         "trigger": "verified expert backend and source SHA, 25Hz real HDF5",
-        "gpu": false,
+        "gpu": true,
         "details": "<=40 attempts; first 25 valid, 5 DEV/20 offline FINAL; new data max 15GiB",
         "seconds_used": 0,
         "status": "PLANNED",
         "job_ids": [],
         "commits": [],
-        "evidence": []
+        "evidence": [],
+        "resource": "single GPU Isaac Sim / collector, serial with other GPU jobs"
       },
       {
         "id": "R13_7B_ZERO_STEP",
@@ -279,6 +280,7 @@
     "Every bucket and aggregate limit both apply; unused buckets cannot be reassigned without fresh approval.",
     "Data acquisition uses a real already auditable expert, never zero trajectory or copies.",
     "New 20 offline final episodes are not training data and not same as 30 sim final rollout seeds.",
-    "Status changes require raw evidence and independent re-evaluation."
+    "Status changes require raw evidence and independent re-evaluation.",
+    "Collector bucket uses GPU/IsaacSim; never run concurrently with 7B GPU jobs."
   ]
 }
