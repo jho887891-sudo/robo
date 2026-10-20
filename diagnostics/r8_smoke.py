@@ -352,12 +352,11 @@ def run_gpu_smoke(args, contract, out, q01, q99):
 
 
 def kv_diagnose(args, contract, out):
-    """Explain a KV-vs-full mismatch: numeric sensitivity or structural defect?
+    """Compare full-sequence vs cached KV logits under identical teacher-forced prefixes.
 
-    One decode step per iteration. At every step both paths emit their full 256-bin logit
-    vector for the SAME context, so a mismatch can be attributed: if the top1-top2 margin
-    of the full path is smaller than the logit delta between the paths, bf16 incremental
-    vs batched matmul is enough to flip the argmax; otherwise it is structural.
+    Record the complete 256-bin logit differences and top1-top2 margins. A token
+    flip compatible with a low margin does not establish that bf16 is the cause.
+    Classify root cause only after precision-controlled follow-up.
 
     NOTE: this mode was written after the main smoke reported 8/14 token agreement. It has
     NOT yet produced a verdict on the shared GPU (its first run hit the documented
@@ -436,8 +435,9 @@ def kv_diagnose(args, contract, out):
                "mismatches_compatible_with_measured_logit_delta": flips_compatible_with_delta,
                "median_margin": float(np.median([s["top1_minus_top2_full"] for s in steps])),
                "median_max_dlogit": float(np.median([s["max_abs_dlogit"] for s in steps])),
-               "verdict": ("numerical sensitivity of bf16 argmax at near-ties" if numerical
-                           else "STRUCTURAL mismatch - investigate"),
+               "verdict": ("OPEN: argmax flips consistent with measured logit differences; cause needs precision-controlled recheck"
+                           if flips_compatible_with_delta else
+                           "OPEN: anomalous same-prefix mismatch; inspect cache/attention/token alignment"),
                "out": out}
     json.dump(summary, open(os.path.join(out, "r8_kv_diagnose.json"), "w"), indent=1)
     print("KV/full match %d/%d | first mismatch step %s | median margin %.6f | median "
