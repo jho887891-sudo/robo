@@ -248,3 +248,12 @@ _本 ROUTE 是长期索引，审计结论始终以对应的源代码/原始数�
 - **阶段**：R10.1 安全释放资源 → R11 KV → R12 全新 25 Push-T 冻结 → R13 真 7B 零步 Smoke + 新部署 → R14 仅 TRAIN 过拟合 → R15 分段 Push-T → R16 单任务闭环 → R17 12-task 固定 TaskSpec（可提前 CPU 并行）→ R18 其他任务数据 → R19 共用模型适配 → R20 2→4→12 多任务训练 → R21 12-task 官方闭环评测 → R22 研究消融 → R23 可复算交付。所有日期/预算仅为计划，不构成 GPU/采集授权。
 - **新增硬风险**：旧纯 VLA 推理约 0.93 秒/动作，但 HDF5 数据 25Hz（40ms 每帧）；真实控制周期/仿真同步需要 Gate，不能把离线精度当实时能力。现有部署代码还是 Push-T 固定语言/14D或28D历史，不能将 R9 CPU 42D train 视为已经部署可用。
 - **计划原件**：[PROJECT_COMPLETION_MASTERPLAN.md](missions/PROJECT_COMPLETION_MASTERPLAN.md)；[机器可读 Gate](mission/PROJECT_COMPLETION_GATES.json)。两个文件只描述未来目标；先按 [R10.1 有条件授权任务](missions/R10_1_AUTHORIZED_RESOURCE_RELEASE.md) 执行，不因此开启任何新训练、重型 GPU、11任务新数据或 main 合并。
+
+
+#### R10.2｜2026-10-21｜最大安全自动化 Spec（仅任务已制定，未实际执行）
+
+- **研究负责人要求**：无需逐步询问，让 DeepSeek 在休息期间尽可能完成无依赖工作。任务定义为“已有明确许可内全量安全并行”，而非对新 GPU/训练/采集器的无限授权。
+- **固定起点**：R10 CPU @4af5d603c6410ec951ac8b1b138312bbdebb9c24；独立冻结审计 PR#14 @429e28affd67f9643a122bdb5bc0f958f9befa43；全局规划 PR#15 @8a95b7cf6fe878a257fe03fa7b7d11950b0ec915；main @329614f54d3090b9b6ab120855ba50fbc93bdd1e 只读。
+- **并行路线**：A 安全归档和确权后可优雅结束专属旧eval/6020；B PR11/12/14正式冻结回归；C 保留一次 7B KV GPU 300s 的已批准窗口；D k1采集入口源码审计、CPU 42D部署新适配器、12任务 TaskSpec/接口盘点、控制周期/评测指标工具和代码复现。真实新Push-T采集在“已证明合规且已获准的采集入口”和独立GPU资源同时存在后最多25次；未知k1不能直接运行。
+- **权限与状态**：CPU 可并行；GPU/Isaac采集串行；优化器训练0步、第二次GPU、额外11任务数据、main合并/真机部署仍未获批。**本段只记录计划，R10.2 的实际 Gate=EXECUTION_NOT_STARTED，不能拿 Spec 或PR当作已完成实验。**
+- **文件**：[R10.2 中文完整任务](missions/R10_2_AUTONOMOUS_MAX_SAFE_SPEC.md)；[机器可读执行模板](mission/R10_2_MISSION_MANIFEST.template.json)。执行日志/新SHA出现后再追加真正结果。
