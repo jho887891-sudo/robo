@@ -1,0 +1,12 @@
+[PASS] sidecar_sha256_matches_metadata  {"file": "534b026c0558d8f2dcf3b60d5c5ac0dcecf6588727e95c975947f369784cc7d7", "json": "534b026c0558d8f2dcf3b60d5c5ac0dcecf6588727e95c975947f369784cc7d7
+[PASS] shape_dtype                      {"kv_shape": [14, 256], "kv_dtype": "float32"}
+[PASS] finite                           {}
+[PASS] columns_256                      {"first": 0, "last": 255}
+[PASS] tokens_recomputed                {"kv": [132, 102, 128, 139, 93, 118, 0, 128, 0, 128, 0, 114, 0, 114], "full": [132, 102, 128, 139, 93, 118, 0, 128, 0, 128, 0, 114, 0, 114]}
+[PASS] match_count                      {"recomputed": 14, "reported": 14}
+[PASS] delta_matches                    {"max_abs_diff_of_max": 0.0}
+[PASS] margin_matches                   {"max_abs_diff": 0.0}
+[PASS] first_mismatch                   {"reported": null}
+[PASS] kv_equivalent_flag               {}
+[PASS] token_ids_inside_window          {"min": 0, "max": 139}
+C5 independent recompute: PASS

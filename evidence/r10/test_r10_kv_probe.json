@@ -105,8 +105,36 @@
    "check": "kv_window_constants_unchanged",
    "pass": true,
    "detail": {}
+  },
+  {
+   "check": "c3_preflight_passes_and_records_risk",
+   "pass": true,
+   "detail": {
+    "prismatic_action_dim": 7,
+    "prismatic_action_dim_mismatch": true,
+    "required_action_dim": 14,
+    "probe_window": [
+     31744,
+     31999
+    ]
+   }
+  },
+  {
+   "check": "c3_rejects_wrong_stop_index",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "c3_rejects_probe_referencing_action_dim",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "check": "c3_rejects_non_14_step_probe",
+   "pass": true,
+   "detail": {}
   }
  ],
- "n_pass": 16,
- "n_total": 16
+ "n_pass": 20,
+ "n_total": 20
 }

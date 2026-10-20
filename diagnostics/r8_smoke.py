@@ -409,6 +409,55 @@ def save_kv_logits_sidecar(out_dir, logits_kv, logits_full, tokens_kv, tokens_fu
             "bytes": len(data), "shape": list(kv.shape), "dtype": str(kv.dtype),
             "columns": "action-token window %d..%d (256 bins)" % (W0, W0 + BINS - 1)}
 
+# ---------------------------------------------- R10.2 C3: 14D / window preflight
+REQUIRED_ACTION_DIM = 14
+REQUIRED_WINDOW = (W0, W0 + BINS - 1)
+
+
+def kv_contract_preflight(trainer_module=None, probe_source=None):
+    """Fail closed unless this probe really covers 14 action tokens in 31744..31999.
+
+    The environment resolves prismatic constants to LIBERO values (ACTION_DIM=7), and the
+    untouched trainer uses ACTION_DIM inside evaluate(). This probe must therefore PROVE that
+    (a) it uses 14 explicit steps and the full 256-bin window, and (b) its own source never
+    references the prismatic ACTION_DIM constant. Otherwise a "successful" GPU run could
+    silently decode a 7-wide action.
+    """
+    info = {"required_action_dim": REQUIRED_ACTION_DIM,
+            "probe_window": list(REQUIRED_WINDOW),
+            "bins": BINS,
+            "steps_in_probe": 14}
+    if REQUIRED_WINDOW != (31744, 31999):
+        raise RuntimeError("agent window drift: %s" % (REQUIRED_WINDOW,))
+    if BINS != 256:
+        raise RuntimeError("bin count drift: %d" % BINS)
+    if trainer_module is not None:
+        info["stop_index"] = int(getattr(trainer_module, "STOP_INDEX", -1))
+        info["action_token_begin_idx"] = int(getattr(trainer_module, "ACTION_TOKEN_BEGIN_IDX", -1))
+        info["prismatic_action_dim"] = int(getattr(trainer_module, "ACTION_DIM", -1))
+        info["prismatic_num_actions_chunk"] = int(getattr(trainer_module, "NUM_ACTIONS_CHUNK", -1))
+        if info["stop_index"] != 2:
+            raise RuntimeError("STOP_INDEX must be 2, got %r" % (info["stop_index"],))
+        if info["action_token_begin_idx"] != 31743:
+            raise RuntimeError("ACTION_TOKEN_BEGIN_IDX must be 31743, got %r"
+                               % (info["action_token_begin_idx"],))
+        info["prismatic_action_dim_mismatch"] = info["prismatic_action_dim"] != REQUIRED_ACTION_DIM
+    src = probe_source
+    if src is None:
+        try:
+            import inspect
+            src = inspect.getsource(kv_diagnose)
+        except Exception:  # noqa: BLE001
+            src = ""
+    info["probe_source_references_action_dim"] = "ACTION_DIM" in src
+    info["probe_steps_are_14"] = "range(14)" in src
+    if info["probe_source_references_action_dim"]:
+        raise RuntimeError("probe source references the prismatic ACTION_DIM constant; refusing")
+    if not info["probe_steps_are_14"]:
+        raise RuntimeError("probe does not iterate exactly 14 action tokens; refusing")
+    info["pass"] = True
+    return info
+
 def kv_diagnose(args, contract, out):
     """R10 same-prefix KV diagnostic: teacher-forced full-path history, full logits archived.
 
@@ -425,6 +474,8 @@ def kv_diagnose(args, contract, out):
     from prismatic.models.backbones.llm.prompting import PurePromptBuilder
 
     free, total = torch.cuda.mem_get_info()
+    c3 = kv_contract_preflight(T)
+    print('[C3 preflight]', json.dumps(c3), flush=True)
     pre = kv_preflight(None, free, args.min_free_gb)
     proc, vla, _ = T.build(3, False)
     llm_dim = int(vla.llm_dim)
@@ -518,7 +569,8 @@ def kv_diagnose(args, contract, out):
                "logits_sidecar": sidecar,
                "precision": {"model_dtype": str(next(vla.parameters()).dtype),
                              "autocast": "bfloat16"},
-               "preflight": pre, "free_bytes_before": int(free), "free_bytes_total": int(total),
+               "preflight": pre, "c3_preflight": c3,
+               "free_bytes_before": int(free), "free_bytes_total": int(total),
                "model_reference": os.environ.get("PUSHT_MODEL", ""),
                "probe_sha256": __import__("hashlib").sha256(open(__file__, "rb").read()).hexdigest(),
                "contract_path": os.path.abspath(args.norm_contract),

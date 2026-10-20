@@ -1,0 +1,92 @@
+{
+ "run_dir": "/home/T7/ojh/robot_actual/r102_C/evidence/r10_2/kv_gpu_20261020T164559Z",
+ "npz_sha256": "534b026c0558d8f2dcf3b60d5c5ac0dcecf6588727e95c975947f369784cc7d7",
+ "n_steps": 14,
+ "recomputed_n_match": 14,
+ "recomputed_median_max_dlogit": 0.234375,
+ "recomputed_median_margin": 1.5625,
+ "checks": {
+  "sidecar_sha256_matches_metadata": {
+   "pass": true,
+   "file": "534b026c0558d8f2dcf3b60d5c5ac0dcecf6588727e95c975947f369784cc7d7",
+   "json": "534b026c0558d8f2dcf3b60d5c5ac0dcecf6588727e95c975947f369784cc7d7"
+  },
+  "shape_dtype": {
+   "pass": true,
+   "kv_shape": [
+    14,
+    256
+   ],
+   "kv_dtype": "float32"
+  },
+  "finite": {
+   "pass": true
+  },
+  "columns_256": {
+   "pass": true,
+   "first": 0,
+   "last": 255
+  },
+  "tokens_recomputed": {
+   "pass": true,
+   "kv": [
+    132,
+    102,
+    128,
+    139,
+    93,
+    118,
+    0,
+    128,
+    0,
+    128,
+    0,
+    114,
+    0,
+    114
+   ],
+   "full": [
+    132,
+    102,
+    128,
+    139,
+    93,
+    118,
+    0,
+    128,
+    0,
+    128,
+    0,
+    114,
+    0,
+    114
+   ]
+  },
+  "match_count": {
+   "pass": true,
+   "recomputed": 14,
+   "reported": 14
+  },
+  "delta_matches": {
+   "pass": true,
+   "max_abs_diff_of_max": 0.0
+  },
+  "margin_matches": {
+   "pass": true,
+   "max_abs_diff": 0.0
+  },
+  "first_mismatch": {
+   "pass": true,
+   "reported": null
+  },
+  "kv_equivalent_flag": {
+   "pass": true
+  },
+  "token_ids_inside_window": {
+   "pass": true,
+   "min": 0,
+   "max": 139
+  }
+ },
+ "pass": true
+}

@@ -1,0 +1,19 @@
+[PASS] split_identity_64_16_20                     
+[PASS] quantiles_recomputed_from_64_train          
+[PASS] quantiles_insensitive_to_dtype              
+[PASS] normalization_scales_match_A_contract       
+[PASS] signed_motion_is_zero_centred               
+[PASS] codec_roundtrip_on_holdout                  
+[PASS] features_use_only_past_and_present          
+[PASS] checkpoint_provenance_complete              
+[PASS] old_80_episode_contract_rejected            
+[PASS] split_identity_64_16_20                      {"n_train": 64, "n_dev": 16, "n_holdout": 20, "train_names_sha256": "9216cb80e13b909e924977a43f79529ee435fa6bbe3f180c2fbce0bab619f2d7", "dev_episodes_in_fit": [], "disjoint": true, "claimed_matches_recomputed": true, "pr
+[PASS] quantiles_recomputed_from_64_train           {"n_rows_64": 19127, "n_rows_80": 25313, "max_abs_diff_q01": 3.0174851506359346e-09, "max_abs_diff_q99": 9.536742145987986e-09, "material_change_vs_80_episode_fit_max_rel": 0.2929057662709994, "n_dev_episodes_excluded": 
+[PASS] quantiles_insensitive_to_dtype               {"max_abs_diff_float32_pipeline": 6.51925802230835e-09, "n_rows": 19127}
+[PASS] normalization_scales_match_A_contract        {"max_abs_diff_v_scale": 0.0, "max_abs_diff_a_scale": 0.0, "bounds_match_npz": true, "mode_ok": true, "single_episode_v_q99_head": [6.699569284757126e-14, 9.909689171680452e-17, 2.3813050174721944e-17], "max_abs_velocity
+[PASS] signed_motion_is_zero_centred                {"zero_maps_to_zero_in_motion_slots": true, "min_v_scale": 0.040849968791007996, "min_a_scale": 0.01729147881269455}
+[PASS] codec_roundtrip_on_holdout                   {"max_abs_error_in_range": 0.00017164647579193115, "max_abs_error_clipped_tail": 0.26479716447216506, "one_bin_step_max": 0.00017185891920235008, "n_entries": 16254, "n_out_of_range": 293, "out_of_range_fraction": 0.0180
+[PASS] features_use_only_past_and_present           {"invariant_to_future": true, "sensitive_to_current_state": true, "detail": [{"episode": "episode_0000001.hdf5", "frame": 40, "max_abs_delta_truncated": 0.0, "max_abs_delta_future_noise": 0.0}, {"episode": "episode_00000
+[PASS] checkpoint_provenance_complete               {"missing": [], "gripper_dims": [6, 13], "contracts_sha256": "3fc0c9ead108b801be797b3eecd1342f456bcdacafa1d5f854550c3a9946c40c"}
+[PASS] old_80_episode_contract_rejected             {"old_n_train_episodes": 80, "returncode": 1, "stderr_tail": "ValueError: R8 frozen target quantiles require 64 TRAIN / 16 DEV; regenerate contract", "old_contract_sha256": "b680d702ca95ce95c8a7aba62c29c1525c424b4ab7a81c
+Gate A verification: PASS -> evidence/r10_2/a_contract_recheck/gate_a_verification.json

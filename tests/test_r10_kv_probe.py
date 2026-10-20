@@ -103,6 +103,35 @@ def main():
     ok("kv_diagnose_records_diag_executed", "DIAG_EXECUTED" in src and "KV_EQUIVALENT" in src)
     ok("kv_window_constants_unchanged", S.W0 == 31744 and S.BINS == 256)
 
+
+    # ---------------------------------------------- R10.2 C3: 14D/window preflight
+    class _Tr:
+        STOP_INDEX = 2
+        ACTION_TOKEN_BEGIN_IDX = 31743
+        ACTION_DIM = 7
+        NUM_ACTIONS_CHUNK = 8
+
+    c3 = S.kv_contract_preflight(_Tr, probe_source="for k in range(14): pass")
+    ok("c3_preflight_passes_and_records_risk",
+       c3["pass"] is True and c3["prismatic_action_dim"] == 7
+       and c3["prismatic_action_dim_mismatch"] is True
+       and c3["probe_steps_are_14"] is True and c3["probe_window"] == [31744, 31999],
+       {k: c3[k] for k in ("prismatic_action_dim", "prismatic_action_dim_mismatch",
+                           "required_action_dim", "probe_window")})
+    class _TrBad:
+        STOP_INDEX = 3
+        ACTION_TOKEN_BEGIN_IDX = 31743
+        ACTION_DIM = 7
+        NUM_ACTIONS_CHUNK = 8
+    ok("c3_rejects_wrong_stop_index",
+       raises(lambda: S.kv_contract_preflight(_TrBad, probe_source="for k in range(14): pass"),
+              RuntimeError))
+    ok("c3_rejects_probe_referencing_action_dim",
+       raises(lambda: S.kv_contract_preflight(_Tr, probe_source="for k in range(ACTION_DIM):"),
+              RuntimeError))
+    ok("c3_rejects_non_14_step_probe",
+       raises(lambda: S.kv_contract_preflight(_Tr, probe_source="for k in range(7):"),
+              RuntimeError))
     n = sum(1 for r in RESULTS if r["pass"])
     print("\n%d/%d checks passed" % (n, len(RESULTS)))
     out = os.path.join(REPO, "evidence", "r10", "test_r10_kv_probe.json")

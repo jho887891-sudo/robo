@@ -1,0 +1,2 @@
+3111650, /isaac-sim/kit/kit, 2486 MiB
+NVIDIA RTX A6000, 49140 MiB, 2562 MiB, 19 %
