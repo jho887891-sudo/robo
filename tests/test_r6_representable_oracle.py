@@ -14,7 +14,7 @@ class TestRepresentableBound(unittest.TestCase):
     def test_best_grid_can_beat_floor_encoder(self):
         lo=np.zeros(14,np.float32)
         hi=np.ones(14,np.float32)
-        y=np.full((4,14),0.9,np.float32)
+        y=np.full((4,14),0.901,np.float32)
         r=M.summarize_oracle(y,lo,hi)
         self.assertLess(r["nearest_representable_lower_bound_L1"],r["floor_encoder_oracle_L1"])
         self.assertGreater(r["fraction_entries_requiring_different_bin"],0)
