@@ -175,6 +175,8 @@ class R42DeployServer:
         return self._prompt_ids
 
     # ------------------------------------------------------------------- preprocessing
+    _pv_shape_logged = None
+
     def preprocess(self, images):
         """RGB uint8 dict -> processor pixel tensor.  No BGR swap, no manual resize."""
         if self.processor is None:
@@ -188,11 +190,23 @@ class R42DeployServer:
         if len(tiles) != len(R.CAMERA_ORDER):
             raise RuntimeError("built %d image tiles but the frozen camera order has %d"
                                % (len(tiles), len(R.CAMERA_ORDER)))
+        # The fused DINOv2+SigLIP backbone stacks TWO 3-channel copies per camera (one per tower), so
+        # 3 cameras produce 18 channels by design - that is exactly what the training entry feeds.
+        # Derive the expectation from what the processor actually returned instead of hard-coding 3.
+        per_cam = int(tiles[0].shape[0])
+        if per_cam % 3 != 0 or per_cam <= 0:
+            raise RuntimeError("a single transformed camera tile has %d channels, which is not a "
+                               "positive multiple of 3 (RGB)" % per_cam)
         pv = torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to(self.device)
-        # fail closed on the exact mismatch seen in closed-loop attempt 3
-        if int(pv.shape[1]) != 3 * len(R.CAMERA_ORDER):
-            raise RuntimeError("pixel_values has %d channels; expected 3 per camera x %d cameras"
-                               % (int(pv.shape[1]), len(R.CAMERA_ORDER)))
+        expected = per_cam * len(R.CAMERA_ORDER)
+        if int(pv.shape[1]) != expected:
+            raise RuntimeError("pixel_values has %d channels; the processor emitted %d per camera x "
+                               "%d cameras = %d" % (int(pv.shape[1]), per_cam,
+                                                    len(R.CAMERA_ORDER), expected))
+        if self._pv_shape_logged != (per_cam, len(R.CAMERA_ORDER)):
+            self._pv_shape_logged = (per_cam, len(R.CAMERA_ORDER))
+            print("[OpenVLA_R42] pixel_values channels=%d (%d per camera x %d cameras)"
+                  % (expected, per_cam, len(R.CAMERA_ORDER)), flush=True)
         return pv
 
     # ------------------------------------------------------------------------- rollout

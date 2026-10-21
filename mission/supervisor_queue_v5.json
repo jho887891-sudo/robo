@@ -191,6 +191,41 @@
    "gpu": true,
    "count_gpu": true,
    "supervisor_locks_gpu": true
+  },
+  {
+   "id": "m2_two_2000",
+   "kind": "m2_train",
+   "bucket": "TWO_TASK_PILOT",
+   "cmd": "bash scripts/m2_two_tasks.sh",
+   "timeout_s": 21600,
+   "depends_on": [
+    "loop_pushT_stage1_r5"
+   ],
+   "gpu": true,
+   "count_gpu": false
+  },
+  {
+   "id": "m2_gate_p6",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/m2_gate_check.py --evidence /home/T7/ojh/robot_actual/runs/m2_two_latest/stage_evidence.json --eval /home/T7/ojh/robot_actual/runs/m2_two_latest/dev_eval_latest.npz --normalizer data/m2_task_normalizer_2task.json --splits data/m2_splits.json --ledger-dir /home/T7/ojh/robot_actual/r15_ledger --out mission/m2_p6_two_report.json; echo P6_EXIT=$? >> logs/gate_verdict.txt; exit 0",
+   "timeout_s": 3600,
+   "depends_on": [
+    "m2_two_2000"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "loop_pushT_stage1_r5",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
   }
  ]
 }
