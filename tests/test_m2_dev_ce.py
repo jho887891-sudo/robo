@@ -45,17 +45,23 @@ def test_vision_prefix_is_shifted_not_rejected():
     assert np.isfinite(out["ce"])
 
 
-def test_the_prefix_really_changes_which_rows_are_used():
+def test_the_prefix_cancels_out_exactly():
+    """With the shift applied, a prefixed logits array must score identically to its text-only tail.
+
+    That is the whole point: the vision tokens are context, they must not move which TEXT positions the
+    supervised labels are read from. If the offset were ignored, the rows would land on different text
+    positions and the CE would differ (or, before the fix, the call would raise on the length check).
+    """
     labels = np.concatenate([np.full(8, -100), np.arange(N_SUP) % V])
     rng = np.random.RandomState(1)
     body = rng.randn(len(labels), V).astype(np.float32)          # the text rows
-    five = np.concatenate([rng.randn(5, V).astype(np.float32), body])
-    six = np.concatenate([rng.randn(6, V).astype(np.float32), body])
-    a = T.token_ce_from_logits(five, labels, 8)
-    b = T.token_ce_from_logits(six, labels, 8)
-    assert a["vision_prefix_tokens"] == 5 and b["vision_prefix_tokens"] == 6
-    # with a different prefix the supervised rows land on different text positions, so the CE differs
-    assert a["ce"] != pytest.approx(b["ce"], rel=1e-9, abs=1e-9)
+    prefixed = np.concatenate([rng.randn(5, V).astype(np.float32), body])
+    a = T.token_ce_from_logits(prefixed, labels, 8)
+    b = T.token_ce_from_logits(body, labels, 8)
+    assert a["vision_prefix_tokens"] == 5
+    assert b["vision_prefix_tokens"] == 0
+    assert a["ce"] == pytest.approx(b["ce"], rel=1e-9, abs=1e-9)
+    assert a["per_position"] == pytest.approx(b["per_position"], rel=1e-9, abs=1e-9)
 
 
 def test_shorter_logits_than_labels_is_refused():
