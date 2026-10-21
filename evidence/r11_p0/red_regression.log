@@ -1,0 +1,444 @@
+..FFF..FF.FF.FF.FEEFFFEEEF                                               [100%]
+==================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_r11_p0_deploy.py _________________
+ImportError while importing test module '/home/T7/ojh/robot_actual/r11/tests/test_r11_p0_deploy.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_r11_p0_deploy.py:25: in <module>
+    import r42_deploy_server as S  # noqa: E402
+E   ModuleNotFoundError: No module named 'r42_deploy_server'
+______________ ERROR collecting tests/test_r11_p0_train_assert.py ______________
+ImportError while importing test module '/home/T7/ojh/robot_actual/r11/tests/test_r11_p0_train_assert.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_r11_p0_train_assert.py:22: in <module>
+    import r42_train_contract as TC  # noqa: E402
+E   ModuleNotFoundError: No module named 'r42_train_contract'
+_____ ERROR at setup of test_normalizer_payload_is_complete_and_sha_stable _____
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    @pytest.fixture(scope="module")
+    def norm(frozen):
+>       return R.normalizer_payload(
+            normalization_mode=frozen["normalization_mode"], pmin=frozen["pmin"], pmax=frozen["pmax"],
+            q01=frozen["q01"], q99=frozen["q99"], v_scale=frozen["v_scale"],
+            a_scale=frozen["a_scale"], motion_quantile=frozen["motion_quantile"],
+            n_train_episodes=frozen["frozen_from"]["n_train_episodes_for_quantiles"],
+            n_dev_episodes_excluded=frozen["frozen_from"]["n_dev_episodes_excluded"])
+E       AttributeError: module 'r42_adapter' has no attribute 'normalizer_payload'
+
+tests/test_r11_p0_metadata.py:39: AttributeError
+________ ERROR at setup of test_metadata_carries_normalizer_and_its_sha ________
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    @pytest.fixture(scope="module")
+    def norm(frozen):
+>       return R.normalizer_payload(
+            normalization_mode=frozen["normalization_mode"], pmin=frozen["pmin"], pmax=frozen["pmax"],
+            q01=frozen["q01"], q99=frozen["q99"], v_scale=frozen["v_scale"],
+            a_scale=frozen["a_scale"], motion_quantile=frozen["motion_quantile"],
+            n_train_episodes=frozen["frozen_from"]["n_train_episodes_for_quantiles"],
+            n_dev_episodes_excluded=frozen["frozen_from"]["n_dev_episodes_excluded"])
+E       AttributeError: module 'r42_adapter' has no attribute 'normalizer_payload'
+
+tests/test_r11_p0_metadata.py:39: AttributeError
+__________ ERROR at setup of test_tampered_normalizer_sha_is_refused ___________
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    @pytest.fixture(scope="module")
+    def norm(frozen):
+>       return R.normalizer_payload(
+            normalization_mode=frozen["normalization_mode"], pmin=frozen["pmin"], pmax=frozen["pmax"],
+            q01=frozen["q01"], q99=frozen["q99"], v_scale=frozen["v_scale"],
+            a_scale=frozen["a_scale"], motion_quantile=frozen["motion_quantile"],
+            n_train_episodes=frozen["frozen_from"]["n_train_episodes_for_quantiles"],
+            n_dev_episodes_excluded=frozen["frozen_from"]["n_dev_episodes_excluded"])
+E       AttributeError: module 'r42_adapter' has no attribute 'normalizer_payload'
+
+tests/test_r11_p0_metadata.py:39: AttributeError
+___________ ERROR at setup of test_roundtrip_decode_is_bit_identical ___________
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    @pytest.fixture(scope="module")
+    def norm(frozen):
+>       return R.normalizer_payload(
+            normalization_mode=frozen["normalization_mode"], pmin=frozen["pmin"], pmax=frozen["pmax"],
+            q01=frozen["q01"], q99=frozen["q99"], v_scale=frozen["v_scale"],
+            a_scale=frozen["a_scale"], motion_quantile=frozen["motion_quantile"],
+            n_train_episodes=frozen["frozen_from"]["n_train_episodes_for_quantiles"],
+            n_dev_episodes_excluded=frozen["frozen_from"]["n_dev_episodes_excluded"])
+E       AttributeError: module 'r42_adapter' has no attribute 'normalizer_payload'
+
+tests/test_r11_p0_metadata.py:39: AttributeError
+_________ ERROR at setup of test_decode_with_metadata_rejects_bad_bins _________
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    @pytest.fixture(scope="module")
+    def norm(frozen):
+>       return R.normalizer_payload(
+            normalization_mode=frozen["normalization_mode"], pmin=frozen["pmin"], pmax=frozen["pmax"],
+            q01=frozen["q01"], q99=frozen["q99"], v_scale=frozen["v_scale"],
+            a_scale=frozen["a_scale"], motion_quantile=frozen["motion_quantile"],
+            n_train_episodes=frozen["frozen_from"]["n_train_episodes_for_quantiles"],
+            n_dev_episodes_excluded=frozen["frozen_from"]["n_dev_episodes_excluded"])
+E       AttributeError: module 'r42_adapter' has no attribute 'normalizer_payload'
+
+tests/test_r11_p0_metadata.py:39: AttributeError
+=================================== FAILURES ===================================
+_____________ test_decode_is_bit_equal_to_action_codec_denormalize _____________
+
+qq = (array([-0.01668977, -0.02186212, -0.01669523, -0.01649382, -0.0144173 ,
+       -0.01250886, -0.01967194, -0.01406616,...0.01414239, 0.01751092, 0.0208283 , 0.01795686,
+       0.01884298, 0.01651443, 0.0142184 , 0.00999999], dtype=float32))
+
+    def test_decode_is_bit_equal_to_action_codec_denormalize(qq):
+        q01, q99 = qq
+        idx = np.arange(256, dtype=np.int64)
+        dim = 5
+        tokens = np.zeros(14, np.int64)
+        state = np.zeros(14, np.float32)
+        velocity = np.zeros(14, np.float32)
+        for k in idx:
+            tokens[dim] = int(k)
+            _cmd, r_hat, _info = R.decode_command(tokens, q01, q99, state, velocity)
+            want = AC.denormalize(AC.decode_indices(np.asarray([k], np.int64), mode=AC.MODE_FIXED),
+                                  q01[dim:dim + 1], q99[dim:dim + 1])[0]
+>           assert r_hat[dim] == want, "bin %d: r42=%r codec=%r" % (k, r_hat[dim], want)
+E           AssertionError: bin 3: r42=-0.012238124 codec=-0.012238123
+E           assert -0.012238124 == -0.012238123
+
+tests/test_r11_p0_codec.py:95: AssertionError
+______________ test_encode_decode_roundtrip_returns_the_same_bin _______________
+
+qq = (array([-0.01668977, -0.02186212, -0.01669523, -0.01649382, -0.0144173 ,
+       -0.01250886, -0.01967194, -0.01406616,...0.01414239, 0.01751092, 0.0208283 , 0.01795686,
+       0.01884298, 0.01651443, 0.0142184 , 0.00999999], dtype=float32))
+
+    def test_encode_decode_roundtrip_returns_the_same_bin(qq):
+        q01, q99 = qq
+        tokens = np.zeros(14, np.int64)
+        state = np.zeros(14, np.float32)
+        velocity = np.zeros(14, np.float32)
+        dim = 9
+        for k in range(256):
+            tokens[dim] = k
+            _cmd, r_hat, _info = R.decode_command(tokens, q01, q99, state, velocity)
+            back, _ids = R.token_ids_for_residual(r_hat, q01, q99)
+>           assert int(back[dim]) == k, "bin %d round-tripped to %d" % (k, int(back[dim]))
+E           AssertionError: bin 2 round-tripped to 1
+E           assert 1 == 2
+E            +  where 1 = int(1)
+
+tests/test_r11_p0_codec.py:108: AssertionError
+_____________________ test_boundaries_clip_to_extreme_bins _____________________
+
+qq = (array([-0.01668977, -0.02186212, -0.01669523, -0.01649382, -0.0144173 ,
+       -0.01250886, -0.01967194, -0.01406616,...0.01414239, 0.01751092, 0.0208283 , 0.01795686,
+       0.01884298, 0.01651443, 0.0142184 , 0.00999999], dtype=float32))
+
+    def test_boundaries_clip_to_extreme_bins(qq):
+        q01, q99 = qq
+        at_q01, _ = R.token_ids_for_residual(q01, q01, q99)
+        at_q99, _ = R.token_ids_for_residual(q99, q01, q99)
+        below, _ = R.token_ids_for_residual(q01 * 4.0, q01, q99)
+        above, _ = R.token_ids_for_residual(q99 * 4.0, q01, q99)
+        assert np.array_equal(at_q01, np.zeros(14, np.int64))
+>       assert np.array_equal(at_q99, np.full(14, 255, np.int64))
+E       AssertionError: assert False
+E        +  where False = <function array_equal at 0x7fd0ec9b5e70>(array([254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254,\n       254]), array([255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,\n       255]))
+E        +    where <function array_equal at 0x7fd0ec9b5e70> = np.array_equal
+E        +    and   array([255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,\n       255]) = <function full at 0x7fd0ec9b0ee0>(14, 255, <class 'numpy.int64'>)
+E        +      where <function full at 0x7fd0ec9b0ee0> = np.full
+E        +      and   <class 'numpy.int64'> = np.int64
+
+tests/test_r11_p0_codec.py:118: AssertionError
+__________________ test_prompt_gets_the_trailing_space_token ___________________
+
+    def test_prompt_gets_the_trailing_space_token():
+        pids = [128000, 9906, 11]
+>       out = R.normalize_prompt_ids(pids)
+E       AttributeError: module 'r42_adapter' has no attribute 'normalize_prompt_ids'
+
+tests/test_r11_p0_codec.py:148: AttributeError
+_______________ test_build_labels_matches_the_legacy_entrypoint ________________
+
+qq = (array([-0.01668977, -0.02186212, -0.01669523, -0.01649382, -0.0144173 ,
+       -0.01250886, -0.01967194, -0.01406616,...0.01414239, 0.01751092, 0.0208283 , 0.01795686,
+       0.01884298, 0.01651443, 0.0142184 , 0.00999999], dtype=float32))
+
+    def test_build_labels_matches_the_legacy_entrypoint(qq):
+        q01, q99 = qq
+        rs = np.random.RandomState(3)
+        residual = (rs.randn(14) * 0.01).astype(np.float32)
+        pids = [128000, 9906, 11, 5123, 29901]
+        got = R.build_labels(pids, residual, q01, q99)
+        idx, ids = R.token_ids_for_residual(residual, q01, q99)
+        want_inp, want_lab = reference_make_ids(pids, idx.tolist())
+>       assert got["input_ids"] == want_inp
+E       assert [128000, 9906...1, 31999, ...] == [128000, 9906...1, 29871, ...]
+E         
+E         At index 5 diff: 31999 != 29871
+E         Right contains one more item: 2
+E         Use -v to get more diff
+
+tests/test_r11_p0_codec.py:161: AssertionError
+______________________ test_libero_defaults_are_rejected _______________________
+
+    @pytest.mark.skipif(not HAS_PRISMATIC, reason="prismatic runtime not installed here")
+    def test_libero_defaults_are_rejected():
+        """With no arx marker in argv prismatic reports 7D; the R42 guard must fail closed."""
+        code = (
+            "import sys, json\n"
+            "sys.argv = ['probe']\n"
+            "import r42_adapter as R\n"
+            "try:\n"
+            "    R.assert_runtime_contract()\n"
+            "except R.R42Error as e:\n"
+            "    print('REJECTED', str(e)[:120]); raise SystemExit(3)\n"
+            "print('ACCEPTED'); raise SystemExit(0)\n"
+        )
+>       res = _run(["probe"], code)
+
+tests/test_r11_p0_poison.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_r11_p0_poison.py:54: in _run
+    return subprocess.run([sys.executable, "-c", code], cwd=REPO, env=env, argv=argv,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = 300, check = False
+popenargs = (['/home/dgut/pusht_runtime/venv_oft/bin/python', '-c', "import sys, json\nsys.argv = ['probe']\nimport r42_adapter as....R42Error as e:\n    print('REJECTED', str(e)[:120]); raise SystemExit(3)\nprint('ACCEPTED'); raise SystemExit(0)\n"],)
+kwargs = {'cwd': '/home/T7/ojh/robot_actual/r11', 'env': {'SHELL': '/bin/bash', 'LANGUAGE': 'en', 'LC_ADDRESS': 'zh_CN.UTF-8', 'LC_NAME': 'zh_CN.UTF-8', ...}, 'argv': ['probe'], 'text': True, ...}
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+>       with Popen(*popenargs, **kwargs) as process:
+E       TypeError: Popen.__init__() got an unexpected keyword argument 'argv'
+
+/usr/lib/python3.10/subprocess.py:503: TypeError
+________________ test_arx_14d_runtime_is_accepted_and_recorded _________________
+
+    @pytest.mark.skipif(not HAS_PRISMATIC, reason="prismatic runtime not installed here")
+    def test_arx_14d_runtime_is_accepted_and_recorded():
+        code = (
+            "import sys, json\n"
+            "sys.argv = ['run', 'arx_x5_push_T']\n"
+            "import r42_adapter as R\n"
+            "obs = R.assert_runtime_contract()\n"
+            "print(json.dumps(obs, sort_keys=True))\n"
+        )
+>       res = _run(["run", "arx_x5_push_T"], code)
+
+tests/test_r11_p0_poison.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_r11_p0_poison.py:54: in _run
+    return subprocess.run([sys.executable, "-c", code], cwd=REPO, env=env, argv=argv,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = 300, check = False
+popenargs = (['/home/dgut/pusht_runtime/venv_oft/bin/python', '-c', "import sys, json\nsys.argv = ['run', 'arx_x5_push_T']\nimport r42_adapter as R\nobs = R.assert_runtime_contract()\nprint(json.dumps(obs, sort_keys=True))\n"],)
+kwargs = {'cwd': '/home/T7/ojh/robot_actual/r11', 'env': {'SHELL': '/bin/bash', 'LANGUAGE': 'en', 'LC_ADDRESS': 'zh_CN.UTF-8', 'LC_NAME': 'zh_CN.UTF-8', ...}, 'argv': ['run', 'arx_x5_push_T'], 'text': True, ...}
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+>       with Popen(*popenargs, **kwargs) as process:
+E       TypeError: Popen.__init__() got an unexpected keyword argument 'argv'
+
+/usr/lib/python3.10/subprocess.py:503: TypeError
+_____________ test_r42_sources_avoid_prismatic_dimension_defaults ______________
+
+    def test_r42_sources_avoid_prismatic_dimension_defaults():
+        missing = [p for p in R42_SOURCES if not os.path.isfile(os.path.join(REPO, p))]
+>       assert not missing, "R42 sources not implemented yet: %s" % missing
+E       AssertionError: R42 sources not implemented yet: ['code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py', 'training/r42_train_contract.py', 'training/r11_train_pushT_r42.py']
+E       assert not ['code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py', 'training/r42_train_contract.py', 'training/r11_train_pushT_r42.py']
+
+tests/test_r11_p0_poison.py:106: AssertionError
+_______________ test_projector_width_guard_rejects_legacy_widths _______________
+
+    def test_projector_width_guard_rejects_legacy_widths():
+        for width in (7, 8, 14, 28, 80):
+            with pytest.raises(R.R42Error):
+>               R.assert_projector_width(width, expected=42)
+E               AttributeError: module 'r42_adapter' has no attribute 'assert_projector_width'
+
+tests/test_r11_p0_poison.py:119: AttributeError
+_______________ test_original_metadata_fields_are_still_required _______________
+
+    def test_original_metadata_fields_are_still_required():
+        assert set(ORIGINAL_19).issubset(set(R.REQUIRED_METADATA))
+>       assert "normalizer" in R.REQUIRED_METADATA
+E       AssertionError: assert 'normalizer' in ('task_id', 'base_model_sha256', 'lora_sha256', 'projector_sha256', 'proprio_dim', 'proprio_layout', ...)
+E        +  where ('task_id', 'base_model_sha256', 'lora_sha256', 'projector_sha256', 'proprio_dim', 'proprio_layout', ...) = R.REQUIRED_METADATA
+
+tests/test_r11_p0_metadata.py:62: AssertionError
+______________________ test_missing_normalizer_is_refused ______________________
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    def test_missing_normalizer_is_refused(frozen):
+        sha = "b" * 64
+        nb = np.load(os.path.join(REPO, "data", "push_T_bounds.npz"))
+        with pytest.raises(R.R42Error):
+>           R.build_metadata("push_T", sha, sha, sha, sha, sha, train_steps=0, seed=0,
+                             gripper_policy=frozen["gripper_policy"],
+                             safety_limits={"amin": nb["amin"].tolist(), "amax": nb["amax"].tolist()},
+                             normalizer=None)
+E           TypeError: build_metadata() got an unexpected keyword argument 'normalizer'
+
+tests/test_r11_p0_metadata.py:96: TypeError
+_________________ test_legacy_80_episode_quantiles_are_refused _________________
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    def test_legacy_80_episode_quantiles_are_refused(frozen):
+        with pytest.raises(R.R42Error):
+>           R.normalizer_payload(
+                normalization_mode=frozen["normalization_mode"], pmin=frozen["pmin"],
+                pmax=frozen["pmax"], q01=frozen["q01"], q99=frozen["q99"],
+                v_scale=frozen["v_scale"], a_scale=frozen["a_scale"],
+                motion_quantile=frozen["motion_quantile"], n_train_episodes=80,
+                n_dev_episodes_excluded=0)
+E           AttributeError: module 'r42_adapter' has no attribute 'normalizer_payload'
+
+tests/test_r11_p0_metadata.py:104: AttributeError
+____________ test_legacy_positional_motion_normalisation_is_refused ____________
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    def test_legacy_positional_motion_normalisation_is_refused(frozen):
+        with pytest.raises(R.R42Error):
+>           R.normalizer_payload(
+                normalization_mode="legacy_position", pmin=frozen["pmin"], pmax=frozen["pmax"],
+                q01=frozen["q01"], q99=frozen["q99"], v_scale=None, a_scale=None,
+                motion_quantile=None, n_train_episodes=64, n_dev_episodes_excluded=16)
+E           AttributeError: module 'r42_adapter' has no attribute 'normalizer_payload'
+
+tests/test_r11_p0_metadata.py:114: AttributeError
+_________________________ test_q01_q99_must_be_ordered _________________________
+
+frozen = {'proprio_mode': 'svacc', 'proprio_dim': 42, 'normalization_mode': 'signed_motion', 'pmin': [-1.2448238134384155, -7.699453999521211e-05, 1.4398613808702345e-16, -1.2743571996688843, -0.6213664412498474, -0.9762032628059387, ...], ...}
+
+    def test_q01_q99_must_be_ordered(frozen):
+        bad = list(frozen["q01"])
+        bad[0] = frozen["q99"][0] + 1.0
+        with pytest.raises(R.R42Error):
+>           R.normalizer_payload(
+                normalization_mode=frozen["normalization_mode"], pmin=frozen["pmin"],
+                pmax=frozen["pmax"], q01=bad, q99=frozen["q99"], v_scale=frozen["v_scale"],
+                a_scale=frozen["a_scale"], motion_quantile=frozen["motion_quantile"],
+                n_train_episodes=64, n_dev_episodes_excluded=16)
+E           AttributeError: module 'r42_adapter' has no attribute 'normalizer_payload'
+
+tests/test_r11_p0_metadata.py:159: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_r11_p0_codec.py::test_decode_is_bit_equal_to_action_codec_denormalize
+FAILED tests/test_r11_p0_codec.py::test_encode_decode_roundtrip_returns_the_same_bin
+FAILED tests/test_r11_p0_codec.py::test_boundaries_clip_to_extreme_bins - Ass...
+FAILED tests/test_r11_p0_codec.py::test_prompt_gets_the_trailing_space_token
+FAILED tests/test_r11_p0_codec.py::test_build_labels_matches_the_legacy_entrypoint
+FAILED tests/test_r11_p0_poison.py::test_libero_defaults_are_rejected - TypeE...
+FAILED tests/test_r11_p0_poison.py::test_arx_14d_runtime_is_accepted_and_recorded
+FAILED tests/test_r11_p0_poison.py::test_r42_sources_avoid_prismatic_dimension_defaults
+FAILED tests/test_r11_p0_poison.py::test_projector_width_guard_rejects_legacy_widths
+FAILED tests/test_r11_p0_metadata.py::test_original_metadata_fields_are_still_required
+FAILED tests/test_r11_p0_metadata.py::test_missing_normalizer_is_refused - Ty...
+FAILED tests/test_r11_p0_metadata.py::test_legacy_80_episode_quantiles_are_refused
+FAILED tests/test_r11_p0_metadata.py::test_legacy_positional_motion_normalisation_is_refused
+FAILED tests/test_r11_p0_metadata.py::test_q01_q99_must_be_ordered - Attribut...
+ERROR tests/test_r11_p0_deploy.py
+ERROR tests/test_r11_p0_train_assert.py
+ERROR tests/test_r11_p0_metadata.py::test_normalizer_payload_is_complete_and_sha_stable
+ERROR tests/test_r11_p0_metadata.py::test_metadata_carries_normalizer_and_its_sha
+ERROR tests/test_r11_p0_metadata.py::test_tampered_normalizer_sha_is_refused
+ERROR tests/test_r11_p0_metadata.py::test_roundtrip_decode_is_bit_identical
+ERROR tests/test_r11_p0_metadata.py::test_decode_with_metadata_rejects_bad_bins
+14 failed, 7 passed, 7 errors in 6.48s

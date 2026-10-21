@@ -1,0 +1,175 @@
+{
+ "mission_id": "RD-R11-R16-DELEGATION-20261021-01",
+ "spec": {
+  "execution_spec": "missions/R11_R16_DELEGATED_EXECUTION_SPEC.md",
+  "budget_and_gates": "mission/R11_R16_DELEGATED_BUDGET_AND_GATES.json",
+  "spec_sha": "83b579415588e60572768ec0e11f5868520fa695",
+  "read_only_baseline": "main@329614f54d3090b9b6ab120855ba50fbc93bdd1e"
+ },
+ "executed_at_utc": "2026-10-20T19:20Z..2026-10-20T20:05Z",
+ "machine": {
+  "host": "jxxy (172.31.68.251)",
+  "gpu": "single RTX A6000 48GB",
+  "driver": "580",
+  "python": "/home/dgut/pusht_runtime/venv_oft/bin/python (3.10.12)",
+  "torch": "2.4.1+cu121",
+  "transformers": "4.40.2",
+  "shared_gpu_process_respected": "pid 3111650 /isaac-sim/kit/kit (2490 MiB) - never touched"
+ },
+ "branches": [
+  {
+   "name": "feature/r11-p0-closeout",
+   "base": "r11/p0-audit@8a444d1",
+   "head": "7186afe",
+   "purpose": "R11 P0 closeout + R13 smoke + R14 overfit entry",
+   "pushed": true
+  },
+  {
+   "name": "r11/p0-audit",
+   "base": "r10/cpu-gates",
+   "head": "8a444d1",
+   "purpose": "unchanged historical base"
+  }
+ ],
+ "draft_pr": {
+  "status": "NOT_CREATED_NO_CREDENTIAL",
+  "reason": "no GitHub API credential (no gh CLI, ~/.netrc only holds a wandb machine token); the spec forbids advertising a /pull/new/ URL as a PR, so none is claimed",
+  "branch_url": "https://github.com/jho887891-sudo/robo/tree/feature/r11-p0-closeout",
+  "action_needed": "research lead supplies a token or opens the Draft PR from the pushed branch"
+ },
+ "budgets": {
+  "aggregate": {
+   "cap_s": 115200,
+   "used_s": 1027.5,
+   "used_gpu_hours": 0.2854
+  },
+  "buckets": [
+   {
+    "id": "COLLECTOR",
+    "cap_s": 14400,
+    "used_s": 0,
+    "status": "BLOCKED_EXPERT",
+    "why": "no executable expert-trajectory source for Push-T in the RoboDojo/Isaac Sim stack; refusing to wrap random/zero trajectories as expert"
+   },
+   {
+    "id": "R13_7B_ZERO_STEP",
+    "cap_s": 1800,
+    "used_s": 169.7,
+    "status": "VERIFIED_GPU_ZERO_UPDATE",
+    "breakdown": "70.0 s crashed attempt 1 (assert_projector_width torch.Size) + 99.7 s verified run"
+   },
+   {
+    "id": "R14_TRAIN_OVERFIT",
+    "cap_s": 3600,
+    "used_s": 857.8,
+    "status": "OVERFIT_SIGNAL_PASS"
+   },
+   {
+    "id": "R15_TRAIN_FORMAL",
+    "cap_s": 50400,
+    "used_s": 0,
+    "status": "NOT_STARTED_BUDGET",
+    "why": "session ended before the staged 300/1000/3000 runs; entry, gates and ledger are implemented and R13+R14 gates are green"
+   },
+   {
+    "id": "R16_SIM_DEV",
+    "cap_s": 14400,
+    "used_s": 0,
+    "status": "BLOCKED_UPSTREAM",
+    "why": "needs an R15 checkpoint"
+   },
+   {
+    "id": "R16_SIM_FINAL",
+    "cap_s": 21600,
+    "used_s": 0,
+    "status": "BLOCKED_UPSTREAM",
+    "why": "needs a locked R15 checkpoint, a DEV progress gate and 30 pre-registered seeds"
+   },
+   {
+    "id": "TWO_TASK_PILOT",
+    "cap_s": 7200,
+    "used_s": 0,
+    "status": "NOT_TRIGGERED",
+    "why": "M1 has no closed-loop result yet, so the gate for this bucket is not met"
+   },
+   {
+    "id": "RESERVE",
+    "cap_s": 1800,
+    "used_s": 0,
+    "status": "UNTOUCHED"
+   }
+  ]
+ },
+ "steps": {
+  "formal_optimizer_steps_used": 0,
+  "formal_steps_cap": 3000,
+  "overfit_optimizer_steps_used": 100,
+  "overfit_steps_cap": 100,
+  "r14_and_r15_counted_separately": true
+ },
+ "isolation_proof": {
+  "train_episodes": 64,
+  "dev_episodes": 16,
+  "old_holdout_episodes": 20,
+  "dev_used_for_gradients": false,
+  "new_final_used": false,
+  "train_dev_overlap": "refused by r9_trainer_contract.select_splits()",
+  "normalizer_source": "frozen_contract_64train.json (64 TRAIN, 16 DEV excluded), sha 2ab68fd3...",
+  "split_sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2"
+ },
+ "stages": [
+  {
+   "id": "P0",
+   "status": "VERIFIED_CPU",
+   "detail": "5 items red->green; suite 250 passed / 3 skipped; 0 GPU seconds"
+  },
+  {
+   "id": "R11_COLLECTOR",
+   "status": "BLOCKED_EXPERT",
+   "detail": "discovery only, see evidence/r11_collector_discovery"
+  },
+  {
+   "id": "R13",
+   "status": "VERIFIED_GPU_ZERO_UPDATE",
+   "detail": "optimizer_steps=0, 99.7 s, peak 22.16 GB"
+  },
+  {
+   "id": "R14",
+   "status": "OVERFIT_SIGNAL_PASS",
+   "detail": "100 steps, CE 14.814->0.125 on 32 fixed TRAIN frames"
+  },
+  {
+   "id": "R15",
+   "status": "NOT_STARTED",
+   "detail": "implementation complete, budget untouched"
+  },
+  {
+   "id": "R16",
+   "status": "NOT_STARTED",
+   "detail": "difficult to reach: needs R15"
+  }
+ ],
+ "failures": [
+  {
+   "id": "F1",
+   "stage": "R13 attempt 1",
+   "cause": "assert_projector_width did not accept torch.Size",
+   "cost_s": 70,
+   "fix": "accept tuple/list/torch.Size/2-D tensor/dict",
+   "booked": true
+  },
+  {
+   "id": "F2",
+   "stage": "git push",
+   "cause": "git add -A swept runs/ (462 MB LoRA + 65 MB projector) into the commit",
+   "cost_s": 0,
+   "fix": "reset the commit, gitignore runs/ *.safetensors *.pt, re-push",
+   "booked": false
+  }
+ ],
+ "risks_open": [
+  "the 20 new offline FINAL events and the 30 sim FINAL seeds are entirely unused",
+  "R14 overfit is a memorisation test on 32 frames, not evidence of generalisation",
+  "no DEV evaluation or closed-loop rollout has been executed yet"
+ ]
+}

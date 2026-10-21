@@ -1,0 +1,23 @@
+.........................................sss....................... [ 26%]
+........................................................................ [ 54%]
+........................................................................ [ 83%]
+..........................................                               [100%]
+=============================== warnings summary ===============================
+tests/test_r8_vla_adapter.py::TestProjectorClass::test_real_projector_width_and_params
+  /home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/wandb/analytics/sentry.py:90: SentryHubDeprecationWarning: `sentry_sdk.Hub` is deprecated and will be removed in a future major release. Please consult our 1.x to 2.x migration guide for details on how to migrate `Hub` usage to the new API: https://docs.sentry.io/platforms/python/migration/1.x-to-2.x
+    self.hub = sentry_sdk.Hub(client)
+
+tests/test_r8_vla_adapter.py::TestProjectorClass::test_real_projector_width_and_params
+  /home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): No module named 'tensorflow_datasets'
+    _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+
+tests/test_r8_vla_adapter.py::TestProjectorClass::test_real_projector_width_and_params
+  /home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py:6: UserWarning: RLDS stack unavailable (inference-only mode): cannot import name 'make_interleaved_dataset' from 'prismatic.vla.datasets.rlds' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/rlds/__init__.py)
+    _w.warn("RLDS stack unavailable (inference-only mode): %s" % _e)
+
+tests/test_r8_vla_adapter.py::TestProjectorClass::test_real_projector_width_and_params
+  /home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/__init__.py:6: UserWarning: prismatic.vla.materialize unavailable (inference-only mode): cannot import name 'EpisodicRLDSDataset' from 'prismatic.vla.datasets' (/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/policy/OpenVLA_OFT/openvla_oft/prismatic/vla/datasets/__init__.py)
+    _w.warn("prismatic.vla.materialize unavailable (inference-only mode): %s" % _e)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+250 passed, 3 skipped, 4 warnings, 5 subtests passed in 45.30s

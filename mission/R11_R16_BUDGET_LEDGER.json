@@ -1,0 +1,246 @@
+{
+ "schema_version": "1.0",
+ "mission_id": "RD-R11-R16-DELEGATION-20261021-01",
+ "spec_sha": "83b579415588e60572768ec0e11f5868520fa695",
+ "aggregate": {
+  "cap_s": 115200,
+  "new_gpu_seconds_used": 1027.5
+ },
+ "results": {
+  "formal_optimizer_steps_used": 0,
+  "overfit_optimizer_steps_used": 100,
+  "collector_attempts": 0,
+  "new_valid_episodes": 0,
+  "dev_rollouts": 0,
+  "sim_final_rollouts": 0,
+  "first_gpu_job_utc": null,
+  "last_gpu_job_utc": null
+ },
+ "buckets": {
+  "COLLECTOR": {
+   "cap_s": 14400,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R13_7B_ZERO_STEP": {
+   "cap_s": 1800,
+   "seconds_used": 169.7,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R14_TRAIN_OVERFIT": {
+   "cap_s": 3600,
+   "seconds_used": 857.8,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R15_TRAIN_FORMAL": {
+   "cap_s": 50400,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R16_SIM_DEV": {
+   "cap_s": 14400,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  },
+  "R16_SIM_FINAL": {
+   "cap_s": 21600,
+   "seconds_used": 0,
+   "status": "BLOCKED",
+   "jobs": []
+  },
+  "TWO_TASK_PILOT": {
+   "cap_s": 7200,
+   "seconds_used": 0,
+   "status": "BLOCKED",
+   "jobs": []
+  },
+  "RESERVE": {
+   "cap_s": 1800,
+   "seconds_used": 0,
+   "status": "PLANNED",
+   "jobs": []
+  }
+ },
+ "events": [
+  {
+   "utc": "2026-10-20T19:36:50Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "start",
+   "seconds": 0.0,
+   "note": "runs/r13_smoke_20261020T193647Z",
+   "extra": {
+    "budget_s": 1500.0
+   }
+  },
+  {
+   "utc": "2026-10-20T19:36:50Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "model_build_begin",
+   "seconds": 0.0,
+   "note": "",
+   "extra": {}
+  },
+  {
+   "utc": "2026-10-20T19:37:57Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "abort",
+   "seconds": 70.0,
+   "note": "attempt 1 crashed on assert_projector_width(torch.Size) after the 7B load; real wall clock booked conservatively, no evidence produced",
+   "extra": {
+    "attempt": 1,
+    "stage": "post_model_build"
+   }
+  },
+  {
+   "utc": "2026-10-20T19:39:15Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "start",
+   "seconds": 0.0,
+   "note": "runs/r13_smoke_20261020T193912Z",
+   "extra": {
+    "budget_s": 1400.0
+   }
+  },
+  {
+   "utc": "2026-10-20T19:39:15Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "model_build_begin",
+   "seconds": 0.0,
+   "note": "",
+   "extra": {}
+  },
+  {
+   "utc": "2026-10-20T19:40:13Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "model_build_done",
+   "seconds": 0.0,
+   "note": "",
+   "extra": {}
+  },
+  {
+   "utc": "2026-10-20T19:40:17Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "forward_backward_done",
+   "seconds": 0.0,
+   "note": "",
+   "extra": {}
+  },
+  {
+   "utc": "2026-10-20T19:40:23Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "inference_done",
+   "seconds": 0.0,
+   "note": "",
+   "extra": {}
+  },
+  {
+   "utc": "2026-10-20T19:40:55Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "end",
+   "seconds": 99.7,
+   "note": "VERIFIED_GPU_ZERO_UPDATE",
+   "extra": {
+    "wall_clock_s": 99.7
+   }
+  },
+  {
+   "utc": "2026-10-20T20:00:30Z",
+   "bucket": "R14_TRAIN_OVERFIT",
+   "event": "start",
+   "seconds": 0.0,
+   "note": "RECONSTRUCTED from evidence/r14_overfit_20261020T200030Z/raw.log (the live ledger was clobbered by a mirror push after this run)",
+   "extra": {
+    "reconstructed": true
+   }
+  },
+  {
+   "utc": "2026-10-20T19:48:55Z",
+   "bucket": "R14_TRAIN_OVERFIT",
+   "event": "milestone",
+   "seconds": 0.0,
+   "note": "step 0 ce=14.8141 lora=69eb7d66a977c317",
+   "extra": {
+    "reconstructed": true,
+    "step": 0
+   }
+  },
+  {
+   "utc": "2026-10-20T19:51:23Z",
+   "bucket": "R14_TRAIN_OVERFIT",
+   "event": "milestone",
+   "seconds": 0.0,
+   "note": "step 20 ce=1.9080 lora=399510fdbe359771",
+   "extra": {
+    "reconstructed": true,
+    "step": 20
+   }
+  },
+  {
+   "utc": "2026-10-20T19:53:35Z",
+   "bucket": "R14_TRAIN_OVERFIT",
+   "event": "milestone",
+   "seconds": 0.0,
+   "note": "step 40 ce=1.3046 lora=6d2cbeaa2707c237",
+   "extra": {
+    "reconstructed": true,
+    "step": 40
+   }
+  },
+  {
+   "utc": "2026-10-20T19:55:56Z",
+   "bucket": "R14_TRAIN_OVERFIT",
+   "event": "milestone",
+   "seconds": 0.0,
+   "note": "step 60 ce=0.5410 lora=3a5e3d7eb7fad0b0",
+   "extra": {
+    "reconstructed": true,
+    "step": 60
+   }
+  },
+  {
+   "utc": "2026-10-20T19:58:06Z",
+   "bucket": "R14_TRAIN_OVERFIT",
+   "event": "milestone",
+   "seconds": 0.0,
+   "note": "step 80 ce=0.3798 lora=f0b20baa1306bbb6",
+   "extra": {
+    "reconstructed": true,
+    "step": 80
+   }
+  },
+  {
+   "utc": "2026-10-20T20:00:23Z",
+   "bucket": "R14_TRAIN_OVERFIT",
+   "event": "milestone",
+   "seconds": 0.0,
+   "note": "step 100 ce=0.1250 lora=e17639702002e0fc",
+   "extra": {
+    "reconstructed": true,
+    "step": 100
+   }
+  },
+  {
+   "utc": "2026-10-20T20:00:30Z",
+   "bucket": "R14_TRAIN_OVERFIT",
+   "event": "end",
+   "seconds": 857.8,
+   "note": "OVERFIT_SIGNAL_PASS (reconstructed from evidence/r14_overfit_20261020T200030Z/raw.log)",
+   "extra": {
+    "reconstructed": true,
+    "steps": 100,
+    "peak_mem_gb": 23.046,
+    "source": "evidence/r14_overfit_20261020T200030Z/raw.log"
+   }
+  }
+ ],
+ "notes": [
+  "Every bucket cap and the aggregate cap apply simultaneously; unused buckets are not reassignable.",
+  "Booked by training/r11_train_pushT_r42.py before/after each GPU job; a negative balance aborts.",
+  "R14 booking was reconstructed from evidence/r14_overfit_*/raw.log after a mirror push overwrote the live ledger with the initial template; the R13 booking and its event log were copied from the untouched ledger_after_r13.json snapshot."
+ ]
+}

@@ -1,3 +1,7 @@
-__pycache__/
+logs/
+*.pt
 *.pyc
+__pycache__/
 *.pyo
+runs/
+*.safetensors
