@@ -1,0 +1,30 @@
+# OpenVLA_R42 - 42D [S,V,Acc] velocity-residual Push-T policy (R16 deployment path)
+#
+# Served through XPolicyLab/setup_policy_server.py (protocol: ws) or directly through
+# OpenVLA_R42/r42_serve.py.  The client side only needs deploy.py and this file's protocol.
+policy_name: OpenVLA_R42
+protocol: ws
+host: 0.0.0.0
+port: 19000
+bench_name: null
+task_name: push_T
+env_cfg_type: arx_x5
+action_type: joint
+seed: 0
+eval_batch: false
+num_open_loop_steps: 1
+result_dir: "./results/openvla-r42/"
+obs_transform_pipeline: "xspark-v1.0"
+
+# ---- 42D policy (R15 stage checkpoint; r42_metadata.json is bridged if absent) ----------
+checkpoint_dir: /home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300
+base_model_path: /home/dgut/pusht_runtime/model_cache/openvla-7b-pristine
+adapter_dir: null
+proprio_projector_path: null
+device: cuda
+control_hz: 25
+expected_hw: [480, 640, 3]
+allow_prompt_override: false
+
+# The single instruction this checkpoint was trained on (training/r11_train_pushT_r42.py:52).
+prompt: "Push the T-shaped block to align it precisely with the gray T-shaped pad."
