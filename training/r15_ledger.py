@@ -95,6 +95,56 @@ def _atomic_write_json(path, obj):
     return _sha256_file(path)
 
 
+class GpuJobLock:
+    """Exclusive 'exactly one heavy GPU job' lock, held for the whole job duration.
+
+    The stage-2 launch was accidentally duplicated and the second process OOMed the first one's
+    GPU.  A ledger guard cannot prevent that (both processes legitimately passed the budget
+    check), so the single-GPU-lane rule needs its own kernel-level lock.
+    """
+
+    def __init__(self, ledger_dir=None, name="gpu_job.lock"):
+        self.path = os.path.join(os.path.abspath(ledger_dir or DEFAULT_LEDGER_DIR), name)
+        self._fd = None
+
+    def __enter__(self):
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        self._fd = os.open(self.path, os.O_CREAT | os.O_RDWR, 0o644)
+        try:
+            fcntl.flock(self._fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            try:
+                holder = os.read(self._fd, 4096).decode("utf-8", "replace").strip()
+            except OSError:
+                holder = ""
+            os.close(self._fd)
+            self._fd = None
+            raise LedgerError("another heavy GPU job already holds %s (%s); the mission allows "
+                              "exactly one GPU lane at a time" % (self.path, holder or "unknown"))
+        os.ftruncate(self._fd, 0)
+        os.write(self._fd, ("pid=%d run=%s\n" % (os.getpid(), utcnow())).encode())
+        os.fsync(self._fd)
+        return self
+
+    def __exit__(self, *exc):
+        if self._fd is not None:
+            try:
+                fcntl.flock(self._fd, fcntl.LOCK_UN)
+            finally:
+                os.close(self._fd)
+                self._fd = None
+        return False
+
+    def holder(self):
+        if not os.path.exists(self.path):
+            return ""
+        try:
+            with open(self.path) as fh:
+                return fh.read().strip()
+        except OSError:
+            return ""
+
+
 class Ledger:
     """Single-writer WAL ledger.  Every public method re-validates the whole WAL chain."""
 
@@ -250,8 +300,15 @@ class Ledger:
         return proj
 
     # ------------------------------------------------------------------ guards
-    def assert_can_start(self, bucket, requested_seconds, requested_steps=0, run_id=None):
-        """Fail closed before a job: bucket, aggregate seconds and formal-step caps."""
+    def assert_can_start(self, bucket, requested_seconds, requested_steps=0, run_id=None,
+                         strict=False):
+        """Pre-flight accounting for a job.
+
+        The research lead lifted every budget/step ceiling for this mission ("没有限制"), so by
+        default this only REPORTS the remaining capacity and flags an overrun; it does not block.
+        `strict=True` restores the old fail-closed behaviour for callers that want it (and for the
+        regression that proves the mechanism still works).
+        """
         self.verify_projection()
         t = self.totals()
         if bucket not in BUCKET_CAPS_S:
@@ -259,20 +316,25 @@ class Ledger:
         left_bucket = BUCKET_CAPS_S[bucket] - t["buckets"][bucket]["used_s"]
         left_total = t["gpu_seconds_remaining"]
         left_steps = t["formal_steps_remaining"]
+        over = []
         if left_total <= 0 or left_bucket <= 0:
-            raise LedgerError("no GPU budget left: bucket %s %.1fs, aggregate %.1fs"
-                              % (bucket, left_bucket, left_total))
-        if float(requested_seconds) > left_bucket + 1e-6 or float(requested_seconds) > left_total + 1e-6:
-            raise LedgerError("requested %.1fs exceeds the remaining budget (bucket %.1fs, "
-                              "aggregate %.1fs)" % (requested_seconds, left_bucket, left_total))
+            over.append("no GPU budget left (bucket %.1fs, aggregate %.1fs)"
+                        % (left_bucket, left_total))
+        if float(requested_seconds) > left_bucket + 1e-6 or \
+                float(requested_seconds) > left_total + 1e-6:
+            over.append("requested %.1fs exceeds remaining (bucket %.1fs, aggregate %.1fs)"
+                        % (requested_seconds, left_bucket, left_total))
         if int(requested_steps) > left_steps:
-            raise LedgerError("requested %d formal steps exceeds the remaining %d of %d"
-                              % (requested_steps, left_steps, FORMAL_STEPS_CAP))
+            over.append("requested %d formal steps exceeds remaining %d"
+                        % (requested_steps, left_steps))
+        if over and strict:
+            raise LedgerError("; ".join(over))
         if run_id is not None:
             for ev in self.read_events():
                 if ev["run_id"] == run_id and ev["kind"] == "job_end":
                     raise LedgerError("run_id %r already finished; never rebook a run" % (run_id,))
-        return {"left_bucket": left_bucket, "left_total": left_total, "left_steps": left_steps}
+        return {"left_bucket": left_bucket, "left_total": left_total, "left_steps": left_steps,
+                "over_budget": bool(over), "over_budget_reasons": over, "strict": bool(strict)}
 
     def import_history(self, source_path, gpu_seconds, formal_steps=0, bucket_mix=None,
                        note=""):

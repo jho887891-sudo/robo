@@ -115,10 +115,16 @@ def test_start_guard_checks_bucket_total_and_steps(led):
                    formal_steps=10, bucket="R15_TRAIN_FORMAL")
         ok = led.assert_can_start("R15_TRAIN_FORMAL", 3600.0, requested_steps=2990, run_id="run-b")
         assert ok["left_steps"] == L.FORMAL_STEPS_CAP - 10
+        assert ok["over_budget"] is False
+        # the research lead lifted the ceilings: the default path only reports, never blocks
+        soft = led.assert_can_start("R15_TRAIN_FORMAL", L.BUCKET_CAPS_S["R15_TRAIN_FORMAL"] + 1)
+        assert soft["over_budget"] is True and soft["over_budget_reasons"]
+        # strict mode keeps the mechanism honest when a caller wants a hard gate
         with pytest.raises(L.LedgerError):
-            led.assert_can_start("R15_TRAIN_FORMAL", L.BUCKET_CAPS_S["R15_TRAIN_FORMAL"] + 1)
+            led.assert_can_start("R15_TRAIN_FORMAL", L.BUCKET_CAPS_S["R15_TRAIN_FORMAL"] + 1,
+                                 strict=True)
         with pytest.raises(L.LedgerError):
-            led.assert_can_start("R15_TRAIN_FORMAL", 10.0, requested_steps=3000)
+            led.assert_can_start("R15_TRAIN_FORMAL", 10.0, requested_steps=3000, strict=True)
         with pytest.raises(L.LedgerError):
             led.assert_can_start("NOT_A_BUCKET", 10.0)
 
@@ -141,8 +147,12 @@ def test_formal_step_cap_is_enforced_end_to_end(led):
         t = led.totals()
     assert t["formal_steps_used"] == 3000
     with led:
+        # reporting is still accurate past the nominal cap ...
+        rep = led.assert_can_start("R15_TRAIN_FORMAL", 1.0, requested_steps=1)
+        assert rep["left_steps"] == 0
+        # ... but only strict mode refuses
         with pytest.raises(L.LedgerError):
-            led.assert_can_start("R15_TRAIN_FORMAL", 1.0, requested_steps=1)
+            led.assert_can_start("R15_TRAIN_FORMAL", 1.0, requested_steps=1, strict=True)
 
 
 def test_second_writer_is_blocked(led, monkeypatch):
@@ -153,6 +163,34 @@ def test_second_writer_is_blocked(led, monkeypatch):
         with pytest.raises(L.LedgerError):
             with inner:
                 pass
+
+
+def test_second_heavy_gpu_job_is_refused(led):
+    """A duplicated launch must be refused outright, not discovered via CUDA OOM."""
+    first = L.GpuJobLock(led.dir)
+    first.__enter__()
+    try:
+        second = L.GpuJobLock(led.dir)
+        with pytest.raises(L.LedgerError):
+            second.__enter__()
+        assert "pid=" in first.holder()
+    finally:
+        first.__exit__(None, None, None)
+    third = L.GpuJobLock(led.dir)
+    third.__enter__()
+    third.__exit__(None, None, None)
+
+
+def test_abort_is_booked_into_the_wal(led):
+    with led:
+        led.append("run-a", "job_begin", payload={"global_step": 0}, bucket="R15_TRAIN_FORMAL")
+        led.append("run-a", "abort", bucket="R15_TRAIN_FORMAL",
+                   payload={"reason": "OutOfMemoryError"}, gpu_seconds=55.0, formal_steps=0)
+        t = led.totals()
+    assert t["gpu_seconds_used"] == pytest.approx(55.0)
+    assert t["formal_steps_used"] == 0
+    kinds = [e["kind"] for e in led.read_events()]
+    assert kinds == ["job_begin", "abort"]
 
 
 def test_projection_is_atomic_and_hash_linked(led):

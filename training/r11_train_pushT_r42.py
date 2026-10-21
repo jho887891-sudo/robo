@@ -50,6 +50,7 @@ for _p in (OFT, os.path.join(OFT, "vla-scripts")):
     if os.path.isdir(_p) and _p not in sys.path:
         sys.path.insert(0, _p)
 INSTR = "Push the T-shaped block to align it precisely with the gray T-shaped pad."
+_R15_GPU_LOCK = None      # module-level holder for the single-GPU-lane flock
 
 
 def log(msg):
@@ -603,6 +604,11 @@ def run_r15(args):
         raise SystemExit("output directory must be NEW and empty: %s" % args.out)
     run_id = args.run_id or ("r15-%d-%s" % (target, datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")))
     gpu_est = float(need_steps) * float(args.est_seconds_per_step) + float(args.time_margin)
+    # exactly one heavy GPU lane: held for the whole run, released by the kernel on process exit
+    global _R15_GPU_LOCK
+    _R15_GPU_LOCK = L15.GpuJobLock(args.ledger_dir)
+    _R15_GPU_LOCK.__enter__()
+    log("gpu lane lock acquired: %s" % _R15_GPU_LOCK.path)
     with ledger:
         guard = ledger.assert_can_start(args.bucket, gpu_est, requested_steps=need_steps,
                                         run_id=run_id)
@@ -1066,7 +1072,20 @@ def main():
         return 0
     except BaseException as exc:
         # A crash still consumed real GPU seconds: book them instead of leaving a silent debt.
-        ledger_book(args.bucket, time.time() - t_start, "abort", note=repr(exc)[:300])
+        if getattr(args, "r15", False):
+            try:
+                import r15_ledger as L15
+                rid = getattr(args, "run_id", "") or ("r15-aborted-%d" % os.getpid())
+                with L15.Ledger(getattr(args, "ledger_dir", None)) as led:
+                    led.append(rid, "abort", bucket=getattr(args, "bucket", "R15_TRAIN_FORMAL"),
+                               payload={"reason": type(exc).__name__,
+                                        "detail": repr(exc)[:400],
+                                        "note": "booked by the entry crash handler into the WAL"},
+                               gpu_seconds=max(0.0, time.time() - t_start), formal_steps=0)
+            except Exception:
+                pass
+        else:
+            ledger_book(args.bucket, time.time() - t_start, "abort", note=repr(exc)[:300])
         raise
 
 
