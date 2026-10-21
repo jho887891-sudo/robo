@@ -667,6 +667,19 @@ def load_eval_archive(path):
 # ------------------------------------------------------------------------------- evidence
 def evidence_skeleton(args, tasks, payload, prompts, mix, dev_frames, caps, data_contract,
                       start_global_step=0, prior_ce_curves=None):
+    """The evidence dict a run starts from.
+
+    prompts may be either the plain {task: instruction} mapping (what run() passes) or the richer
+    dict returned by assert_prompts_distinct(); both are accepted so the two call styles cannot
+    diverge into a KeyError at the first save point (that is exactly what happened on the first M2
+    launch: 'prompts' was looked up in a plain mapping).
+    """
+    if isinstance(prompts, dict) and "prompts" in prompts and "prompt_sha256" in prompts:
+        _prompts = dict(prompts["prompts"])
+        _prompt_sha = dict(prompts["prompt_sha256"])
+    else:
+        _prompts = dict(prompts or {})
+        _prompt_sha = {t: hashlib.sha256(_prompts[t].encode()).hexdigest() for t in tasks}
     return {
         "schema": SCHEMA_EVIDENCE,
         "run_id": None, "utc_start": utcnow(), "utc_end": None,
@@ -678,7 +691,7 @@ def evidence_skeleton(args, tasks, payload, prompts, mix, dev_frames, caps, data
         "start_global_step": int(start_global_step),
         "caps": caps,
         "task_mix": mix,
-        "prompts": prompts["prompts"], "prompt_sha256": prompts["prompt_sha256"],
+        "prompts": _prompts, "prompt_sha256": _prompt_sha,
         "include_task_token": bool(getattr(args, "include_task_token", False)),
         "normalizer_sha256": TN.normalizer_sha256(payload),
         "per_task_normalizer_sha256": {t: TN.sha256_json(payload["tasks"][t]) for t in tasks},
