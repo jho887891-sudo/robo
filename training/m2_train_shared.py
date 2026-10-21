@@ -92,6 +92,10 @@ DEFAULT_DEV_FRAMES_PER_TASK = 8
 N_ACTIONS = 14
 N_SUPERVISED = N_ACTIONS + 1                # 14 action tokens + STOP(2)
 DEFAULT_BUCKET = "TWO_TASK_PILOT"
+# The mission gives M2 its own <=20000 multi-task optimizer-step budget, independent of M1's 3000.
+# Only steps booked into these buckets count against it.
+M2_STEP_BUDGET = 20000
+M2_BUCKETS = frozenset({"TWO_TASK_PILOT", "RESERVE"})
 INSTR_TEMPLATE = "What action should the robot take to %s?"
 
 
@@ -898,10 +902,24 @@ def run(args):
 
     ledger = L15.Ledger(args.ledger_dir)
     with ledger:
-        guard = ledger.assert_can_start(args.bucket, gpu_est, requested_steps=need, run_id=run_id)
-        if int(guard["left_steps"]) < need:
-            raise M2TrainError("the ledger has only %d formal steps left but this stage needs %d"
-                               % (int(guard["left_steps"]), need))
+        # M2 has its OWN optimizer-step budget (<=20,000 multi-task steps per the mission) which is
+        # independent of the M1 3,000-step cap. assert_can_start reports the M1 remainder
+        # (3000 - executed), so gating on it refused a legitimate 2-task stage: the first real M2
+        # launch died with "the ledger has only 1336 formal steps left but this stage needs 2000".
+        # The M2 counter is the sum of formal steps booked into M2 buckets.
+        guard = ledger.assert_can_start(args.bucket, gpu_est, requested_steps=0, run_id=run_id)
+        tot = ledger.totals()
+        m2_used = sum(int(b["formal_steps"]) for name, b in tot["buckets"].items()
+                      if name in M2_BUCKETS)
+        if m2_used + need > M2_STEP_BUDGET:
+            raise M2TrainError(
+                "M2 optimizer-step budget exceeded: %d of %d used, this stage needs %d "
+                "(the M1 3000-step cap is a different budget and does not apply here)"
+                % (m2_used, M2_STEP_BUDGET, need))
+        guard["m2_steps_used_before"] = m2_used
+        guard["m2_step_budget"] = M2_STEP_BUDGET
+        guard["m2_buckets"] = sorted(M2_BUCKETS)
+        guard["m1_formal_steps_remaining_not_used_for_m2"] = int(guard["left_steps"])
         ledger.append(run_id, "job_begin", bucket=args.bucket, payload={
             "tasks": tasks, "target_global_step": int(args.target_global_step),
             "start_global_step": start_step, "steps_requested": need,
