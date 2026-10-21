@@ -28,7 +28,7 @@ def test_command_uses_the_official_client_and_records_joint_actions(tmp_path):
 
 def test_docker_runner_wraps_the_same_official_command():
     args = type("A", (), dict(root="/R", root_inner="/workspace/RoboDojo", docker="rd_setup",
-                              dataset="RoboDojo", task="push_T", env_cfg="arx_x5",
+                              docker_env=[], dataset="RoboDojo", task="push_T", env_cfg="arx_x5",
                               policy_name="OpenVLA_R42", host="127.0.0.1", port=19000, episodes=1,
                               seed=0, env_gpu="0", ckpt_label="step1000",
                               action_type="joint"))()
@@ -51,11 +51,38 @@ def test_result_parsing_reads_the_official_success_flags(tmp_path):
     assert sum(1 for e in entries if e["success"]) == 1
 
 
+def test_dev_budget_counts_observed_not_requested(tmp_path):
+    ledger = tmp_path / "l.jsonl"
+    # a crashed launch observed nothing -> must not consume budget
+    L.append_ledger(str(ledger), {"task": "push_T", "stage": 1, "episodes_requested": 1,
+                                  "episodes_observed": 0, "verdict": "NO_RESULT"})
+    assert L.episodes_used(L.load_ledger(str(ledger)), "push_T") == 0
+    # a real run consumes exactly what the official result contained
+    L.append_ledger(str(ledger), {"task": "push_T", "stage": 1, "episodes_requested": 1,
+                                  "episodes_observed": 1, "verdict": "OFFICIAL_FAILURE"})
+    assert L.episodes_used(L.load_ledger(str(ledger)), "push_T") == 1
+
+
+def test_docker_env_is_passed_through():
+    args = type("A", (), dict(root="/R", root_inner="/workspace/RoboDojo", docker="rd_setup",
+                              docker_env=["SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0",
+                                          "CUROBO_KERNEL_BACKEND=cuda_core"],
+                              dataset="RoboDojo", task="push_T", env_cfg="arx_x5",
+                              policy_name="OpenVLA_R42", host="127.0.0.1", port=19000, episodes=1,
+                              seed=0, env_gpu="0", ckpt_label="step1000",
+                              action_type="joint"))()
+    cmd = L.build_cmd(args)
+    assert cmd[:3] == ["docker", "exec", "-e"]
+    assert "SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0" in cmd
+    assert cmd[-4] == "rd_setup" and cmd[-3] == "bash" and cmd[-2] == "-lc"
+
+
 def test_dev_budget_is_cumulative_and_refused_past_the_cap(tmp_path):
     ledger = tmp_path / "l.jsonl"
-    L.append_ledger(str(ledger), {"task": "push_T", "stage": 3, "episodes_requested": 20})
+    L.append_ledger(str(ledger), {"task": "push_T", "stage": 3, "episodes_requested": 20,
+                                  "episodes_observed": 20, "verdict": "OFFICIAL_SUCCESS"})
     recs = L.load_ledger(str(ledger))
-    assert L.episodes_used(recs, "push_T") == 20
+    assert L.episodes_used(recs, "push_T") == 20  # observed, not requested
     assert L.episodes_used(recs, "stack_bowls") == 0
     # a 21st episode for that task must be refused, another task is unaffected
     out = tmp_path / "o.json"

@@ -1,70 +1,117 @@
 # R15–R23 status — what is true right now
 
-Generated 2026-10-21T08:50Z by the executor. **Every number below was produced by a command on the
-server, quoted in `mission/R15_R23_EXECUTOR_LOG.md` or in `lanes/*`.** Nothing here is a plan.
+Generated 2026-10-21T10:20Z. Every number was produced by a command on the server; the log of those
+commands is `mission/R15_R23_EXECUTOR_LOG.md`, and the per-lane evidence is under `lanes/`.
 
-## 1. Where the GPU is right now
+## 1. HEADLINE: M1 Push-T offline gate G5_1000 = **FAIL** (machine verdict)
 
-| item | value |
-|---|---|
-| running | stage 2b: `500 -> 1000 (500 steps)`, run `r15-s2b-1000-20261021T0803Z`, `--save_every 200` |
-| launched by | `tools/mission_supervisor.py` (server-side, PPID 1, own session, survives disconnect) |
-| next automatically | DEV predictions at step1000 -> `tools/r15_gate_check.py --gate G5_1000` -> stage 3 (+2000) **only if the gate PASSES**; a FAIL leaves stage 3 BLOCKED and keeps the checkpoint |
-| why the split | `/home/T7` is ntfs-3g at **1.5–3 MB/s**; one 1.1 GB full-state save costs 4–8 min, so a single job cannot reach step1000 before its wall guard |
-
-## 2. M1 Push-T: real state
-
-| quantity | value | how |
+| quantity (frozen 32-frame DEV gate set, pre-registered) | step 300 | step 1000 |
 |---|---|---|
-| verified parent | `runs/r15_stage_300_*/checkpoints/step300` | 9/9 MANIFEST sha256 reproduce (audit lane H) |
-| stage 2a | +200 steps, `PARTIAL` at step500 (wall guard), last save step500 | log + WAL seq 1201 |
-| resume seam | `position=300` at `global_step=300` — peek only, never `sampler.next()` | `logs/r15_s2_1000_*/…` |
-| sample order | `sampler_order_hash = f1024210…` **identical to stage 1** | stage_evidence.json |
-| GPU booked | 6169.8 s total WAL (incl. the historical 1027.5 s import) | `tools/r15_ledger_lineage.py` |
-| formal steps booked | 1164 executed, of which **963 distinct lineage steps** (audit H) | lineage tool |
-| overhead billing | fixed: stage 2a `job_end` books 2269.1 s of load/save/IO that the old code dropped | WAL seq 1201 |
-| offline DEV @300 | SAFE macro L1 **0.0020678** vs CV **0.0020475** -> **1.0 % worse than constant velocity** | v2 evaluator on the archived 32-frame gate set |
-| G4_300 | **PASS** under the v2 definitions (better than identity 0.0077, no collapse, SAFE inside box, RAW-OOB reported) | `/home/dgut/r15_lanes/gate_G4_300_recomputed.json` |
-| G5_1000 | **not decided yet** (needs step1000) | pending |
+| VLA macro L1, SAFE (what the robot executes) | 0.0020678 | **0.0025385** |
+| VLA macro L1, RAW (as decoded) | 0.0021344 | 0.0026050 |
+| constant velocity, SAFE | 0.0020475 | 0.0020475 |
+| **relative improvement vs CV** | **-1.0 %** | **-23.98 %** |
+| motion strata won (of 4, needs 3) | — | **0** (q4 loses by 40 %) |
+| no collapse | pass | pass |
+| delta sign / magnitude not worse than CV by >20 % | pass | pass (0.6897 vs 0.7857; 1.051 vs 1.040) |
 
-### Why G5 may legitimately fail, stated before the run
-`A[t] == S[t+1]` means CV's error *is* `|R_t|`, the residual magnitude, so CV is the "predict R = 0"
-model. On the frozen DEV frames a TRAIN-only linear map from the 42D proprio feature to R has
-**DEV R² = −0.141** (and the TRAIN-mean residual has R² = −0.035): the proprio history does not
-predict the residual, so beating CV requires the 3 RGB frames to carry information the history does
-not. A negative G5 is therefore a residual/vision finding, not a training bug — and the pre-registered
-action is to stop at 1000, keep the checkpoint and diagnose, not to train blindly to 3000.
+Machine verdict: `mission/r15_gate_G5_1000.json` -> `G5.macro_relative_5pct=false`,
+`G5.strata_3_of_4=false`, `G5.pass_rule=false`, **verdict FAIL**, exit 3.
+The pre-registered action for a FAIL is "stop at 1000, keep the checkpoint, diagnose, never train to
+3000 blindly" — so the +2000 stage is BLOCKED by design (`m1_2000_seg3_to_3000` = BLOCKED in the
+supervisor state file) and the checkpoint is preserved.
 
-## 3. Engineering state (all pushed)
+### Why it fails (measured, not speculated)
 
-| commit | content |
-|---|---|
-| `97cd5e8` | PR#21 findings 3–4: ΔA−S and residual metrics, RAW vs SAFE split, machine gate, lineage accounting, resumable supervisor, prereg errata E1–E4 |
-| `c6c0059` | multi-task data contract for the 3 real datasets (22 tests) |
+Because `A[t] == S[t+1]`, the constant-velocity predictor's error **is** the residual magnitude:
+`|CV - A_t| = |R_t|`. So CV is the "predict R = 0" model, and beating it requires predicting R better
+than zero. `tools/r15_mechanism_diagnostics.py` on the frozen DEV frames:
 
-Branch `feature/r15-true-continuation`, pushed to `origin`. Tests: **45 passed** (dev_eval + gate +
-ledger + resume) and **22 passed** (multi-task data). Draft PR still needs the research lead: the box
-has no `gh` and no token, so a PR cannot be opened from here.
+| model on the same frames | DEV L1 | DEV R^2 |
+|---|---|---|
+| constant velocity (R = 0) | 0.002110 | 0 (by construction) |
+| TRAIN-mean residual | 0.002333 | -0.0354 |
+| TRAIN-only linear map, 42D feature -> R | 0.003429 | **-0.1412** |
 
-## 4. The 12-task programme: what the audits actually found
+The 42D proprio history does **not** carry the residual, so only the 3 RGB frames could. At 1000 steps
+the model has not extracted it; the DEV L1 got 23 % worse than at 300 steps, with the decoded motion
+sign agreement unchanged (0.6897 at both 300 and 1000) — i.e. the model's *direction* behaviour did not
+change while its magnitude error grew. That is consistent with fitting TRAIN noise rather than a
+residual mechanism, and it is the honest finding: **this R15 recipe does not beat a two-line baseline
+on Push-T offline.**
 
-| lane | result |
-|---|---|
-| C TaskSpec | **12/12 installed and traceable, 0 BLOCKED_INTERFACE.** `generalization` is exactly the 12 ids in `scripts/internal/task_inventory.py:25-39` (executed: `--list-dimensions` -> `generalization | 12 | 24`). Robot `dual_x5` = 2×ARX X5, 14D action = our contract, 3 RGB cameras, **25 Hz** control, timeout = `step_lim` |
-| D expert | **6 realistic, 4 hard-but-rigid, 2 BLOCKED_DATA** (`fold_clothes` cloth mesh vertices, `pour_liquid_into_cup` PhysX particles — the predicates need geometry→action inverses that do not exist). The `k1_*` scripts in the RoboDojo root are **not** legal experts (they set `env.success[0]=True` by hand) |
-| B R16 | transport is WebSocket+msgpack; obs/action are dicts (verified shapes); our 14D/gripper/camera semantics match. **The official FINAL is 25 episodes, not 30** — `_task.yml:105-107` sets `eval_nums: 25` and `main.py:325-329` clamps `EVAL_NUM` downward only. Pre-registered equivalent contract written to `mission/R15_R23_FINAL_EVAL_CONTRACT.json` |
-| M2 data | 3 of the 12 tasks have real data and they are **structurally identical** (schema diff empty over 300 episodes, `A[t]==S[t+1]` bit-exact, language present and task-distinguishing). 2-task curriculum = 160 TRAIN episodes / 61,171 rows. Blocker: the normalizer payload has **no task id** and the per-task residual scale spread is 2.4× |
+## 2. What was executed for M1 training (all verifiable)
 
-## 5. Honest gaps (do not let anyone quote past these)
+| segment | run | steps | verdict | evidence |
+|---|---|---|---|---|
+| 0 -> 300 | `r15-s300-…030423Z` | 300 | REACHED_TARGET | parent checkpoint, 9/9 MANIFEST sha256 verified by the independent audit |
+| 300 -> 500 | `r15-s2-1000-…0803Z` | +200 | PARTIAL (wall guard at a save point) | `start_global_step=300`, `position=300` peek-only resume |
+| 500 -> 1000 | `r15-s2b-1000-…0803Z` | +500 | REACHED_TARGET, 3.039 s/step | `position==global_step==1000` |
 
-1. **No closed-loop number yet.** Offline L1 is not success; the RoboDojo wire is built (serving
-   wrapper + converters + metadata bridge, in progress) but not yet driven against the simulator.
-2. **9 of 12 tasks have no data.** Collection needs scripted experts (6 realistic candidates) and GPU
-   simulator time; 2 are BLOCKED_DATA by physics.
-3. **Scene-level TRAIN/eval disjointness is unprovable from the data**: the HDF5 files carry no layout
-   id. File-level disjointness is proven. This must be stated in any FINAL report.
-4. **The licence is contradictory** in the installed stack (`LICENSE:1` MIT vs `README.md:129`
-   non-commercial research). Not an execution blocker; it is a publication decision for the lead.
-5. **The historical WAL cannot be retro-fixed**: ~734 s of load/save time and 323 s of DEV inference
-   from before this session are unbilled there. They are quantified, not hidden
-   (`tools/r15_ledger_lineage.py`), and every job started in this session books its own overhead.
+So `runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000` is **exactly +700 optimizer steps after the
+verified step300 parent**, with `sampler_order_hash = f1024210…` identical to the stage-1 run (the same
+sample order an uninterrupted run would have used) and the resume seam proven by
+`position == global_step` at every saved checkpoint.
+
+Ledger truth (`tools/r15_ledger_lineage.py`), which is deliberately honest about the wasted work:
+1664 optimizer steps were **executed** and booked, but only **1000 distinct global steps** exist —
+the 664 extra are the discarded invalid segment plus the 2a re-execution. 8764 s of GPU time is booked;
+3979 s of load/save/inference overhead is now measurable, and every job started in this session books
+its own overhead at `job_end` (the audit's finding 2b).
+
+## 3. M1 closed loop (P3) — wire proven, runs in progress
+
+The transport, the serving path and the official client are all real now:
+
+* `OpenVLA_R42/model.py` + `r42_env_io.py` + `r42_metadata_bridge.py` + `r42_serve.py`
+  (162 CPU tests). The metadata bridge reproduces **7/7** existing `r42_metadata.json` files
+  byte-identically, and builds one for the R15 stage checkpoint that never had it.
+* Measured on loopback with a stub backend (n=200, warm-up discarded): server total p50 24.6 /
+  p95 46.0 / p99 53.8 ms; client RTT p50 31.2 / p95 57.6 / p99 69.5 ms against a 40 ms budget at 25 Hz.
+* `tools/r15_loop_dev.py` drives the OFFICIAL client and reads ONLY the official `_result.json`.
+
+Two real integration failures were found and fixed (each diagnosed from its log, not guessed):
+1. the container died importing curobo because `SETUPTOOLS_SCM_PRETEND_VERSION` was unset;
+2. the server answered every call with `No module named 'prismatic'` because the host server was
+   started without the OFT runtime on `PYTHONPATH` — and, separately, nothing had forced the ARX
+   platform before the prismatic import, which would have silently decoded 14D actions against the
+   LIBERO 7D table. Both are fixed in `r42_serve.py` + the launcher.
+
+Attempt 3 is running under the supervisor (`loop_pushT_stage1_r3`) with those fixes; its record is
+written to `runs/r15_loop_dev/push_T_stage1_*.json` and its raw logs to `logs/supervisor/`.
+**No closed-loop success rate has been measured yet, and none will be quoted until the official
+`_result.json` exists.**
+
+## 4. The 12-task programme (M2): what is now built and what is blocking
+
+| piece | state | tests |
+|---|---|---|
+| 12/12 TaskSpec audit (P4) | **done, 0 BLOCKED_INTERFACE**: robot dual_x5, 25 Hz, 3 RGB cameras, official success predicate located | lane report |
+| expert feasibility (P5) | 6 realistic, 4 hard-but-rigid, **2 BLOCKED_DATA** (fold_clothes cloth mesh, pour_liquid particles) | lane report |
+| collection harness + quality gate | built, success taken ONLY from the official verdict, caps enforced | 44 |
+| multi-task data contract | 3 tasks structurally identical (schema diff empty over 300 episodes, `A[t]==S[t+1]` bit-exact), per-task splits keyed `<task>/<episode>` | 22 |
+| ONE shared task-conditioned trainer + P6 gate | built, per-task normalizers (2.44x residual scale spread handled), counterfactual routing test | 36 |
+| R16 deployment path | built (see §3) | 162 |
+
+2-task curriculum would consume push_T + stack_bowls = 160 TRAIN episodes / 61,171 rows. The measured
+bars it must beat: push_T no-op CE 2.6241 / CV 2.6736; stack_bowls no-op 3.3667 / CV 3.3172.
+
+**Blocking items, stated plainly:**
+1. 9 of 12 tasks have **no data**; collection needs GPU simulator time and, for 2 tasks, is physically
+   BLOCKED (cloth / fluid verdicts cannot be inverted).
+2. No M2 checkpoint can be **deployed** until `r42_adapter.normalizer_payload` /
+   `r9_trainer_contract.load_frozen_contract` accept the multi-task schema; the exact minimal patch is
+   documented in `lanes/M2_trainer.md` and was deliberately not applied in the additive commits.
+3. Scene-level TRAIN/eval disjointness is **unprovable** from the data (the HDF5 files carry no layout
+   id), so any FINAL report must say file-level disjointness only.
+4. The official FINAL is **25 episodes per task**, not 30 (`_task.yml:105-107` + `main.py:325-329`);
+   the equivalent contract is pre-registered in `mission/R15_R23_FINAL_EVAL_CONTRACT.json`.
+
+## 5. Engineering state
+
+Branch `feature/r15-true-continuation` @ `8acede9` (pushed). Commits in this session: PR#21 findings
+3-4 + supervisor + gate + lineage (`97cd5e8`), M2 data (`c6c0059`), loop driver + mechanism
+(`c6e8590`), R16 deployment path (`5f99df8`), closed-loop wiring (`6b7d058`), M2 trainer (`8acede9`).
+Tests added and passing in this session: **321** (162 deploy + 45 R15 core + 44 collection + 36 M2 +
+22 M2 data + 7 loop driver + 5 stats). Nothing was merged to main, no official rule or success
+predicate was modified, and no other user's process was touched.

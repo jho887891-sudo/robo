@@ -11,6 +11,9 @@
 set -uo pipefail
 cd /home/T7/ojh/robot_actual/r11
 export ROBODOJO_ROOT=/home/T7/ojh/robot_actual/RoboDojo
+# the server also needs the OFT runtime (prismatic + vla-scripts) on PYTHONPATH, exactly like the
+# training entry builds it; without it every policy call answers "No module named 'prismatic'"
+OFT=/home/dgut/pusht_runtime/openvla_oft_src
 PY=/home/dgut/pusht_runtime/venv_oft/bin/python
 CKPT=${1:?checkpoint dir}
 EPISODES=${2:-1}
@@ -20,7 +23,7 @@ SRVLOG=logs/r15_policyserver_${PORT}.log
 if [ ! -f "$CKPT/MANIFEST.json" ]; then echo "REFUSING: $CKPT has no MANIFEST.json"; exit 9; fi
 mkdir -p logs runs/r15_loop_dev
 echo "# closed loop $(date -u +%Y-%m-%dT%H:%M:%SZ) ckpt=$CKPT episodes=$EPISODES stage=$STAGE port=$PORT"
-ROBODOJO_ROOT=$ROBODOJO_ROOT PYTHONPATH=$ROBODOJO_ROOT:$ROBODOJO_ROOT/XPolicyLab   "$PY" code/xpolicylab/policy/OpenVLA_R42/r42_serve.py \
+ROBODOJO_ROOT=$ROBODOJO_ROOT PYTHONPATH=$ROBODOJO_ROOT:$ROBODOJO_ROOT/XPolicyLab:$OFT:$OFT/vla-scripts   "$PY" code/xpolicylab/policy/OpenVLA_R42/r42_serve.py \
   --config_path code/xpolicylab/policy/OpenVLA_R42/deploy.yml \
   --host 0.0.0.0 --port "$PORT" --overrides checkpoint_dir="$CKPT" > "$SRVLOG" 2>&1 &
 SRV=$!
@@ -37,8 +40,13 @@ done
 if [ "$READY" != 1 ]; then echo "POLICY SERVER NOT READY after 1200s"; tail -n 40 "$SRVLOG"; exit 8; fi
 echo "policy server ready on ws://0.0.0.0:$PORT (pid $SRV) after $((i*5))s"
 grep -a "OpenVLA_R42\|codec\|metadata" "$SRVLOG" | tail -8
+# The rd_setup container needs the same two variables RoboDojo's own _run_sim_client.sh exports:
+# without SETUPTOOLS_SCM_PRETEND_VERSION the import of third_party/curobo dies inside setuptools_scm
+# ("unable to detect version"), which is exactly how the first closed-loop attempt failed.
 "$PY" tools/r15_loop_dev.py --task push_T --policy-name OpenVLA_R42 --port "$PORT" \
   --episodes "$EPISODES" --stage "$STAGE" --docker rd_setup --ckpt-label "$(basename "$CKPT")" \
+  --docker-env SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0 \
+  --docker-env CUROBO_KERNEL_BACKEND=cuda_core \
   --timeout-s 3000 \
   --out "runs/r15_loop_dev/push_T_stage${STAGE}_$(date -u +%Y%m%dT%H%M%SZ).json"
 RC=$?

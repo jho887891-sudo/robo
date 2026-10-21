@@ -1,0 +1,198 @@
+[OpenVLA_R42] metadata bridged from runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 (manifest=manifest, steps=1000, lora=de93b7fed088..)
+[OpenVLA_R42] template=XPolicyLab.model_template codec_mode=FIXED (asserted) window=[31744, 31999] n_actions=14 camera_order=['cam_head', 'cam_left_wrist', 'cam_right_wrist'] control_hz=25 metadata=r42_metadata_bridge(runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000) device=cuda
+[OpenVLA_R42] backend is lazy: no model is loaded until the first get_action()
+[OpenVLA_R42] serving on ws://0.0.0.0:19000 (policy=OpenVLA_R42)
+opening handshake failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/http11.py", line 138, in parse
+    request_line = yield from parse_line(read_line)
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/http11.py", line 320, in parse_line
+    line = yield from read_line(MAX_LINE_LENGTH)
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/streams.py", line 46, in read_line
+    raise EOFError(f"stream ends after {p} bytes, before end of line")
+EOFError: stream ends after 0 bytes, before end of line
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/server.py", line 547, in parse
+    request = yield from Request.parse(
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/http11.py", line 140, in parse
+    raise EOFError("connection closed while reading HTTP request line") from exc
+EOFError: connection closed while reading HTTP request line
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 356, in conn_handler
+    await connection.handshake(
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 207, in handshake
+    raise self.protocol.handshake_exc
+websockets.exceptions.InvalidMessage: did not receive a valid HTTP request
+opening handshake failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/http11.py", line 138, in parse
+    request_line = yield from parse_line(read_line)
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/http11.py", line 320, in parse_line
+    line = yield from read_line(MAX_LINE_LENGTH)
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/streams.py", line 46, in read_line
+    raise EOFError(f"stream ends after {p} bytes, before end of line")
+EOFError: stream ends after 0 bytes, before end of line
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/server.py", line 547, in parse
+    request = yield from Request.parse(
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/http11.py", line 140, in parse
+    raise EOFError("connection closed while reading HTTP request line") from exc
+EOFError: connection closed while reading HTTP request line
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 356, in conn_handler
+    await connection.handshake(
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 207, in handshake
+    raise self.protocol.handshake_exc
+websockets.exceptions.InvalidMessage: did not receive a valid HTTP request
+connection handler failed
+asyncio.exceptions.TimeoutError: timed out while closing connection
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+[R42DeployServer] codec_mode=FIXED (asserted) action_token_window=[31744, 31999] n_actions=14 task=push_T camera_order=['cam_head', 'cam_left_wrist', 'cam_right_wrist'] device=cuda
+2026-10-21 09:52:56.027996: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-21 09:52:56.712830: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received
+connection handler failed
+Traceback (most recent call last):
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "/home/T7/ojh/robot_actual/RoboDojo/XPolicyLab/client_server/ws/model_server.py", line 125, in _handle_connection
+    async for raw in websocket:
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 244, in __aiter__
+    yield await self.recv()
+  File "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/websockets/asyncio/connection.py", line 324, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: sent 1011 (internal error) keepalive ping timeout; no close frame received

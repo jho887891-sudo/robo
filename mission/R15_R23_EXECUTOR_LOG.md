@@ -88,3 +88,53 @@ magnitude. The 42D [S,V,Acc] features do not linearly predict R on DEV (negative
 requires the 3 RGB frames to carry residual information the proprio history does not. That is the
 falsifiable claim G5 actually tests at step 1000 — and the reason a negative G5 is a data/residual
 finding rather than a training bug.
+
+## 2026-10-21 09:28Z — step 1000 reached (M1 training chain complete)
+
+| when | what | evidence |
+|---|---|---|
+| 09:28:04Z | `r15-s2b-1000-…0803Z`: **REACHED_TARGET**, `500 -> 1000`, 2576.3 s, 3.039 s/step | `logs/r15_s2b_1000_*.log` |
+| 09:28:02Z | step1000 MANIFEST written, 9 files hashed, `global_step=1000`, `position=1000` | MANIFEST.json + sampler.json |
+| 09:28:04Z | `sampler_order_hash = f1024210…` identical to stage 1 | stage_evidence.json |
+| 09:36:59Z | DEV greedy predictions at step 1000 written (32 frozen frames, global_step=1000) | `runs/r15_dev_gate_1000_20261021T0803Z.npz` |
+
+The M1 formal budget is now **300 + 200 + 500 = 1000 optimizer steps** on one lineage whose parent is the
+verified step300 checkpoint.
+
+Two path bugs found and fixed by evidence (both fail closed, so nothing was silently scored):
+* numpy's `savez_compressed` APPENDS `.npz`, so the archive was `…0803Z.json.npz` while the gate looked
+  for `…0803Z.json` -> the first gate run correctly returned CANNOT_EVALUATE (exit 4), not a score;
+* the supervisor DAG's `adopt_wait_trainer_exit` pointed at the failed attempt-1 directory.
+
+## 2026-10-21 09:47Z — G5_1000 machine verdict: **FAIL**
+
+`tools/r15_gate_check.py --gate G5_1000` on the frozen 32-frame gate set (frames_sha256 67b4320…):
+
+| check | measured | passed |
+|---|---|---|
+| cohort.frozen_frames | matches pre-registration | yes |
+| G5.macro_relative_5pct | VLA SAFE 0.0025385 vs CV 0.0020475 = **-23.98 %** | **no** |
+| G5.strata_3_of_4 | 0 of 4 strata won (q1 -14.5 %, q2 +0.9 %, q3 -3.1 %, q4 -40.0 %) | **no** |
+| G5.no_collapse | still_rate 0.0, delta magnitude 1.0508 | yes |
+| G5.sign_mag_not_worse_20pct | delta sign 0.6897 vs CV 0.7857; magnitude 1.0508 vs 1.0403 | yes |
+| **G5.pass_rule** | — | **no -> VERDICT FAIL (exit 3)** |
+
+Progression across the lineage: step300 SAFE 0.0020678 -> step1000 SAFE 0.0025385. The model became
+**23 % worse** with 700 more steps, while its decoded motion sign agreement stayed at 0.6897 — the
+direction behaviour did not change, the magnitude error grew. `correction_r2` went +0.026 -> -0.121.
+
+Per the pre-registered action the +2000 stage is **BLOCKED** (`m1_2000_seg3_to_3000` in the supervisor
+state) and the checkpoint is kept. The mechanism evidence is in
+`/home/dgut/r15_lanes/mechanism_diagnostics.json` and summarised in `report/R15_R23_STATUS.md`.
+
+## 2026-10-21 10:17Z — closed loop: two real integration failures, then attempt 3
+
+| attempt | outcome | root cause (from the log, not guessed) | fix |
+|---|---|---|---|
+| 1 (09:37) | exit 141, NO_RESULT | the container died importing `third_party/curobo`: `setuptools-scm was unable to detect version` | pass `SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0` + `CUROBO_KERNEL_BACKEND=cuda_core` with `docker exec -e` (what RoboDojo's own `_run_sim_client.sh` exports) |
+| 2 (09:49) | exit 141 after 1541 s, NO_RESULT | the server answered `WsError: No module named 'prismatic'` because the host server lacked the OFT runtime on PYTHONPATH; and nothing had forced the ARX platform before the prismatic import (which would have decoded 14D actions against the LIBERO 7D table) | `PYTHONPATH` += OFT + vla-scripts; `force_arx_platform()` in `r42_serve.py`. Also fixed: a crashed run no longer consumes the 20-episode DEV budget |
+| 3 (10:17) | running | — | — |
+
+Isaac Sim reaches "Resetting all environments" ~530 s after launch, so a single-episode loop costs
+roughly 25-30 min of wall clock before the policy is even asked for an action. That is why the driver's
+own timeout is 3000 s and the supervisor's job timeout is 7200 s.

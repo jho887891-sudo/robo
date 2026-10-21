@@ -146,6 +146,40 @@
    "gpu": true,
    "count_gpu": true,
    "supervisor_locks_gpu": true
+  },
+  {
+   "id": "gate_g5_1000_fixed",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.npz --eval-out runs/r15_gate_eval_1000_20261021T0803Z_b --out mission/r15_gate_G5_1000.json; echo GATE_EXIT=$? >> logs/gate_verdict.txt; exit 0",
+   "timeout_s": 2400,
+   "depends_on": [],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "loop_pushT_stage1_fixed",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [
+    "gate_g5_1000_fixed"
+   ],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
+  },
+  {
+   "id": "loop_pushT_stage1_r3",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
   }
  ]
 }

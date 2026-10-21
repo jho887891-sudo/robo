@@ -56,8 +56,14 @@ def append_ledger(path, rec):
 
 
 def episodes_used(recs, task):
-    return sum(int(r.get("episodes_requested", 0)) for r in recs
-               if r.get("task") == task and r.get("stage") in STAGE_CUM)
+    """Cumulative DEV episodes actually OBSERVED.
+
+    A run that crashed or never produced an official _result.json (verdict NO_RESULT) must not eat
+    the budget - otherwise a broken launch silently spends one of the 20 allowed rollouts.
+    """
+    return sum(int(r.get("episodes_observed") or 0) for r in recs
+               if r.get("task") == task and r.get("stage") in STAGE_CUM
+               and r.get("verdict") not in (None, "NO_RESULT"))
 
 
 def build_cmd(args):
@@ -83,8 +89,12 @@ def build_cmd(args):
              "--ckpt", args.ckpt_label,
              "--action-type", args.action_type]
     if args.docker:
-        return ["docker", "exec", args.docker, "bash", "-lc",
+        cmd = ["docker", "exec"]
+        for kv in (args.docker_env or []):
+            cmd += ["-e", kv]
+        cmd += [args.docker, "bash", "-lc",
                 "cd %s && %s" % (args.root_inner, " ".join(inner))]
+        return cmd
     return inner
 
 
@@ -131,6 +141,8 @@ def main():
                     help="the same tree as seen inside --docker")
     ap.add_argument("--docker", default="",
                     help="run the official client inside this container (e.g. rd_setup); empty = host")
+    ap.add_argument("--docker-env", action="append", default=[],
+                    help="KEY=VALUE passed with docker exec -e (e.g. SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0)")
     ap.add_argument("--dataset", default="RoboDojo")
     ap.add_argument("--env-cfg", default="arx_x5")
     ap.add_argument("--env-gpu", default="0")

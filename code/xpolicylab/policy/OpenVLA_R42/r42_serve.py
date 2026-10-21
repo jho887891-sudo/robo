@@ -40,6 +40,19 @@ def _bootstrap_paths():
     return tried
 
 
+def force_arx_platform():
+    """prismatic picks ACTION_DIM from sys.argv AT IMPORT TIME and silently defaults to LIBERO 7D.
+
+    The training entry does this in force_arx_platform(); the serving entry needs the same guard or
+    the 42D checkpoint would be decoded against a 7-dimensional constant table. sys.argv survives
+    until the lazy prismatic import inside R42DeployServer.load(), so appending here is enough.
+    """
+    joined = " ".join(sys.argv).lower()
+    if "arx" not in joined and "goai" not in joined:
+        sys.argv = list(sys.argv) + ["arx_x5_push_T"]
+    return " ".join(sys.argv)
+
+
 def load_config(path):
     import yaml
     with open(path, "r", encoding="utf-8") as fh:
@@ -82,6 +95,7 @@ def _apply_overrides(cfg, tokens):
 
 def main(argv=None):
     args = parse_args(argv)
+    force_arx_platform()          # MUST precede any prismatic import (fail-closed otherwise)
     tried = _bootstrap_paths()
     # argparse.REMAINDER swallows later flags, so accept --print-contract on either side
     overrides = list(args.overrides or [])
