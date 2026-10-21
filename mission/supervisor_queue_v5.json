@@ -73,6 +73,79 @@
    "depends_on": [],
    "gpu": false,
    "count_gpu": false
+  },
+  {
+   "id": "m1_700c_seg2b_to_1000",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s2b_1000.sh",
+   "timeout_s": 9000,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  },
+  {
+   "id": "m1_devpreds_seg2b",
+   "kind": "r15_devpreds",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_devpreds_1000.sh",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_700c_seg2b_to_1000"
+   ],
+   "gpu": true,
+   "count_gpu": false
+  },
+  {
+   "id": "gate_g5_1000_seg2b",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.json --eval-out runs/r15_gate_eval_1000_20261021T0803Z --out mission/r15_gate_G5_1000.json",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_devpreds_seg2b"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "m1_2000_seg3_to_3000",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s3_3000.sh",
+   "timeout_s": 21600,
+   "depends_on": [
+    "loop_pushT_stage1"
+   ],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  },
+  {
+   "id": "gate_verdict_recorded",
+   "kind": "gate_record",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.json --eval-out runs/r15_gate_eval_1000_20261021T0803Z --out mission/r15_gate_G5_1000.json; echo GATE_EXIT=$? >> logs/gate_verdict.txt; exit 0",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_devpreds_seg2b"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "loop_pushT_stage1",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [
+    "gate_verdict_recorded"
+   ],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
   }
  ]
 }
