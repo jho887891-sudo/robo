@@ -1,0 +1,87 @@
+{
+ "schema": "r15-r23-final-eval-contract-v1",
+ "status": "PRE_REGISTERED_BEFORE_ANY_FINAL_RUN",
+ "written_utc": "2026-10-21T08:25:00Z",
+ "why_this_file_exists": "The mission asked for '12 tasks x 30 new seeds'. The OFFICIAL installed protocol cannot produce 30: RoboDojo task/RoboDojo/config/_task.yml:105-107 sets eval_nums: 25 and src/eval_client/main.py:325-329 clamps eval_num = min(EVAL_NUM, eval_nums), so EVAL_NUM can only LOWER the count. Per the mission spec ('if the official protocol differs, lock an equivalent contract beforehand') this file locks the equivalent contract BEFORE any FINAL episode is run. No official rule, config or success predicate is modified.",
+ "official_evidence": {
+  "repo": "/home/T7/ojh/robot_actual/RoboDojo",
+  "commit": "b8e5eed9fc11fc3da8e4b142fc60acf22036efa5",
+  "task_list_source": "scripts/internal/task_inventory.py:25-39 DIMENSION_TASKS['generalization'] (executed: python3 scripts/internal/task_inventory.py --list-dimensions -> 'generalization | 12 | 24')",
+  "success_source": "task/RoboDojo/tasks/<task>.py run_reward + env/reward_manager/reward_manager.py:527-587 + src/eval_client/eval_env.py:882-901 (env.success set only there)",
+  "episode_count_source": "task/RoboDojo/config/_task.yml:105-107 (eval_nums: 25) + src/eval_client/main.py:325-329 (min clamp)",
+  "seed_source": "env/seed_manager/seed_manager.py:37-70: a 'seed' is a LAYOUT DIRECTORY Assets/Eval_Layout/RoboDojo/arx_x5/<seed>/; 55 <task>_<n>.json layouts exist in each of dirs 0,1,2",
+  "control_rate": "25 Hz (env_cfg/arx_x5.yml:10 collect_freq plus env/observation_manager/obs_manager.py:37-43 collect_interval) against 250 Hz physics (env_cfg/sim/sim_config.yml:1-2)"
+ },
+ "frozen_final_protocol": {
+  "tasks": [
+   "stack_bowls",
+   "push_T",
+   "pack_objects_into_box",
+   "fold_clothes",
+   "hang_mugs",
+   "sweep_blocks",
+   "pour_liquid_into_cup",
+   "make_toast",
+   "arrange_largest_number",
+   "sort_nesting_dolls_by_size",
+   "store_laptop_and_headphones",
+   "stack_blocks"
+  ],
+  "episodes_per_task_per_seed_dir": 25,
+  "primary_seed_dir": 1,
+  "held_out_seed_dirs_available": [
+   0,
+   2
+  ],
+  "planned_sample_size_per_task": 25,
+  "rationale_for_25": "the official default; using 25 keeps every number comparable to a stock RoboDojo run and avoids editing _task.yml",
+  "optional_larger_sample": "if more episodes are wanted, the SAME frozen protocol is repeated on seed dirs 0 and 2 (75 total per task) and reported as 'official 25 x 3 layout dirs'; the macro headline uses the primary dir only",
+  "success_definition": "the official verdict only: env.success[i] set by src/eval_client/eval_env.py:895-897 when reward > 1-1e-3; unstable envs excluded from the denominator exactly as main.py:831-835 does",
+  "ci_method": "Wilson score interval 95% per task; macro = unweighted mean of per-task success rates; macro CI = bootstrap over tasks AND episodes (10000 resamples, seed 0), reported alongside the plain mean",
+  "data_isolation": "FINAL layouts are never used for training or model selection; the frozen DEV cohort (16 episodes) and TRAIN split are separate files (data/split80.json)",
+  "freeze_requirements_before_the_first_final_episode": [
+   "checkpoint directory + MANIFEST.json sha256 for every file",
+   "this contract's own sha256 and the git commit that contains it",
+   "the exact command line, the eval client version (RoboDojo b8e5eed), and the layout dir",
+   "the policy metadata (r42_metadata.json incl. normalizer_sha256) and the codec mode"
+  ],
+  "forbidden": [
+   "changing any task module, config or success predicate",
+   "re-running a FINAL episode to get a better outcome (one attempt per layout, recorded)",
+   "using FINAL outcomes to pick a checkpoint, prompt, threshold or epoch",
+   "reporting a number produced with a different layout dir as if it were the frozen one"
+  ]
+ },
+ "reporting": {
+  "per_task": [
+   "successes",
+   "episodes",
+   "success_rate",
+   "wilson_95_ci",
+   "step_lim_hit_count",
+   "mean_steps_to_success_or_failure",
+   "object_progress_series_path",
+   "video_sha256_list",
+   "action_safety_events"
+  ],
+  "macro": [
+   "unweighted mean success rate over the 12 tasks",
+   "bootstrap 95% CI",
+   "count of tasks with 0 successes",
+   "explicit FAILED_CAPABILITY if the research target (>=3/25 each, macro >=25%) is not met"
+  ],
+  "latency": [
+   "policy inference p50/p95/p99 measured in-process (4 phases) and end-to-end RTT at the client",
+   "observation-to-action clock skew"
+  ],
+  "resources": [
+   "GPU seconds booked in the WAL for the FINAL job",
+   "wall clock per task",
+   "videos retained and hashed, not uploaded"
+  ]
+ },
+ "target_not_official": {
+  "research_target": "per task >= 3/25 successes and macro >= 25%",
+  "note": "this is a research goal stated by the mission, NOT an official benchmark requirement; failing it must be reported as FAILED_CAPABILITY with the real numbers, never hidden"
+ }
+}

@@ -55,6 +55,93 @@ def test_gripper_and_arm_split():
     assert m["arm_l1"] == pytest.approx(0.0, abs=1e-6)
 
 
+def test_sign_and_magnitude_use_delta_motion_not_absolute_position():
+    """PR#21 finding 3: v1 scored sign/magnitude on the ABSOLUTE joint position.
+
+    Here the arm sits at +10 rad and the prediction has the WRONG sign of motion while every
+    absolute coordinate still has the right sign, so the two definitions must disagree.
+    """
+    state = np.full((3, 14), 10.0, np.float32)
+    vel = np.full((3, 14), 0.01, np.float32)
+    target = state + 0.1                      # commanded motion is +0.1
+    pred = state - 0.1                        # model says -0.1
+    eps = ["a", "a", "b"]
+    m = E.metrics(pred, target, state, vel, eps)
+    assert m["absolute_sign_agreement"] == pytest.approx(1.0)      # legacy v1 -> looks perfect
+    assert m["delta_sign_agreement"] == pytest.approx(0.0)         # the real quantity -> wrong
+    assert m["sign_agreement"] == m["delta_sign_agreement"]        # unprefixed = delta (fixed)
+    assert m["delta_magnitude_ratio"] == pytest.approx(1.0, abs=1e-6)
+    # the residual sign is the *direct* statement about what the controller adds on top of velocity
+    assert m["residual_sign_agreement"] == pytest.approx(0.0)
+    # physical L1 is unchanged by the relabelling: |dA_pred - dA_true| == |A_pred - A_true|
+    assert m["physical_l1_macro"] == pytest.approx(0.2, abs=1e-5)
+
+
+def test_residual_metrics_are_one_for_constant_velocity():
+    rng = np.random.RandomState(3)
+    state = rng.randn(5, 14).astype(np.float32)
+    vel = rng.randn(5, 14).astype(np.float32) * 0.02
+    target = state + vel + rng.randn(5, 14).astype(np.float32) * 1e-4
+    cv = state + vel
+    m = E.metrics(cv, target, state, vel, ["a"] * 5)
+    # CV reproduces the commanded motion exactly, so delta magnitude is 1 ...
+    assert m["delta_magnitude_ratio"] == pytest.approx(1.0, abs=1e-3)
+    # ... and it predicts a ZERO residual, so the residual magnitude ratio is 0 (it explains none of
+    # the true residual R = (A-S)-V). v1 could not express this at all because it looked at absolute q.
+    assert m["residual_magnitude_ratio"] < 1e-3
+    assert m["delta_sign_agreement"] > 0.9
+    assert m["correction_r2"] < 0.1
+
+
+def test_raw_and_safe_predictions_are_reported_separately():
+    """PR#21 finding 4: 6.03% of decoded coordinates were outside the joint box while the gate
+    reported a single ambiguous clip rate. RAW and SAFE must be distinct, unambiguous numbers."""
+    lo = np.full(14, -1.0, np.float32)
+    hi = np.full(14, 1.0, np.float32)
+    state = np.zeros((4, 14), np.float32)
+    vel = np.zeros((4, 14), np.float32)
+    target = np.zeros((4, 14), np.float32)
+    pred = np.zeros((4, 14), np.float32)
+    pred[0, 3] = 5.0            # one coordinate far outside the box
+    pred[1, 7] = -2.0           # a second out-of-box coordinate
+    m = E.metrics(pred, target, state, vel, ["a"] * 4, bounds=(lo, hi))
+    assert m["raw_oob_coord_count"] == 2
+    assert m["raw_oob_coord_rate"] == pytest.approx(2.0 / 56.0)
+    assert m["raw_oob_frame_rate"] == pytest.approx(2.0 / 4.0)
+    assert m["raw_oob_frame_count"] == 2
+    assert m["raw_oob_max_excursion"] == pytest.approx(4.0)        # 5.0 - hi(1.0)
+    assert m["joint_clip_rate"] == pytest.approx(m["raw_oob_coord_rate"])   # legacy alias, RAW
+    # SAFE is what the robot executes: the excursion is clamped to the box
+    assert m["safe_clip_frame_rate"] == pytest.approx(0.5)
+    assert m["safe_clip_max_abs"] == pytest.approx(4.0)            # 5.0 -> hi 1.0 is a 4.0 change
+    # SAFE error is exactly 1.0 on two of the 56 coordinates -> 2/56 as a coordinate mean
+    assert m["physical_l1_macro"] == pytest.approx(2.0 / 56.0, abs=1e-6)
+    assert m["raw_physical_l1_macro"] > m["physical_l1_macro"]
+    assert m["gated_on"] == "SAFE"
+
+
+def test_clamp_is_a_noop_inside_the_box():
+    lo = np.full(14, -3.0, np.float32)
+    hi = np.full(14, 3.0, np.float32)
+    rng = np.random.RandomState(4)
+    state = rng.randn(3, 14).astype(np.float32) * 0.1
+    vel = rng.randn(3, 14).astype(np.float32) * 0.01
+    target = state + vel
+    m = E.metrics(target, target, state, vel, ["a"] * 3, bounds=(lo, hi))
+    assert m["raw_oob_coord_count"] == 0
+    assert m["safe_clip_frame_rate"] == 0.0
+    assert m["physical_l1_macro"] == pytest.approx(m["raw_physical_l1_macro"])
+    assert m["metric_version"] == E.METRIC_VERSION
+
+
+def test_metric_definitions_are_published():
+    d = E.metric_definitions()
+    for key in ("gate_quantity", "delta_definition", "residual_definition", "sign_agreement",
+                "magnitude_ratio", "raw_vs_safe", "clip_policy", "sampling"):
+        assert key in d and d[key]
+    assert "NOT absolute" in d["sign_agreement"]
+
+
 @pytest.mark.skipif(not HAVE_DATA, reason="Push-T HDF5 not available")
 def test_frozen_dev_cohort_is_the_frozen_16_and_never_the_holdout():
     import r9_trainer_contract as RC
@@ -117,5 +204,8 @@ def test_matching_prediction_archive_is_scored(tmp_path):
                         model_sha256=np.array("f" * 64))
     ev = E.run(str(tmp_path / "pred.npz"), per_episode=1, seed=0, out_dir=None, skip_mlp=True)
     m = ev["models"]["vla_r42"]["metrics"]
-    assert m["physical_l1_macro"] == pytest.approx(0.0, abs=1e-6)
+    # the RAW oracle is exact; the SAFE (clamped) one is not exactly zero because a few expert
+    # labels themselves sit infinitesimally outside the frozen joint box
+    assert m["raw_physical_l1_macro"] == pytest.approx(0.0, abs=1e-9)
+    assert m["physical_l1_macro"] <= 1e-5
     assert ev["gate"]["improvement_vs_cv"] > 0.99

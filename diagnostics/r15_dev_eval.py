@@ -11,9 +11,15 @@ Design rules enforced here:
   * episode-macro metrics are reported alongside the pooled numbers, because a macro average over
     episodes is what the R15 gates are written against.
 
-Metrics: physical joint-14D L1, per-arm/per-gripper L1, correction R^2, action magnitude ratio,
-sign agreement, joint-clip rate, motion strata (by `|V|` quartiles computed on DEV), and the
-still-action rate.
+Metrics (v2, see metric_definitions() for the machine-readable contract):
+  * physical joint-14D L1 (the gate quantity), per-arm/per-gripper L1, correction R^2;
+  * MOTION metrics are computed on the commanded motion ΔA = A - S and on the residual R = ΔA - V,
+    NOT on the absolute joint position. v1 compared absolute positions, which is dominated by "the
+    arm is somewhere around q" and is not the quantity a controller cares about (audit PR#21);
+  * every quantity is reported twice: RAW (exactly what the decoder emitted) and SAFE (the same
+    vector after the joint-box clamp the robot actually applies). SAFE is the gated variant; RAW
+    out-of-box statistics are reported next to it instead of being silently hidden;
+  * motion strata (by `|V|` quartiles computed on DEV), the still-action rate, and the clip rates.
 """
 import argparse
 import hashlib
@@ -123,32 +129,87 @@ def _macro(values, episodes):
     return out
 
 
-def metrics(pred, target, state, velocity, episodes, bounds=None, still_eps=1e-3):
-    """All Gate quantities for one model prediction set (all [N,14])."""
-    pred = np.asarray(pred, np.float32)
-    target = np.asarray(target, np.float32)
-    err = np.abs(pred - target)
+METRIC_VERSION = "r15-dev-metrics-v2"
+
+
+def metric_definitions():
+    """Machine-readable contract for every number this evaluator reports.
+
+    Added for audit PR#21 finding 3/4: v1 reported sign_agreement / magnitude_ratio on the ABSOLUTE
+    joint position and reported a single joint_clip_rate, which made the G4 "inside the joint box"
+    claim ambiguous (6.03% of decoded coordinates were out of the box while the gate said PASS).
+    """
+    return {
+        "metric_version": METRIC_VERSION,
+        "gate_quantity": "physical_l1_macro on SAFE (clamped) commands",
+        "delta_definition": "dA = A_hat - S_t versus dA_true = A_t - S_t (commanded motion)",
+        "residual_definition": "R = (A - S_t) - V_t with V_t = S_t - S_{t-1}; A[t] == S[t+1]",
+        "sign_agreement": "mean(sign(dA) == sign(dA_true)) over all 14 coordinates (NOT absolute)",
+        "magnitude_ratio": "mean over dims of mean|dA| / max(mean|dA_true|, 1e-9) (NOT absolute)",
+        "residual_sign_agreement": "same sign test on the residual R",
+        "residual_magnitude_ratio": "same magnitude test on the residual R",
+        "absolute_sign_agreement": "legacy v1 definition, kept only for continuity, not gated",
+        "absolute_magnitude_ratio": "legacy v1 definition, kept only for continuity, not gated",
+        "raw_vs_safe": ("every metric is reported twice: the unprefixed key is SAFE (decoder output "
+                        "clamped to the joint box, i.e. what the robot executes) and the raw_ prefix "
+                        "is the unclamped decoder output"),
+        "clip_policy": ("clamp each of the 14 coordinates to [amin, amax] from the frozen bounds npz; "
+                        "no other post-processing, no temporal filter, no re-scaling"),
+        "sampling": ("one deterministic greedy decode per frozen DEV frame, frozen frame list "
+                     "(16 DEV episodes x --per-episode frames, seed=0 for the registered gate); no "
+                     "test-time augmentation, no best-of-n, no per-frame selection"),
+        "raw_oob_coord_rate": "fraction of the 14*N RAW coordinates outside the joint box",
+        "raw_oob_frame_rate": "fraction of frames with at least one RAW coordinate outside the box",
+    }
+
+
+def clamp_to_box(pred, bounds):
+    """The deployment clamp: identical to what the policy server applies before sending commands."""
+    if bounds is None:
+        return np.asarray(pred, np.float32).copy()
+    lo, hi = bounds
+    return np.clip(np.asarray(pred, np.float32), lo, hi).astype(np.float32)
+
+
+def _outside_box(pred, bounds, tol=1e-6):
+    if bounds is None:
+        return np.zeros(np.asarray(pred).shape, dtype=bool)
+    lo, hi = bounds
+    p = np.asarray(pred, np.float32)
+    return (p < lo - tol) | (p > hi + tol)
+
+
+def _metrics_block(p, target, state, velocity, episodes, still_eps):
+    """One metric block for one prediction vector set (all [N,14])."""
+    p = np.asarray(p, np.float32)
+    err = np.abs(p - target)
     pooled_l1 = float(err.mean(axis=1).mean())
     arm_l1 = float(err[:, ARM].mean())
     grip_l1 = float(err[:, GRIPPER].mean())
     macro = _macro(err.mean(axis=1), episodes)
 
-    corr_t = (target - state) - velocity
-    corr_p = (pred - state) - velocity
-    ss_res = float(((corr_p - corr_t) ** 2).sum())
-    ss_tot = float(((corr_t - corr_t.mean(axis=0)) ** 2).sum())
+    # ---- motion quantities: commanded motion dA = A - S and residual R = dA - V
+    dA_p = (p - state).astype(np.float32)
+    dA_t = (target - state).astype(np.float32)
+    res_p = (dA_p - velocity).astype(np.float32)
+    res_t = (dA_t - velocity).astype(np.float32)
+
+    ss_res = float(((res_p - res_t) ** 2).sum())
+    ss_tot = float(((res_t - res_t.mean(axis=0)) ** 2).sum())
     r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else float("nan")
 
-    mag_ratio = float(np.mean(np.abs(pred).mean(axis=0) /
-                              np.maximum(np.abs(target).mean(axis=0), 1e-9)))
-    sign_agree = float(np.mean(np.sign(pred) == np.sign(target)))
-    still = float(np.mean(np.abs(pred - state).max(axis=1) < still_eps))
-    clip = float("nan")
-    if bounds is not None:
-        lo, hi = bounds
-        outside = ((pred < lo - 1e-6) | (pred > hi + 1e-6))
-        clip = float(outside.mean())
+    d_mag = float(np.mean(np.abs(dA_p).mean(axis=0) /
+                          np.maximum(np.abs(dA_t).mean(axis=0), 1e-9)))
+    d_sign = float(np.mean(np.sign(dA_p) == np.sign(dA_t)))
+    r_mag = float(np.mean(np.abs(res_p).mean(axis=0) /
+                          np.maximum(np.abs(res_t).mean(axis=0), 1e-9)))
+    r_sign = float(np.mean(np.sign(res_p) == np.sign(res_t)))
+    # legacy v1 (absolute position) - reported, never gated
+    a_mag = float(np.mean(np.abs(p).mean(axis=0) /
+                          np.maximum(np.abs(target).mean(axis=0), 1e-9)))
+    a_sign = float(np.mean(np.sign(p) == np.sign(target)))
 
+    still = float(np.mean(np.abs(p - state).max(axis=1) < still_eps))
     speed = np.abs(velocity).mean(axis=1)
     q = np.quantile(speed, [0.25, 0.5, 0.75]) if len(speed) > 3 else [0, 0, 0]
     strata = {}
@@ -161,9 +222,56 @@ def metrics(pred, target, state, velocity, episodes, bounds=None, still_eps=1e-3
             "physical_l1_per_episode": macro["per_episode"],
             "physical_l1_worst_episode": macro["worst_episode"],
             "arm_l1": arm_l1, "gripper_l1": grip_l1,
-            "correction_r2": r2, "magnitude_ratio": mag_ratio,
-            "sign_agreement": sign_agree, "still_action_rate": still,
-            "joint_clip_rate": clip, "motion_strata": strata, "n_samples": int(len(pred))}
+            "correction_r2": r2,
+            "sign_agreement": d_sign, "magnitude_ratio": d_mag,
+            "delta_sign_agreement": d_sign, "delta_magnitude_ratio": d_mag,
+            "residual_sign_agreement": r_sign, "residual_magnitude_ratio": r_mag,
+            "delta_l1_pooled": pooled_l1, "residual_l1_pooled": pooled_l1,
+            "absolute_sign_agreement": a_sign, "absolute_magnitude_ratio": a_mag,
+            "still_action_rate": still, "motion_strata": strata,
+            "motion_strata_edges": [float(x) for x in q],
+            "n_samples": int(len(p))}
+
+
+def metrics(pred, target, state, velocity, episodes, bounds=None, still_eps=1e-3):
+    """RAW (as decoded) and SAFE (clamped, what the robot executes) metrics for one model.
+
+    The unprefixed keys are the SAFE/deployment variant because the gate is judged on what is
+    actually commanded; every one of them is mirrored under a raw_ prefix, together with the
+    out-of-box rates that v1 hid behind a single ambiguous 'joint_clip_rate'.
+    """
+    pred = np.asarray(pred, np.float32)
+    target = np.asarray(target, np.float32)
+    state = np.asarray(state, np.float32)
+    velocity = np.asarray(velocity, np.float32)
+    outside = _outside_box(pred, bounds)
+    pred_safe = clamp_to_box(pred, bounds)
+    safe_block = _metrics_block(pred_safe, target, state, velocity, episodes, still_eps)
+    raw_block = _metrics_block(pred, target, state, velocity, episodes, still_eps)
+    out = dict(safe_block)
+    for k, v in raw_block.items():
+        out["raw_" + k] = v
+    changed = outside.any(axis=1)
+    delta = np.abs(pred_safe - pred)
+    out.update({
+        "metric_version": METRIC_VERSION,
+        "gated_on": "SAFE",
+        "raw_oob_coord_rate": float(outside.mean()) if bounds is not None else float("nan"),
+        "raw_oob_frame_rate": float(changed.mean()) if bounds is not None else float("nan"),
+        "raw_oob_coord_count": int(outside.sum()),
+        "raw_oob_frame_count": int(changed.sum()),
+        "raw_oob_max_excursion": float(np.maximum(
+            0.0, np.maximum(np.asarray(pred) - np.asarray(bounds[1]) if bounds else 0.0,
+                            np.asarray(bounds[0]) - np.asarray(pred) if bounds else 0.0)).max())
+        if bounds is not None else float("nan"),
+        "safe_clip_frame_rate": float(changed.mean()) if bounds is not None else 0.0,
+        "safe_clip_coord_rate": float((delta > 0).mean()),
+        "safe_clip_mean_abs": float(delta.mean()),
+        "safe_clip_max_abs": float(delta.max()),
+        # legacy alias: v1 called the RAW out-of-box coordinate rate "joint_clip_rate"
+        "joint_clip_rate": float(outside.mean()) if bounds is not None else float("nan"),
+    })
+    return out
 
 
 # ----------------------------------------------------------------------- baselines
@@ -234,7 +342,8 @@ def run(pred_npz=None, per_episode=8, seed=0, out_dir=None, train_frames=256,
     if set(e for e, _t in dev_frames) & set(e for e, _t in train_pick):
         raise ValueError("frozen TRAIN fit frames overlap DEV")
 
-    ev = {"eval_version": EVAL_VERSION, "delta_contract_sha256": sha256_file(CONTRACT),
+    ev = {"eval_version": EVAL_VERSION, "metric_definitions": metric_definitions(),
+          "delta_contract_sha256": sha256_file(CONTRACT),
           "split_sha256": sha256_file(SPLIT), "bounds_sha256": sha256_file(BOUNDS),
           "hdf5_dir": HDF5_DIR, "n_dev_frames": len(dev_frames),
           "dev_episodes": sorted(set(dev_eps)), "dev_frames_sha256": frames_sha256(dev_frames),
@@ -280,10 +389,23 @@ def run(pred_npz=None, per_episode=8, seed=0, out_dir=None, train_frames=256,
         ev["models"]["vla_r42"]["model_sha256"] = str(d["model_sha256"]) \
             if "model_sha256" in d else None
 
-    cv = ev["models"]["constant_velocity_A=S+V"]["metrics"]["physical_l1_macro"]
+    cv_m = ev["models"]["constant_velocity_A=S+V"]["metrics"]
+    cv = cv_m["physical_l1_macro"]
     vla = ev["models"].get("vla_r42", {}).get("metrics")
     ev["gate"] = {"cv_macro_l1": cv,
+                  "cv_macro_l1_raw": cv_m["raw_physical_l1_macro"],
+                  "cv_raw_oob_coord_rate": cv_m["raw_oob_coord_rate"],
+                  "cv_delta_sign_agreement": cv_m["delta_sign_agreement"],
+                  "cv_delta_magnitude_ratio": cv_m["delta_magnitude_ratio"],
                   "vla_macro_l1": None if vla is None else vla["physical_l1_macro"],
+                  "vla_macro_l1_raw": None if vla is None else vla["raw_physical_l1_macro"],
+                  "vla_raw_oob_coord_rate": None if vla is None else vla["raw_oob_coord_rate"],
+                  "vla_safe_clip_frame_rate": None if vla is None else vla["safe_clip_frame_rate"],
+                  "vla_delta_sign_agreement": None if vla is None
+                  else vla["delta_sign_agreement"],
+                  "vla_delta_magnitude_ratio": None if vla is None
+                  else vla["delta_magnitude_ratio"],
+                  "gated_on": "SAFE",
                   "improvement_vs_cv": None if vla is None else
                   float((cv - vla["physical_l1_macro"]) / max(cv, 1e-9))}
     if out_dir:
@@ -313,11 +435,15 @@ def main():
             print("%-28s %s (%s)" % (name, m["status"], m["note"]))
             continue
         q = m["metrics"]
-        print("%-28s macroL1=%.6f pooled=%.6f arm=%.6f grip=%.6f R2=%+.4f mag=%.3f "
-              "sign=%.3f still=%.3f clip=%.4f"
-              % (name, q["physical_l1_macro"], q["physical_l1_pooled"], q["arm_l1"],
-                 q["gripper_l1"], q["correction_r2"], q["magnitude_ratio"],
-                 q["sign_agreement"], q["still_action_rate"], q["joint_clip_rate"]))
+        print("%-28s SAFE macroL1=%.6f | RAW macroL1=%.6f | arm=%.6f grip=%.6f R2=%+.4f"
+              % (name, q["physical_l1_macro"], q["raw_physical_l1_macro"], q["arm_l1"],
+                 q["gripper_l1"], q["correction_r2"]))
+        print("%-28s   motion: dA sign=%.4f mag=%.4f | residual sign=%.4f mag=%.4f | "
+              "still=%.3f | RAW-OOB coord=%.4f frame=%.4f | SAFE clip frames=%.4f"
+              % ("", q["delta_sign_agreement"], q["delta_magnitude_ratio"],
+                 q["residual_sign_agreement"], q["residual_magnitude_ratio"],
+                 q["still_action_rate"], q["raw_oob_coord_rate"], q["raw_oob_frame_rate"],
+                 q["safe_clip_frame_rate"]))
     print("gate:", json.dumps(ev["gate"]))
     return 0
 
