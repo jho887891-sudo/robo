@@ -460,12 +460,17 @@ def token_ce_from_logits(logits, labels, n_prompt, n_supervised=N_SUPERVISED):
     n_prompt = int(n_prompt)
     if lg.ndim != 2:
         raise M2TrainError("logits must be [L,V], got %s" % (lg.shape,))
-    if len(lab) != lg.shape[0]:
-        raise M2TrainError("labels length %d != logits length %d" % (len(lab), lg.shape[0]))
+    # The model prepends the projected VISION tokens to the text embeddings, so the logits sequence is
+    # longer than the label sequence by exactly that prefix. Ignoring the offset made the first real
+    # 2-task run die with "labels length 51 != logits length 820" (769 vision tokens + 51 text).
+    pad = int(lg.shape[0]) - len(lab)
+    if pad < 0:
+        raise M2TrainError("logits (%d rows) are SHORTER than the labels (%d); the multimodal prefix "
+                           "cannot be negative" % (lg.shape[0], len(lab)))
     if n_prompt < 1 or n_prompt + n_supervised > len(lab):
         raise M2TrainError("prompt length %d cannot carry %d supervised positions (L=%d)"
                            % (n_prompt, n_supervised, len(lab)))
-    rows = np.arange(n_prompt - 1, n_prompt - 1 + n_supervised)
+    rows = np.arange(pad + n_prompt - 1, pad + n_prompt - 1 + n_supervised)
     tgts = lab[n_prompt:n_prompt + n_supervised]
     logits_rows = lg[rows]
     mx = logits_rows.max(axis=1, keepdims=True)
@@ -478,6 +483,7 @@ def token_ce_from_logits(logits, labels, n_prompt, n_supervised=N_SUPERVISED):
     if not np.isfinite(ce[valid]).all():
         raise M2TrainError("non-finite teacher-forced CE")
     return {"ce": float(ce[valid].mean()), "per_position": [float(x) for x in ce[valid]],
+            "vision_prefix_tokens": int(pad),
             "n_supervised": int(valid.sum())}
 
 
