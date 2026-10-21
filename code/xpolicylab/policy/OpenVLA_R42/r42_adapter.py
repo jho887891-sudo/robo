@@ -368,12 +368,23 @@ def normalizer_sha256(payload):
 
 
 def normalizer_payload(normalization_mode, pmin, pmax, q01, q99, v_scale=None, a_scale=None,
-                       motion_quantile=None, n_train_episodes=64, n_dev_episodes_excluded=16):
-    """The frozen normalizer that a checkpoint must carry (and that DEV must never be fitted on)."""
-    if int(n_train_episodes) != 64 or int(n_dev_episodes_excluded) != 16:
+                       motion_quantile=None, n_train_episodes=64, n_dev_episodes_excluded=16,
+                       require_legacy_fit=True):
+    """The frozen normalizer that a checkpoint must carry (and that DEV must never be fitted on).
+
+    require_legacy_fit=True is the single-task R15 contract (exactly 64 TRAIN / 16 DEV). The M2
+    per-task blocks come from an 80/20 split, so they are validated with the flag off, which still
+    refuses a payload with no TRAIN episodes or no excluded DEV episodes.
+    """
+    if require_legacy_fit and (int(n_train_episodes) != 64 or int(n_dev_episodes_excluded) != 16):
         raise R42Error("normalizer must be fitted on 64 TRAIN episodes with 16 DEV excluded "
                        "(got %r TRAIN / %r DEV excluded); the legacy 80-episode quantiles are "
                        "refused" % (n_train_episodes, n_dev_episodes_excluded))
+    if (not require_legacy_fit) and (int(n_train_episodes) < 1
+                                     or int(n_dev_episodes_excluded) < 1):
+        raise R42Error("a per-task normalizer block must record at least one TRAIN episode and at "
+                       "least one excluded DEV episode (got %r TRAIN / %r DEV excluded)"
+                       % (n_train_episodes, n_dev_episodes_excluded))
     if normalization_mode != "signed_motion":
         raise R42Error("only signed_motion normalisation may drive the 42D path, got %r"
                        % (normalization_mode,))
@@ -398,9 +409,12 @@ def normalizer_payload(normalization_mode, pmin, pmax, q01, q99, v_scale=None, a
     return payload
 
 
-def validate_normalizer(payload):
+def validate_normalizer(payload, require_legacy_fit=True):
     if not isinstance(payload, dict):
         raise R42Error("checkpoint must carry a normalizer payload dict")
+    if is_task_normalizer(payload):
+        raise R42Error("this is a multi-task payload; call normalizer_for_task(payload, task) so "
+                       "the task is explicit")
     src = payload.get("fit_source") or {}
     return normalizer_payload(
         normalization_mode=payload.get("normalization_mode"),
@@ -408,7 +422,61 @@ def validate_normalizer(payload):
         q99=payload.get("q99"), v_scale=payload.get("v_scale"), a_scale=payload.get("a_scale"),
         motion_quantile=payload.get("motion_quantile"),
         n_train_episodes=src.get("n_train_episodes_for_quantiles", -1),
-        n_dev_episodes_excluded=src.get("n_dev_episodes_excluded", -1))
+        n_dev_episodes_excluded=src.get("n_dev_episodes_excluded", -1),
+        require_legacy_fit=require_legacy_fit)
+
+
+M2_TASK_SCHEMA = "m2-task-normalizer-v1"
+
+
+def is_task_normalizer(payload):
+    """True for the M2 per-task payload produced by training/m2_task_normalizer.py."""
+    return isinstance(payload, dict) and payload.get("schema") == M2_TASK_SCHEMA
+
+
+def task_normalizer_tasks(payload):
+    if not is_task_normalizer(payload):
+        return None
+    return sorted((payload.get("tasks") or {}).keys())
+
+
+def normalizer_for_task(payload, task=None):
+    """The 14D normalizer that applies to task.
+
+    A legacy single-task payload has no task dimension, so it is returned for any task (that is how
+    every R15 checkpoint works). A multi-task payload requires an explicit task and fails closed on a
+    missing block or a task id that disagrees with the frozen mapping.
+    """
+    if not is_task_normalizer(payload):
+        return validate_normalizer(payload)
+    tasks = payload.get("tasks") or {}
+    if task is None:
+        raise R42Error("a multi-task normalizer needs an explicit task; it carries %s"
+                       % (sorted(tasks),))
+    if task not in tasks:
+        raise R42Error("task %r has no normalizer block (have %s)" % (task, sorted(tasks)))
+    ids = payload.get("task_id") or {}
+    if ids and ids.get(str(task)) is None:
+        raise R42Error("task %r has no frozen task id in the payload" % (task,))
+    block = validate_normalizer(tasks[task], require_legacy_fit=False)
+    fitted = payload.get("fitted_on") or {}
+    if fitted and str(task) not in fitted:
+        raise R42Error("task %r has a normalizer block but no fit provenance" % (task,))
+    return block
+
+
+def normalizer_sha256_for(payload):
+    """sha256 that pins the WHOLE normalizer: all tasks for M2, the single payload for R15."""
+    if not is_task_normalizer(payload):
+        return normalizer_sha256(validate_normalizer(payload))
+    for task in task_normalizer_tasks(payload):
+        normalizer_for_task(payload, task)
+    return normalizer_sha256(payload)
+
+
+def normalizer_task_list(payload):
+    """The task list a checkpoint covers, so metadata can name it without guessing."""
+    return task_normalizer_tasks(payload) or []
 
 
 # ------------------------------------------------------------------------- metadata
@@ -432,8 +500,16 @@ def build_metadata(task_id, base_model_sha256, lora_sha256, projector_sha256,
             raise R42Error("%s must be a 64-char sha256, got %r" % (name, val))
     if normalizer is None:
         raise R42Error("an R42 checkpoint must carry the frozen normalizer payload")
-    norm = validate_normalizer(normalizer)
-    return {"task_id": task_id, "base_model_sha256": base_model_sha256,
+    if is_task_normalizer(normalizer):
+        for _task in task_normalizer_tasks(normalizer):
+            normalizer_for_task(normalizer, _task)
+        norm = normalizer
+        tasks_covered = normalizer_task_list(normalizer)
+    else:
+        norm = validate_normalizer(normalizer)
+        tasks_covered = []
+    meta = {"task_id": task_id,
+            "base_model_sha256": base_model_sha256,
             "lora_sha256": lora_sha256, "projector_sha256": projector_sha256,
             "proprio_dim": N42, "proprio_layout": "[state14, velocity14, acceleration14]",
             "history_policy": "V=0,Acc=0 at t0; Acc=0 at t1; per-env isolated, observed only",
@@ -443,7 +519,12 @@ def build_metadata(task_id, base_model_sha256, lora_sha256, projector_sha256,
             "target_representation": TARGET, "train_steps": int(train_steps),
             "seed": int(seed), "gripper_policy": gripper_policy,
             "safety_limits": safety_limits, "alignment_version": ALIGNMENT_VERSION,
-            "normalizer": norm, "normalizer_sha256": normalizer_sha256(norm)}
+            "normalizer": norm, "normalizer_sha256": normalizer_sha256_for(normalizer)}
+    # ONLY a multi-task checkpoint names its task set, so every single-task metadata file stays
+    # byte-identical to the ones this repo already produced (pinned by the byte-parity test).
+    if tasks_covered:
+        meta["tasks"] = tasks_covered
+    return meta
 
 
 def validate_metadata(meta, expect_task=None):
@@ -466,15 +547,25 @@ def validate_metadata(meta, expect_task=None):
         raise R42Error("alignment_version must be %r" % ALIGNMENT_VERSION)
     if list(meta["camera_order"]) != list(CAMERA_ORDER):
         raise R42Error("camera_order mismatch: %s" % (meta["camera_order"],))
-    if expect_task is not None and meta["task_id"] != expect_task:
-        raise R42Error("task mismatch: checkpoint %r vs requested %r"
-                       % (meta["task_id"], expect_task))
+    covered = list(meta.get("tasks") or [])
+    if expect_task is not None:
+        if covered:
+            if expect_task not in covered:
+                raise R42Error("task %r is not served by this checkpoint (covers %s)"
+                               % (expect_task, covered))
+        elif meta["task_id"] != expect_task:
+            raise R42Error("task mismatch: checkpoint %r vs requested %r"
+                           % (meta["task_id"], expect_task))
     for key in ("base_model_sha256", "lora_sha256", "projector_sha256",
                 "frozen_contract_sha256", "split_sha256", "normalizer_sha256"):
         if len(str(meta[key])) != 64:
             raise R42Error("%s is not a sha256" % key)
-    norm = validate_normalizer(meta["normalizer"])
-    recomputed = normalizer_sha256(norm)
+    if is_task_normalizer(meta["normalizer"]):
+        n_tasks = task_normalizer_tasks(meta["normalizer"])
+        if not covered or sorted(covered) != n_tasks:
+            raise R42Error("metadata tasks %s disagree with the normalizer payload %s"
+                           % (covered, n_tasks))
+    recomputed = normalizer_sha256_for(meta["normalizer"])
     if recomputed != str(meta["normalizer_sha256"]):
         raise R42Error("normalizer_sha256 mismatch: metadata says %s, payload hashes to %s"
                        % (meta["normalizer_sha256"], recomputed))
@@ -500,10 +591,14 @@ def load_metadata(path, expect_task=None):
 
 
 def decode_with_metadata(meta, indices, state, velocity, prev_cmd=None, dt=None,
-                         on_unsafe="raise"):
-    """Deployment entry: everything (quantiles, limits, gripper policy) comes from the checkpoint."""
+                         on_unsafe="raise", task=None):
+    """Deployment entry: everything (quantiles, limits, gripper policy) comes from the checkpoint.
+
+    task is required for a multi-task checkpoint and simply ignored for an R15 single-task payload,
+    so callers do not have to branch on the schema.
+    """
     validate_metadata(meta)
-    norm = meta["normalizer"]
+    norm = normalizer_for_task(meta["normalizer"], task)
     return decode_command(indices, norm["q01"], norm["q99"], state, velocity,
                           limits=meta["safety_limits"], prev_cmd=prev_cmd, dt=dt,
                           gripper_dims=tuple(meta["gripper_policy"]["gripper_dims"]),

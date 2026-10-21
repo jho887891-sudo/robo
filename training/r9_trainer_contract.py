@@ -32,6 +32,13 @@ def load_frozen_contract(path, require_64_16=True):
     if not os.path.isfile(path):
         raise FileNotFoundError("frozen contract not found: %s" % path)
     meta = json.load(open(path))
+    if isinstance(meta, dict) and meta.get("schema") == "m2-task-normalizer-v1":
+        raise ValueError(
+            "this file is a MULTI-TASK normalizer payload, not an R15 frozen contract: it has no "
+            "single proprio_dim/target_representation and one block per task. The R15 loader cannot "
+            "apply to it. Use training/m2_task_normalizer.payload_for(payload, task) for the task's "
+            "14D block (that is what training/m2_train_shared.py does), and deployment goes through "
+            "r42_adapter.normalizer_for_task(meta['normalizer'], task).")
     prov = meta.get("frozen_from", {})
     if require_64_16 and (prov.get("n_train_episodes_for_quantiles") != 64
                           or prov.get("n_dev_episodes_excluded") != 16):
