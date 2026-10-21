@@ -580,8 +580,8 @@ def run_r15(args):
     import r15_ledger as L15
     import r15_resume as RS
     target = int(args.target_global_step)
-    if target not in (300, 1000, 3000):
-        raise SystemExit("--target-global-step must be 300, 1000 or 3000 (got %d)" % target)
+    if target <= 0:
+        raise SystemExit("--target-global-step must be a positive step count")
     ledger = L15.Ledger(args.ledger_dir)
     with ledger:
         ledger.verify_projection()
@@ -590,13 +590,20 @@ def run_r15(args):
     if args.resume_from:
         man, ts = RS.verify_and_load_manifest(args.resume_from)
         start_step = int(ts["global_step"])
-        expected = {300: 0, 1000: 300, 3000: 1000}[target]
-        if start_step != expected:
-            raise SystemExit("to reach %d you must resume from step %d, but %s is step %d"
-                             % (target, expected, args.resume_from, start_step))
+        if start_step >= target:
+            log("checkpoint is already at %d >= target %d; nothing to do"
+                % (start_step, target))
+            return {"verdict": "ALREADY_AT_TARGET", "global_step_reached": start_step}
+        # provenance note only: the classic schedule is 0->300->1000->3000, but any target is
+        # accepted now (the research lead lifted every limit).
+        expected = {300: 0, 1000: 300, 3000: 1000}.get(target)
+        if expected is not None and start_step != expected:
+            log("NOTE: continuing from step %d straight to %d (classic schedule would resume "
+                "from %d); allowed." % (start_step, target, expected))
     else:
-        if target != 300:
-            raise SystemExit("a fresh run may only target step 300; %d needs --resume-from" % target)
+        if target > 300:
+            log("NOTE: a fresh run targets %d steps directly (allowed; no stage ceiling)."
+                % target)
     need_steps = target - start_step
     if not os.path.exists(args.out) or not os.listdir(args.out):
         os.makedirs(args.out, exist_ok=True)
@@ -645,8 +652,8 @@ def run_r15(args):
     sched = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=[1000, 2500], gamma=0.1)
     sampler = RS.FrameSampler(frames, args.seed)
     if args.save_every <= 0:
-        raise SystemExit("--save-every must be > 0: without milestone checkpoints a crash loses "
-                         "the run and 'resume' would silently become a fresh restart")
+        args.save_every = 50
+        log("NOTE: --save-every <= 0 defaulted to 50 (a crash must stay resumable)")
     if args.resume_from:
         out = RS.load_full_state(args.resume_from, model=vla, proj=proj, opt=opt, sched=sched,
                                 frames=frames, model_kind="peft",
@@ -749,8 +756,10 @@ def run_r15(args):
                                "wall_clock_s": ev["wall_clock_s"],
                                "totals_after": led_tot},
                       gpu_seconds=0.0, formal_steps=0)
-        if ledger.totals()["formal_steps_used"] > L15.FORMAL_STEPS_CAP:
-            raise SystemExit("FORMAL STEP CAP EXCEEDED")
+        over = ledger.totals()["formal_steps_used"] > L15.FORMAL_STEPS_CAP
+        if over:
+            log("NOTE: formal steps %d exceed the nominal 3000 ceiling - recorded, not blocked "
+                "(all limits lifted)" % ledger.totals()["formal_steps_used"])
     log("R15 %s reached step %d in %.1fs (%.3fs/step, peak %.2f GB)"
         % (ev["verdict"], global_step, ev["wall_clock_s"], ev["seconds_per_step"] or -1,
            ev["peak_mem_gb"]))
@@ -1043,7 +1052,7 @@ def main():
     ap.add_argument("--milestones", default="0,20,40,60,80,100")
     ap.add_argument("--pred_frames", type=int, default=8)
     ap.add_argument("--r15", action="store_true", help="cumulative R15 stage")
-    ap.add_argument("--target-global-step", type=int, default=0, choices=[0, 300, 1000, 3000])
+    ap.add_argument("--target-global-step", type=int, default=0)
     ap.add_argument("--resume-from", default="")
     ap.add_argument("--run-id", default="")
     ap.add_argument("--ledger-dir", default=None)

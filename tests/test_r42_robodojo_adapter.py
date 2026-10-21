@@ -135,9 +135,17 @@ def _lat(total, pre=0.5, dec=0.5):
             "decode": dec, "total": float(total)}
 
 
+def _inside(alpha=0.5):
+    """A 14D state strictly inside the real push_T joint box (the box is asymmetric)."""
+    nb = np.load(BOUNDS)
+    lo = np.asarray(nb["amin"], np.float32)
+    hi = np.asarray(nb["amax"], np.float32)
+    return (lo + float(alpha) * (hi - lo)).astype(np.float32)
+
+
 @pytest.fixture()
 def adapter():
-    ad = A.R42RoboDojoAdapter(_server(), control_dt=0.04)
+    ad = A.R42RoboDojoAdapter(SpyServer(_server()), control_dt=0.04)
     ad.reset(0)
     return ad
 
@@ -225,9 +233,10 @@ def test_positional_images_need_a_declared_frozen_order(adapter):
 
 
 def test_positional_images_with_wrong_declared_order_are_refused(adapter):
-    seq = [_images()[cam] for cam in ("cam_head", "cam_right_wrist", "cam_left_wrist")]
+    names = ["cam_head", "cam_right_wrist", "cam_left_wrist"]
+    seq = [_images()[cam] for cam in names]
     with pytest.raises(R.R42Error):
-        adapter.step(_obs(images=seq, camera_names=list(R.CAMERA_ORDER)))
+        adapter.step(_obs(images=seq, camera_names=names))
 
 
 def test_positional_images_with_correct_order_match_the_named_path(adapter):
@@ -381,9 +390,11 @@ def test_adapter_feeds_the_recorder_across_steps(adapter):
 # ----------------------------------------------------------------------- rate / env handling
 def test_checkpoint_max_rate_holds_the_command_when_configured_to_zero():
     ad = A.R42RoboDojoAdapter(_server(_meta(max_rate=(0.0,) * 14)), control_dt=0.04)
-    out0 = ad.step(_obs(state=np.full(14, 0.1, np.float32)))
-    out1 = ad.step(_obs(state=np.full(14, 0.9, np.float32)))
-    assert np.allclose(out0["action14"], np.full(14, 0.1), atol=1e-6)
+    s0 = _inside(0.30)
+    s1 = _inside(0.90)
+    out0 = ad.step(_obs(state=s0))
+    out1 = ad.step(_obs(state=s1))
+    assert np.allclose(out0["action14"], s0, atol=1e-6)
     assert np.allclose(out1["action14"], out0["action14"], atol=1e-6)
     assert out1["rate"]["rate_limited"] > 0
 
@@ -395,13 +406,13 @@ def test_max_rate_step_scales_with_control_dt():
     st = np.zeros(14, np.float32)
     o_fast = fast.step(_obs(state=st))
     o_slow = slow.step(_obs(state=st))
-    assert o_fast["rate"]["max_step"] == pytest.approx(0.04)
-    assert o_slow["rate"]["max_step"] == pytest.approx(0.01)
+    assert np.allclose(o_fast["rate"]["max_step"], 0.04)
+    assert np.allclose(o_slow["rate"]["max_step"], 0.01)
 
 
 def test_env_isolation_and_reset_clears_per_env_history(adapter):
     adapter.step(_obs(state=np.zeros(14, np.float32)), env_idx=0)
-    adapter.step(_obs(state=np.full(14, 0.2, np.float32)), env_idx=1)
+    adapter.step(_obs(state=_inside(0.6)), env_idx=1)
     assert adapter.server.history_features(0).shape == (42,)
     assert adapter.server.history_features(1).shape == (42,)
     adapter.reset(0)
@@ -414,10 +425,11 @@ def test_env_isolation_and_reset_clears_per_env_history(adapter):
 
 def test_reset_drops_the_held_previous_command():
     ad = A.R42RoboDojoAdapter(_server(_meta(max_rate=(0.0,) * 14)), control_dt=0.04)
-    ad.step(_obs(state=np.full(14, 0.3, np.float32)))
+    ad.step(_obs(state=_inside(0.3)))
     ad.reset(0)
-    out = ad.step(_obs(state=np.full(14, 0.7, np.float32)))
-    assert np.allclose(out["action14"], np.full(14, 0.7), atol=1e-6), (
+    held = _inside(0.7)
+    out = ad.step(_obs(state=held))
+    assert np.allclose(out["action14"], held, atol=1e-6), (
         "after reset the previous command must be re-seeded from the state")
 
 

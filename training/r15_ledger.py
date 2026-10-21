@@ -110,17 +110,26 @@ class GpuJobLock:
     def __enter__(self):
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
         self._fd = os.open(self.path, os.O_CREAT | os.O_RDWR, 0o644)
-        try:
-            fcntl.flock(self._fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except OSError:
+        # NOT a permission gate. If another heavy job already owns the single 48 GB card, WAIT for
+        # it (refusing would just stall the work; launching anyway would OOM it). Give up only
+        # after R15_GPU_LOCK_WAIT_S seconds.
+        deadline = time.time() + float(os.environ.get("R15_GPU_LOCK_WAIT_S", "7200"))
+        while True:
             try:
-                holder = os.read(self._fd, 4096).decode("utf-8", "replace").strip()
+                fcntl.flock(self._fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
             except OSError:
-                holder = ""
-            os.close(self._fd)
-            self._fd = None
-            raise LedgerError("another heavy GPU job already holds %s (%s); the mission allows "
-                              "exactly one GPU lane at a time" % (self.path, holder or "unknown"))
+                if time.time() >= deadline:
+                    try:
+                        holder = os.read(self._fd, 4096).decode("utf-8", "replace").strip()
+                    except OSError:
+                        holder = ""
+                    os.close(self._fd)
+                    self._fd = None
+                    raise LedgerError("waited %.0fs for the GPU lane held by %s"
+                                      % (float(os.environ.get("R15_GPU_LOCK_WAIT_S", 7200)),
+                                         holder or "unknown"))
+                time.sleep(5.0)
         os.ftruncate(self._fd, 0)
         os.write(self._fd, ("pid=%d run=%s\n" % (os.getpid(), utcnow())).encode())
         os.fsync(self._fd)

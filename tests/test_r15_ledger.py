@@ -165,20 +165,39 @@ def test_second_writer_is_blocked(led, monkeypatch):
                 pass
 
 
-def test_second_heavy_gpu_job_is_refused(led):
-    """A duplicated launch must be refused outright, not discovered via CUDA OOM."""
+def test_second_heavy_gpu_job_waits_then_acquires(led, monkeypatch):
+    """The lane lock serialises, it does not authorise: a second job waits, then proceeds."""
+    monkeypatch.setenv("R15_GPU_LOCK_WAIT_S", "30")
+    first = L.GpuJobLock(led.dir)
+    first.__enter__()
+    assert "pid=" in first.holder()
+    second = L.GpuJobLock(led.dir)
+    import threading
+    got = {}
+
+    def _take():
+        second.__enter__()
+        got["t"] = True
+
+    t = threading.Thread(target=_take)
+    t.start()
+    t.join(timeout=1.0)
+    assert not got.get("t"), "the second job must wait while the first holds the lane"
+    first.__exit__(None, None, None)          # release -> the waiter must now proceed
+    t.join(timeout=15.0)
+    assert got.get("t"), "the waiter never acquired the lane after release"
+    second.__exit__(None, None, None)
+
+
+def test_gpu_lock_gives_up_after_the_wait_budget(led, monkeypatch):
+    monkeypatch.setenv("R15_GPU_LOCK_WAIT_S", "0")
     first = L.GpuJobLock(led.dir)
     first.__enter__()
     try:
-        second = L.GpuJobLock(led.dir)
         with pytest.raises(L.LedgerError):
-            second.__enter__()
-        assert "pid=" in first.holder()
+            L.GpuJobLock(led.dir).__enter__()
     finally:
         first.__exit__(None, None, None)
-    third = L.GpuJobLock(led.dir)
-    third.__enter__()
-    third.__exit__(None, None, None)
 
 
 def test_abort_is_booked_into_the_wal(led):
