@@ -180,6 +180,17 @@
    "gpu": true,
    "count_gpu": true,
    "supervisor_locks_gpu": true
+  },
+  {
+   "id": "loop_pushT_stage1_r4",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
   }
  ]
 }

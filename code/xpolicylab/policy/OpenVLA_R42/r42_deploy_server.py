@@ -185,7 +185,15 @@ class R42DeployServer:
         for cam in R.CAMERA_ORDER:
             tiles.append(self.processor.image_processor.apply_transform(
                 Image.fromarray(images[cam], mode="RGB")))
-        return torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to(self.device)
+        if len(tiles) != len(R.CAMERA_ORDER):
+            raise RuntimeError("built %d image tiles but the frozen camera order has %d"
+                               % (len(tiles), len(R.CAMERA_ORDER)))
+        pv = torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to(self.device)
+        # fail closed on the exact mismatch seen in closed-loop attempt 3
+        if int(pv.shape[1]) != 3 * len(R.CAMERA_ORDER):
+            raise RuntimeError("pixel_values has %d channels; expected 3 per camera x %d cameras"
+                               % (int(pv.shape[1]), len(R.CAMERA_ORDER)))
+        return pv
 
     # ------------------------------------------------------------------------- rollout
     def reset(self, env_idx=0):
@@ -379,6 +387,15 @@ def _load_prismatic(base_model_path, device="cuda"):
     AutoImageProcessor.register(OpenVLAConfig, PrismaticImageProcessor)
     AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
     R.assert_runtime_contract()
-    return AutoModelForVision2Seq.from_pretrained(
+    vla = AutoModelForVision2Seq.from_pretrained(
         base_model_path, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True,
         trust_remote_code=True).to(device)
+    # The training entry calls vision_backbone.set_num_images_in_input(3) in build_model(cams=3).
+    # Without the same call here the backbone keeps the checkpoint default image count and every
+    # forward dies with 'split_with_sizes expects split_sizes to sum exactly to 18 ... got [3, 3]'
+    # (closed-loop attempt 3). Set it from the frozen camera order, not from a constant.
+    n_images = len(R.CAMERA_ORDER)
+    vla.vision_backbone.set_num_images_in_input(n_images)
+    print("[OpenVLA_R42] vision_backbone.set_num_images_in_input(%d) for cameras %s"
+          % (n_images, list(R.CAMERA_ORDER)), flush=True)
+    return vla
