@@ -547,6 +547,210 @@ def run_train(args):
     return run
 
 
+# ------------------------------------------------------- R15 true cumulative continuation
+def _r15_data_contract(meta, norm):
+    import r9_trainer_contract as RC
+    return {"split_sha256": sha256_file(SPLIT), "frozen_contract_sha256": sha256_file(CONTRACT),
+            "bounds_sha256": sha256_file(BOUNDS), "hdf5_dir": os.path.abspath(HDF5_DIR),
+            "codec": {"mode": "fixed", "window": list(R.CODEC_WINDOW), "stop": R.STOP_ID,
+                      "pad": R.PAD_TOKEN_ID},
+            "normalizer_sha256": R.normalizer_sha256(norm),
+            "camera_order": list(R.CAMERA_ORDER),
+            "gripper_dims": list(R.GRIPPER_DIMS),
+            "target": R.TARGET, "alignment_version": R.ALIGNMENT_VERSION,
+            "train_episodes": sorted(RC.select_splits(SPLIT)["train"])}
+
+
+def r15_train_frames(splits):
+    """Every history-safe TRAIN frame, as (episode, t) pairs, in a stable order."""
+    import h5py
+    frames = []
+    for name in sorted(splits["train"]):
+        with h5py.File(os.path.join(HDF5_DIR, name), "r") as h:
+            T = len(h["action/left_arm_joint_states"])
+        for t in range(TC.MIN_HISTORY_FRAMES, T - 1):
+            frames.append((name, int(t)))
+    return frames
+
+
+def run_r15(args):
+    """One cumulative stage of the formal R15 run: 0->300, 300->1000 or 1000->3000."""
+    import torch
+    import r15_ledger as L15
+    import r15_resume as RS
+    target = int(args.target_global_step)
+    if target not in (300, 1000, 3000):
+        raise SystemExit("--target-global-step must be 300, 1000 or 3000 (got %d)" % target)
+    ledger = L15.Ledger(args.ledger_dir)
+    with ledger:
+        ledger.verify_projection()
+        tot = ledger.totals()
+    start_step = 0
+    if args.resume_from:
+        man, ts = RS.verify_and_load_manifest(args.resume_from)
+        start_step = int(ts["global_step"])
+        expected = {300: 0, 1000: 300, 3000: 1000}[target]
+        if start_step != expected:
+            raise SystemExit("to reach %d you must resume from step %d, but %s is step %d"
+                             % (target, expected, args.resume_from, start_step))
+    else:
+        if target != 300:
+            raise SystemExit("a fresh run may only target step 300; %d needs --resume-from" % target)
+    need_steps = target - start_step
+    if not os.path.exists(args.out) or not os.listdir(args.out):
+        os.makedirs(args.out, exist_ok=True)
+    else:
+        raise SystemExit("output directory must be NEW and empty: %s" % args.out)
+    run_id = args.run_id or ("r15-%d-%s" % (target, datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")))
+    gpu_est = float(need_steps) * float(args.est_seconds_per_step) + float(args.time_margin)
+    with ledger:
+        guard = ledger.assert_can_start(args.bucket, gpu_est, requested_steps=need_steps,
+                                        run_id=run_id)
+        ledger.append(run_id, "job_begin", bucket=args.bucket, payload={
+            "target_global_step": target, "start_global_step": start_step,
+            "steps_requested": need_steps, "resume_from": args.resume_from,
+            "gpu_estimate_s": round(gpu_est, 1), "argv": force_arx_platform(),
+            "guard": guard, "gpu_snapshot": gpu_snapshot()})
+    log("R15 %s: %d -> %d (%d steps), bucket %s, estimate %.0fs"
+        % (run_id, start_step, target, need_steps, args.bucket, gpu_est))
+
+    t0 = time.time()
+    contract, meta, splits = load_splits()
+    q01 = np.asarray(meta["q01"], np.float32)
+    q99 = np.asarray(meta["q99"], np.float32)
+    norm = R.normalizer_payload(
+        normalization_mode=meta["normalization_mode"], pmin=meta["pmin"], pmax=meta["pmax"],
+        q01=meta["q01"], q99=meta["q99"], v_scale=meta["v_scale"], a_scale=meta["a_scale"],
+        motion_quantile=meta.get("motion_quantile"),
+        n_train_episodes=meta["frozen_from"]["n_train_episodes_for_quantiles"],
+        n_dev_episodes_excluded=meta["frozen_from"]["n_dev_episodes_excluded"])
+    nb = np.load(BOUNDS)
+    limits = {"amin": nb["amin"].astype(np.float32).tolist(),
+              "amax": nb["amax"].astype(np.float32).tolist(), "max_rate": [0.5] * 14}
+    dcontract = _r15_data_contract(meta, norm)
+    base_id = RS.attest_base_model(MODEL)
+    frames = r15_train_frames(splits)
+
+    RS.seed_everything(args.seed)          # BEFORE any model/LoRA/projector construction
+    proc, vla, proj, modeling_sha = build_model(args.cams)
+    prompt = make_prompt(proc)
+    params = [p for p in vla.parameters() if p.requires_grad] + list(proj.parameters())
+    opt = torch.optim.AdamW(params, lr=args.lr, weight_decay=0.0)
+    sched = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=[1000, 2500], gamma=0.1)
+    sampler = RS.FrameSampler(frames, args.seed)
+    if args.save_every <= 0:
+        raise SystemExit("--save-every must be > 0: without milestone checkpoints a crash loses "
+                         "the run and 'resume' would silently become a fresh restart")
+    if args.resume_from:
+        out = RS.load_full_state(args.resume_from, model=vla, proj=proj, opt=opt, sched=sched,
+                                frames=frames, model_kind="peft",
+                                expected_contract=dcontract, expected_base=base_id,
+                                expected_global_step=start_step)
+        sampler = out["sampler"]
+        log("resumed from %s at global_step=%d (next frame %s)"
+            % (args.resume_from, start_step, sampler.next()))
+        sampler = out["sampler"]
+    ev = {"mode": "r15_stage", "run_id": run_id, "utc_start": utcnow(), "target": target,
+          "start_global_step": start_step, "steps": need_steps, "bucket": args.bucket,
+          "out": args.out, "resume_from": args.resume_from, "seed": args.seed,
+          "lr": args.lr, "sched_milestones": [1000, 2500], "cams": args.cams,
+          "n_train_frames": len(frames), "sampler_order_hash": sampler.order_hash(),
+          "data_contract": dcontract, "base_model": base_id, "modeling_sha256": modeling_sha,
+          "train_only": True, "dev_used_for_gradients": False,
+          "new_final_used": False, "gpu_snapshot_start": gpu_snapshot(), "log": []}
+    with open(os.path.join(args.out, "stage_evidence.json"), "w") as fh:
+        json.dump(ev, fh, indent=1)
+
+    vla.train()
+    proj.train()
+    global_step = start_step
+    step_times = []
+    while global_step < target:
+        elapsed = time.time() - t0
+        if elapsed > gpu_est - args.time_margin:
+            log("stopping at global_step=%d: bucket/time guard (%.0fs used of %.0fs)"
+                % (global_step, elapsed, gpu_est))
+            break
+        name, t = sampler.next()
+        st = time.time()
+        state, action = read_episode(name)
+        row = sample_row(state, action, t, contract)
+        pv = episode_images(proc, name, t, args.cams)
+        pr = torch.from_numpy(row["features"]).reshape(1, 42).to("cuda")
+        lab = R.build_labels(prompt, row["residual"], q01, q99)
+        inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
+        tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
+        opt.zero_grad(set_to_none=True)
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            o = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
+                    labels=tgt, proprio=pr, proprio_projector=proj)
+            loss = o.loss
+        if not torch.isfinite(loss):
+            with open(os.path.join(args.out, "FAILURES.md"), "w") as fh:
+                fh.write("# R15 stage stopped\n\nnon-finite loss at global_step %d (%s t=%d)\n"
+                         % (global_step + 1, name, t))
+            with ledger:
+                ledger.append(run_id, "abort", bucket=args.bucket,
+                              payload={"global_step": global_step, "reason": "non_finite_loss"},
+                              gpu_seconds=time.time() - t0, formal_steps=0)
+            raise SystemExit("non-finite loss at global_step %d" % (global_step + 1))
+        loss.backward()
+        gn = float(torch.nn.utils.clip_grad_norm_(params, 1.0))
+        opt.step()
+        sched.step()
+        global_step += 1
+        step_times.append(time.time() - st)
+        with ledger:
+            ledger.append(run_id, "step_commit", bucket=args.bucket,
+                          payload={"global_step": global_step, "loss": round(float(loss), 6),
+                                   "grad_norm": round(gn, 4), "lr": sched.get_last_lr()[0],
+                                   "episode": name, "t": int(t)},
+                          formal_steps=1, gpu_seconds=max(0.0, time.time() - st))
+        if global_step % 10 == 0 or global_step == target:
+            ev["log"].append({"global_step": global_step, "loss": float(loss),
+                              "grad_norm": gn, "lr": sched.get_last_lr()[0],
+                              "seconds": round(sum(step_times[-10:]) / len(step_times[-10:]), 3),
+                              "utc": utcnow()})
+            log("step=%d loss=%.4f gnorm=%.2f lr=%.2e mem=%.2fGB"
+                % (global_step, float(loss), gn, sched.get_last_lr()[0],
+                   torch.cuda.max_memory_allocated() / 1e9))
+            with open(os.path.join(args.out, "stage_evidence.json"), "w") as fh:
+                json.dump(ev, fh, indent=1)
+        if global_step % args.save_every == 0 or global_step == target:
+            ck = RS.save_full_state(
+                os.path.join(args.out, "checkpoints", "step%d" % global_step),
+                model=vla, proj=proj, opt=opt, sched=sched, sampler=sampler,
+                global_step=global_step, run_id=run_id, data_contract=dcontract,
+                model_kind="peft", extra={"base_model": base_id, "modeling_sha256": modeling_sha,
+                                          "target": target})
+            log("saved full-state checkpoint step=%d sha=%s"
+                % (global_step, ck["manifest"]["files"]["proprio_projector_42.pt"][:16]))
+
+    ev["global_step_reached"] = global_step
+    ev["utc_end"] = utcnow()
+    ev["wall_clock_s"] = round(time.time() - t0, 1)
+    ev["seconds_per_step"] = round(float(np.mean(step_times)), 3) if step_times else None
+    ev["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+    ev["gpu_snapshot_end"] = gpu_snapshot()
+    ev["verdict"] = "REACHED_TARGET" if global_step == target else "PARTIAL"
+    with open(os.path.join(args.out, "stage_evidence.json"), "w") as fh:
+        json.dump(ev, fh, indent=1)
+    with ledger:
+        led_tot = ledger.totals()
+        ledger.append(run_id, "job_end", bucket=args.bucket,
+                      payload={"global_step": global_step, "verdict": ev["verdict"],
+                               "formal_steps_booked_here": global_step - start_step,
+                               "wall_clock_s": ev["wall_clock_s"],
+                               "totals_after": led_tot},
+                      gpu_seconds=0.0, formal_steps=0)
+        if ledger.totals()["formal_steps_used"] > L15.FORMAL_STEPS_CAP:
+            raise SystemExit("FORMAL STEP CAP EXCEEDED")
+    log("R15 %s reached step %d in %.1fs (%.3fs/step, peak %.2f GB)"
+        % (ev["verdict"], global_step, ev["wall_clock_s"], ev["seconds_per_step"] or -1,
+           ev["peak_mem_gb"]))
+    return ev
+
+
 # ------------------------------------------------------------------- R14 overfit mode
 def fixed_overfit_frames(splits, n_frames, seed=0):
     """Deterministically pick one frame from each of n distinct TRAIN episodes."""
@@ -754,6 +958,63 @@ def run_overfit(args):
     return ev
 
 
+def run_dev_preds(args):
+    """Greedy 14-token DEV predictions for the frozen gate frame list (no gradient, no update)."""
+    import torch
+    import r15_resume as RS
+    sys.path.insert(0, os.path.join(REPO, "diagnostics"))
+    import r15_dev_eval as DE
+    contract, meta, splits = load_splits()
+    q01 = np.asarray(meta["q01"], np.float32)
+    q99 = np.asarray(meta["q99"], np.float32)
+    norm = R.normalizer_payload(
+        normalization_mode=meta["normalization_mode"], pmin=meta["pmin"], pmax=meta["pmax"],
+        q01=meta["q01"], q99=meta["q99"], v_scale=meta["v_scale"], a_scale=meta["a_scale"],
+        motion_quantile=meta.get("motion_quantile"),
+        n_train_episodes=meta["frozen_from"]["n_train_episodes_for_quantiles"],
+        n_dev_episodes_excluded=meta["frozen_from"]["n_dev_episodes_excluded"])
+    RS.seed_everything(args.seed)
+    proc, vla, proj, modeling_sha = build_model(args.cams)
+    prompt = make_prompt(proc)
+    man, ts = RS.verify_and_load_manifest(args.resume_from)
+    frames = r15_train_frames(splits)
+    from safetensors.torch import load_file
+    from peft.utils.save_and_load import set_peft_model_state_dict
+    set_peft_model_state_dict(vla, load_file(os.path.join(
+        args.resume_from, "lora_adapter", "adapter_model.safetensors")))
+    proj.load_state_dict(torch.load(os.path.join(args.resume_from, "proprio_projector_42.pt"),
+                                    map_location="cpu"))
+    proj.to("cuda")
+    vla.eval()
+    proj.eval()
+    gate_frames = DE.frozen_frames(sorted(splits["dev"]), args.dev_per_episode, seed=args.dev_seed)
+    if set(e for e, _t in gate_frames) & set(e for e, _t in frames):
+        raise SystemExit("DEV gate frames overlap TRAIN")
+    actions, rows = [], []
+    for name, t in gate_frames:
+        state, action = read_episode(name)
+        row = TC.build_training_row(state, action, t, contract)
+        pv = episode_images(proc, name, t, args.cams)
+        pr = torch.from_numpy(row["features"]).reshape(1, 42).to("cuda")
+        bins, _ids = inference_14_tokens(vla, proj, pv, prompt, pr)
+        cmd, _r, _i = R.decode_command(bins, q01, q99, row["state"], row["velocity"])
+        actions.append(cmd)
+        rows.append([name, int(t)])
+    out = args.dev_preds
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    a = np.stack(actions).astype(np.float32)
+    np.savez_compressed(out, action=a, frames=np.array(rows),
+                        frames_sha256=np.array(DE.frames_sha256(gate_frames)),
+                        model_sha256=np.array(
+                            RS.sha256_file(os.path.join(args.resume_from, "lora_adapter",
+                                                        "adapter_model.safetensors"))),
+                        global_step=np.array(int(ts["global_step"])),
+                        modeling_sha256=np.array(modeling_sha))
+    log("DEV predictions (%d frames, global_step=%d) -> %s"
+        % (len(actions), int(ts["global_step"]), out))
+    return {"n": len(actions), "out": out}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
@@ -774,9 +1035,24 @@ def main():
                     help="R14: fixed diverse TRAIN frame count (0 = plain random sampling)")
     ap.add_argument("--milestones", default="0,20,40,60,80,100")
     ap.add_argument("--pred_frames", type=int, default=8)
+    ap.add_argument("--r15", action="store_true", help="cumulative R15 stage")
+    ap.add_argument("--target-global-step", type=int, default=0, choices=[0, 300, 1000, 3000])
+    ap.add_argument("--resume-from", default="")
+    ap.add_argument("--run-id", default="")
+    ap.add_argument("--ledger-dir", default=None)
+    ap.add_argument("--est-seconds-per-step", type=float, default=3.0)
+    ap.add_argument("--dev-preds", default="")
+    ap.add_argument("--dev-per-episode", type=int, default=2)
+    ap.add_argument("--dev-seed", type=int, default=0)
     args = ap.parse_args()
     t_start = time.time()
     try:
+        if args.dev_preds:
+            run_dev_preds(args)
+            return 0
+        if args.r15:
+            run_r15(args)
+            return 0
         if args.smoke:
             run_smoke(args)
             return 0

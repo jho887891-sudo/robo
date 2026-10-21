@@ -1,0 +1,106 @@
+{
+ "schema": "r15-gate-preregistration-v1",
+ "written_utc": "2026-10-21T11:05:00Z",
+ "written_before_any_vla_dev_prediction": true,
+ "statement": "These thresholds were frozen BEFORE any R15-trained checkpoint existed and before any VLA DEV prediction was computed. They are not to be adjusted after seeing a VLA DEV score.",
+ "eval_version": "r15-dev-eval-v1",
+ "dev_cohort": {
+  "episodes": [
+   "episode_0000000.hdf5",
+   "episode_0000009.hdf5",
+   "episode_0000017.hdf5",
+   "episode_0000022.hdf5",
+   "episode_0000028.hdf5",
+   "episode_0000033.hdf5",
+   "episode_0000038.hdf5",
+   "episode_0000044.hdf5",
+   "episode_0000051.hdf5",
+   "episode_0000058.hdf5",
+   "episode_0000064.hdf5",
+   "episode_0000070.hdf5",
+   "episode_0000075.hdf5",
+   "episode_0000082.hdf5",
+   "episode_0000088.hdf5",
+   "episode_0000095.hdf5"
+  ],
+  "n_episodes": 16,
+  "per_episode_frames": 2,
+  "n_gate_frames": 32,
+  "seed": 0,
+  "frames_sha256": "67b4320420249aef7cd560f33a66e2ae454960238c695e05a3910ebad3e50dff",
+  "frame_rule": "history-safe t in [2, T-2], deterministically chosen"
+ },
+ "data_contract": {
+  "split_sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2",
+  "frozen_contract_sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+  "bounds_sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855"
+ },
+ "forbidden_for_selection": [
+  "the old 20 holdout episodes",
+  "any new offline FINAL episode",
+  "any new simulation FINAL seed"
+ ],
+ "same_sample_baselines": {
+  "identity_A=S": {
+   "macro_l1": 0.007733860024018213,
+   "r2": -7.551588340786363
+  },
+  "constant_velocity_A=S+V": {
+   "macro_l1": 0.002110443303536158,
+   "r2": -0.021605880822231027,
+   "arm_l1": 0.00238405866548419,
+   "gripper_l1": 0.00046875106636434793,
+   "magnitude_ratio": 1.0008282661437988,
+   "sign_agreement": 0.9977678571428571,
+   "still_action_rate": 0.0
+  },
+  "train_only_affine": {
+   "macro_l1": 0.0035257016206742264,
+   "r2": -0.2310981562451313
+  },
+  "train_only_mlp": {
+   "macro_l1": 0.0174531739030499,
+   "r2": -17.798019007713805
+  }
+ },
+ "cv_macro_l1": 0.002110443303536158,
+ "gates": {
+  "G4_300": {
+   "conditions": [
+    "loss finite at every recorded step",
+    "100% of decoded action tokens inside 31744..31999",
+    "every decoded 14D command inside the joint box",
+    "a clear signal over the zero-step model and over identity A=S: DEV macro L1 must be strictly lower than identity_A=S macro L1 (0.007733860024018213)",
+    "no total collapse: still_action_rate < 1.0 and magnitude_ratio within [0.2, 5.0]"
+   ],
+   "action_if_fail": "stop formal training, diagnose (labels/shift/vision/grad/lr), do not add steps"
+  },
+  "G5_1000": {
+   "conditions": [
+    "DEV macro physical L1 improves at least 5 percent versus constant velocity (target <= 0.002005 from 0.002110)",
+    "OR the same 5% test passes in at least 3 of 4 pre-registered motion strata (strata are the DEV |V| quartiles of the frozen gate frames)",
+    "no action collapse (still_action_rate < 1.0)",
+    "magnitude ratio and sign agreement not worse than CV by more than 20 percent"
+   ],
+   "action_if_fail": "stop at 1000, keep the checkpoint, diagnose; never train to 3000 blindly"
+  },
+  "G6_3000": {
+   "conditions": [
+    "cumulative formal steps == 3000",
+    "same-sample fair metrics for every reported stage",
+    "the reported checkpoint is the DEV-best among 300/1000/3000",
+    "the new FINAL data remains untouched"
+   ],
+   "action_if_fail": "report FAILED_CAPABILITY with the real numbers"
+  }
+ },
+ "step_plan": {
+  "0_to_300": "fresh run",
+  "300_to_1000": "resume step300, +700 only",
+  "1000_to_3000": "resume step1000, +2000 only"
+ },
+ "notes": [
+  "Offline L1 is not the closed-loop success rate.",
+  "constant velocity is a strong baseline on Push-T; a model that cannot beat it has not learned the task."
+ ]
+}
