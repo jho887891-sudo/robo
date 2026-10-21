@@ -254,3 +254,12 @@ steps 0 of 3000):
 - **新P0：动作指标定义不对**：sign_agreement和magnitude_ratio当前比较绝对关节位置，而不是 A-S 动作增量或 R。identity A=S 的sign 0.993和magnitude~1证明这些指标不能代表运动方向/幅度。旧G4/G5预注册不事后修改；发布前瞻指标勘误与负例。
 - **新P0：G4安全验收口径冲突**：DEV源 R.decode_command 未传 limits，DEV raw VLA有6.03% joint coordinates越界，预注册G4称“每个解码命令在关节盒内”；必须分别评价 RAW 与部署真正受限动作，交叉对齐真实速率/控制周期。G4原报告PASS只属报告口径，独立状态 DISPUTED_PENDING_SAFETY。
 - **决策**：R15 300步实测已执行，但下一段+700先 BLOCKED_P0_REVIEW。修CPU修复、原始证据独立重算和账本修正后，已有授权可自动300→1000，不用再问研究负责人。新25 expert、R16闭环均未完成；无依赖CPU继续。审计report/R15_300_INDEPENDENT_AUDIT.md与missions/R15_300_TO_1000_BLOCKER_FIX_AND_AUTO_CONTINUE.md在独立审计分支。
+
+
+### 项目级大任务扩展授权计划｜R15–R23 V2（2026-10-21，仅授权文档，非远程执行）
+
+- **范围**：从真实R15正式300step到R16 Push-T闭环、R17 12项 TaskSpec、R18专家数据、R19统一task-conditioned OpenVLA、R20 2→4→12任务联合训练、R21 12任务官方仿真成功率、R22一项matched研究消融、R23复现与独立交叉审计。Push-T不再是项目结束条件。
+- **现状起点**：执行者 feature/r15-true-continuation@ca62c490，独立P0审计 review/r15-300-audit-20261021@8adefe1，真实300正式steps、恒速CV 0.0021104433优于 VLA0.002134357、未有闭环成功；采集器未收新25。R15 sampler日志漏样本、GPU账本漏计加载/DEV推理、absolute-position方向指标及RAW/SAFE冲突均先修复。
+- **新方案**：服务器端真实持久化DAG监督器 + CPU独立并行 + 单卡GPU/Isaac排队，分阶段自动测试、预算、冻结FINAL和失败留证。取消不符合用户目标的32h项目级墙钟停止点，但单次heavy-job ≤6h且训练/数据/DEV/FINAL/安全限制持续生效；不要混淆“聊天窗口结束”和“服务器job退出”。
+- **扩展权限条款（仅研究负责人明确转发整份任务后生效）**：现有服务器上独立M2多任务训练上限累计20k optimizer steps（不包括既有M1 3k）；12个官方任务中每任务最多100合规真实expert demos、250次尝试，累计≤3000次、数据总新写≤250GiB；12任务DEV每项最多20回合，冻结后新SIM FINAL每项至多30seed；不含云GPU新付费、真机、外部人员GPU清理、修改main/官方规则或覆盖历史。
+- **可核验文件**：missions/R15_R23_FULL_AUTONOMOUS_PROJECT_MISSION_V2.md 与 mission/R15_R23_PROJECT_DAG_AND_LIMITS_V2.json。创建任务Issue/PR仅代表计划已入库；真正远程执行后必须把各任务SOURCE SHA、CUDA/Isaac日志、数据/权重hash、成功率与失败原因以append-only新证据交付。

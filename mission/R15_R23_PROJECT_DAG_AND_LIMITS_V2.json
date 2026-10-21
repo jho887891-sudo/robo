@@ -1,0 +1,307 @@
+{
+  "schema": "robodojo-delegated-project-mission-v2",
+  "status": "SPEC_COMMITTED_EXECUTOR_NOT_LAUNCHED",
+  "written_date": "2026-10-21",
+  "repo": "jho887891-sudo/robo",
+  "protected_main_sha": "329614f54d3090b9b6ab120855ba50fbc93bdd1e",
+  "executor_latest_sha": "ca62c490f3655a3aa1ce30a2ebde046ee93bb475",
+  "audit_base_sha": "8adefe1d695217f1eec79339d433b362909dd180",
+  "activation": "Only research lead forwarding this full mission to DeepSeek with actual remote access authorizes expanded M2 GPU and additional 11 task expert acquisition; GitHub alone does not.",
+  "prior_results": {
+    "M1_formal_steps_used": 300,
+    "M1_formal_max_steps": 3000,
+    "R14_overfit_used": 100,
+    "R14_overfit_total": 100,
+    "R15_ledger_reported_gpu_seconds": 576.967,
+    "R15_run_wall_seconds": 757.7,
+    "R15_overhead_gap_seconds": 180.733,
+    "other_real_7b_DEV_inference_unbilled": true,
+    "M1_dev_macro_vla_l1": 0.002134356982423924,
+    "M1_dev_macro_cv_l1": 0.002110443303536158,
+    "closed_loop_success_rate": "NOT_MEASURED"
+  },
+  "scope": {
+    "dimension": "generalization",
+    "tasks": [
+      "stack_bowls",
+      "push_T",
+      "pack_objects_into_box",
+      "fold_clothes",
+      "hang_mugs",
+      "sweep_blocks",
+      "pour_liquid_into_cup",
+      "make_toast",
+      "arrange_largest_number",
+      "sort_nesting_dolls_by_size",
+      "store_laptop_and_headphones",
+      "stack_blocks"
+    ],
+    "n_tasks": 12,
+    "task_scope_status": "PROPOSED_UNTIL_INSTALLED_INVENTORY_AND_ROBOT_CONTRACT_FREEZE"
+  },
+  "expanded_authority": {
+    "project_aggregate_gpu_hours_limit": "NONE_REQUESTED_ON_OWNED_EXISTING_SERVER; each job <=6h, step and attempt budgets and hard safety checks remain",
+    "single_gpu_heavy_queue": 1,
+    "max_cpu_worktrees": 4,
+    "max_single_heavy_job_seconds": 21600,
+    "m1_formal_optimizer_steps_total": 3000,
+    "m2_formal_optimizer_steps_total": 20000,
+    "m2_stages_cumulative": [
+      2000,
+      6000,
+      18000
+    ],
+    "m2_ablation_max_included_in_total": 2000,
+    "expert_accepted_target_max_per_task": 100,
+    "expert_episode_attempts_max_per_task": 250,
+    "expert_episode_attempts_total_max": 3000,
+    "new_dataset_bytes_max": 268435456000,
+    "dev_sim_attempts_max_per_task": 20,
+    "official_final_sim_attempts_max_per_task": 30,
+    "pushT_m1_sim_final_once_max": 30,
+    "external_paid_gpu": false,
+    "real_robot_deployment": false,
+    "modify_main": false,
+    "overwrite_old_data_or_checkpoints": false,
+    "change_official_success": false,
+    "terminate_other_gpu_processes": false
+  },
+  "lanes": [
+    {
+      "id": "S",
+      "title": "Persistent supervisor",
+      "launch": "immediate",
+      "dependencies": [],
+      "resource": "cpu",
+      "acceptance": "Server-run DAG, recovery, checksum, watchdog, per-job <=6h; verify task continues after SSH/agent exit",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "A",
+      "title": "R15 P0 safety and ledger",
+      "launch": "immediate",
+      "dependencies": [],
+      "resource": "cpu",
+      "acceptance": "Fix sampler skip, full GPU billing, RAW/SAFE and delta metrics; red/green test",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "B",
+      "title": "R16 deploy/control time",
+      "launch": "immediate",
+      "dependencies": [],
+      "resource": "cpu",
+      "acceptance": "42D real model->RoboDojo client, latency p50/p95/p99, action safety",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "C",
+      "title": "12 TaskSpec inventory",
+      "launch": "immediate",
+      "dependencies": [],
+      "resource": "cpu",
+      "acceptance": "12 installed tasks verified: robot/camera/action/language/success/version/license",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "D",
+      "title": "Expert source/collector",
+      "launch": "immediate",
+      "dependencies": [],
+      "resource": "cpu",
+      "acceptance": "True expert behavior; first legal successes before scaling; fail closed",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "H",
+      "title": "Independent audit",
+      "launch": "immediate",
+      "dependencies": [],
+      "resource": "cpu",
+      "acceptance": "SHA, WAL, dataset hashes, paired metrics, separate audit PRs",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "M1_700",
+      "title": "R15 resume step300->1000",
+      "launch": "gate",
+      "dependencies": [
+        "S",
+        "A"
+      ],
+      "resource": "gpu",
+      "acceptance": "Exactly 700 additional optimizer steps from verified step300 parent",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "M1_G5",
+      "title": "1000-step DEV G5",
+      "launch": "gate",
+      "dependencies": [
+        "M1_700"
+      ],
+      "resource": "gpu",
+      "acceptance": "Macro physical L1 <=0.002005 OR pre-registered 3/4 strata ≥5% vs CV, no collapse and safe",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "M1_2000",
+      "title": "1000->3000",
+      "launch": "gate",
+      "dependencies": [
+        "M1_G5"
+      ],
+      "resource": "gpu",
+      "acceptance": "Exactly +2000 steps, only if G5 PASS; else mechanism diagnostics",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "M1_LOOP",
+      "title": "Push-T official sim loop",
+      "launch": "gate",
+      "dependencies": [
+        "B",
+        "M1_G5"
+      ],
+      "resource": "gpu",
+      "acceptance": "DEV 1->5->20 cumulative, then optional new 30-seed once-only FINAL, no peeking",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "DATA_12",
+      "title": "12 task curated expert data",
+      "launch": "gate",
+      "dependencies": [
+        "C",
+        "D"
+      ],
+      "resource": "gpu",
+      "acceptance": "At most100 accepted per task, at most250 attempts/task 3000 total, new writes<=250GiB",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "MODEL_SHARED",
+      "title": "One shared task-conditioned VLA",
+      "launch": "gate",
+      "dependencies": [
+        "C"
+      ],
+      "resource": "cpu",
+      "acceptance": "Explicit embodiment adapter; real language; task-specific normalizers; exact train/deploy contract",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "M2_TWO",
+      "title": "2-task curriculum",
+      "launch": "gate",
+      "dependencies": [
+        "MODEL_SHARED",
+        "DATA_12"
+      ],
+      "resource": "gpu",
+      "acceptance": "<=2000 multi-task cumulative optimizer steps",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "M2_FOUR",
+      "title": "4-task curriculum",
+      "launch": "gate",
+      "dependencies": [
+        "M2_TWO"
+      ],
+      "resource": "gpu",
+      "acceptance": "<=6000 multi-task cumulative steps, forgetting checks",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "M2_TWELVE",
+      "title": "12-task curriculum",
+      "launch": "gate",
+      "dependencies": [
+        "M2_FOUR"
+      ],
+      "resource": "gpu",
+      "acceptance": "<=18000 multi-task cumulative steps; blocked datasets honestly reported",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "FINAL12",
+      "title": "12-task official once-only final",
+      "launch": "gate",
+      "dependencies": [
+        "M2_TWELVE",
+        "B"
+      ],
+      "resource": "gpu",
+      "acceptance": "12 tasks x max30 new independent sim seeds, exact checkpoint/protocol frozen",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "RESEARCH",
+      "title": "Matched one-factor research ablation",
+      "launch": "gate",
+      "dependencies": [
+        "M2_TWO"
+      ],
+      "resource": "cpu_gpu_optional",
+      "acceptance": "Only if evidence-backed; optional<=2000 optimizer steps included M2 total20k",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    },
+    {
+      "id": "DELIVERY",
+      "title": "Reproducibility and QA closeout",
+      "launch": "gate",
+      "dependencies": [
+        "H",
+        "FINAL12"
+      ],
+      "resource": "cpu",
+      "acceptance": "12-task checkpoint, per-task success, CI, video hash, frozen manifest, PRs",
+      "status": "NOT_STARTED_IN_THIS_MISSION",
+      "real_evidence_sha": null,
+      "blocked_reason": null
+    }
+  ],
+  "terminal_requirements": [
+    "M1 Push-T real sim progress, official success and measured latency or explicit blocked/failed",
+    "M2 12/12 TaskSpec and shared checkpoint or honestly documented missing compatibility",
+    "M3 12 tasks official results per task counts/CI or explicit unexecuted gaps",
+    "original logs and failed histories preserved; no pretend new FINAL",
+    "safe persistent supervisor verified with host evidence; not AI background promise"
+  ],
+  "revision_policy": "No redefinition of task set, finalized gate or final seeds after results; append errata with provenance; separate review branch fixes."
+}
