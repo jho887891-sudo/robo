@@ -77,10 +77,17 @@ Two real integration failures were found and fixed (each diagnosed from its log,
    platform before the prismatic import, which would have silently decoded 14D actions against the
    LIBERO 7D table. Both are fixed in `r42_serve.py` + the launcher.
 
-Attempt 3 is running under the supervisor (`loop_pushT_stage1_r3`) with those fixes; its record is
-written to `runs/r15_loop_dev/push_T_stage1_*.json` and its raw logs to `logs/supervisor/`.
-**No closed-loop success rate has been measured yet, and none will be quoted until the official
-`_result.json` exists.**
+Attempt 3 got further and failed at a third, precisely located defect: `split_with_sizes expects
+split_sizes to sum exactly to 18 (input tensor's size at dimension 1), but got split_sizes=[3, 3]` —
+the served vision backbone expects **6 images** while the request carried **2**. The training entry
+calls `set_num_images_in_input(3)` and feeds 3 tiles; the serving path must do both. That fix is
+confined to `OpenVLA_R42/model.py` / `r42_env_io.py`.
+
+What attempt 3 DID prove: the container imports, the client connects over ws, the server asserts the
+ARX constants before prismatic, loads the real 7B + LoRA + 42D projector
+(`backend ready: _TorchBackend prompt_len=31 device=cuda`) and answers the `reset` call.
+**No closed-loop success rate has been measured, and none is claimed.** Records for all three attempts
+are kept: `runs/r15_loop_dev/` + `evidence/r15_loop_attempt{1,2}/`.
 
 ## 4. The 12-task programme (M2): what is now built and what is blocking
 

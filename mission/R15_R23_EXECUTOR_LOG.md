@@ -156,3 +156,25 @@ after launch, and the 7B is loaded lazily on the first policy call (2-3 min). A 
 therefore a ~30 min wall-clock job before the first action is even requested. The supervisor's job
 timeout (7200 s) and the driver's own (3000 s) are sized for that, and the record + raw logs land in
 `runs/r15_loop_dev/` and `logs/supervisor/` whether it succeeds or times out.
+
+### 10:45Z — attempt 3 outcome (the wire works; the vision input count does not)
+
+Attempt 3 got further than either previous run and failed at a **new, precisely located** defect:
+
+    [Eval] unhandled exception during reset/run_eval: WsError:
+    split_with_sizes expects split_sizes to sum exactly to 18 (input tensor's size at dimension 1),
+    but got split_sizes=[3, 3]
+
+Interpretation (from the message, not from guesswork): the vision backbone in the served model was
+built expecting **6 images** (18 channels) while the request carried **2 images** (6 channels). The
+training entry calls `vla.vision_backbone.set_num_images_in_input(3)` and feeds 3 tiles
+(`torch.cat([t1,t2,t3]).unsqueeze(0)`), so the serving path must do both: set the backbone to 3 images
+AND emit exactly 3 tiles in `CAMERA_ORDER`. Neither is currently guaranteed by
+`OpenVLA_R42/model.py` / `r42_env_io.py` (the 2-image count points at the converter, the 6-image
+expectation at a missing `set_num_images_in_input`). That is the next fix, and it is confined to our
+own serving files.
+
+Everything before that point is proven by this attempt: the container imports fine, the client connects
+over ws, the server asserts the ARX constants before prismatic, loads the real 7B + LoRA + 42D
+projector (`backend ready: _TorchBackend prompt_len=31 device=cuda`) and answers the `reset` call.
+**No closed-loop success rate exists, and none is claimed.**
