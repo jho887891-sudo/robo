@@ -1,0 +1,1 @@
+[OpenVLA_R42] 20 actions | total p50 7754 p95 8509 p99 8552 ms | forward p50 5998 ms | budget 40 ms -> 194x real-time

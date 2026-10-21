@@ -83,6 +83,8 @@ NORMALIZER_JSON = os.environ.get("M2_NORMALIZER_JSON",
 EVIDENCE_DIR = os.environ.get("M2_EVIDENCE_DIR", "/home/dgut/r15_lanes/M2T")
 
 SCHEMA_EVIDENCE = "m2-train-evidence-v1"
+# v2 archives are the only ones whose action windows were read from the 14 legal action rows
+SCHEMA_EVAL_ARCHIVE = "m2-eval-archive-v2"
 SCHEMA_MIX = "m2-task-mix-v1"
 MIX_POLICY = "proportional_to_train_frames_with_floor"
 STEPS_PER_TASK_STAGE = 1000
@@ -487,8 +489,22 @@ def token_ce_from_logits(logits, labels, n_prompt, n_supervised=N_SUPERVISED):
             "n_supervised": int(valid.sum())}
 
 
-def action_window_probs(logits, n_prompt, n_actions=N_ACTIONS, n_bins=256):
-    """Per-dim 256-bin distribution over the legal action window + its argmax bin."""
+ACTION_WINDOW_ALIGNMENT = "vision-prefix-aware-v2"
+
+
+def action_window_probs(logits, n_prompt, n_actions=N_ACTIONS, n_bins=256, n_text_tokens=None):
+    """Per-dim 256-bin distribution over the legal action window + its argmax bin.
+
+    The model prepends the projected VISION tokens to the text embeddings, so a logits row index is
+    the text row index shifted by that prefix. token_ce_from_logits() always applied the shift;
+    this function did NOT, so ce_window / pred_bins / the counterfactual task-routing distributions -
+    i.e. everything the P6 gate compared - were read from VISION rows instead of the 14 legal action
+    rows (issue #26, audit PR #25).
+
+    n_text_tokens is the length of the label array for THIS prompt; the offset is then
+    logits_len - n_text_tokens, which is per prompt because prompts differ in length. None keeps the
+    legacy text-only behaviour (offset 0) for callers that already pass text-only logits.
+    """
     import r42_adapter as R
     lg = np.asarray(logits, np.float32)
     if lg.ndim == 3:
@@ -496,7 +512,12 @@ def action_window_probs(logits, n_prompt, n_actions=N_ACTIONS, n_bins=256):
             raise M2TrainError("action_window_probs expects one sequence")
         lg = lg[0]
     n_prompt = int(n_prompt)
-    rows = np.arange(n_prompt - 1, n_prompt - 1 + n_actions)
+    pad = 0 if n_text_tokens is None else int(lg.shape[0]) - int(n_text_tokens)
+    if pad < 0:
+        raise M2TrainError(
+            "action_window_probs: n_text_tokens=%r exceeds the %d logits rows, so the multimodal "
+            "prefix would be negative" % (n_text_tokens, lg.shape[0]))
+    rows = np.arange(pad + n_prompt - 1, pad + n_prompt - 1 + n_actions)
     if rows[-1] >= lg.shape[0]:
         raise M2TrainError("not enough logits for %d action positions" % n_actions)
     lo = R.TOKEN_BEGIN_IDX + 1
@@ -506,7 +527,9 @@ def action_window_probs(logits, n_prompt, n_actions=N_ACTIONS, n_bins=256):
         raise M2TrainError("action window shape %s != (%d,%d)"
                            % (win.shape, n_actions, n_bins))
     probs = _softmax_rows(win).astype(np.float32)
-    return {"pred_bins": probs.argmax(axis=1).astype(np.int64), "pred_probs": probs}
+    return {"pred_bins": probs.argmax(axis=1).astype(np.int64), "pred_probs": probs,
+            "vision_prefix_tokens": int(pad),
+            "action_window_alignment": ACTION_WINDOW_ALIGNMENT}
 
 
 def bins_from_residual(payload, task, residual):
@@ -545,7 +568,7 @@ def evaluate_frame(predict, payload, frame_task, episode, t, prompt_tasks):
     out = predict(frame_task, frame_task, episode, int(t))
     n_prompt = int(out["n_prompt"])
     ce = token_ce_from_logits(out["logits"], out["labels"], n_prompt)
-    win = action_window_probs(out["logits"], n_prompt)
+    win = action_window_probs(out["logits"], n_prompt, n_text_tokens=len(out["labels"]))
     if "residual" not in out:
         raise M2TrainError("predict() must return the row residual so the true bins can be "
                            "recomputed")
@@ -554,13 +577,18 @@ def evaluate_frame(predict, payload, frame_task, episode, t, prompt_tasks):
     for pt in prompt_tasks:
         if pt == frame_task:
             x[pt] = {"pred_probs": win["pred_probs"], "pred_bins": win["pred_bins"],
+                     "vision_prefix_tokens": win["vision_prefix_tokens"],
                      "ce_window": ce_window_from_probs(win["pred_probs"], bins_true)}
             continue
         o2 = predict(pt, frame_task, episode, int(t))
-        w2 = action_window_probs(o2["logits"], o2["n_prompt"])
+        w2 = action_window_probs(o2["logits"], o2["n_prompt"],
+                                 n_text_tokens=len(o2["labels"]))
         x[pt] = {"pred_probs": w2["pred_probs"], "pred_bins": w2["pred_bins"],
+                 "vision_prefix_tokens": w2["vision_prefix_tokens"],
                  "ce_window": ce_window_from_probs(w2["pred_probs"], bins_true)}
     return {"task": frame_task, "episode": episode, "t": int(t), "ce": float(ce["ce"]),
+            "vision_prefix_tokens": win["vision_prefix_tokens"],
+            "action_window_alignment": ACTION_WINDOW_ALIGNMENT,
             "ce_window": ce_window_from_probs(win["pred_probs"], bins_true),
             "pred_bins": win["pred_bins"], "pred_probs": win["pred_probs"],
             "bins_true": bins_true, "counterfactual": x}
@@ -588,7 +616,8 @@ def evaluate_dev_ce(predict, payload, tasks, dev_frames, log_fn=None):
 
 def eval_archive_from(entries_by_task):
     """The npz payload: per frame task the frames/CE/true bins, plus the counterfactual prompts."""
-    out = {}
+    out = {"action_window_alignment": np.array(ACTION_WINDOW_ALIGNMENT),
+           "schema": np.array(SCHEMA_EVAL_ARCHIVE)}
     for task, block in entries_by_task.items():
         frames = block["frames"]
         out[task + "/episodes"] = np.array([e["episode"] for e in frames], dtype=object)
@@ -607,13 +636,21 @@ def eval_archive_from(entries_by_task):
     return out
 
 
-def write_eval_archive(path, entries_by_task, data_contract=None):
+def write_eval_archive(path, entries_by_task, data_contract=None, extra=None):
+    """Write the DEV archive WITH its alignment provenance.
+
+    The marker is mandatory: an archive whose action windows were read from vision-token rows is not
+    evidence about the policy, so load_eval_archive refuses it (LEGACY_INVALID_FOR_P6) and the old
+    files are left on disk untouched rather than overwritten.
+    """
     d = os.path.dirname(os.path.abspath(path))
     if d:
         os.makedirs(d, exist_ok=True)
     arrays = eval_archive_from(entries_by_task)
     if data_contract is not None:
         arrays["data_contract"] = np.array(json.dumps(data_contract, sort_keys=True))
+    for key, val in (extra or {}).items():
+        arrays[str(key)] = np.array(val if isinstance(val, str) else json.dumps(val, sort_keys=True))
     np.savez_compressed(path, **arrays)
     return sha256_file(path)
 
@@ -623,10 +660,19 @@ def load_eval_archive(path):
     if not os.path.isfile(path):
         raise M2TrainError("DEV eval archive not found: %s" % path)
     z = np.load(path, allow_pickle=True)
+    alignment = str(z["action_window_alignment"]) if "action_window_alignment" in z.files else None
+    if alignment != ACTION_WINDOW_ALIGNMENT:
+        raise M2TrainError(
+            "LEGACY_INVALID_FOR_P6: %s has action_window_alignment=%r, need %r. Its ce_window / "
+            "pred_bins / counterfactual routing were read from vision-token rows, not the 14 legal "
+            "action rows (issue #26). Regenerate the archive from the same validated checkpoint; the "
+            "old file stays on disk as evidence and must never be used for a P6 verdict."
+            % (path, alignment, ACTION_WINDOW_ALIGNMENT))
     tasks = sorted({k.split("/")[0] for k in z.files if "/" in k}, key=lambda t: M2.TASK_IDS[t])
     if not tasks:
         raise M2TrainError("DEV eval archive has no per-task blocks: %s" % path)
-    out = {"tasks": tasks, "blocks": {}}
+    out = {"tasks": tasks, "blocks": {}, "action_window_alignment": alignment,
+           "schema": str(z["schema"]) if "schema" in z.files else None}
     for task in tasks:
         for k in ("episodes", "t", "ce", "ce_window", "pred_bins", "pred_probs", "bins_true"):
             if task + "/" + k not in z.files:
@@ -967,9 +1013,9 @@ def run(args):
                                    model_kind="peft", expected_contract=dcontract,
                                    expected_base=base_id, expected_global_step=start_step)
         sampler = state["sampler"]
-        log("resumed from %s at global_step=%d (next frame %s)"
-            % (args.resume_from, start_step, sampler.next()))
-        sampler.position -= 1
+        # peek, never next(): the log line must not consume the sample that step start+1 will use
+        log("resumed from %s at global_step=%d (next frame %s)  # peek only, never sampler.next()"
+            % (args.resume_from, start_step, sampler.peek()))
     ev["data_contract"] = dcontract
     _write_json(os.path.join(out, "stage_evidence.json"), ev)
 
@@ -1118,12 +1164,24 @@ def run(args):
                       for t in tasks}
     refresh_loss_summary(ev)
     with ledger:
+        # Book the WHOLE job wall, not just the step loop: 7B load, the DEV counterfactual CE
+        # (16 frames x 2 tasks x 2 prompts of real forward) and every full-state save are real GPU
+        # occupancy. Each step already booked its own seconds, so job_end books only the remainder -
+        # exactly the R15 fix, applied here because M2's first job_end booked 0.0 s against a 7742.6 s
+        # wall (issue #26 item 3).
+        booked_steps_s = float(sum(step_times)) if step_times else 0.0
+        overhead_s = max(0.0, float(ev["wall_clock_s"]) - booked_steps_s)
         ledger.append(run_id, "job_end", bucket=args.bucket,
                       payload={"global_step": global_step, "verdict": ev["verdict"],
                                "tasks": tasks, "steps_booked_here": global_step - start_step,
                                "wall_clock_s": ev["wall_clock_s"],
+                               "booked_step_seconds": round(booked_steps_s, 1),
+                               "unbooked_overhead_seconds": round(overhead_s, 1),
+                               "counts_toward_total": True,
                                "totals_after": ledger.totals()},
-                      gpu_seconds=0.0, formal_steps=0)
+                      gpu_seconds=overhead_s, formal_steps=0)
+        ev["ledger"]["booked_step_seconds"] = round(booked_steps_s, 1)
+        ev["ledger"]["unbooked_overhead_seconds"] = round(overhead_s, 1)
         tot = ledger.totals()
         ev["ledger"]["steps_booked"] = int(tot["buckets"][args.bucket]["formal_steps"]) \
             if args.bucket in tot["buckets"] else None

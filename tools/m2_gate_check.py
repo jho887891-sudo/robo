@@ -7,12 +7,20 @@ curves, the task mix and the step accounting) and dev_eval_latest.npz (per-DEV-f
 256-bin distributions) - plus a FRESH recomputation of the two baselines from the HDF5 and the
 task-aware normalizer payload.  Nothing is read from a table or copied from an older run.
 
+Action-window alignment (issue #26, audit PR #25): the model prepends 769 multimodal vision
+tokens, so the 14 legal action rows live at pad + n_prompt - 1 where pad = logits_len - len(labels).
+Both the teacher-forced CE and the window probabilities now apply that per-prompt offset; an eval
+archive without the 'vision-prefix-aware-v2' marker is refused (LEGACY_INVALID_FOR_P6).
+
 Pre-registered conditions (all must hold for PASS):
-  P6.ce_vs_noop        per-task DEV teacher-forced CE (256-bin window) is BELOW the no-op
-                       baseline (A_hat = S, i.e. R_hat = -V) on the SAME DEV frames;
-  P6.ce_vs_constant_velocity
-                       ... and below the constant-velocity baseline (A_hat = S+V, R_hat = 0) on
-                       the same frames;
+  P6.nll_smoothed_vs_noop
+                       per-task eps-smoothed NLL of the true 256-bin window is BELOW the no-op
+                       baseline (A_hat = S, i.e. R_hat = -V) on the SAME DEV frames, same eps both
+                       sides (PRIMARY);
+  P6.nll_smoothed_vs_constant_velocity
+                       ... and below the constant-velocity baseline (A_hat = S+V, R_hat = 0);
+  P6.ce_vs_noop_legacy_hybrid_score / P6.ce_vs_constant_velocity_legacy_hybrid_score
+                       the old hybrid score, reported for continuity, never decisive;
   P6.routing_not_degenerate
                        the per-task predicted 256-bin distributions must be separable: minimum
                        pairwise Jensen-Shannon divergence above --routing-min-js, and a
@@ -70,6 +78,43 @@ GATE = "P6_M2_TWO"
 EXIT_PASS, EXIT_FAIL, EXIT_CANNOT = 0, 3, 4
 SPLITS = os.environ.get("M2_SPLITS", os.path.join(REPO, "data", "m2_splits.json"))
 LN_BINS = float(np.log(256.0))
+# PRE-REGISTERED smoothing for the 256-bin action window (issue #26 item 4).
+# p = (1 - eps) * onehot + eps / 256 on BOTH sides, so a hit and a miss are priced by the same
+# distribution instead of the legacy "0 nats on a hit, ln(256) on a miss" hybrid (which is eps->0 for
+# hits and eps->1 for misses and is therefore not a likelihood at all).
+EPS_SMOOTH = 1e-3
+
+
+def smoothed_nll_from_probs(probs, bins_true, eps=EPS_SMOOTH):
+    """Coherent negative log-likelihood of the true bins under the model's smoothed window.
+
+    probs is [n_actions, 256] already renormalised over the legal window; smoothing is applied here,
+    once, with the pre-registered eps.
+    """
+    p = np.asarray(probs, np.float64)
+    b = np.asarray(bins_true, np.int64)
+    if p.ndim == 3:                       # [n_frames, n_actions, 256] as the archive stores it
+        if b.ndim != 2 or b.shape != p.shape[:2]:
+            raise GateCannotEvaluate("smoothed_nll frames %s vs bins %s" % (p.shape, b.shape))
+        per = [smoothed_nll_from_probs(p[i], b[i], eps) for i in range(p.shape[0])]
+        return float(np.mean(per))
+    b1 = b.reshape(-1)
+    if p.ndim != 2 or p.shape[0] != b1.shape[0]:
+        raise GateCannotEvaluate("smoothed_nll shapes %s vs %s" % (p.shape, b.shape))
+    ps = (1.0 - float(eps)) * p + float(eps) / 256.0
+    picked = ps[np.arange(len(b1)), np.clip(b1, 0, 255)]
+    return float(-np.log(picked).mean())
+
+
+def smoothed_nll_from_bins(pred_bins, bins_true, eps=EPS_SMOOTH):
+    """Same likelihood for a POINT predictor: p = 1 at the predicted bin, smoothed with eps."""
+    pred = np.asarray(pred_bins, np.int64).reshape(-1)
+    b = np.asarray(bins_true, np.int64).reshape(-1)
+    if pred.shape != b.shape:
+        raise GateCannotEvaluate("smoothed_nll_from_bins shapes %s vs %s" % (pred.shape, b.shape))
+    hit = pred == b
+    p = np.where(hit, (1.0 - float(eps)) + float(eps) / 256.0, float(eps) / 256.0)
+    return float(-np.log(p).mean())
 
 
 class GateCannotEvaluate(Exception):
@@ -140,8 +185,12 @@ def recompute_baselines(payload, tasks, blocks, hdf5_root):
             "n_frames": int(true.shape[0]),
             "true_bins_sha256": MT.sha256_json(true.tolist()),
             "hit_rate_noop": hit_noop, "hit_rate_cv": hit_cv,
+            # legacy hybrid score, kept for continuity only (NOT a likelihood)
             "ce_noop": (1.0 - hit_noop) * LN_BINS,
             "ce_cv": (1.0 - hit_cv) * LN_BINS,
+            # coherent smoothed NLL on the same frames, same eps as the model side
+            "nll_smoothed_noop": smoothed_nll_from_bins(noop, true),
+            "nll_smoothed_cv": smoothed_nll_from_bins(cv, true),
             "l1_noop": float(np.mean([b["l1_noop"] for b in per_frame])),
             "l1_cv": float(np.mean([b["l1_cv"] for b in per_frame])),
         }
@@ -337,11 +386,21 @@ def score(evidence_path, eval_path, normalizer_path, splits_path=None, hdf5_root
               "eval_archive": os.path.abspath(eval_path),
               "normalizer": os.path.abspath(normalizer_path),
               "checks": [], "per_task": {}, "verdict": "CANNOT_EVALUATE", "exit": EXIT_CANNOT,
+              "action_window_alignment": "vision-prefix-aware-v2",
+              "ce_definitions": {
+                  "primary": "eps-smoothed NLL of the true 256-bin action window: "
+                             "p = (1-eps) * p_model + eps/256 with eps = %g pre-registered; the "
+                             "point baselines are scored as a point likelihood with the SAME eps so "
+                             "a hit and a miss are priced coherently" % EPS_SMOOTH,
+                  "legacy": "(1 - hit_rate) * ln(256): 0 nats on a hit, ln(256) on a miss. Kept for "
+                            "continuity with the previous report only - it is a heuristic bin-error "
+                            "score, not a likelihood, and is NOT used to decide P6."},
               "metric_definitions": {
                   "model_ce": "mean over the 14 action dims of -log p_window(true_bin), "
                               "256-way window renormalised (nats)",
-                  "baseline_ce": "(1 - hit_rate) * ln(256): a point baseline pays 0 nats for an "
-                                 "exact bin hit and ln(256) for a miss",
+                  "model_nll_smoothed": "eps-smoothed NLL of the true bins (the primary metric)",
+                  "baseline_nll_smoothed": "the same eps-smoothed NLL for the point baseline's bins",
+                  "baseline_ce": "LEGACY (1 - hit_rate) * ln(256) hybrid score, reported only",
                   "forgetting": "worst save-point CE minus that task's step-0 CE",
                   "routing": "pairwise Jensen-Shannon divergence of the per-task mean predicted "
                              "256-bin distributions + leave-one-out nearest-centroid accuracy"}}
@@ -448,21 +507,43 @@ def score(evidence_path, eval_path, normalizer_path, splits_path=None, hdf5_root
                           "HDF5 + normalizer payload (the archive was made with another payload "
                           "or other frames)" % t)
         model_ce = float(arch["blocks"][t]["ce_window"].mean())
+        model_nll = smoothed_nll_from_probs(arch["blocks"][t]["pred_probs"], got)
         base[t]["model_ce"] = model_ce
+        base[t]["model_nll_smoothed"] = model_nll
         base[t]["margin_vs_noop"] = base[t]["ce_noop"] - model_ce
         base[t]["margin_vs_cv"] = base[t]["ce_cv"] - model_ce
+        base[t]["margin_nll_vs_noop"] = base[t]["nll_smoothed_noop"] - model_nll
+        base[t]["margin_nll_vs_cv"] = base[t]["nll_smoothed_cv"] - model_nll
         report["per_task"][t] = base[t]
+        # PRIMARY, coherent comparison (same eps on both sides, issue #26 item 4)
         report["checks"].append(check(
-            "P6.ce_vs_noop.%s" % t,
-            "per-task DEV CE is below the no-op baseline (A_hat=S) on the same frames",
+            "P6.nll_smoothed_vs_noop.%s" % t,
+            "coherent eps-smoothed NLL of the true bins is below the no-op baseline (A_hat=S) on "
+            "the same frames, same eps=%g on both sides" % EPS_SMOOTH,
+            {"model_nll": model_nll, "baseline_nll": base[t]["nll_smoothed_noop"],
+             "hit_rate": base[t]["hit_rate_noop"], "l1": base[t]["l1_noop"],
+             "margin_nats": base[t]["margin_nll_vs_noop"], "eps": EPS_SMOOTH},
+            model_nll < base[t]["nll_smoothed_noop"]))
+        report["checks"].append(check(
+            "P6.nll_smoothed_vs_constant_velocity.%s" % t,
+            "coherent eps-smoothed NLL of the true bins is below the constant-velocity baseline "
+            "(A_hat=S+V) on the same frames, same eps=%g on both sides" % EPS_SMOOTH,
+            {"model_nll": model_nll, "baseline_nll": base[t]["nll_smoothed_cv"],
+             "hit_rate": base[t]["hit_rate_cv"], "l1": base[t]["l1_cv"],
+             "margin_nats": base[t]["margin_nll_vs_cv"], "eps": EPS_SMOOTH},
+            model_nll < base[t]["nll_smoothed_cv"]))
+        report["checks"].append(check(
+            "P6.ce_vs_noop_legacy_hybrid_score.%s" % t,
+            "LEGACY hybrid score (0 nats on a hit, ln256 on a miss: not a likelihood) below the "
+            "no-op baseline - reported for continuity, not used to decide P6",
             {"model_ce": model_ce, "baseline_ce": base[t]["ce_noop"],
              "hit_rate": base[t]["hit_rate_noop"], "l1": base[t]["l1_noop"],
              "margin_nats": base[t]["margin_vs_noop"]},
             model_ce < base[t]["ce_noop"]))
         report["checks"].append(check(
-            "P6.ce_vs_constant_velocity.%s" % t,
-            "per-task DEV CE is below the constant-velocity baseline (A_hat=S+V) on the same "
-            "frames",
+            "P6.ce_vs_constant_velocity_legacy_hybrid_score.%s" % t,
+            "LEGACY hybrid score (0 nats on a hit, ln256 on a miss) below the constant-velocity "
+            "baseline - reported for continuity, not used to decide P6",
             {"model_ce": model_ce, "baseline_ce": base[t]["ce_cv"],
              "hit_rate": base[t]["hit_rate_cv"], "l1": base[t]["l1_cv"],
              "margin_nats": base[t]["margin_vs_cv"]},

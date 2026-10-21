@@ -117,6 +117,16 @@ class FrameSampler:
                              "perm": self.perm}, sort_keys=True).encode())
         return h.hexdigest()
 
+    def peek(self, k=0):
+        """The frame next() WOULD return, without advancing.
+
+        Reading the sampler for a log line must never consume a sample: doing exactly that is how the
+        first R15 resume silently skipped one frame (issue found by audit PR#21). Logging therefore
+        uses peek(); next() is the only method allowed to advance the position.
+        """
+        idx = self.perm[(self.position + int(k)) % len(self.perm)]
+        return self.frames[idx]
+
     def next(self):
         idx = self.perm[self.position % len(self.perm)]
         self.position += 1

@@ -200,8 +200,10 @@ def test_model_worse_than_both_baselines_fails(ds, tmp_path):
     assert code == 3 and report["verdict"] == "FAIL"
     failed = ids_failed(report)
     for t in TASKS:
-        assert "P6.ce_vs_noop.%s" % t in failed
-        assert "P6.ce_vs_constant_velocity.%s" % t in failed
+        assert "P6.nll_smoothed_vs_noop.%s" % t in failed
+        assert "P6.nll_smoothed_vs_constant_velocity.%s" % t in failed
+        # the legacy hybrid score is still reported (continuity) but never decides
+        assert "P6.ce_vs_noop_legacy_hybrid_score.%s" % t in failed
         assert report["per_task"][t]["margin_vs_noop"] < 0
 
 
@@ -214,7 +216,7 @@ def test_prompt_ignoring_model_fails_routing_but_not_ce(ds, tmp_path):
     assert "P6.routing_not_degenerate.own_prompt_wins" in failed
     assert "P6.routing_not_degenerate.wrong_prompt_penalty" in failed
     for t in TASKS:
-        assert "P6.ce_vs_noop.%s" % t not in failed, "the CE checks must still pass here"
+        assert "P6.nll_smoothed_vs_noop.%s" % t not in failed, "the CE checks must still pass here"
     assert report["routing"]["min_wrong_prompt_ce_penalty"] == 0.0
     assert report["routing"]["min_own_prompt_win_rate"] == 0.0
 

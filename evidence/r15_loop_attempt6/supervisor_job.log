@@ -1,0 +1,21 @@
+# supervisor job loop_pushT_stage1_r6
+# cmd: bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000
+# utc: 2026-10-21T12:14:55Z
+# closed loop 2026-10-21T12:14:55Z ckpt=runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 episodes=1 stage=1 port=19000
+policy server ready on ws://0.0.0.0:19000 (pid 2921252) after 10s
+[OpenVLA_R42] metadata bridged from runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 (manifest=manifest, steps=1000, lora=de93b7fed088..)
+[OpenVLA_R42] template=XPolicyLab.model_template codec_mode=FIXED (asserted) window=[31744, 31999] n_actions=14 camera_order=['cam_head', 'cam_left_wrist', 'cam_right_wrist'] control_hz=25 metadata=r42_metadata_bridge(runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000) device=cuda
+[OpenVLA_R42] backend is lazy: no model is loaded until the first get_action()
+[OpenVLA_R42] serving on ws://0.0.0.0:19000 (policy=OpenVLA_R42)
+{
+ "task": "push_T",
+ "stage": 1,
+ "exit": 0,
+ "episodes_observed": null,
+ "successes": null,
+ "success_rate": null,
+ "wilson_95_ci": null,
+ "verdict": "NO_RESULT",
+ "result_json": null
+}
+# closed loop finished rc=4 at 2026-10-21T12:19:43Z
