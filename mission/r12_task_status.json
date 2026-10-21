@@ -1,0 +1,186 @@
+{
+ "schema": "r12-task-status-v1",
+ "generated_from": [
+  "lanes/C_taskspec.json (TaskSpec verified 12/12)",
+  "lanes/D_expert_feasibility.md (section headings -> expert class)",
+  "live filesystem check for HDF5 episode counts"
+ ],
+ "counts": {
+  "n_tasks": 12,
+  "data_present": 3,
+  "data_absent": 9,
+  "blocked_data": 2
+ },
+ "gate_2_to_4": {
+  "state": "PERMITTED_PENDING_BUDGET_DECISION",
+  "why": "P6_M2_TWO now PASSES on the corrected evidence (mission/m2_p6_two_corrected_report.json), so the pre-registered 2->4 condition is met. Starting a 4-task stage is a model/budget decision for the research lead and has NOT been started.",
+  "evidence": "mission/m2_p6_two_corrected_report.json (PASS, 20/20 checks)"
+ },
+ "global_unknowns": [
+  "NOTHING in the 12-task list is missing: all 12 task ids exist as task/RoboDojo/tasks/<id>.py + config/<id>.yml in BOTH /home/T7/ojh/robot_actual/RoboDojo (installed, runnable) and RoboDojo_official. Status VERIFIED, not BLOCKED_INTERFACE.",
+  "UNKNOWN: the published benchmark spec at https://robodojo-benchmark.com/doc/sim-tasks/ was NOT fetched (no network work performed in this lane) - so per-task prose spec (e.g. intended object colours, published instruction wording variants) is UNKNOWN; only on-machine source is quoted.",
+  "UNKNOWN: object colours/textures per index. Only stack_blocks' three texture classes and pack_objects' 'front side facing left' are expressed in config; the actual RGB values live inside the USD assets.",
+  "UNKNOWN: 'colour of cameras' has no on-machine meaning beyond RGB-only output - no white balance / colour-temperature / colour-space setting exists in env_cfg/camera/*.",
+  "UNKNOWN: licence intent - LICENSE says MIT (LICENSE:1) but README.md:129 says 'RoboDojo Non-Commercial Research License'. Unresolved contradiction; treat as non-commercial until clarified.",
+  "UNKNOWN: real wall-clock timeout is only step_lim*0.04 s if every policy action is consumed as 10 sim steps; a policy that does not call take_action keeps the episode open (no wall-clock watchdog exists in eval_env.py).",
+  "UNKNOWN: *_random (generalization-random) variants were not audited per field; they are present (12 of them) and inherit the generalization dimension per task_inventory.py:93-98."
+ ],
+ "tasks": [
+  {
+   "task": "stack_bowls",
+   "step_lim": 800,
+   "expert_class": "REALISTIC",
+   "data": {
+    "status": "PRESENT",
+    "dir": "/home/T7/ojh/robot_actual/data/data/hdf5/stack_bowls/arx_x5/data",
+    "n_episodes": 100
+   },
+   "authorisation": "AUTHORISED",
+   "next_action": "usable: TaskSpec verified, data present, included in the shared-model task pool",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "push_T",
+   "step_lim": 600,
+   "expert_class": "REALISTIC",
+   "data": {
+    "status": "PRESENT",
+    "dir": "/home/T7/ojh/robot_actual/data/data/hdf5/push_T/arx_x5/data",
+    "n_episodes": 100
+   },
+   "authorisation": "AUTHORISED",
+   "next_action": "usable: TaskSpec verified, data present, included in the shared-model task pool",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "pack_objects_into_box",
+   "step_lim": 1300,
+   "expert_class": "REALISTIC",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "AUTHORISED_FOR_PILOT",
+   "next_action": "collect a bounded scripted-expert pilot under COLLECT harness (lanes/COLLECT_harness.md); gate P5_EXPERT_VALID must pass on a pilot before any 100-episode run",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "fold_clothes",
+   "step_lim": 500,
+   "expert_class": "BLOCKED_DATA",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "NOT_AUTHORISED",
+   "next_action": "BLOCKED_DATA - rigid-body expert design cannot represent cloth/liquid; needs a physics-capable expert or moto/sim asset work, which is not authorised this round",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "hang_mugs",
+   "step_lim": 800,
+   "expert_class": "HARD_BUT_RIGID",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "AUTHORISED_FOR_PILOT",
+   "next_action": "collect a bounded scripted-expert pilot under COLLECT harness (lanes/COLLECT_harness.md); gate P5_EXPERT_VALID must pass on a pilot before any 100-episode run",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "sweep_blocks",
+   "step_lim": 1000,
+   "expert_class": "HARD_BUT_RIGID",
+   "data": {
+    "status": "PRESENT",
+    "dir": "/home/T7/ojh/robot_actual/data/data/hdf5/sweep_blocks/arx_x5/data",
+    "n_episodes": 100
+   },
+   "authorisation": "AUTHORISED",
+   "next_action": "usable: TaskSpec verified, data present, included in the shared-model task pool",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "pour_liquid_into_cup",
+   "step_lim": 400,
+   "expert_class": "BLOCKED_DATA",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "NOT_AUTHORISED",
+   "next_action": "BLOCKED_DATA - rigid-body expert design cannot represent cloth/liquid; needs a physics-capable expert or moto/sim asset work, which is not authorised this round",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "make_toast",
+   "step_lim": 1400,
+   "expert_class": "HARD_BUT_RIGID",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "AUTHORISED_FOR_PILOT",
+   "next_action": "collect a bounded scripted-expert pilot under COLLECT harness (lanes/COLLECT_harness.md); gate P5_EXPERT_VALID must pass on a pilot before any 100-episode run",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "arrange_largest_number",
+   "step_lim": 1050,
+   "expert_class": "REALISTIC",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "AUTHORISED_FOR_PILOT",
+   "next_action": "collect a bounded scripted-expert pilot under COLLECT harness (lanes/COLLECT_harness.md); gate P5_EXPERT_VALID must pass on a pilot before any 100-episode run",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "sort_nesting_dolls_by_size",
+   "step_lim": 1050,
+   "expert_class": "REALISTIC",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "AUTHORISED_FOR_PILOT",
+   "next_action": "collect a bounded scripted-expert pilot under COLLECT harness (lanes/COLLECT_harness.md); gate P5_EXPERT_VALID must pass on a pilot before any 100-episode run",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "store_laptop_and_headphones",
+   "step_lim": 800,
+   "expert_class": "HARD_BUT_RIGID",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "AUTHORISED_FOR_PILOT",
+   "next_action": "collect a bounded scripted-expert pilot under COLLECT harness (lanes/COLLECT_harness.md); gate P5_EXPERT_VALID must pass on a pilot before any 100-episode run",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  },
+  {
+   "task": "stack_blocks",
+   "step_lim": 550,
+   "expert_class": "REALISTIC",
+   "data": {
+    "status": "ABSENT",
+    "dir": null,
+    "n_episodes": 0
+   },
+   "authorisation": "AUTHORISED_FOR_PILOT",
+   "next_action": "collect a bounded scripted-expert pilot under COLLECT harness (lanes/COLLECT_harness.md); gate P5_EXPERT_VALID must pass on a pilot before any 100-episode run",
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+  }
+ ]
+}
