@@ -487,16 +487,32 @@ def token_ce_from_logits(logits, labels, n_prompt, n_supervised=N_SUPERVISED):
             "n_supervised": int(valid.sum())}
 
 
-def action_window_probs(logits, n_prompt, n_actions=N_ACTIONS, n_bins=256):
-    """Per-dim 256-bin distribution over the legal action window + its argmax bin."""
+def action_window_probs(logits, n_prompt, n_actions=N_ACTIONS, n_bins=256,
+                        n_text_tokens=None):
+    """256-bin action distributions at the *causal action positions*.
+
+    The 7B forward prepends visual tokens (769 in the recorded M2 run) to the
+    text sequence, so for real model logits n_text_tokens MUST be supplied
+    from the corresponding labels/input_ids length. Without this correction
+    P6 compared visual-prefix logits to action labels while ce_full used the
+    correct (shifted) rows, silently invalidating the Gate. The omitted value
+    is supported only for text-only CPU fixtures with no visual prefix.
+    """
     import r42_adapter as R
     lg = np.asarray(logits, np.float32)
     if lg.ndim == 3:
         if lg.shape[0] != 1:
             raise M2TrainError("action_window_probs expects one sequence")
         lg = lg[0]
+    if lg.ndim != 2:
+        raise M2TrainError("action_window_probs requires [sequence,vocab] logits")
     n_prompt = int(n_prompt)
-    rows = np.arange(n_prompt - 1, n_prompt - 1 + n_actions)
+    pad = 0 if n_text_tokens is None else int(lg.shape[0]) - int(n_text_tokens)
+    if pad < 0:
+        raise M2TrainError("visual prefix length cannot be negative")
+    if n_text_tokens is not None and n_prompt + n_actions > int(n_text_tokens):
+        raise M2TrainError("action token block exceeds text token sequence")
+    rows = np.arange(pad + n_prompt - 1, pad + n_prompt - 1 + n_actions)
     if rows[-1] >= lg.shape[0]:
         raise M2TrainError("not enough logits for %d action positions" % n_actions)
     lo = R.TOKEN_BEGIN_IDX + 1
@@ -545,7 +561,8 @@ def evaluate_frame(predict, payload, frame_task, episode, t, prompt_tasks):
     out = predict(frame_task, frame_task, episode, int(t))
     n_prompt = int(out["n_prompt"])
     ce = token_ce_from_logits(out["logits"], out["labels"], n_prompt)
-    win = action_window_probs(out["logits"], n_prompt)
+    win = action_window_probs(out["logits"], n_prompt,
+                              n_text_tokens=len(out["labels"]))
     if "residual" not in out:
         raise M2TrainError("predict() must return the row residual so the true bins can be "
                            "recomputed")
@@ -557,7 +574,8 @@ def evaluate_frame(predict, payload, frame_task, episode, t, prompt_tasks):
                      "ce_window": ce_window_from_probs(win["pred_probs"], bins_true)}
             continue
         o2 = predict(pt, frame_task, episode, int(t))
-        w2 = action_window_probs(o2["logits"], o2["n_prompt"])
+        w2 = action_window_probs(o2["logits"], o2["n_prompt"],
+                                 n_text_tokens=len(o2["labels"]))
         x[pt] = {"pred_probs": w2["pred_probs"], "pred_bins": w2["pred_bins"],
                  "ce_window": ce_window_from_probs(w2["pred_probs"], bins_true)}
     return {"task": frame_task, "episode": episode, "t": int(t), "ce": float(ce["ce"]),
@@ -588,7 +606,7 @@ def evaluate_dev_ce(predict, payload, tasks, dev_frames, log_fn=None):
 
 def eval_archive_from(entries_by_task):
     """The npz payload: per frame task the frames/CE/true bins, plus the counterfactual prompts."""
-    out = {}
+    out = {"action_window_alignment": np.array("vision-prefix-aware-v2")}
     for task, block in entries_by_task.items():
         frames = block["frames"]
         out[task + "/episodes"] = np.array([e["episode"] for e in frames], dtype=object)
@@ -623,6 +641,12 @@ def load_eval_archive(path):
     if not os.path.isfile(path):
         raise M2TrainError("DEV eval archive not found: %s" % path)
     z = np.load(path, allow_pickle=True)
+    # Existing pre-fix archives have incorrectly indexed visual-token logits.
+    # Historical evidence must be preserved, but must NOT pass P6 as valid.
+    if ("action_window_alignment" not in z.files or
+            str(z["action_window_alignment"]) != "vision-prefix-aware-v2"):
+        raise M2TrainError("P6 requires vision-prefix-aware-v2 action-window alignment; "
+                           "legacy DEV archives must be regenerated from fixed checkpoints")
     tasks = sorted({k.split("/")[0] for k in z.files if "/" in k}, key=lambda t: M2.TASK_IDS[t])
     if not tasks:
         raise M2TrainError("DEV eval archive has no per-task blocks: %s" % path)
