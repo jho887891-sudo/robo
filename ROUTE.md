@@ -243,3 +243,12 @@ steps 0 of 3000):
   upstream gates are green, but the window ended before the 300/1000/3000 runs.
 * **Draft PR not created** — the box has no GitHub API credential (no `gh`, no token); the branch
   is pushed and this is recorded rather than papered over with a `/pull/new/` link.
+
+### R16真实7B推理与M2 P6独立审计（2026-10-21）
+
+- 执行者SHA feature/r15-true-continuation@b57d16a2579ee69f90703b49ca2b96955329dc8b。PushT服务端每个动作14次重新调用7B多模态forward；执行者报告20个动作真7B p50=7754/p95=8509/p99=8552ms（14次forward共~5998ms），比25Hz40ms周期慢194倍。24.6ms是桩后端不可使用；GitHub固定tree中尚未见attempt6原始latency证据，不能声称由本独立审计复测，需执行者推送log/checksum。
+- P0 M2指标：training/m2_train_shared.py的token_ce_from_logits正确按多模态视觉前缀(769 tokens)偏移，但action_window_probs未偏移、P6使用错误的视觉位置推导ce_window/跨任务概率。审计分支最小修正action_window_probs，新增vision-prefix-aware-v2存档标识与无前缀/有前缀概率等价负例，拒绝历史错误P6 archive；补丁尚待执行者CPU全套及真实7B回归。旧训练checkpoint有效可供正确DEV重算，旧指标不得被用作P6 PASS。
+- 第二P0 GPU账本：M2 job_end gpu_seconds=0，虽然step_commit计费，但model load、存档和8DEV/task反事实评测尚未纳入完整GPU job wall；需要只追加WAL修正与CPU失败负例。不停止合法正在运行的M2进程，先查源/进程归属。
+- P6对照的方法学问题：将点baseline的bin miss简单设ln256叫CE不是统一概率模型的真实对数评分；需要标启发式分数，或预先固定与模型同口径的概率平滑，然后增加匹配帧关节physical L1/闭环。冻结旧P6协议不删改，新版本评测单独标明。
+- R16多模态prefix prefill+incrementalKV是首要推理研究，必须以真实7B 14/14 bins、合法SAFE动作与cache invalidation完全对齐为Gate，再统计同GPU真实p50/p95/p99。缓存不保证25Hz达标；同步仿真慢于实时仍可能统计闭环结果，但不能宣称能实时部署。
+- 完整自动执行Spec：missions/R16_KV_CACHE_M2_P6_CONTRACT_FIX_AND_AUTOCONTINUE.md。历史G5=FAIL继续阻断旧PushT+2000无证据加训；12任务M2的已获独立预算和数据研发不受影响，需修P6后作门控。无远程GPU新执行由本审计发生。
