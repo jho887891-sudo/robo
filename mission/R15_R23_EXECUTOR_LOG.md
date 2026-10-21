@@ -178,3 +178,43 @@ Everything before that point is proven by this attempt: the container imports fi
 over ws, the server asserts the ARX constants before prismatic, loads the real 7B + LoRA + 42D
 projector (`backend ready: _TorchBackend prompt_len=31 device=cuda`) and answers the `reset` call.
 **No closed-loop success rate exists, and none is claimed.**
+
+## 2026-10-21 11:20-12:25Z — closed loop: four attempts, four real defects, one decisive measurement
+
+| attempt | got as far as | failure | fix |
+|---|---|---|---|
+| 3 (10:47) | real 7B + 42D projector resident, ARX asserted, reset answered | split_with_sizes expects 18 ... got [3,3] — the serving path never called set_num_images_in_input | set it from CAMERA_ORDER |
+| 4 (10:47) | same | my own assertion fired: pixel_values has 18 channels; expected 3 per camera x 3 | the fused DINO+SigLIP backbone stacks TWO 3-channel copies per camera, so 3 cameras = 18 channels by design (training feeds the same); the expectation is now derived from the processor output |
+| 5 (11:23) | episode actually running: pixel_values channels=18 (6 per camera x 3), GPU at 100 % | driver timeout after 3000 s with no _result.json | this is the finding, not a bug |
+| 6 (12:14) | same, with latency instrumentation | stopped on purpose after the measurement below | — |
+
+### The number that changes the plan
+
+    20 actions | total p50 7754 p95 8509 p99 8552 ms | forward p50 5998 ms
+    budget 40 ms -> 194x real-time
+
+One control step costs **7.75 s** (p50), 6.0 s of it in the 14 autoregressive forwards. A Push-T episode
+is up to step_lim=600 steps, i.e. **~77 minutes of policy time for a single episode** — 194x the 40 ms
+budget at 25 Hz. The 24.6 ms p50 measured earlier was a stub backend and must never be quoted as the
+model's latency.
+
+Consequences, applied:
+* the closed loop is NOT a matter of a bigger timeout; it needs the per-action cost to drop. The obvious
+  next step is caching the multimodal prefix (vision features are recomputed on every one of the 14
+  decode steps today) — inference-side work, no architecture change, to be verified as a like-for-like
+  latency measurement.
+* the GPU lane was handed to the authorised M2 deliverable instead of burning 1.5 h on an episode that
+  cannot finish; the four failed loop attempts and their logs are kept under
+  evidence/r15_loop_attempt{1,2,3,6}/.
+
+## 2026-10-21 12:20Z — M2 first real launch: two latent bugs, both fixed and pinned
+
+1. KeyError: 'prompts' — evidence_skeleton() looked up the rich dict returned by assert_prompts_distinct
+   while run() passes the plain {task: instruction} mapping. Both are now accepted; 3 new tests call
+   evidence_skeleton directly.
+2. 'the ledger has only 1336 formal steps left but this stage needs 2000' — the 2-task stage was being
+   gated on M1's 3000-step cap instead of the mission's independent <=20,000 M2 budget. The M2 counter is
+   now the formal steps booked into the M2 buckets.
+
+The 2-task run (m2_two_2000_r4) is now running under the supervisor: push_T + stack_bowls, 2000
+optimizer steps, per-task normalizers, task-conditioned prompts, per-task DEV CE at every save point.
