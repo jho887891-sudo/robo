@@ -243,3 +243,59 @@ steps 0 of 3000):
   upstream gates are green, but the window ended before the 300/1000/3000 runs.
 * **Draft PR not created** — the box has no GitHub API credential (no `gh`, no token); the branch
   is pushed and this is recorded rather than papered over with a `/pull/new/` link.
+
+## 2026-10-22 — R16 round: P6 measurement defect fixed and re-verdicted, M2 booking corrected (append-only)
+
+Fixed source for this round: `feature/r15-true-continuation@b57d16a`, audited by PR #25 @`22e6061`.
+Server-verified state (not inferred from the previous report):
+
+* `m2_two_2000_r5` = **DONE exit 0**, `REACHED_TARGET`, global_step **2000**, 7742.6 s wall,
+  2.939 s/step, peak 23.04 GB, checkpoint `runs/m2_two_2000_20261021T123314Z/checkpoints/step2000`
+  with manifest-verified LoRA `c221e739…` and projector `1635bd02…`.
+* The WAL confirmed audit item 3 exactly: `job_end` booked `gpu_seconds=0.0` against a 7827 s wall.
+
+### P6 action-window alignment (RED -> GREEN, then re-verdict)
+
+`action_window_probs()` read the 14 action positions from `n_prompt-1` without the 769-token vision
+prefix, while `token_ce_from_logits()` applied it. Everything P6 compared - `ce_window`, `pred_bins`,
+the counterfactual task-routing distributions - came from vision-token rows. RED: 4 failing tests
+(`tests/test_m2_action_window_alignment.py`) on the old code. GREEN after the fix, and an archive
+without the `vision-prefix-aware-v2` marker is now refused (`LEGACY_INVALID_FOR_P6`).
+
+Corrected evidence, regenerated from the sealed step2000 checkpoint **without retraining**
+(`tools/m2_regen_dev.py`, same 8 DEV frames/task, same true bins - the push_T `true_bins_sha256`
+`b45fcbaa…` is byte-identical to the legacy run):
+
+| task | ce_window before | ce_window corrected | no-op | constant velocity |
+|---|---|---|---|---|
+| push_T | 4.8883 | **2.1214** | 2.6241 | 2.6736 |
+| stack_bowls | 5.3775 | **3.0963** | 3.3667 | 3.3172 |
+
+Coherent eps-smoothed NLL (eps = 1e-3 pre-registered, same eps on both sides): 2.122 vs 5.893 (no-op)
+and 6.005 (CV) for push_T; 3.096 vs 7.561 and 7.450 for stack_bowls. Routing: own-prompt win rate
+0.25 -> **1.0**, wrong-prompt penalty ~0 -> **0.65-0.77 nats**, distinct predicted bins 1 -> **8**.
+
+`mission/m2_p6_two_corrected_report.json`: **PASS, exit 0, 20/20 checks**. The previous FAIL was a
+measurement artefact, not the model. The legacy report and archive are untouched and remain permanently
+invalid for P6. Erratum: the per-save-point CE curve was recorded with the legacy alignment, so its
+absolute values are not comparable to the corrected final point; the forgetting conclusion still holds
+because every point of that curve was measured identically.
+
+### M2 GPU booking (append-only correction)
+
+`job_end` now books `wall - sum(step_seconds)`, so the 7B load, the DEV counterfactual CE and every
+full-state save are charged. The historical gap was corrected append-only:
+`tools/m2_wal_correction.py` booked +9937.7 s, but that summed supervisor wrappers *and* their inner
+trainers, so `tools/m2_wal_correction_fix.py` appends a documented reversal (-9937.7) and a correctly
+scoped rebooking (+2058.7 = 1933.7 for the completed run + 125 bounded for the crashed one).
+
+Ledger after correction: gpu **26242.6 s**; `TWO_TASK_PILOT` 7952.0 s / **2000** steps;
+`R15_TRAIN_FORMAL` 8261.6 s / 1664 steps - the M1 3000-step cap and the M2 20000-step budget are
+separate buckets, so P6 evidence can never be produced by borrowing M1 headroom.
+
+### What is still NOT claimed
+
+* M1 G5_1000 = FAIL stands; no further same-hypothesis Push-T steps were taken and none will be.
+* The 2->4 task expansion is now *permitted* by the corrected P6, but it is a budget decision for the
+  research lead and has not been started.
+* The 12-task expert data for the 9 missing tasks, and any official FINAL, are unchanged.
