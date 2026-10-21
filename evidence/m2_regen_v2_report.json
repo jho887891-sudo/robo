@@ -1,0 +1,32 @@
+{
+ "archive": "/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/dev_eval_v2_aligned.npz",
+ "archive_sha256": "17f8559b95cc411327915bb2c914a0c486dc88b3c3ef037a246b1843c888e0f1",
+ "tasks": [
+  "push_T",
+  "stack_bowls"
+ ],
+ "ce_window": {
+  "push_T": 2.121402947626892,
+  "stack_bowls": 3.096309640274999
+ },
+ "ce_full": {
+  "push_T": 1.980048269033432,
+  "stack_bowls": 2.890133887529373
+ },
+ "vision_prefix_tokens": {
+  "push_T": [
+   769
+  ],
+  "stack_bowls": [
+   769
+  ]
+ },
+ "all_argmax_inside_legal_window": true,
+ "all_14_supervised_positions_present": true,
+ "n_frames_per_task": {
+  "push_T": 8,
+  "stack_bowls": 8
+ },
+ "checkpoint_global_step": 2000,
+ "n_prompts": 2
+}

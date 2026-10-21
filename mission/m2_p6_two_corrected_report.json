@@ -1,0 +1,365 @@
+{
+ "gate": "P6_M2_TWO",
+ "evidence": "/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/stage_evidence.json",
+ "eval_archive": "/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/dev_eval_v2_aligned.npz",
+ "normalizer": "/home/T7/ojh/robot_actual/r11/data/m2_task_normalizer_2task.json",
+ "checks": [
+  {
+   "id": "P6.dev_disjoint",
+   "requirement": "every scored frame is a DEV episode of the same task",
+   "measured": {
+    "violations": [],
+    "n_violations": 0
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.nll_smoothed_vs_noop.push_T",
+   "requirement": "coherent eps-smoothed NLL of the true bins is below the no-op baseline (A_hat=S) on the same frames, same eps=0.001 on both sides",
+   "measured": {
+    "model_nll": 2.122051552043021,
+    "baseline_nll": 5.893430653251366,
+    "hit_rate": 0.5267857142857143,
+    "l1": 0.38056812807917595,
+    "margin_nats": 3.7713791012083453,
+    "eps": 0.001
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.nll_smoothed_vs_constant_velocity.push_T",
+   "requirement": "coherent eps-smoothed NLL of the true bins is below the constant-velocity baseline (A_hat=S+V) on the same frames, same eps=0.001 on both sides",
+   "measured": {
+    "model_nll": 2.122051552043021,
+    "baseline_nll": 6.0046086544413715,
+    "hit_rate": 0.5178571428571429,
+    "l1": 0.0009436629861738766,
+    "margin_nats": 3.8825571023983505,
+    "eps": 0.001
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.ce_vs_noop_legacy_hybrid_score.push_T",
+   "requirement": "LEGACY hybrid score (0 nats on a hit, ln256 on a miss: not a likelihood) below the no-op baseline - reported for continuity, not used to decide P6",
+   "measured": {
+    "model_ce": 2.121402947626892,
+    "baseline_ce": 2.624057183548364,
+    "hit_rate": 0.5267857142857143,
+    "l1": 0.38056812807917595,
+    "margin_nats": 0.5026542359214723
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.ce_vs_constant_velocity_legacy_hybrid_score.push_T",
+   "requirement": "LEGACY hybrid score (0 nats on a hit, ln256 on a miss) below the constant-velocity baseline - reported for continuity, not used to decide P6",
+   "measured": {
+    "model_ce": 2.121402947626892,
+    "baseline_ce": 2.673567696445503,
+    "hit_rate": 0.5178571428571429,
+    "l1": 0.0009436629861738766,
+    "margin_nats": 0.552164748818611
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.nll_smoothed_vs_noop.stack_bowls",
+   "requirement": "coherent eps-smoothed NLL of the true bins is below the no-op baseline (A_hat=S) on the same frames, same eps=0.001 on both sides",
+   "measured": {
+    "model_nll": 3.096430080800734,
+    "baseline_nll": 7.561100671101452,
+    "hit_rate": 0.39285714285714285,
+    "l1": 0.4628685563802719,
+    "margin_nats": 4.4646705903007184,
+    "eps": 0.001
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.nll_smoothed_vs_constant_velocity.stack_bowls",
+   "requirement": "coherent eps-smoothed NLL of the true bins is below the constant-velocity baseline (A_hat=S+V) on the same frames, same eps=0.001 on both sides",
+   "measured": {
+    "model_nll": 3.096430080800734,
+    "baseline_nll": 7.449922669911446,
+    "hit_rate": 0.4017857142857143,
+    "l1": 0.002196996007114649,
+    "margin_nats": 4.353492589110712,
+    "eps": 0.001
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.ce_vs_noop_legacy_hybrid_score.stack_bowls",
+   "requirement": "LEGACY hybrid score (0 nats on a hit, ln256 on a miss: not a likelihood) below the no-op baseline - reported for continuity, not used to decide P6",
+   "measured": {
+    "model_ce": 3.096309640274999,
+    "baseline_ce": 3.3667148770054487,
+    "hit_rate": 0.39285714285714285,
+    "l1": 0.4628685563802719,
+    "margin_nats": 0.2704052367304497
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.ce_vs_constant_velocity_legacy_hybrid_score.stack_bowls",
+   "requirement": "LEGACY hybrid score (0 nats on a hit, ln256 on a miss) below the constant-velocity baseline - reported for continuity, not used to decide P6",
+   "measured": {
+    "model_ce": 3.096309640274999,
+    "baseline_ce": 3.3172043641083095,
+    "hit_rate": 0.4017857142857143,
+    "l1": 0.002196996007114649,
+    "margin_nats": 0.22089472383331055
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.routing_not_degenerate.own_prompt_wins",
+   "requirement": "on every scored frame the model is better (lower CE) with its OWN task prompt than with any other task prompt (ties never count as a win)",
+   "measured": {
+    "min_own_prompt_win_rate": 1.0,
+    "required": 0.9,
+    "per_pair": {
+     "push_T<-prompt:stack_bowls": {
+      "own_prompt_win_rate": 1.0,
+      "mean_ce_penalty_nats": 0.7680667903240351,
+      "n_frames": 8
+     },
+     "stack_bowls<-prompt:push_T": {
+      "own_prompt_win_rate": 1.0,
+      "mean_ce_penalty_nats": 0.6527384159562055,
+      "n_frames": 8
+     }
+    }
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.routing_not_degenerate.wrong_prompt_penalty",
+   "requirement": "evaluating a frame under another task's prompt costs CE (the model really uses the task tag instead of one collapsed output distribution)",
+   "measured": {
+    "min_ce_penalty_nats": 0.6527384159562055,
+    "required": 0.05,
+    "prompt_identical_fraction": {
+     "push_T<-prompt:stack_bowls": 0.0,
+     "stack_bowls<-prompt:push_T": 0.0
+    }
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.routing_not_degenerate.marginals_informational",
+   "requirement": "per-task marginal predicted distributions (reported, never required: the targets are standardised per task, so equal marginals are possible)",
+   "measured": {
+    "pairwise_js": {
+     "push_T|stack_bowls": 0.1875460844912438
+    },
+    "required_if_used": 0.02
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.routing_not_degenerate.not_constant",
+   "requirement": "the model does not emit one constant bin vector for every frame of every task",
+   "measured": {
+    "distinct_pred_bins_per_task": {
+     "push_T": 8,
+     "stack_bowls": 8
+    }
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.no_catastrophic_forgetting.push_T",
+   "requirement": "every save-point DEV CE <= that task's step-0 CE + tolerance",
+   "measured": {
+    "step0_ce": 8.426583469592865,
+    "worst_ce": 5.048281966877951,
+    "worst_step": 800,
+    "final_ce": 4.888308272601581,
+    "best_ce": 4.320370810048008,
+    "delta_worst_minus_step0": -3.3783015027149137,
+    "tolerance": 0.1,
+    "n_save_points": 11
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.no_catastrophic_forgetting.stack_bowls",
+   "requirement": "every save-point DEV CE <= that task's step-0 CE + tolerance",
+   "measured": {
+    "step0_ce": 9.841333325106392,
+    "worst_ce": 5.659458856852284,
+    "worst_step": 200,
+    "final_ce": 5.377518584593141,
+    "best_ce": 4.940957321190805,
+    "delta_worst_minus_step0": -4.181874468254108,
+    "tolerance": 0.1,
+    "n_save_points": 11
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.task_count",
+   "requirement": "task count <= --max-tasks-stage",
+   "measured": {
+    "n_tasks": 2,
+    "max_tasks_stage": 2
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.cumulative_steps",
+   "requirement": "cumulative multi-task optimizer steps <= the stage cap",
+   "measured": {
+    "cap": 2000,
+    "target": 2000,
+    "reached": 2000
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.stage_completed",
+   "requirement": "the stage actually reached its declared cumulative target",
+   "measured": {
+    "target": 2000,
+    "reached": 2000
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.booking_matches_steps",
+   "requirement": "steps booked/claimed agree with the executed steps",
+   "measured": {
+    "executed": 2000,
+    "reached": 2000,
+    "start": 0,
+    "ledger_steps_booked": 2000
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.wal_steps",
+   "requirement": "the R15 WAL books exactly one step per executed step",
+   "measured": {
+    "run_id": "m2-2task-2000-20261021T123322Z",
+    "wal_steps": 2000,
+    "executed": 2000
+   },
+   "passed": true
+  }
+ ],
+ "per_task": {
+  "push_T": {
+   "n_frames": 8,
+   "true_bins_sha256": "b45fcbaa88dd096ec8c8993672990068b7171a0dd987081ffda22d10016d56c3",
+   "hit_rate_noop": 0.5267857142857143,
+   "hit_rate_cv": 0.5178571428571429,
+   "ce_noop": 2.624057183548364,
+   "ce_cv": 2.673567696445503,
+   "nll_smoothed_noop": 5.893430653251366,
+   "nll_smoothed_cv": 6.0046086544413715,
+   "l1_noop": 0.38056812807917595,
+   "l1_cv": 0.0009436629861738766,
+   "model_ce": 2.121402947626892,
+   "model_nll_smoothed": 2.122051552043021,
+   "margin_vs_noop": 0.5026542359214723,
+   "margin_vs_cv": 0.552164748818611,
+   "margin_nll_vs_noop": 3.7713791012083453,
+   "margin_nll_vs_cv": 3.8825571023983505
+  },
+  "stack_bowls": {
+   "n_frames": 8,
+   "true_bins_sha256": "2b97a64be199d8b2dfa21dc5cbe6991fab37ac9c5b95a11fa84d57da058ce599",
+   "hit_rate_noop": 0.39285714285714285,
+   "hit_rate_cv": 0.4017857142857143,
+   "ce_noop": 3.3667148770054487,
+   "ce_cv": 3.3172043641083095,
+   "nll_smoothed_noop": 7.561100671101452,
+   "nll_smoothed_cv": 7.449922669911446,
+   "l1_noop": 0.4628685563802719,
+   "l1_cv": 0.002196996007114649,
+   "model_ce": 3.096309640274999,
+   "model_nll_smoothed": 3.096430080800734,
+   "margin_vs_noop": 0.2704052367304497,
+   "margin_vs_cv": 0.22089472383331055,
+   "margin_nll_vs_noop": 4.4646705903007184,
+   "margin_nll_vs_cv": 4.353492589110712
+  }
+ },
+ "verdict": "PASS",
+ "exit": 0,
+ "action_window_alignment": "vision-prefix-aware-v2",
+ "ce_definitions": {
+  "primary": "eps-smoothed NLL of the true 256-bin action window: p = (1-eps) * p_model + eps/256 with eps = 0.001 pre-registered; the point baselines are scored as a point likelihood with the SAME eps so a hit and a miss are priced coherently",
+  "legacy": "(1 - hit_rate) * ln(256): 0 nats on a hit, ln(256) on a miss. Kept for continuity with the previous report only - it is a heuristic bin-error score, not a likelihood, and is NOT used to decide P6."
+ },
+ "metric_definitions": {
+  "model_ce": "mean over the 14 action dims of -log p_window(true_bin), 256-way window renormalised (nats)",
+  "model_nll_smoothed": "eps-smoothed NLL of the true bins (the primary metric)",
+  "baseline_nll_smoothed": "the same eps-smoothed NLL for the point baseline's bins",
+  "baseline_ce": "LEGACY (1 - hit_rate) * ln(256) hybrid score, reported only",
+  "forgetting": "worst save-point CE minus that task's step-0 CE",
+  "routing": "pairwise Jensen-Shannon divergence of the per-task mean predicted 256-bin distributions + leave-one-out nearest-centroid accuracy"
+ },
+ "tasks": [
+  "push_T",
+  "stack_bowls"
+ ],
+ "evidence_sha256": "9cfb9fffa7256395ebb48c5ceb88a7e9a462389a467e74364a4d5f276c29a1e6",
+ "run_id": "m2-2task-2000-20261021T123322Z",
+ "routing": {
+  "per_pair": {
+   "push_T<-prompt:stack_bowls": {
+    "own_prompt_win_rate": 1.0,
+    "mean_ce_penalty_nats": 0.7680667903240351,
+    "n_frames": 8
+   },
+   "stack_bowls<-prompt:push_T": {
+    "own_prompt_win_rate": 1.0,
+    "mean_ce_penalty_nats": 0.6527384159562055,
+    "n_frames": 8
+   }
+  },
+  "min_own_prompt_win_rate": 1.0,
+  "min_wrong_prompt_ce_penalty": 0.6527384159562055,
+  "min_win_rate_required": 0.9,
+  "prompt_identical_fraction": {
+   "push_T<-prompt:stack_bowls": 0.0,
+   "stack_bowls<-prompt:push_T": 0.0
+  },
+  "marginal_pairwise_js_informational": {
+   "push_T|stack_bowls": 0.1875460844912438
+  },
+  "distinct_pred_bins_per_task": {
+   "push_T": 8,
+   "stack_bowls": 8
+  },
+  "any_frame_variation": true
+ },
+ "forgetting": {
+  "push_T": {
+   "step0_ce": 8.426583469592865,
+   "worst_ce": 5.048281966877951,
+   "worst_step": 800,
+   "final_ce": 4.888308272601581,
+   "best_ce": 4.320370810048008,
+   "delta_worst_minus_step0": -3.3783015027149137,
+   "tolerance": 0.1,
+   "n_save_points": 11
+  },
+  "stack_bowls": {
+   "step0_ce": 9.841333325106392,
+   "worst_ce": 5.659458856852284,
+   "worst_step": 200,
+   "final_ce": 5.377518584593141,
+   "best_ce": 4.940957321190805,
+   "delta_worst_minus_step0": -4.181874468254108,
+   "tolerance": 0.1,
+   "n_save_points": 11
+  }
+ },
+ "cap": 2000,
+ "n_checks": 20,
+ "n_failed": 0
+}
