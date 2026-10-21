@@ -89,6 +89,48 @@ ARX constants before prismatic, loads the real 7B + LoRA + 42D projector
 **No closed-loop success rate has been measured, and none is claimed.** Records for all three attempts
 are kept: `runs/r15_loop_dev/` + `evidence/r15_loop_attempt{1,2}/`.
 
+
+## 3b. Closed loop: the wire works, the SPEED does not (measured 2026-10-21T12:19Z)
+
+Four attempts, four distinct real defects, all found from logs and all fixed:
+
+1. container: curobo needed `SETUPTOOLS_SCM_PRETEND_VERSION`;
+2. server: the OFT runtime was missing from `PYTHONPATH` (every call returned "No module named
+   'prismatic'") and nothing forced the ARX platform before the prismatic import;
+3. serving: `set_num_images_in_input` was never called, so the backbone kept the checkpoint default;
+4. serving: my own channel assertion was wrong — the fused DINO+SigLIP tower stacks two 3-channel
+   copies per camera, so 3 cameras legitimately make 18 channels.
+
+After those, attempt 5 ran the episode for real (`pixel_values channels=18 (6 per camera x 3)`, GPU at
+100 %, the official client driving the server), and produced the number that matters:
+
+| real 7B control latency (20 actions, measured in-process) | value |
+|---|---|
+| total per control step p50 / p95 / p99 | **7754 / 8509 / 8552 ms** |
+| of which the 14 autoregressive forwards | 5998 ms |
+| budget at 25 Hz | 40 ms |
+| **slowdown** | **194x** |
+
+A Push-T episode is up to `step_lim=600` steps, i.e. **~77 minutes of policy time for one episode**. The
+24.6 ms p50 reported earlier was a **stub backend** and must never be quoted as the model's latency.
+The closed loop therefore cannot produce an official verdict until the per-action cost drops by ~2
+orders of magnitude; the concrete next step is caching the multimodal prefix, because the vision tower
+is recomputed on every one of the 14 decode steps.
+
+## 3c. M2 two-task shared model: training now (2026-10-21T12:36Z)
+
+`m2_two_2000_r5` under the supervisor: push_T + stack_bowls, 2000 optimizer steps, per-task normalizers,
+task-conditioned prompts, per-task DEV CE at every save point. First measured anchors:
+
+    step=10  task=stack_bowls  loss=4.0974  per-task={'push_T': 6.963, 'stack_bowls': 4.0974}
+    DEV push_T       ce_window=8.4266 ce_full=14.8548 nats over 8 frames
+    DEV stack_bowls  ce_window=9.8413 ce_full=16.1796 nats over 8 frames
+
+Three latent bugs had to be fixed before it would train a single step, each now pinned by a test:
+`evidence_skeleton` rejecting the plain prompt mapping; the 2-task stage being gated on M1's 3000-step
+cap instead of the mission's own 20k M2 budget; and the teacher-forced CE not shifting by the vision
+prefix (769 tokens) that the model prepends to the text embeddings.
+
 ## 4. The 12-task programme (M2): what is now built and what is blocking
 
 | piece | state | tests |
