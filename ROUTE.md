@@ -243,3 +243,14 @@ steps 0 of 3000):
   upstream gates are green, but the window ended before the 300/1000/3000 runs.
 * **Draft PR not created** — the box has no GitHub API credential (no `gh`, no token); the branch
   is pushed and this is recorded rather than papered over with a `/pull/new/` link.
+
+
+#### 独立交叉审计｜R15 正式300步｜2026-10-21（无新GPU执行）
+
+- **真实证据**：feature/r15-true-continuation@ca62c490f3655a3aa1ce30a2ebde046ee93bb475，有 300 optimizer.step 和 step50..300 checkpoint、WAL、16 DEV×2帧评测；同 cohort CV macro L1=0.002110443304，R42@300=0.002134356982（VLA高1.133%），残差 R²=-0.023977。说明未证明超越恒速，不说明闭环成功。
+- **预注册来源**：文件本身误写 written_utc 11:05Z，但 GitHub 引入时间 @7fcbc32a2fd2fb0d82e24cecdbdd6726fb9d8fb2 为 02:59:53Z，早于训练日志03:04:25Z；保留原件，新报告注明时间戳误标，不把原始证据改写。
+- **新P0：续训日志漏样本**：run_r15 load state 后的 log 调用了 sampler.next()，日志也消费一个样本。CPU独立resume fixture未覆盖真实训练入口；300→1000前修复，测试续训第301步样本与不间断训练一致。
+- **新P0：GPU计费遗漏**：R15 raw job wall757.7s，WAL只累计577.0s step时间，至少180.7s模型加载/存档等未记；另有实际DEV 7B GPU推理03:34:07→03:39:30未入WAL。须追加immutable预算修正并对今后整段job和DEV计费，不能只算optimizer的CUDA核时间。原32GPUh/3000step额度不增加。
+- **新P0：动作指标定义不对**：sign_agreement和magnitude_ratio当前比较绝对关节位置，而不是 A-S 动作增量或 R。identity A=S 的sign 0.993和magnitude~1证明这些指标不能代表运动方向/幅度。旧G4/G5预注册不事后修改；发布前瞻指标勘误与负例。
+- **新P0：G4安全验收口径冲突**：DEV源 R.decode_command 未传 limits，DEV raw VLA有6.03% joint coordinates越界，预注册G4称“每个解码命令在关节盒内”；必须分别评价 RAW 与部署真正受限动作，交叉对齐真实速率/控制周期。G4原报告PASS只属报告口径，独立状态 DISPUTED_PENDING_SAFETY。
+- **决策**：R15 300步实测已执行，但下一段+700先 BLOCKED_P0_REVIEW。修CPU修复、原始证据独立重算和账本修正后，已有授权可自动300→1000，不用再问研究负责人。新25 expert、R16闭环均未完成；无依赖CPU继续。审计report/R15_300_INDEPENDENT_AUDIT.md与missions/R15_300_TO_1000_BLOCKER_FIX_AND_AUTO_CONTINUE.md在独立审计分支。
