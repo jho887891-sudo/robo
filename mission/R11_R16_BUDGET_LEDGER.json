@@ -4,7 +4,7 @@
  "spec_sha": "83b579415588e60572768ec0e11f5868520fa695",
  "aggregate": {
   "cap_s": 115200,
-  "new_gpu_seconds_used": 1027.5
+  "new_gpu_seconds_used": 1039.6832032203674
  },
  "results": {
   "formal_optimizer_steps_used": 0,
@@ -25,7 +25,7 @@
   },
   "R13_7B_ZERO_STEP": {
    "cap_s": 1800,
-   "seconds_used": 169.7,
+   "seconds_used": 181.88320322036742,
    "status": "PLANNED",
    "jobs": []
   },
@@ -236,6 +236,14 @@
     "peak_mem_gb": 23.046,
     "source": "evidence/r14_overfit_20261020T200030Z/raw.log"
    }
+  },
+  {
+   "utc": "2026-10-21T03:23:57Z",
+   "bucket": "R13_7B_ZERO_STEP",
+   "event": "abort",
+   "seconds": 12.183,
+   "note": "R42Error('prismatic ACTION_DIM=7 leaked into the 14D R42 path (expected 14); prismatic selects its constants from sys.argv, so make sure the arx platform marker is present before the model modules are imported')",
+   "extra": {}
   }
  ],
  "notes": [

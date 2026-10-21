@@ -973,6 +973,7 @@ def run_dev_preds(args):
         motion_quantile=meta.get("motion_quantile"),
         n_train_episodes=meta["frozen_from"]["n_train_episodes_for_quantiles"],
         n_dev_episodes_excluded=meta["frozen_from"]["n_dev_episodes_excluded"])
+    force_arx_platform()          # MUST precede every prismatic import (fail-closed otherwise)
     RS.seed_everything(args.seed)
     proc, vla, proj, modeling_sha = build_model(args.cams)
     prompt = make_prompt(proc)
