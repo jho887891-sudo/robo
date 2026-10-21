@@ -176,6 +176,8 @@ class R42DeployServer:
 
     # ------------------------------------------------------------------- preprocessing
     _pv_shape_logged = None
+    _lat_samples = None      # filled lazily by act(); real 7B per-action latency
+    _lat_fwd = None
 
     def preprocess(self, images):
         """RGB uint8 dict -> processor pixel tensor.  No BGR swap, no manual resize."""
@@ -254,6 +256,22 @@ class R42DeployServer:
         lat["decode"] = (time.perf_counter() - t_dec) * 1e3
         lat["total"] = (time.perf_counter() - t_start) * 1e3
         lat = self._check_latency(lat)                        # G6: all four phases, checked
+        # Real-7B latency is a deliverable, and it is NOT the 24.6 ms the stub backend measured:
+        # 14 autoregressive forwards per control step take seconds. Aggregate and print so a single
+        # slow episode yields p50/p95/p99 instead of only a timeout.
+        if getattr(self, "_lat_samples", None) is None:
+            self._lat_samples, self._lat_fwd = [], []
+        self._lat_samples.append(float(lat["total"]))
+        self._lat_fwd.append(float(lat["forward_total"]))
+        n = len(self._lat_samples)
+        if n % 20 == 0:
+            import numpy as _np
+            a = _np.asarray(self._lat_samples, float)
+            fw = _np.asarray(self._lat_fwd, float)
+            print("[OpenVLA_R42] %d actions | total p50 %.0f p95 %.0f p99 %.0f ms | forward p50 "
+                  "%.0f ms | budget 40 ms -> %.0fx real-time"
+                  % (n, _np.percentile(a, 50), _np.percentile(a, 95), _np.percentile(a, 99),
+                     _np.percentile(fw, 50), _np.percentile(a, 50) / 40.0), flush=True)
         out = {"action": action, "residual": residual, "bins": np.asarray(ids) - (R.TOKEN_BEGIN_IDX + 1),
                "ids": np.asarray(ids, np.int64), "features": feat, "velocity": v, "info": info,
                "n_action_tokens": int(len(ids)), "prompt_len": len(self.prompt_ids()),

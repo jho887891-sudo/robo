@@ -184,12 +184,25 @@ def main():
         return 0
 
     t0 = time.time()
-    p = subprocess.run(cmd, cwd=a.root, env=env, capture_output=True, text=True,
-                       timeout=a.timeout_s)
-    rec["exit"] = p.returncode
+    rec["utc_end"] = None
+    timed_out = False
+    try:
+        p = subprocess.run(cmd, cwd=a.root, env=env, capture_output=True, text=True,
+                           timeout=a.timeout_s)
+        out, err, rc = p.stdout, p.stderr, p.returncode
+    except subprocess.TimeoutExpired as exc:
+        # Keep the partial client output: a timeout is the most informative failure there is
+        # (it means the policy is slower than the simulator's episode budget), and losing it
+        # would leave a verdict with no evidence.
+        timed_out = True
+        out = exc.stdout.decode("utf-8", "replace") if isinstance(exc.stdout, bytes) else exc.stdout
+        err = exc.stderr.decode("utf-8", "replace") if isinstance(exc.stderr, bytes) else exc.stderr
+        rc = None
+    rec["exit"] = rc
+    rec["timed_out"] = timed_out
     rec["wall_clock_s"] = round(time.time() - t0, 1)
-    rec["stdout_tail"] = (p.stdout or "")[-4000:]
-    rec["stderr_tail"] = (p.stderr or "")[-4000:]
+    rec["stdout_tail"] = (out or "")[-4000:]
+    rec["stderr_tail"] = (err or "")[-4000:]
     rec["utc_end"] = utcnow()
 
     res = newest_result(a.root, a.task, a.policy_name)
@@ -214,8 +227,14 @@ def main():
     else:
         rec["parse_error"] = "no _result.json was produced"
 
-    rec["verdict"] = ("OFFICIAL_SUCCESS" if rec.get("successes") else
-                      ("OFFICIAL_FAILURE" if rec.get("episodes_observed") else "NO_RESULT"))
+    if rec.get("successes"):
+        rec["verdict"] = "OFFICIAL_SUCCESS"
+    elif rec.get("episodes_observed"):
+        rec["verdict"] = "OFFICIAL_FAILURE"
+    elif timed_out:
+        rec["verdict"] = "TIMEOUT_NO_RESULT"
+    else:
+        rec["verdict"] = "NO_RESULT"
     append_ledger(ledger, rec)
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     with open(a.out, "w") as fh:
@@ -223,7 +242,7 @@ def main():
     print(json.dumps({k: rec.get(k) for k in
                       ("task", "stage", "exit", "episodes_observed", "successes",
                        "success_rate", "wilson_95_ci", "verdict", "result_json")}, indent=1))
-    return 0 if rec["verdict"] != "NO_RESULT" else 4
+    return 0 if rec["verdict"].startswith("OFFICIAL") else 4
 
 
 if __name__ == "__main__":
