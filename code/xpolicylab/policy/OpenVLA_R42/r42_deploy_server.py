@@ -283,8 +283,15 @@ class R42DeployServer:
         return out
 
     def _decode_tokens(self, pixel_values, feat):
-        """Greedy legal 14-token decoding; the window constraint is enforced per token."""
+        """Greedy legal 14-token decoding; the window constraint is enforced per token.
+
+        R16: when the cached backend is enabled the vision + 42D + prompt prefill happens ONCE and the
+        remaining tokens are decoded incrementally against that cache. The cache is built and dropped
+        inside this call, so it can never leak across control steps, frames, environments or resets.
+        """
         prompt = self.prompt_ids()
+        if getattr(self.backend, "kv_cache_enabled", False):
+            return self._decode_tokens_cached(prompt, pixel_values, feat)
         ids, logs = [], []
         for k in range(R.N_ACTIONS):
             prefix = prompt + ids
@@ -294,6 +301,22 @@ class R42DeployServer:
                 raise R.R42Error("decoded bin %d outside 0..255" % tok)
             ids.append(R.TOKEN_BEGIN_IDX + 1 + tok)
             logs.append({"k": k, "bin": tok, "id": ids[-1]})
+        if len(ids) != R.N_ACTIONS:
+            raise R.R42Error("expected %d action tokens, produced %d" % (R.N_ACTIONS, len(ids)))
+        return ids, logs
+
+    def _decode_tokens_cached(self, prompt, pixel_values, feat):
+        """14 tokens from ONE prefill + 13 incremental steps (feature-flagged, R42_KV_CACHE=1)."""
+        logits, cache, n_past = self.backend.prefill_cached(prompt, pixel_values, feat)
+        ids, logs = [], []
+        for k in range(R.N_ACTIONS):
+            tok = self._argmax_in_window(logits)
+            if not (0 <= tok <= 255):
+                raise R.R42Error("decoded bin %d outside 0..255" % tok)
+            ids.append(R.TOKEN_BEGIN_IDX + 1 + tok)
+            logs.append({"k": k, "bin": tok, "id": ids[-1]})
+            if k + 1 < R.N_ACTIONS:
+                logits, cache, n_past = self.backend.step_cached(ids[-1], cache, n_past)
         if len(ids) != R.N_ACTIONS:
             raise R.R42Error("expected %d action tokens, produced %d" % (R.N_ACTIONS, len(ids)))
         return ids, logs
@@ -384,6 +407,48 @@ class _TorchBackend:
 
     def parameters(self):
         return iter(self._params)
+
+    # ------------------------------------------------------------------ R16 KV cache (opt-in)
+    # The multimodal forward ASSERTS past_key_values is None, so a cache cannot be threaded through
+    # it. After ONE prefill (vision + 42D + prompt -> full multimodal_embeddings, cached in the LLM),
+    # the 13 remaining action tokens are decoded directly on the language model with only the new
+    # token as input: the multimodal prefix is already in the KV. Weights, codec and the pure-autoreg
+    # conditioning are untouched; the full path stays the default (R42_KV_CACHE=0).
+    kv_cache_enabled = False
+
+    def prefill_cached(self, input_ids, pixel_values=None, proprio=None):
+        """One multimodal forward with use_cache=True -> (last-token logits, cache, n_past)."""
+        import torch
+        ids = torch.tensor([list(input_ids)], dtype=torch.long, device=self.device)
+        pr = None if proprio is None else torch.from_numpy(
+            np.asarray(proprio, np.float32)).reshape(1, -1).to(self.device)
+        with torch.no_grad():
+            with torch.autocast("cuda", dtype=torch.bfloat16) if self.device.startswith("cuda") \
+                    else _nullcontext():
+                out = self.model(input_ids=ids, attention_mask=torch.ones_like(ids),
+                                 pixel_values=pixel_values, proprio=pr,
+                                 proprio_projector=self.projector, labels=ids.clone(),
+                                 use_cache=True)
+        cache = getattr(out, "past_key_values", None)
+        if cache is None:
+            raise R.R42Error("the model returned no past_key_values; the cached backend needs "
+                             "use_cache support (R42_KV_CACHE=1)")
+        n_past = int(ids.shape[1])
+        return out.logits[0, -1].float().cpu().numpy(), cache, n_past
+
+    def step_cached(self, tok_id, cache, n_past):
+        """One incremental decode step: only the token embedding is new, the prefix is reused."""
+        import torch
+        tok = torch.tensor([[int(tok_id)]], dtype=torch.long, device=self.device)
+        with torch.no_grad():
+            with torch.autocast("cuda", dtype=torch.bfloat16) if self.device.startswith("cuda") \
+                    else _nullcontext():
+                out = self.model.language_model(input_ids=tok, past_key_values=cache,
+                                                use_cache=True)
+        nxt = getattr(out, "past_key_values", None)
+        if nxt is None:
+            raise R.R42Error("the language model returned no past_key_values on an incremental step")
+        return out.logits[0, -1].float().cpu().numpy(), nxt, n_past + 1
 
     def next_token_logits(self, input_ids, pixel_values=None, proprio=None):
         """G5: identical to training's inference_14_tokens - pure autoreg + labels= always."""
