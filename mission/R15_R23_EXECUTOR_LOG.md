@@ -39,3 +39,52 @@ A 640 MB full-state checkpoint therefore costs **4–8 minutes**; step 350 took 
 (08:06:08 → 08:13:29). Consequences adopted: resume granularity raised to `--save_every 200` for later
 segments, per-job wall estimates raised so the guard does not cut a segment between save points, and
 stage 2 is run as 2a (300 → last saved step) + 2b (last saved step → 1000).
+
+## 2026-10-21 08:45Z — stage 2 split into 2a/2b (measured, not planned)
+
+| when | what | evidence |
+|---|---|---|
+| 07:54:40Z | 2a `job_begin`: `start_global_step=300`, 700 steps requested | WAL seq 994 |
+| 08:03:04Z | resume verified in the log: `resumed from ... step300 at global_step=300 position=300  # peek only, never sampler.next()` | `logs/r15_s2_1000_20261021T0803Z.log` |
+| 08:03:04Z | `sampler_order_hash = f1024210752cb42e0fbf60dd3270692c8d15555bb38b161eb87d22a032f48081` — **identical to the stage-1 run**, i.e. the sample order is the same as an uninterrupted continuation | `runs/r15_s2_1000_*/stage_evidence.json` |
+| 08:13:29Z | save step350 took **7 min 21 s** (1.1 GB at ~1.5 MB/s) | log |
+| 08:42:55Z | `stopping at global_step=500: bucket/time guard (2894s used of 2980s)` -> `R15 PARTIAL`, last saved **step500** | log + evidence |
+| 08:42:56Z | `job_end` books `gpu_seconds=2269.106 = wall 2894.5 - booked steps 625.4`, i.e. **the load/save overhead is now billed** (audit lane H finding 2b) | WAL seq 1201 |
+| 08:45:08Z | 2b launched by the supervisor: `500 -> 1000 (500 steps), estimate 6120s`, `--save_every 200` | `logs/r15_s2b_1000_20261021T0803Z.log` |
+
+Stage 2 therefore produced exactly **+200 optimizer steps** in 2a and 2b continues the same lineage;
+the discarded steps are the ones between the last save and the guard (none in 2a: it stopped exactly
+on a save point at step500).
+
+### supervisor bug found and fixed by evidence, not by inspection
+`adopt_wait_trainer_exit` failed with exit 8 (`NO CHECKPOINT SAVED`) because the queue entry pointed at
+`runs/r15_s2_1000_20261021T0758Z/checkpoints` — the stamp of the *failed attempt 1* — instead of
+`..._0803Z`. The dependency chain then correctly marked 2b/dev-preds/gate/stage-3 BLOCKED, which is the
+designed behaviour for a broken dependency. Fixed by enqueueing fresh ids with the right paths; the
+BLOCKED ids are kept in the state file as evidence.
+
+## Lane results (all with real evidence, deliverables under `lanes/`)
+
+| lane | verdict | headline number |
+|---|---|---|
+| H audit | WAL chain PASS (0 breaks), step300/350/950 MANIFEST 27/27 reproduce, **no `step963` checkpoint exists** (run stopped partial at 963, last save 950) | 1014 step_commit events cover 963 distinct global_steps; 301 booked 3x |
+| C TaskSpec | 12/12 installed and traceable, 0 BLOCKED_INTERFACE | `generalization` = exactly the 12 ids (`task_inventory.py:25-39`), 25 Hz control, dual_x5 = 14D |
+| D expert | 6 realistic / 4 hard-but-rigid / **2 BLOCKED_DATA** (fold_clothes, pour_liquid) | success verdict only at `eval_env.py:895-897`; `k1_*` scripts are NOT legal experts |
+| B R16 wiring | WS+msgpack, obs/action dict contract, gaps G1-G12 | **official FINAL is 25 episodes, not 30** (`_task.yml:105-107` + `main.py:325-329`) |
+| M2 data | 3 tasks structurally identical, 0 schema work, language present | 2-task = 160 train eps / 61,171 rows; blocker = single normalizer has no task id |
+
+## Mechanism result that frames the whole G5 question
+
+`tools/r15_mechanism_diagnostics.py` on the frozen DEV frames (CPU, no model):
+
+| model | DEV L1 | DEV R^2 |
+|---|---|---|
+| constant velocity (= predicting R = 0) | **0.002110** | 0 (by construction) |
+| TRAIN-mean residual | 0.002333 | -0.0354 |
+| TRAIN-only linear map on the 42D feature | 0.003429 | -0.1412 |
+
+Because `A[t] == S[t+1]`, `|CV - A_t| = |R_t|` exactly, so the CV baseline IS the mean residual
+magnitude. The 42D [S,V,Acc] features do not linearly predict R on DEV (negative R^2), so beating CV
+requires the 3 RGB frames to carry residual information the proprio history does not. That is the
+falsifiable claim G5 actually tests at step 1000 — and the reason a negative G5 is a data/residual
+finding rather than a training bug.
