@@ -1,0 +1,63 @@
+[03:04:25] R15 r15-s300-20261021T030423Z: 0 -> 300 (300 steps), bucket R15_TRAIN_FORMAL, estimate 1020s
+2026-10-21 03:04:26.753540: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-21 03:04:26.835017: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Using ARX constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[03:04:30] runtime contract: {"action_dim": 14, "action_token_begin_idx": 31743, "ignore_index": -100, "num_actions_chunk_unused": 25, "proprio_dim_unused": 14, "r42_action_tokens": 14, "r42_proprio_dim": 42, "robot_platform": "ARX", "stop_index": 2}
+10/21 [03:04:31] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  3.74it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  4.22it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  4.52it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  4.37it/s]
+[03:04:55] pristine modeling sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+[03:05:07] LoRA trainable=110.83M | 42D projector=16.957M | llm_dim=4096 | modeling_sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+[03:05:29] step=10 loss=3.1433 gnorm=7.73 lr=5.00e-04 mem=23.06GB
+[03:05:52] step=20 loss=3.6353 gnorm=6.37 lr=5.00e-04 mem=23.06GB
+[03:06:14] step=30 loss=2.4775 gnorm=6.06 lr=5.00e-04 mem=23.06GB
+[03:06:34] step=40 loss=1.7638 gnorm=2.49 lr=5.00e-04 mem=23.06GB
+[03:06:54] step=50 loss=1.4842 gnorm=3.06 lr=5.00e-04 mem=23.06GB
+/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/peft/utils/save_and_load.py:180: UserWarning: Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.
+  warnings.warn("Setting `save_embedding_layers` to `True` as embedding layers found in `target_modules`.")
+[03:07:11] saved full-state checkpoint step=50 sha=af53892109bb57fd
+[03:07:30] step=60 loss=2.1143 gnorm=1.27 lr=5.00e-04 mem=23.06GB
+[03:07:50] step=70 loss=2.4962 gnorm=8.66 lr=5.00e-04 mem=23.06GB
+[03:08:09] step=80 loss=2.1762 gnorm=2.53 lr=5.00e-04 mem=23.06GB
+[03:08:25] step=90 loss=1.8773 gnorm=1.58 lr=5.00e-04 mem=23.06GB
+[03:08:44] step=100 loss=1.4355 gnorm=1.09 lr=5.00e-04 mem=23.06GB
+[03:09:01] saved full-state checkpoint step=100 sha=8941bf62509180df
+[03:09:19] step=110 loss=2.2778 gnorm=1.75 lr=5.00e-04 mem=23.06GB
+[03:09:36] step=120 loss=1.2570 gnorm=2.44 lr=5.00e-04 mem=23.06GB
+[03:09:54] step=130 loss=1.4916 gnorm=1.57 lr=5.00e-04 mem=23.06GB
+[03:10:13] step=140 loss=3.6947 gnorm=8.86 lr=5.00e-04 mem=23.06GB
+[03:10:33] step=150 loss=1.8091 gnorm=2.11 lr=5.00e-04 mem=23.06GB
+[03:11:03] saved full-state checkpoint step=150 sha=e7c4c7d3b5a95746
+[03:11:22] step=160 loss=1.9525 gnorm=6.48 lr=5.00e-04 mem=23.06GB
+[03:11:42] step=170 loss=2.2086 gnorm=1.73 lr=5.00e-04 mem=23.06GB
+[03:12:01] step=180 loss=1.7262 gnorm=2.93 lr=5.00e-04 mem=23.06GB
+[03:12:21] step=190 loss=1.6850 gnorm=2.24 lr=5.00e-04 mem=23.06GB
+[03:12:41] step=200 loss=1.7331 gnorm=1.66 lr=5.00e-04 mem=23.06GB
+[03:12:59] saved full-state checkpoint step=200 sha=bd16ac75e70a46bf
+[03:13:17] step=210 loss=1.6641 gnorm=3.34 lr=5.00e-04 mem=23.06GB
+[03:13:41] step=220 loss=1.3423 gnorm=2.46 lr=5.00e-04 mem=23.06GB
+[03:14:00] step=230 loss=1.6386 gnorm=1.44 lr=5.00e-04 mem=23.06GB
+[03:14:20] step=240 loss=1.8041 gnorm=1.48 lr=5.00e-04 mem=23.06GB
+[03:14:39] step=250 loss=1.5230 gnorm=1.34 lr=5.00e-04 mem=23.06GB
+[03:15:01] saved full-state checkpoint step=250 sha=0f1fba5e6f23c63b
+[03:15:22] step=260 loss=1.6559 gnorm=1.46 lr=5.00e-04 mem=23.06GB
+[03:15:40] step=270 loss=1.7990 gnorm=4.89 lr=5.00e-04 mem=23.06GB
+[03:15:59] step=280 loss=2.2659 gnorm=1.92 lr=5.00e-04 mem=23.06GB
+[03:16:19] step=290 loss=2.0828 gnorm=1.33 lr=5.00e-04 mem=23.06GB
+[03:16:40] step=300 loss=1.5034 gnorm=1.36 lr=5.00e-04 mem=23.06GB
+[03:17:03] saved full-state checkpoint step=300 sha=b71ec79f5dad5670
+[03:17:03] R15 REACHED_TARGET reached step 300 in 757.7s (1.922s/step, peak 23.06 GB)
