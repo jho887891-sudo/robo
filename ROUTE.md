@@ -243,3 +243,12 @@ steps 0 of 3000):
   upstream gates are green, but the window ended before the 300/1000/3000 runs.
 * **Draft PR not created** — the box has no GitHub API credential (no `gh`, no token); the branch
   is pushed and this is recorded rather than papered over with a `/pull/new/` link.
+
+
+### 独立审计补记：R11–R15 真续训与预算 P0（2026-10-21）
+
+- **证据**：执行提交 feature/r11-p0-closeout@69031eda6ee32439aa75d71b227a66a7dcb78aa2，原R13 7B zero-update Smoke和R14 32TRAIN固定帧100step过拟合均有真实运行日志；R14 CE 14.8141→0.125，仅支持TRAIN记忆能力，不说明DEV泛化或Push-T闭环成功；原报告与日志保持不动。
+- **新审计 P0-RESUME-1**：training/r11_train_pushT_r42.py 的R15每次由pristine创建新LoRA/optimizer，禁止init_lora，循环步数总从1开始，checkpoint无AdamW/scheduler/RNG，默认save_every=0。按原命令300、1000、3000会执行三次独立训练且总4300steps，**不等于获批的累计3000**。必须新增full-state resume、global_step和完整DEV Gate，并用CPU中断恢复等价性测试证明。
+- **新审计 P0-LEDGER-2**：budget_ledger曾被镜像push覆盖为0，重建账本总GPU1027.5s依据原始R13/R14日志；R14重建事件的start写为重建时刻，与真实milestone事件时间非单调。运行时ledger_book直接覆盖JSON且训练step数未逐步可靠记账，无法容忍崩溃/覆盖/多次执行。继续R15前要单写者、WAL+原子提交、GPU/step双门槛和失败留证。
+- **明确状态**：R13 VERIFIED_GPU_ZERO_UPDATE、R14 OVERFIT_SIGNAL_PASS；R11 NEW_DATA BLOCKED_EXPERT；R15 **BLOCKED_IMPLEMENTATION**（不是BLOCKED_AUTHORIZATION）、R16 NOT_STARTED。原32GPUh/3000步上限不重置，R14的100步不算R15步；无需反复小额请示。
+- **审计文件**：report/R11_R15_INDEPENDENT_RESUME_LEDGER_AUDIT.md；missions/R15_TRUE_CONTINUATION_EXECUTION.md。修复及真训练必须另在DeepSeek执行分支提交固定SHA、红绿回归、GPU WAL、DEV预测与checkpoint，旧source保持不可改写。
