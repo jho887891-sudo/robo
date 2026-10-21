@@ -138,3 +138,21 @@ state) and the checkpoint is kept. The mechanism evidence is in
 Isaac Sim reaches "Resetting all environments" ~530 s after launch, so a single-episode loop costs
 roughly 25-30 min of wall clock before the policy is even asked for an action. That is why the driver's
 own timeout is 3000 s and the supervisor's job timeout is 7200 s.
+
+### 10:44Z — attempt 3 state at report time
+
+`loop_pushT_stage1_r3` is still RUNNING. Verified inside it, from its own logs:
+
+* the host policy server imported **prismatic successfully** and asserted the ARX constants before the
+  import (`If needed, manually set the correct constants…` then `[OpenVLA_R42] backend ready:
+  _TorchBackend prompt_len=31 device=cuda`), i.e. the real 7B + LoRA + 42D projector are resident;
+* the client inside `rd_setup` is alive (`/isaac-sim/kit/python/bin/python3 -u src/eval_client/main.py
+  --task_name push_T … --policy_server_url ws://127.0.0.1:19000`) and got past the curobo import that
+  killed attempt 1;
+* no `_result.json` exists yet, so **no closed-loop number is claimed**.
+
+Two facts about the cost of this loop, measured: Isaac reaches "Resetting all environments" ~20-25 min
+after launch, and the 7B is loaded lazily on the first policy call (2-3 min). A single-episode loop is
+therefore a ~30 min wall-clock job before the first action is even requested. The supervisor's job
+timeout (7200 s) and the driver's own (3000 s) are sized for that, and the record + raw logs land in
+`runs/r15_loop_dev/` and `logs/supervisor/` whether it succeeds or times out.
