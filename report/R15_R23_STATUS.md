@@ -164,3 +164,58 @@ Branch `feature/r15-true-continuation` @ `8acede9` (pushed). Commits in this ses
 Tests added and passing in this session: **321** (162 deploy + 45 R15 core + 44 collection + 36 M2 +
 22 M2 data + 7 loop driver + 5 stats). Nothing was merged to main, no official rule or success
 predicate was modified, and no other user's process was touched.
+
+## 6. R16 round (2026-10-22) — measurement defects fixed, two cache results, one PASS
+
+Server-verified starting state (not inferred): `m2_two_2000_r5` **DONE exit 0**, step **2000**,
+`REACHED_TARGET`, 7742.6 s, 2.939 s/step, peak 23.04 GB; `job_end` had booked `gpu_seconds=0.0`.
+
+### 6.1 P6 was mis-measured, not failing
+
+`action_window_probs()` read the 14 action positions without the 769-token vision prefix, so `ce_window`,
+`pred_bins` and the counterfactual routing all came from vision rows. RED (4 failing tests) -> fixed ->
+archives carry `vision-prefix-aware-v2` and old ones are refused (`LEGACY_INVALID_FOR_P6`).
+
+Regenerated from the sealed step2000 checkpoint, **no retraining**, same frames, same true bins
+(`b45fcbaa…` byte-identical):
+
+| task | ce_window before | after | no-op | CV |
+|---|---|---|---|---|
+| push_T | 4.8883 | **2.1214** | 2.6241 | 2.6736 |
+| stack_bowls | 5.3775 | **3.0963** | 3.3667 | 3.3172 |
+
+Routing: own-prompt win rate 0.25 -> **1.0**; wrong-prompt penalty ~0 -> **0.65-0.77 nats**; distinct bins
+1 -> **8**. `mission/m2_p6_two_corrected_report.json` = **PASS, 20/20**, with a pre-registered coherent
+eps-smoothed NLL (eps=1e-3) replacing the legacy hybrid score, which is still reported but never decisive.
+
+### 6.2 M2 GPU booking corrected append-only
+
+`job_end` now books `wall - sum(step_seconds)`. The historical gap: +9937.7 s was booked by the first
+correction but that double-counted supervisor wrappers, so a documented reversal (-9937.7) plus a scoped
+rebooking (+2058.7) leaves gpu **26242.6 s**, `TWO_TASK_PILOT` 7952.0 s / 2000 steps,
+`R15_TRAIN_FORMAL` 8261.6 s / 1664 steps. M1 and M2 step budgets are separate buckets.
+
+### 6.3 R16 cache: one negative, one exact-and-useless
+
+LLM-prefix cache (one prefill + 13 incremental steps): **4.05x faster and NOT deployable**. 32/32 inputs
+diverge; the three-way attribution against the training forward says why: reference == full deploy
+**8/8**, reference == cached **0/8**, k=0 bit-identical for both, first split at k=1, and the window-
+boundary bin count is identical for reference and full (42 vs 42) so the 0/255 saturation is real model
+behaviour. The deployed full path is faithful to training; the incremental step is the defect -> the line
+stops as BLOCKED_MECHANISM with a sidecar.
+
+Vision-only cache (share the 3-camera encode across the 14 tokens): **bit-exact and useless**. 32/32
+identical, worst |delta| **0.0**, invalidation verified (fresh 0.0 / stale 0.0625 detected), speedup
+**1.0002**. The cost is the LLM forward over ~800 multimodal tokens, not the vision tower.
+
+Measured per-action latency, same weights: **3058.9 ms p50** / 3095.7 p95 / 3111.2 p99 in a clean loop;
+5906.9 ms with the interleaved prefix path in the same process; 5998 ms in the live server. All 75-150x
+the 40 ms budget -> **OFFLINE_SIM_ONLY**, no realtime claim. The next lever is architectural (action
+chunking, distillation, shorter context) and needs a lead decision.
+
+### 6.4 12-task line
+
+`mission/r12_task_status.json` + `report/R12_TASK_STATUS.md` are generated from verified artefacts (lane C
+TaskSpec 12/12, lane D classes, live HDF5 counts): **3 tasks with 100 episodes**, 9 without data, **2
+BLOCKED_DATA** by physics. The 2->4 gate is `PERMITTED_PENDING_BUDGET_DECISION`: P6 now passes, but
+expanding the shared model is a model/budget decision and was **not** started.
