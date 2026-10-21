@@ -243,3 +243,12 @@ steps 0 of 3000):
   upstream gates are green, but the window ended before the 300/1000/3000 runs.
 * **Draft PR not created** — the box has no GitHub API credential (no `gh`, no token); the branch
   is pushed and this is recorded rather than papered over with a `/pull/new/` link.
+
+### R15 G5=FAIL / R16 DEV / M2 / FINAL25和许可证独立审计（2026-10-21）
+
+- 执行者 feature/r15-true-continuation@9305563a2cf947739ebcc8cf428a11e2542dec90。机器Gate G5_1000 verdict=FAIL/exit3：SAFE DEV macroL1 VLA0.002538455、CV0.002047481（VLA相对劣化23.979%），运动分层0/4达标。原线新增2000优化步不获原G5许可，真实闭环结果未测。
+- 资源叙述务必区分lineage 1000 unique formal steps与实际1664 executed optimizer updates（664废弃/重算计算不免费），需要远程原始WAL与checkpoint hash独立核对。
+- 独立P0：mission/supervisor_queue_v5.json部分gate命令以exit 0吞掉rc3，tools/mission_supervisor.py只看DONE不读Gate JSON；m1_2000_seg3_to_3000仅依赖loop_pushT_stage1成功，不依赖真正G5_PASS。这是可误启动新增2000步的依赖图缺陷。旧队列/日志不改写；新v6修Gate并补负例，确认当前远程r4运行状态后继续独立DEV。
+- 研究决定同意RoboDojo官方每任务25回合primary FINAL（12任务最多300次）：固定上游 b8e5eed task YAML配置25及main.py min(EVAL_NUM,eval_num)。既有30只作为历史方案，首次FINAL前锁定新协议、checkpoint、task、layout、版本、SHA；官方SIM25不可替代新专家HDF5中的5DEV/20FINAL。
+- 固定上游b8e5eed的LICENSE=MIT但README同SHA写Non-Commercial Research License；当前上游main两个文件均标MIT。研究报告并列注明冲突，发布前单独审Assets/HF数据/XPolicyLab/第三方模型协议，不能笼统说整套资源MIT。
+- 12 TaskSpec工程进展已有代码，但M2共享模型真正GPU训练与12任务成功率未证实；旧HDF5缺layout provenance，严格新场景独立UNKNOWN。详见 report/R15_G5_FINAL25_LICENSE_SUPERVISOR_AUDIT.md，原始证据完整保留。
