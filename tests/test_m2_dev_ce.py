@@ -75,3 +75,43 @@ def test_all_ignore_index_is_refused():
     labels = np.full(len(labels), -100)
     with pytest.raises(Exception):
         T.token_ce_from_logits(logits, labels, n_prompt)
+
+
+def test_action_window_probs_shift_by_visual_prefix():
+    """P6 must score action logits, not the 769 visual prefix rows."""
+    import r42_adapter as R
+    n_prompt, n_actions, pad = 8, T.N_ACTIONS, 5
+    vocab = R.TOKEN_BEGIN_IDX + 1 + 256
+    rng = np.random.RandomState(23)
+    body = rng.randn(n_prompt + N_SUP, vocab).astype(np.float32)
+    # Make the true action bin 7 strongly preferred at its causal row.
+    idx = R.TOKEN_BEGIN_IDX + 1 + 7
+    for k in range(n_actions):
+        body[n_prompt - 1 + k, idx] = 17.0
+    visual = rng.randn(pad, vocab).astype(np.float32)
+    prefixed = np.concatenate([visual, body], axis=0)
+    base = T.action_window_probs(body, n_prompt, n_text_tokens=body.shape[0])
+    got = T.action_window_probs(prefixed, n_prompt, n_text_tokens=body.shape[0])
+    np.testing.assert_array_equal(got["pred_bins"], base["pred_bins"])
+    np.testing.assert_allclose(got["pred_probs"], base["pred_probs"], rtol=0, atol=0)
+    assert got["pred_bins"].tolist() == [7] * n_actions
+    assert T.ce_window_from_probs(got["pred_probs"], np.full(n_actions, 7)) == pytest.approx(
+        T.ce_window_from_probs(base["pred_probs"], np.full(n_actions, 7)), abs=1e-10)
+    # Old code would pick prefix rows and silently return a different distribution.
+    wrong = T.action_window_probs(prefixed, n_prompt)
+    assert not np.array_equal(wrong["pred_bins"], got["pred_bins"])
+
+
+def test_action_window_probs_reject_bad_text_length():
+    import r42_adapter as R
+    logits = np.zeros((22, R.TOKEN_BEGIN_IDX + 257), dtype=np.float32)
+    with pytest.raises(T.M2TrainError):
+        T.action_window_probs(logits, n_prompt=8, n_text_tokens=99)
+
+
+def test_old_p6_archive_cannot_be_scored(tmp_path):
+    """Old prediction archives remain intact but are invalid as Gate evidence."""
+    p = tmp_path / "legacy.npz"
+    np.savez_compressed(p, **{"push_T/episodes": np.array(["episode_0.hdf5"])})
+    with pytest.raises(T.M2TrainError, match="vision-prefix-aware-v2"):
+        T.load_eval_archive(str(p))
