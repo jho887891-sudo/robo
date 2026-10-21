@@ -532,6 +532,9 @@ def write_episode(new_root, run_id, episode_id, task, instruction, state, action
         stage = "renamed"
         _fsync_dir(root)
         size = int(os.path.getsize(final_path))
+        if size < int(min_bytes):
+            _reject("size_floor", "written episode is %d bytes < the %d byte floor: a "
+                    "placeholder, not an episode" % (size, min_bytes))
         if size > int(max_bytes):
             _reject("size_cap", "written episode is %d bytes > the %d byte cap"
                     % (size, max_bytes))

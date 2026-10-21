@@ -236,6 +236,16 @@ def test_seed_before_init_is_reproducible():
         "a different seed must change the initialisation (seed is really applied pre-init)"
 
 
+def test_peeking_the_next_frame_does_not_consume_it():
+    """PR#21 finding 1: logging the next frame must not advance the sampler."""
+    sm = RS.FrameSampler(FRAMES, 3)
+    peek = sm.perm[sm.position % len(sm.perm)]
+    assert sm.frames[peek] == sm.next()
+    sm2 = RS.FrameSampler(FRAMES, 3)
+    peek2 = sm2.perm[sm2.position % len(sm2.perm)]
+    assert sm2.position == 0
+    assert sm2.frames[peek2] == sm2.next()
+
 def test_sampler_is_permutation_and_resumable():
     sm = RS.FrameSampler(FRAMES, 3)
     first = [sm.next() for _ in range(len(FRAMES))]

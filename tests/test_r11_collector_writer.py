@@ -101,8 +101,11 @@ def test_writes_an_episode_and_passes_read_back_verification(tmp_path):
         assert int(h["additional_info/frequency"][()]) == 25
         assert h["instruction"][()].decode("utf-8") == INSTRUCTION
         for cam in CAMERAS:
-            assert h["vision/" + cam + "/colors"].shape[0] == 120
-            assert isinstance(h["vision/" + cam + "/colors"][0], (bytes, np.bytes_))
+            ds = h["vision/" + cam + "/colors"]
+            assert ds.shape[0] == 120
+            frame = bytes(ds[0])
+            assert frame == payload["rgb_frames"][cam][0], "the JPEG payload changed on disk"
+            assert frame[:2] == b"\xff\xd8" and frame[-2:] == b"\xff\xd9"
         assert h.attrs["seed"] == 1234
         assert h.attrs["expert_version_sha"] == "a" * 40
         assert json.loads(h.attrs["meta_json"])["expert"] == "geometric_push_t"
@@ -318,6 +321,7 @@ def test_size_floor_rejects_placeholder_episodes(tmp_path):
     with pytest.raises(W.EpisodeRejected) as exc:
         W.write_episode(**dict(payload, state=state, action=action, rgb_frames=rgb, **kw))
     assert exc.value.code == "size_floor"
+    assert not os.path.exists(payload["new_root"]), "a rejected episode is not left on disk"
 
 
 def test_no_tmp_residue_after_an_injected_write_failure(tmp_path, monkeypatch):
@@ -349,7 +353,8 @@ def test_build_existing_index_reads_reference_episodes(tmp_path):
     assert index["episode_0000000.hdf5"]["state_action_sha256"] == rep["state_action_sha256"]
     # and that index really blocks a duplicate
     with pytest.raises(W.EpisodeRejected) as exc:
-        W.write_episode(**payload, existing_index=index, **kw)
+        W.write_episode(**dict(payload, episode_id=1), existing_index=index,
+                        allow_existing_root=True, **kw)
     assert exc.value.code == "hash_collision"
 
 

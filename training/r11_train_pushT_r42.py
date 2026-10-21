@@ -660,8 +660,8 @@ def run_r15(args):
                                 expected_contract=dcontract, expected_base=base_id,
                                 expected_global_step=start_step)
         sampler = out["sampler"]
-        log("resumed from %s at global_step=%d (next frame %s)"
-            % (args.resume_from, start_step, sampler.next()))
+        log("resumed from %s at global_step=%d position=%d  # peek only, never sampler.next()"
+            % (args.resume_from, start_step, sampler.position))
         sampler = out["sampler"]
     ev = {"mode": "r15_stage", "run_id": run_id, "utc_start": utcnow(), "target": target,
           "start_global_step": start_step, "steps": need_steps, "bucket": args.bucket,
@@ -740,6 +740,7 @@ def run_r15(args):
                 % (global_step, ck["manifest"]["files"]["proprio_projector_42.pt"][:16]))
 
     ev["global_step_reached"] = global_step
+    ev["booked_step_seconds"] = round(float(sum(step_times)), 1)
     ev["utc_end"] = utcnow()
     ev["wall_clock_s"] = round(time.time() - t0, 1)
     ev["seconds_per_step"] = round(float(np.mean(step_times)), 3) if step_times else None
@@ -755,7 +756,7 @@ def run_r15(args):
                                "formal_steps_booked_here": global_step - start_step,
                                "wall_clock_s": ev["wall_clock_s"],
                                "totals_after": led_tot},
-                      gpu_seconds=0.0, formal_steps=0)
+                      gpu_seconds=max(0.0, ev["wall_clock_s"] - float(sum(step_times))), formal_steps=0)
         over = ledger.totals()["formal_steps_used"] > L15.FORMAL_STEPS_CAP
         if over:
             log("NOTE: formal steps %d exceed the nominal 3000 ceiling - recorded, not blocked "
