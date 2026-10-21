@@ -14,7 +14,8 @@ import r15_loop_dev as L  # noqa: E402
 
 
 def test_command_uses_the_official_client_and_records_joint_actions(tmp_path):
-    args = type("A", (), dict(root="/R", dataset="RoboDojo", task="push_T", env_cfg="arx_x5",
+    args = type("A", (), dict(root="/R", root_inner="/R", docker="", dataset="RoboDojo",
+                              task="push_T", env_cfg="arx_x5",
                               policy_name="OpenVLA_R42", host="127.0.0.1", port=18765, episodes=1,
                               seed=0, env_gpu="0", ckpt_label="step1000",
                               action_type="joint"))()
@@ -23,6 +24,22 @@ def test_command_uses_the_official_client_and_records_joint_actions(tmp_path):
     assert "--eval-num" in cmd and cmd[cmd.index("--eval-num") + 1] == "1"
     assert cmd[cmd.index("--action-type") + 1] == "joint"
     assert cmd[cmd.index("--policy-port") + 1] == "18765"
+
+
+def test_docker_runner_wraps_the_same_official_command():
+    args = type("A", (), dict(root="/R", root_inner="/workspace/RoboDojo", docker="rd_setup",
+                              dataset="RoboDojo", task="push_T", env_cfg="arx_x5",
+                              policy_name="OpenVLA_R42", host="127.0.0.1", port=19000, episodes=1,
+                              seed=0, env_gpu="0", ckpt_label="step1000",
+                              action_type="joint"))()
+    cmd = L.build_cmd(args)
+    assert cmd[:5] == ["docker", "exec", "rd_setup", "bash", "-lc"]
+    script = cmd[5]
+    assert script.startswith("cd /workspace/RoboDojo && ")
+    assert "robodojo.sh client" in script and "--eval-num 1" in script
+    # without --docker the same command runs on the host, from the host path
+    args.docker = ""
+    assert L.build_cmd(args)[:3] == ["bash", "/R/scripts/robodojo.sh", "client"]   # root, not root_inner
 
 
 def test_result_parsing_reads_the_official_success_flags(tmp_path):

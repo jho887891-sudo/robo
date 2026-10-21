@@ -61,18 +61,31 @@ def episodes_used(recs, task):
 
 
 def build_cmd(args):
-    return ["bash", os.path.join(args.root, "scripts", "robodojo.sh"), "client",
-            "--dataset", args.dataset,
-            "--task", args.task,
-            "--env-cfg", args.env_cfg,
-            "--policy-name", args.policy_name,
-            "--policy-host", args.host,
-            "--policy-port", str(args.port),
-            "--eval-num", str(args.episodes),
-            "--seed", str(args.seed),
-            "--env-gpu", str(args.env_gpu),
-            "--ckpt", args.ckpt_label,
-            "--action-type", args.action_type]
+    """The official client command.
+
+    The Isaac Sim client runs INSIDE the rd_setup container (network mode host; the container mounts
+    only RoboDojo -> /workspace/RoboDojo, and the r11 repo is NOT visible there). Running it on the
+    host would need an isaacsim python this repo does not pin, so the container is the
+    provenance-clean path: pass --docker rd_setup and the same arguments run there. eval_result lives
+    inside the bind mount, so result parsing still happens on the host.
+    """
+    script_root = args.root_inner if args.docker else args.root
+    inner = ["bash", os.path.join(script_root, "scripts", "robodojo.sh"), "client",
+             "--dataset", args.dataset,
+             "--task", args.task,
+             "--env-cfg", args.env_cfg,
+             "--policy-name", args.policy_name,
+             "--policy-host", args.host,
+             "--policy-port", str(args.port),
+             "--eval-num", str(args.episodes),
+             "--seed", str(args.seed),
+             "--env-gpu", str(args.env_gpu),
+             "--ckpt", args.ckpt_label,
+             "--action-type", args.action_type]
+    if args.docker:
+        return ["docker", "exec", args.docker, "bash", "-lc",
+                "cd %s && %s" % (args.root_inner, " ".join(inner))]
+    return inner
 
 
 def newest_result(root, task, policy):
@@ -113,7 +126,11 @@ def main():
     ap.add_argument("--episodes", type=int, required=True, help="episodes in THIS stage (EVAL_NUM)")
     ap.add_argument("--stage", type=int, default=1, choices=[1, 2, 3])
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--root", default=DEFAULT_ROOT)
+    ap.add_argument("--root", default=DEFAULT_ROOT, help="host path of the RoboDojo checkout")
+    ap.add_argument("--root-inner", default="/workspace/RoboDojo",
+                    help="the same tree as seen inside --docker")
+    ap.add_argument("--docker", default="",
+                    help="run the official client inside this container (e.g. rd_setup); empty = host")
     ap.add_argument("--dataset", default="RoboDojo")
     ap.add_argument("--env-cfg", default="arx_x5")
     ap.add_argument("--env-gpu", default="0")
