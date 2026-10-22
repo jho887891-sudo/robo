@@ -41,6 +41,9 @@ class Model(Legacy.Model):
                                "R15 bridge fallback is forbidden")
         if model_cfg.get("metadata") is not None and model_cfg.get("metadata_path"):
             raise M2ModelError("ambiguous metadata sources: choose one")
+        if (model_cfg.get("backend") is not None and
+                str(model_cfg.get("device", "cuda")).startswith("cuda")):
+            raise M2ModelError("injected GPU backend cannot bypass the M2 real-action safety gate")
         self._m2_task = task
         # Legacy __init__ checks the old Push-T prompt before it calls our own
         # metadata resolver. The override is restricted to the *exact* frozen
@@ -144,10 +147,22 @@ class Model(Legacy.Model):
         self._server = server
         return server
 
+    def get_action(self):
+        # CPU stub output is for contract testing.  The real 7B backend may be
+        # LOADED in a strictly opt-in smoke, but this XPolicyLab entry cannot
+        # issue robot commands until a validated prev_cmd/dt rate limiter and
+        # physical joint safety authority are wired into the servo interface.
+        if self.model_cfg.get("backend") is None:
+            raise M2ModelError(
+                "real M2 robot action emission BLOCKED: certified per-step "
+                "rate control (prev_cmd/dt) and live deployment Gate not verified")
+        return super().get_action()
+
     def contract(self):
         ans = super().contract()
         ans["strict_task_binding"] = True
         ans["trained_prompt"] = self.metadata["trained_prompt"]
         ans["tokenizer_prompt_parity"] = self.metadata["tokenizer_prompt_parity"]
         ans["m2_official_closed_loop"] = "NOT_VERIFIED"
+        ans["real_robot_action_emission"] = "BLOCKED_PENDING_RATE_AND_SAFETY_GATE"
         return ans
