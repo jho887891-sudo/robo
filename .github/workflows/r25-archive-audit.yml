@@ -1,0 +1,56 @@
+name: R25 archive-only episode audit
+
+on:
+  push:
+    branches:
+      - research/r25-safe-boundary-audit
+  pull_request:
+    paths:
+      - 'tools/r25_episode_cluster_audit.py'
+      - 'tests/test_r25_episode_cluster_audit.py'
+      - 'mission/r24/stratum_audit.json'
+      - 'mission/r24/frame_manifest*.json'
+      - 'report/R25_INDEPENDENT_CLUSTER_CROSSCHECK.json'
+      - '.github/workflows/r25-archive-audit.yml'
+
+jobs:
+  archive-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install isolated pytest
+        run: python -m pip install pytest==8.3.5
+      - name: Run R25 CPU regressions
+        run: pytest -q tests/test_r25_episode_cluster_audit.py
+      - name: Reproduce episode audit on actual committed R24 archives
+        run: |
+          python tools/r25_episode_cluster_audit.py --out "$RUNNER_TEMP/r25_cluster_actual.json"
+          python - "$RUNNER_TEMP/r25_cluster_actual.json" <<'PY'
+          import json, math, sys
+          actual=json.load(open(sys.argv[1]))
+          independent=json.load(open("report/R25_INDEPENDENT_CLUSTER_CROSSCHECK.json"))
+          assert actual["same_frame_arrays_verified"]
+          for task, expected in independent["tasks"].items():
+              got=actual["tasks"][task]
+              assert got["n_frames"] == expected["frames"]
+              assert got["n_independent_episodes"] == expected["episodes"]
+              assert got["frames_per_episode"] == expected["episode_counts"]
+              assert math.isclose(
+                  got["pooled_frame_mean_model_minus_cv"],
+                  expected["paired_model_minus_cv_pooled_frames"], abs_tol=1e-10)
+              assert math.isclose(
+                  got["equal_episode_macro_model_minus_cv"],
+                  expected["paired_model_minus_cv_episode_macro"], abs_tol=1e-10)
+          print("R25_ARCHIVE_REPRODUCTION_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r25-episode-cluster-audit
+          path: ${{ runner.temp }}/r25_cluster_actual.json
+          if-no-files-found: error
