@@ -1,0 +1,23 @@
+{
+ "checkpoint": "/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/checkpoints/step2000",
+ "checkpoint_global_step": 2000,
+ "frame_manifest_sha256": "304513b7410f6b2849ecbe2385bb87d3a15032dfed75e47d6b0e92437c00df3e",
+ "splits": {
+  "push_T|train": {
+   "n_frames": 64,
+   "ce_window_mean": 1.8982782257418642
+  },
+  "push_T|dev": {
+   "n_frames": 68,
+   "ce_window_mean": 1.9476134213004646
+  },
+  "stack_bowls|train": {
+   "n_frames": 72,
+   "ce_window_mean": 2.2372444799616864
+  },
+  "stack_bowls|dev": {
+   "n_frames": 72,
+   "ce_window_mean": 1.945608372489134
+  }
+ }
+}

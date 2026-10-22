@@ -1,0 +1,33 @@
+{
+ "r15_seg_500_1000": [
+  {
+   "lr": 0.0005,
+   "first_step": 510,
+   "prev_lr": null
+  },
+  {
+   "lr": 5e-05,
+   "first_step": 1000,
+   "prev_lr": 0.0005
+  }
+ ],
+ "r15_seg_300_500": [
+  {
+   "lr": 0.0005,
+   "first_step": 310,
+   "prev_lr": null
+  }
+ ],
+ "m2_two_2000": [
+  {
+   "lr": 0.0005,
+   "first_step": 10,
+   "prev_lr": null
+  },
+  {
+   "lr": 5e-05,
+   "first_step": 1000,
+   "prev_lr": 0.0005
+  }
+ ]
+}

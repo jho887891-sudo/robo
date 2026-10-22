@@ -1,0 +1,65 @@
+{
+ "schema": "r24-coverage-v1",
+ "runs": {
+  "m2_two_2000": {
+   "batch_size_per_device": 1,
+   "grad_accum": 1,
+   "optimizer_steps": 2000,
+   "unique_frames_consumed_if_never_repeated": 2000,
+   "train_frames_available": 61171,
+   "per_task_train_frames": {
+    "push_T": 25313,
+    "stack_bowls": 35858
+   },
+   "epoch_fraction": 0.032695231400500235,
+   "frame_count_error": null,
+   "note": "batch=1 and no gradient accumulation: one optimizer step consumes exactly ONE frame, so 'epochs' is optimizer_steps / TRAIN_FRAMES and the model has seen at most one pass over a fraction of the data"
+  },
+  "r15_lineage": {
+   "batch_size_per_device": 1,
+   "grad_accum": 1,
+   "observed_step_min": 310,
+   "observed_step_max": 1000,
+   "n_step_lines": 70,
+   "train_frames_available": 25313,
+   "global_steps_total_lineage": 1000,
+   "epoch_fraction_at_1000": 0.03950539248607435,
+   "note": "the R15 lineage is three segments (0-300, 300-500, 500-1000); only the segments whose raw logs still exist are reported, and the others are listed as MISSING rather than back-filled",
+   "segments": {
+    "r15_seg_500_1000": {
+     "step_range": [
+      510,
+      1000
+     ],
+     "n_steps": 50,
+     "lr_schedule": [
+      {
+       "lr": 0.0005,
+       "first_step": 510,
+       "prev_lr": null
+      },
+      {
+       "lr": 5e-05,
+       "first_step": 1000,
+       "prev_lr": 0.0005
+      }
+     ]
+    },
+    "r15_seg_300_500": {
+     "step_range": [
+      310,
+      500
+     ],
+     "n_steps": 20,
+     "lr_schedule": [
+      {
+       "lr": 0.0005,
+       "first_step": 310,
+       "prev_lr": null
+      }
+     ]
+    }
+   }
+  }
+ }
+}

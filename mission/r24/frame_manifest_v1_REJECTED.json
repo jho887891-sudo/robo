@@ -1,0 +1,2016 @@
+{
+ "schema": "r24-frame-manifest-v1",
+ "tasks": [
+  "push_T",
+  "stack_bowls"
+ ],
+ "why": "frozen BEFORE any model evaluation so that the R24 comparison cannot be a selection artefact; DEV episodes are chosen by hash of the episode name, strata from the demonstration alone, and the same manifest is used for every checkpoint",
+ "selection": {
+  "dev_frames_per_stratum_per_task": 12,
+  "train_frames_per_stratum_per_task": 12,
+  "seed": 0,
+  "dev_episode_rule": "sorted by sha256(episode)[:8] - never by model score",
+  "strata_definition": "still (|V| <= 0.2*median), slow_motion (<=median), fast_motion (>median), '+large_residual' when |R| >= 2*median"
+ },
+ "limitation": "contact and approach phases are NOT identifiable from the HDF5 alone; they need privileged simulator object poses (Stage D trace). These strata are imitation-kinematic, and are reported as such.",
+ "frames": {
+  "push_T": {
+   "dev": [
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 489,
+     "stratum": "still+large_residual",
+     "speed": 0.00058566,
+     "resid_mag": 0.00198978
+    },
+    {
+     "episode": "episode_0000041.hdf5",
+     "t": 371,
+     "stratum": "still+large_residual",
+     "speed": 0.00022421,
+     "resid_mag": 0.00598946
+    },
+    {
+     "episode": "episode_0000041.hdf5",
+     "t": 421,
+     "stratum": "still+large_residual",
+     "speed": 0.00058084,
+     "resid_mag": 0.00188388
+    },
+    {
+     "episode": "episode_0000041.hdf5",
+     "t": 455,
+     "stratum": "still+large_residual",
+     "speed": 0.00041175,
+     "resid_mag": 0.00256407
+    },
+    {
+     "episode": "episode_0000047.hdf5",
+     "t": 189,
+     "stratum": "still+large_residual",
+     "speed": 0.00047576,
+     "resid_mag": 0.00187902
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 1,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00214093,
+     "resid_mag": 0.01140262
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 2,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01354355,
+     "resid_mag": 0.01337043
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 3,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02691398,
+     "resid_mag": 0.00682551
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 4,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03373949,
+     "resid_mag": 0.00463871
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 5,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03426025,
+     "resid_mag": 0.00640704
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 6,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02801419,
+     "resid_mag": 0.02468749
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 7,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.00423581,
+     "resid_mag": 0.00640339
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 8,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01056311,
+     "resid_mag": 0.00775294
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 9,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01831605,
+     "resid_mag": 0.00326255
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 10,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02104165,
+     "resid_mag": 0.00310066
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 11,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02090555,
+     "resid_mag": 0.00214329
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 12,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01914732,
+     "resid_mag": 0.00303198
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 13,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01700114,
+     "resid_mag": 0.01542512
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 14,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00246975,
+     "resid_mag": 0.00568497
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 18,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00151655,
+     "resid_mag": 0.00526384
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 21,
+     "stratum": "fast_motion",
+     "speed": 0.02080802,
+     "resid_mag": 0.00087125
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 22,
+     "stratum": "fast_motion",
+     "speed": 0.02116199,
+     "resid_mag": 0.00148083
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 30,
+     "stratum": "fast_motion",
+     "speed": 0.00763594,
+     "resid_mag": 0.00142766
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 31,
+     "stratum": "fast_motion",
+     "speed": 0.00706705,
+     "resid_mag": 0.00173263
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 33,
+     "stratum": "fast_motion",
+     "speed": 0.00486805,
+     "resid_mag": 0.0006398
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 34,
+     "stratum": "fast_motion",
+     "speed": 0.0044022,
+     "resid_mag": 0.00027989
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 35,
+     "stratum": "fast_motion",
+     "speed": 0.00422629,
+     "resid_mag": 0.00030355
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 36,
+     "stratum": "slow_motion",
+     "speed": 0.00392275,
+     "resid_mag": 0.0002274
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 37,
+     "stratum": "slow_motion",
+     "speed": 0.00384478,
+     "resid_mag": 0.00068655
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 38,
+     "stratum": "fast_motion",
+     "speed": 0.00404548,
+     "resid_mag": 0.00053092
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 39,
+     "stratum": "fast_motion",
+     "speed": 0.0041247,
+     "resid_mag": 0.0003344
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 40,
+     "stratum": "fast_motion",
+     "speed": 0.00406579,
+     "resid_mag": 0.00015198
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 41,
+     "stratum": "fast_motion",
+     "speed": 0.00407908,
+     "resid_mag": 0.00039879
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 42,
+     "stratum": "fast_motion",
+     "speed": 0.00407695,
+     "resid_mag": 0.00027532
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 43,
+     "stratum": "slow_motion",
+     "speed": 0.00395859,
+     "resid_mag": 0.00036878
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 44,
+     "stratum": "slow_motion",
+     "speed": 0.00358981,
+     "resid_mag": 0.0004776
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 45,
+     "stratum": "slow_motion",
+     "speed": 0.00312433,
+     "resid_mag": 0.0006811
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 46,
+     "stratum": "slow_motion",
+     "speed": 0.00269922,
+     "resid_mag": 0.0015951
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 47,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00303569,
+     "resid_mag": 0.0025782
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 86,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00368496,
+     "resid_mag": 0.00415798
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 99,
+     "stratum": "slow_motion",
+     "speed": 0.00384107,
+     "resid_mag": 0.00026092
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 100,
+     "stratum": "slow_motion",
+     "speed": 0.00392021,
+     "resid_mag": 0.00058937
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 104,
+     "stratum": "slow_motion",
+     "speed": 0.00392723,
+     "resid_mag": 0.00053781
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 105,
+     "stratum": "slow_motion",
+     "speed": 0.00379544,
+     "resid_mag": 0.00057764
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 106,
+     "stratum": "slow_motion",
+     "speed": 0.00389431,
+     "resid_mag": 0.00053765
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 107,
+     "stratum": "slow_motion",
+     "speed": 0.00383233,
+     "resid_mag": 0.00059547
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 121,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00250578,
+     "resid_mag": 0.00228709
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 138,
+     "stratum": "still+large_residual",
+     "speed": 0.00053408,
+     "resid_mag": 0.00230257
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 142,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00183639,
+     "resid_mag": 0.00180222
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 143,
+     "stratum": "still",
+     "speed": 0.00075727,
+     "resid_mag": 0.00154938
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 162,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00244641,
+     "resid_mag": 0.00301351
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 163,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00284156,
+     "resid_mag": 0.00386654
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 204,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00337515,
+     "resid_mag": 0.00350836
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 205,
+     "stratum": "still",
+     "speed": 0.00032053,
+     "resid_mag": 0.00054919
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 229,
+     "stratum": "still",
+     "speed": 0.00020747,
+     "resid_mag": 0.0013866
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 252,
+     "stratum": "still",
+     "speed": 0.00067522,
+     "resid_mag": 0.00135981
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 253,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00160987,
+     "resid_mag": 0.00190987
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 292,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00354931,
+     "resid_mag": 0.00180948
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 321,
+     "stratum": "still",
+     "speed": 0.00066231,
+     "resid_mag": 0.00029962
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 322,
+     "stratum": "still",
+     "speed": 0.00052786,
+     "resid_mag": 0.00020805
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 323,
+     "stratum": "still",
+     "speed": 0.00054245,
+     "resid_mag": 7.341e-05
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 324,
+     "stratum": "still",
+     "speed": 0.00054803,
+     "resid_mag": 9.455e-05
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 325,
+     "stratum": "still",
+     "speed": 0.0005842,
+     "resid_mag": 0.00016165
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 326,
+     "stratum": "still",
+     "speed": 0.00067527,
+     "resid_mag": 6.372e-05
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 327,
+     "stratum": "still",
+     "speed": 0.00066387,
+     "resid_mag": 9.975e-05
+    },
+    {
+     "episode": "episode_0000048.hdf5",
+     "t": 328,
+     "stratum": "still",
+     "speed": 0.00060129,
+     "resid_mag": 0.00059749
+    },
+    {
+     "episode": "episode_0000063.hdf5",
+     "t": 112,
+     "stratum": "still+large_residual",
+     "speed": 0.00041993,
+     "resid_mag": 0.00227426
+    },
+    {
+     "episode": "episode_0000080.hdf5",
+     "t": 156,
+     "stratum": "still+large_residual",
+     "speed": 0.00047026,
+     "resid_mag": 0.00198986
+    }
+   ],
+   "dev_strata": {
+    "counts": {
+     "still+large_residual": 8,
+     "slow_motion+large_residual": 12,
+     "fast_motion+large_residual": 12,
+     "fast_motion": 12,
+     "slow_motion": 12,
+     "still": 12
+    },
+    "median_speed": 0.003960162401199341,
+    "median_resid": 0.0008941260748542845,
+    "pool_size": 6711
+   },
+   "train": [
+    {
+     "episode": "episode_0000009.hdf5",
+     "t": 265,
+     "stratum": "still+large_residual",
+     "speed": 0.00026367,
+     "resid_mag": 0.00188603
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 1,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.00698192,
+     "resid_mag": 0.01912753
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 2,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02541951,
+     "resid_mag": 0.01038797
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 3,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03580748,
+     "resid_mag": 0.00768078
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 4,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03725705,
+     "resid_mag": 0.006221
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 5,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03620112,
+     "resid_mag": 0.00506647
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 6,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03228082,
+     "resid_mag": 0.0111569
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 7,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02112392,
+     "resid_mag": 0.01923091
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 8,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00293977,
+     "resid_mag": 0.01137066
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 9,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01416358,
+     "resid_mag": 0.00852316
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 10,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02053039,
+     "resid_mag": 0.00335573
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 11,
+     "stratum": "fast_motion",
+     "speed": 0.02168395,
+     "resid_mag": 0.00157546
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 12,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02150285,
+     "resid_mag": 0.00526042
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 13,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01713675,
+     "resid_mag": 0.01629103
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 14,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00118175,
+     "resid_mag": 0.00608984
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 15,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.00685352,
+     "resid_mag": 0.00832323
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 16,
+     "stratum": "fast_motion",
+     "speed": 0.01515628,
+     "resid_mag": 0.00147069
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 23,
+     "stratum": "fast_motion",
+     "speed": 0.01408107,
+     "resid_mag": 0.00077936
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 26,
+     "stratum": "fast_motion",
+     "speed": 0.00581195,
+     "resid_mag": 0.00120375
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 27,
+     "stratum": "fast_motion",
+     "speed": 0.0046082,
+     "resid_mag": 0.00141709
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 28,
+     "stratum": "fast_motion",
+     "speed": 0.00356949,
+     "resid_mag": 0.00139504
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 29,
+     "stratum": "fast_motion",
+     "speed": 0.00362862,
+     "resid_mag": 0.00104199
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 30,
+     "stratum": "slow_motion",
+     "speed": 0.00347904,
+     "resid_mag": 0.00083488
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 31,
+     "stratum": "slow_motion",
+     "speed": 0.00307028,
+     "resid_mag": 0.00139899
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 32,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00324706,
+     "resid_mag": 0.0022619
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 34,
+     "stratum": "fast_motion",
+     "speed": 0.00549847,
+     "resid_mag": 0.00130211
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 35,
+     "stratum": "fast_motion",
+     "speed": 0.00679416,
+     "resid_mag": 0.00083912
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 36,
+     "stratum": "fast_motion",
+     "speed": 0.00762766,
+     "resid_mag": 0.00071374
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 37,
+     "stratum": "fast_motion",
+     "speed": 0.0083414,
+     "resid_mag": 0.00083095
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 38,
+     "stratum": "fast_motion",
+     "speed": 0.00917235,
+     "resid_mag": 0.00090937
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 64,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00287705,
+     "resid_mag": 0.01165241
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 75,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00244735,
+     "resid_mag": 0.00186202
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 76,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00138795,
+     "resid_mag": 0.00217019
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 77,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00311799,
+     "resid_mag": 0.00198267
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 83,
+     "stratum": "slow_motion",
+     "speed": 0.00341087,
+     "resid_mag": 0.00057252
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 84,
+     "stratum": "slow_motion",
+     "speed": 0.00283835,
+     "resid_mag": 0.00094052
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 85,
+     "stratum": "slow_motion",
+     "speed": 0.00258788,
+     "resid_mag": 0.00106247
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 86,
+     "stratum": "slow_motion",
+     "speed": 0.00277383,
+     "resid_mag": 0.00102832
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 87,
+     "stratum": "slow_motion",
+     "speed": 0.0031625,
+     "resid_mag": 0.00093228
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 101,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00288121,
+     "resid_mag": 0.01363706
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 144,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00184972,
+     "resid_mag": 0.00181658
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 145,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.0015108,
+     "resid_mag": 0.0016653
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 146,
+     "stratum": "slow_motion",
+     "speed": 0.00317575,
+     "resid_mag": 0.00118977
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 154,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00193631,
+     "resid_mag": 0.00446711
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 161,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00317898,
+     "resid_mag": 0.00318506
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 175,
+     "stratum": "slow_motion",
+     "speed": 0.00338531,
+     "resid_mag": 0.00089545
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 176,
+     "stratum": "slow_motion",
+     "speed": 0.00292812,
+     "resid_mag": 0.00079094
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 177,
+     "stratum": "slow_motion",
+     "speed": 0.00238288,
+     "resid_mag": 0.00029033
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 178,
+     "stratum": "slow_motion",
+     "speed": 0.00249385,
+     "resid_mag": 0.00040752
+    },
+    {
+     "episode": "episode_0000010.hdf5",
+     "t": 318,
+     "stratum": "still",
+     "speed": 0.00014155,
+     "resid_mag": 0.00013719
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 266,
+     "stratum": "still",
+     "speed": 0.00055236,
+     "resid_mag": 0.00072522
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 366,
+     "stratum": "still",
+     "speed": 0.00067209,
+     "resid_mag": 0.00017449
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 367,
+     "stratum": "still",
+     "speed": 0.00054581,
+     "resid_mag": 0.00011772
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 368,
+     "stratum": "still",
+     "speed": 0.00054527,
+     "resid_mag": 0.0001152
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 369,
+     "stratum": "still",
+     "speed": 0.00058763,
+     "resid_mag": 8.914e-05
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 370,
+     "stratum": "still",
+     "speed": 0.0005842,
+     "resid_mag": 7.566e-05
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 371,
+     "stratum": "still",
+     "speed": 0.00056496,
+     "resid_mag": 6.893e-05
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 372,
+     "stratum": "still",
+     "speed": 0.00052822,
+     "resid_mag": 6.462e-05
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 373,
+     "stratum": "still",
+     "speed": 0.00050093,
+     "resid_mag": 7.059e-05
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 374,
+     "stratum": "still",
+     "speed": 0.0004594,
+     "resid_mag": 7.176e-05
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 375,
+     "stratum": "still",
+     "speed": 0.00050212,
+     "resid_mag": 6.175e-05
+    },
+    {
+     "episode": "episode_0000014.hdf5",
+     "t": 54,
+     "stratum": "still+large_residual",
+     "speed": 0.00066665,
+     "resid_mag": 0.00176746
+    },
+    {
+     "episode": "episode_0000015.hdf5",
+     "t": 307,
+     "stratum": "still+large_residual",
+     "speed": 0.00057682,
+     "resid_mag": 0.00172875
+    },
+    {
+     "episode": "episode_0000017.hdf5",
+     "t": 406,
+     "stratum": "still+large_residual",
+     "speed": 0.00012757,
+     "resid_mag": 0.00198494
+    }
+   ],
+   "train_strata": {
+    "counts": {
+     "still+large_residual": 4,
+     "fast_motion+large_residual": 12,
+     "slow_motion+large_residual": 12,
+     "fast_motion": 12,
+     "slow_motion": 12,
+     "still": 12
+    },
+    "median_speed": 0.003493391675874591,
+    "median_resid": 0.0008088083995971829,
+    "pool_size": 4190
+   }
+  },
+  "stack_bowls": {
+   "dev": [
+    {
+     "episode": "episode_0000037.hdf5",
+     "t": 1,
+     "stratum": "still+large_residual",
+     "speed": 0.00084359,
+     "resid_mag": 0.0024468
+    },
+    {
+     "episode": "episode_0000037.hdf5",
+     "t": 79,
+     "stratum": "still+large_residual",
+     "speed": 0.00040396,
+     "resid_mag": 0.00325293
+    },
+    {
+     "episode": "episode_0000037.hdf5",
+     "t": 187,
+     "stratum": "still+large_residual",
+     "speed": 0.00047219,
+     "resid_mag": 0.00298394
+    },
+    {
+     "episode": "episode_0000037.hdf5",
+     "t": 287,
+     "stratum": "still+large_residual",
+     "speed": 0.00025772,
+     "resid_mag": 0.00287201
+    },
+    {
+     "episode": "episode_0000065.hdf5",
+     "t": 132,
+     "stratum": "still+large_residual",
+     "speed": 0.00074818,
+     "resid_mag": 0.00359908
+    },
+    {
+     "episode": "episode_0000065.hdf5",
+     "t": 244,
+     "stratum": "still+large_residual",
+     "speed": 0.0008066,
+     "resid_mag": 0.00175165
+    },
+    {
+     "episode": "episode_0000084.hdf5",
+     "t": 121,
+     "stratum": "still+large_residual",
+     "speed": 0.000815,
+     "resid_mag": 0.00264294
+    },
+    {
+     "episode": "episode_0000084.hdf5",
+     "t": 347,
+     "stratum": "still+large_residual",
+     "speed": 0.0003997,
+     "resid_mag": 0.00224599
+    },
+    {
+     "episode": "episode_0000084.hdf5",
+     "t": 496,
+     "stratum": "still+large_residual",
+     "speed": 0.00061934,
+     "resid_mag": 0.00306589
+    },
+    {
+     "episode": "episode_0000084.hdf5",
+     "t": 513,
+     "stratum": "still+large_residual",
+     "speed": 0.00080686,
+     "resid_mag": 0.00403471
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 1,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00179808,
+     "resid_mag": 0.00433521
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 2,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.00530783,
+     "resid_mag": 0.00593812
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 3,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01124596,
+     "resid_mag": 0.007333
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 4,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.0184506,
+     "resid_mag": 0.00549952
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 5,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02351653,
+     "resid_mag": 0.00222411
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 6,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02545526,
+     "resid_mag": 0.00250013
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 7,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02581566,
+     "resid_mag": 0.00210535
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 8,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02503468,
+     "resid_mag": 0.00346718
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 9,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02264435,
+     "resid_mag": 0.00377956
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 10,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01935357,
+     "resid_mag": 0.00281944
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 11,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01653413,
+     "resid_mag": 0.00300321
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 12,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01458674,
+     "resid_mag": 0.00425286
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 13,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01202306,
+     "resid_mag": 0.0033672
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 15,
+     "stratum": "fast_motion",
+     "speed": 0.00823519,
+     "resid_mag": 0.00137665
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 16,
+     "stratum": "fast_motion",
+     "speed": 0.00701294,
+     "resid_mag": 0.00109246
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 17,
+     "stratum": "fast_motion",
+     "speed": 0.00592047,
+     "resid_mag": 0.00101859
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 18,
+     "stratum": "fast_motion",
+     "speed": 0.00502629,
+     "resid_mag": 0.00101898
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 19,
+     "stratum": "slow_motion",
+     "speed": 0.00437476,
+     "resid_mag": 0.00083208
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 20,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00439009,
+     "resid_mag": 0.00340262
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 22,
+     "stratum": "fast_motion",
+     "speed": 0.01131219,
+     "resid_mag": 0.0008158
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 23,
+     "stratum": "fast_motion",
+     "speed": 0.0113731,
+     "resid_mag": 0.00054666
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 24,
+     "stratum": "fast_motion",
+     "speed": 0.01156924,
+     "resid_mag": 0.00067249
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 25,
+     "stratum": "fast_motion",
+     "speed": 0.01120517,
+     "resid_mag": 0.00083665
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 26,
+     "stratum": "fast_motion",
+     "speed": 0.01065976,
+     "resid_mag": 0.00097808
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 27,
+     "stratum": "fast_motion",
+     "speed": 0.00984634,
+     "resid_mag": 0.00105568
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 28,
+     "stratum": "fast_motion",
+     "speed": 0.0089899,
+     "resid_mag": 0.00107258
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 31,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00317003,
+     "resid_mag": 0.00249007
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 34,
+     "stratum": "fast_motion",
+     "speed": 0.00739868,
+     "resid_mag": 0.00126307
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 54,
+     "stratum": "slow_motion",
+     "speed": 0.00427649,
+     "resid_mag": 0.00053195
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 55,
+     "stratum": "slow_motion",
+     "speed": 0.00375262,
+     "resid_mag": 0.00038099
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 56,
+     "stratum": "slow_motion",
+     "speed": 0.00341,
+     "resid_mag": 0.00032052
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 57,
+     "stratum": "slow_motion",
+     "speed": 0.00333188,
+     "resid_mag": 0.00034386
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 58,
+     "stratum": "slow_motion",
+     "speed": 0.00325746,
+     "resid_mag": 0.00030395
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 59,
+     "stratum": "slow_motion",
+     "speed": 0.00310622,
+     "resid_mag": 0.00029073
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 60,
+     "stratum": "slow_motion",
+     "speed": 0.00288603,
+     "resid_mag": 0.00038074
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 61,
+     "stratum": "slow_motion",
+     "speed": 0.00257404,
+     "resid_mag": 0.00048535
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 62,
+     "stratum": "slow_motion",
+     "speed": 0.002184,
+     "resid_mag": 0.00034614
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 63,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00184956,
+     "resid_mag": 0.00208562
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 64,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00334854,
+     "resid_mag": 0.00578901
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 96,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00302936,
+     "resid_mag": 0.00308626
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 108,
+     "stratum": "slow_motion",
+     "speed": 0.00437547,
+     "resid_mag": 0.00039423
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 109,
+     "stratum": "slow_motion",
+     "speed": 0.00415557,
+     "resid_mag": 0.00030408
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 110,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.0041975,
+     "resid_mag": 0.00227921
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 133,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.0035971,
+     "resid_mag": 0.0015843
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 136,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00146072,
+     "resid_mag": 0.0017786
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 137,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00167894,
+     "resid_mag": 0.00247699
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 138,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00356294,
+     "resid_mag": 0.0025993
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 140,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00246012,
+     "resid_mag": 0.00174748
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 246,
+     "stratum": "still",
+     "speed": 0.00088234,
+     "resid_mag": 0.00014688
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 247,
+     "stratum": "still",
+     "speed": 0.00078787,
+     "resid_mag": 0.00014415
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 248,
+     "stratum": "still",
+     "speed": 0.0006785,
+     "resid_mag": 0.00010688
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 249,
+     "stratum": "still",
+     "speed": 0.000586,
+     "resid_mag": 0.00019269
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 250,
+     "stratum": "still",
+     "speed": 0.00048575,
+     "resid_mag": 0.00018905
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 251,
+     "stratum": "still",
+     "speed": 0.00041797,
+     "resid_mag": 5.095e-05
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 252,
+     "stratum": "still",
+     "speed": 0.00040275,
+     "resid_mag": 6.957e-05
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 253,
+     "stratum": "still",
+     "speed": 0.00038116,
+     "resid_mag": 0.00010278
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 254,
+     "stratum": "still",
+     "speed": 0.00040825,
+     "resid_mag": 8.267e-05
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 255,
+     "stratum": "still",
+     "speed": 0.00045163,
+     "resid_mag": 2.273e-05
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 256,
+     "stratum": "still",
+     "speed": 0.00043861,
+     "resid_mag": 9.804e-05
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 257,
+     "stratum": "still",
+     "speed": 0.00041914,
+     "resid_mag": 7.908e-05
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 282,
+     "stratum": "still+large_residual",
+     "speed": 0.00038779,
+     "resid_mag": 0.00288996
+    },
+    {
+     "episode": "episode_0000090.hdf5",
+     "t": 525,
+     "stratum": "still+large_residual",
+     "speed": 0.00085321,
+     "resid_mag": 0.00275718
+    }
+   ],
+   "dev_strata": {
+    "counts": {
+     "still+large_residual": 12,
+     "slow_motion+large_residual": 12,
+     "fast_motion+large_residual": 12,
+     "fast_motion": 12,
+     "slow_motion": 12,
+     "still": 12
+    },
+    "median_speed": 0.004544226685538888,
+    "median_resid": 0.000784330622991547,
+    "pool_size": 8736
+   },
+   "train": [
+    {
+     "episode": "episode_0000000.hdf5",
+     "t": 1,
+     "stratum": "still+large_residual",
+     "speed": 0.00133009,
+     "resid_mag": 0.00211041
+    },
+    {
+     "episode": "episode_0000000.hdf5",
+     "t": 98,
+     "stratum": "still+large_residual",
+     "speed": 0.00116883,
+     "resid_mag": 0.00318061
+    },
+    {
+     "episode": "episode_0000000.hdf5",
+     "t": 204,
+     "stratum": "still+large_residual",
+     "speed": 0.00099607,
+     "resid_mag": 0.00824039
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 1,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00244047,
+     "resid_mag": 0.00745524
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 2,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.00898243,
+     "resid_mag": 0.01812229
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 3,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02446203,
+     "resid_mag": 0.01172861
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 4,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03618046,
+     "resid_mag": 0.00350762
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 5,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03826388,
+     "resid_mag": 0.00424277
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 6,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03703362,
+     "resid_mag": 0.00723555
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 7,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.03212361,
+     "resid_mag": 0.00459895
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 8,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02789987,
+     "resid_mag": 0.00502751
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 9,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.02287237,
+     "resid_mag": 0.0056946
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 10,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01717777,
+     "resid_mag": 0.00567719
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 11,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01262121,
+     "resid_mag": 0.00446531
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 12,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.01025953,
+     "resid_mag": 0.0028463
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 13,
+     "stratum": "fast_motion",
+     "speed": 0.00949409,
+     "resid_mag": 0.00155336
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 14,
+     "stratum": "fast_motion",
+     "speed": 0.00883709,
+     "resid_mag": 0.00093191
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 15,
+     "stratum": "fast_motion",
+     "speed": 0.00807575,
+     "resid_mag": 0.00099658
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 16,
+     "stratum": "fast_motion",
+     "speed": 0.00731335,
+     "resid_mag": 0.00096233
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 17,
+     "stratum": "slow_motion",
+     "speed": 0.00657874,
+     "resid_mag": 0.00165881
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 18,
+     "stratum": "slow_motion",
+     "speed": 0.00657228,
+     "resid_mag": 0.00172998
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 19,
+     "stratum": "slow_motion",
+     "speed": 0.00707122,
+     "resid_mag": 0.00095608
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 20,
+     "stratum": "slow_motion",
+     "speed": 0.00670395,
+     "resid_mag": 0.00067751
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 21,
+     "stratum": "slow_motion",
+     "speed": 0.00618361,
+     "resid_mag": 0.0008478
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 22,
+     "stratum": "slow_motion",
+     "speed": 0.0061216,
+     "resid_mag": 0.00070435
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 23,
+     "stratum": "slow_motion",
+     "speed": 0.00599438,
+     "resid_mag": 0.00059756
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 24,
+     "stratum": "slow_motion",
+     "speed": 0.00562669,
+     "resid_mag": 0.00058392
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 25,
+     "stratum": "slow_motion",
+     "speed": 0.00530473,
+     "resid_mag": 0.000724
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 26,
+     "stratum": "slow_motion",
+     "speed": 0.00526256,
+     "resid_mag": 0.00070173
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 27,
+     "stratum": "slow_motion",
+     "speed": 0.00537456,
+     "resid_mag": 0.00053462
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 28,
+     "stratum": "slow_motion",
+     "speed": 0.00530505,
+     "resid_mag": 0.00046832
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 47,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00467146,
+     "resid_mag": 0.00554714
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 48,
+     "stratum": "fast_motion+large_residual",
+     "speed": 0.0099262,
+     "resid_mag": 0.0027206
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 49,
+     "stratum": "fast_motion",
+     "speed": 0.01240832,
+     "resid_mag": 0.00054785
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 50,
+     "stratum": "fast_motion",
+     "speed": 0.01248898,
+     "resid_mag": 0.00052103
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 51,
+     "stratum": "fast_motion",
+     "speed": 0.01214596,
+     "resid_mag": 0.00063268
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 52,
+     "stratum": "fast_motion",
+     "speed": 0.01160224,
+     "resid_mag": 0.00064516
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 53,
+     "stratum": "fast_motion",
+     "speed": 0.0110458,
+     "resid_mag": 0.00069165
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 54,
+     "stratum": "fast_motion",
+     "speed": 0.0105319,
+     "resid_mag": 0.00103361
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 83,
+     "stratum": "still+large_residual",
+     "speed": 0.0014529,
+     "resid_mag": 0.0053819
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 84,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.0065535,
+     "resid_mag": 0.00234967
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 85,
+     "stratum": "fast_motion",
+     "speed": 0.00860901,
+     "resid_mag": 0.00019479
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 86,
+     "stratum": "fast_motion",
+     "speed": 0.00867522,
+     "resid_mag": 0.00012031
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 97,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00604641,
+     "resid_mag": 0.00438906
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 98,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00640727,
+     "resid_mag": 0.00968103
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 135,
+     "stratum": "still",
+     "speed": 0.00108261,
+     "resid_mag": 0.00017797
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 136,
+     "stratum": "still",
+     "speed": 0.00090566,
+     "resid_mag": 0.00049342
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 137,
+     "stratum": "still",
+     "speed": 0.00139888,
+     "resid_mag": 0.00050978
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 143,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00552285,
+     "resid_mag": 0.00226911
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 158,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.0047754,
+     "resid_mag": 0.00604261
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 167,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00602443,
+     "resid_mag": 0.00447274
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 169,
+     "stratum": "still",
+     "speed": 0.00114778,
+     "resid_mag": 0.00120488
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 170,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.0015128,
+     "resid_mag": 0.00225796
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 171,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00365944,
+     "resid_mag": 0.00368309
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 172,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00718909,
+     "resid_mag": 0.00472347
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 224,
+     "stratum": "still+large_residual",
+     "speed": 0.00141346,
+     "resid_mag": 0.0073501
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 274,
+     "stratum": "slow_motion+large_residual",
+     "speed": 0.00391556,
+     "resid_mag": 0.00644964
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 297,
+     "stratum": "still",
+     "speed": 0.00114259,
+     "resid_mag": 0.00029756
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 298,
+     "stratum": "still",
+     "speed": 0.00117621,
+     "resid_mag": 0.0013362
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 328,
+     "stratum": "still",
+     "speed": 0.00136913,
+     "resid_mag": 0.00191407
+    },
+    {
+     "episode": "episode_0000001.hdf5",
+     "t": 365,
+     "stratum": "still",
+     "speed": 0.00092429,
+     "resid_mag": 0.00094996
+    },
+    {
+     "episode": "episode_0000002.hdf5",
+     "t": 304,
+     "stratum": "still+large_residual",
+     "speed": 0.0007196,
+     "resid_mag": 0.00726467
+    },
+    {
+     "episode": "episode_0000005.hdf5",
+     "t": 256,
+     "stratum": "still+large_residual",
+     "speed": 0.00138528,
+     "resid_mag": 0.0050821
+    },
+    {
+     "episode": "episode_0000008.hdf5",
+     "t": 1,
+     "stratum": "still+large_residual",
+     "speed": 0.00100359,
+     "resid_mag": 0.00362057
+    },
+    {
+     "episode": "episode_0000008.hdf5",
+     "t": 212,
+     "stratum": "still+large_residual",
+     "speed": 0.00136906,
+     "resid_mag": 0.00350251
+    },
+    {
+     "episode": "episode_0000011.hdf5",
+     "t": 148,
+     "stratum": "still+large_residual",
+     "speed": 0.0011921,
+     "resid_mag": 0.00304625
+    },
+    {
+     "episode": "episode_0000011.hdf5",
+     "t": 263,
+     "stratum": "still+large_residual",
+     "speed": 0.00079634,
+     "resid_mag": 0.00663455
+    },
+    {
+     "episode": "episode_0000012.hdf5",
+     "t": 1,
+     "stratum": "still+large_residual",
+     "speed": 0.00126041,
+     "resid_mag": 0.00787359
+    },
+    {
+     "episode": "episode_0000013.hdf5",
+     "t": 48,
+     "stratum": "still",
+     "speed": 0.00093707,
+     "resid_mag": 0.00073757
+    },
+    {
+     "episode": "episode_0000013.hdf5",
+     "t": 49,
+     "stratum": "still",
+     "speed": 0.00059975,
+     "resid_mag": 0.00094299
+    },
+    {
+     "episode": "episode_0000013.hdf5",
+     "t": 50,
+     "stratum": "still",
+     "speed": 0.00097163,
+     "resid_mag": 0.00123129
+    },
+    {
+     "episode": "episode_0000013.hdf5",
+     "t": 94,
+     "stratum": "still",
+     "speed": 0.00140028,
+     "resid_mag": 0.00076204
+    }
+   ],
+   "train_strata": {
+    "counts": {
+     "still+large_residual": 12,
+     "slow_motion+large_residual": 12,
+     "fast_motion+large_residual": 12,
+     "fast_motion": 12,
+     "slow_motion": 12,
+     "still": 12
+    },
+    "median_speed": 0.007266479078680277,
+    "median_resid": 0.0010528668644838035,
+    "pool_size": 3718
+   }
+  }
+ },
+ "manifest_sha256": "b79029d178297b68420f431de8c998769c777ccca0826142cbe87ff176a97b05",
+ "frozen_before_model_run": true
+}
