@@ -112,6 +112,9 @@ class M2TaskDeployServer(S.R42DeployServer):
         ids, step_logs = self._decode_tokens(pixel_values, feature)
         policy_mode = ("cv_diagnostic" if os.environ.get("R42_POLICY", "").lower() == "cv"
                        else "vla")
+        # The legacy ModelTemplate serialiser drops server-specific fields;
+        # persist the mode for the strict M2 wrapper to publish to the caller.
+        self._last_policy_mode = policy_mode
         lat["forward_total"] = (time.perf_counter() - t_forward) * 1000.0
         t_decode = time.perf_counter()
         v = self._history.velocity(int(env_idx))
