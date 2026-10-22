@@ -80,3 +80,42 @@ with the control quantity being judged. Candidate mechanisms, each with a distin
 * the video-derived motion curve (`/tmp/ep1_motion.json` summary in this report) and the three frame
   stills used above.
 * `tools/m2_physical_audit.py` — reproducible, CPU-only, no GPU and no re-inference.
+
+## 6. The paired closed-loop control: the CV baseline also fails, and that refines the mechanism
+
+A zero-parameter constant-velocity baseline was served through the **real** protocol (R42_POLICY=cv: the
+tokens for a zero residual, so A_hat = S + V, same SAFE clip, same official client), job
+`loop_pushT_cv_baseline_r10`:
+
+| run | policy | official verdict | motion p50 / per-100-step medians | object moved? |
+|---|---|---|---|---|
+| `..._r7` | VLA step1000 (full path) | **0/1**, layout 0 | 0.046 : 0.106 / 0.092 / 0.071 / 0.020 / 0.031 / 0.009 | no |
+| `..._cache_r8` | VLA step1000 (KV cache) | **0/1**, layout 0 | (same rollout) | no |
+| `..._cv_baseline_r10` | constant velocity | **0/1**, layout 0 | 0.076 : 0.098 / 0.112 / 0.096 / 0.048 / 0.053 / 0.032 | no |
+
+So **the trivial extrapolator that beats the model offline also fails closed-loop**. That is not a
+contradiction, it is the most informative result of the round:
+
+* offline L1 is measured on states **drawn from the demonstrations**, where V is non-zero by construction;
+  a CV policy is therefore scored on the only state distribution where it is meaningful. A real episode
+  starts from rest (V ≈ 0), where "continue at current velocity" is a *no-op* and cannot initiate a reach.
+* the closed loop is governed by the distribution the policy **creates**, not the one it was scored on.
+  Offline L1 on demo frames is a biased proxy; this is textbook covariate shift, measured rather than
+  asserted.
+* the VLA is still not rescued: it does initiate motion (26 steps above 0.2 vs 37 for CV, so it also
+  decays), but its predicted residual has 0.47x the demonstration magnitude and R² ≈ 0, so what it
+  initiates is not a push.
+
+**Neither policy produces a reach-and-push trajectory.** The failure is not "the loop was too slow", not
+"the cache", and not "the SAFE clip": it is that one-step imitation of this dataset, at this scale, does
+not yield a controller that can generate the multi-step approach the task requires.
+
+## 7. Consequences recorded for the next stage
+
+* the 2->4 task expansion is **stopped** on the physical condition (see the M2 audit report), which is the
+  pre-registered rule, not a judgement call;
+* the metric that must gate future training is a **closed-loop** one (object displacement, minimum
+  distance to target, sub-condition timeline), because the offline one has just been shown to prefer a
+  policy that cannot start;
+* the cheapest instrumented next step is the per-step privileged trace (object pose, contact, sub-conditions)
+  described in workline A2, which needs an observation hook in the DEV rollout, not a new model.
