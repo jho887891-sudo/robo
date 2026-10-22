@@ -66,3 +66,11 @@ never be mistaken for a fresh episode. Regression: `tests/test_r15_loop_result_r
 * Not a success rate: n=1, CI [0, 0.79].
 * Not realtime: 138x over budget.
 * No FINAL episode was touched; this is DEV, and the model was chosen earlier, never on FINAL.
+
+## Addendum: the supervisor state for this job still says FAILED
+
+`loop_pushT_stage1_r7` is recorded FAILED / exit 4 in the supervisor state, which was the driver's
+NO_RESULT code **before** the result-discovery fix. The episode itself completed and its official verdict
+was recovered from the client's own `_result.json` (see above): 1 episode, 0 successes,
+Wilson [0.0, 0.7935]. The FAILED state is therefore a HARNESS verdict about parsing, not about the run, and
+it is left in place (append-only) rather than rewritten.
