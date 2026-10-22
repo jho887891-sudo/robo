@@ -408,6 +408,12 @@ class _TorchBackend:
         self.pure_autoreg = bool(pure_autoreg)
         self.core = install_pure_autoreg(model) if pure_autoreg else None
         self._params = list(model.parameters()) + list(projector.parameters())
+        # R16: the KV path is opt-in. It is NOT bit-identical to the full recompute (teacher-forced
+        # per-k logit parity is noise level, 5/448 free-running tokens flip with a physical impact of
+        # at most 1.6e-4 on the residual), so the full backend stays the default and enabling this must
+        # be an explicit, recorded decision - never a silent speed switch.
+        self.kv_cache_enabled = os.environ.get("R42_KV_CACHE", "0") == "1"
+        self.vision_cache_enabled = os.environ.get("R42_VISION_CACHE", "0") == "1"
 
     def parameters(self):
         return iter(self._params)

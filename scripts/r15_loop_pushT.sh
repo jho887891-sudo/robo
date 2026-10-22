@@ -23,7 +23,11 @@ SRVLOG=logs/r15_policyserver_${PORT}.log
 if [ ! -f "$CKPT/MANIFEST.json" ]; then echo "REFUSING: $CKPT has no MANIFEST.json"; exit 9; fi
 mkdir -p logs runs/r15_loop_dev
 echo "# closed loop $(date -u +%Y-%m-%dT%H:%M:%SZ) ckpt=$CKPT episodes=$EPISODES stage=$STAGE port=$PORT"
-ROBODOJO_ROOT=$ROBODOJO_ROOT PYTHONPATH=$ROBODOJO_ROOT:$ROBODOJO_ROOT/XPolicyLab:$OFT:$OFT/vla-scripts   "$PY" code/xpolicylab/policy/OpenVLA_R42/r42_serve.py \
+# R42_KV_CACHE / R42_VISION_CACHE are passed through to the server (default 0 = full recompute).
+# A cached run must be recorded as such: the KV path is noise-level equivalent, not bit-identical.
+ROBODOJO_ROOT=$ROBODOJO_ROOT PYTHONPATH=$ROBODOJO_ROOT:$ROBODOJO_ROOT/XPolicyLab:$OFT:$OFT/vla-scripts \
+  R42_KV_CACHE=${R42_KV_CACHE:-0} R42_VISION_CACHE=${R42_VISION_CACHE:-0} \
+  "$PY" code/xpolicylab/policy/OpenVLA_R42/r42_serve.py \
   --config_path code/xpolicylab/policy/OpenVLA_R42/deploy.yml \
   --host 0.0.0.0 --port "$PORT" --overrides checkpoint_dir="$CKPT" > "$SRVLOG" 2>&1 &
 SRV=$!
