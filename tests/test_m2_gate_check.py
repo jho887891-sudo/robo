@@ -472,3 +472,29 @@ def test_teacher_forced_ce_math_is_exact():
         MT.token_ce_from_logits(flat, labels, n_prompt, n_supervised=99)
     with pytest.raises(MT.M2TrainError):
         MT.ce_window_from_probs(win["pred_probs"], np.array([999] + [0] * 13))
+
+
+def test_physical_noop_baseline_is_state_not_zero(ds):
+    """Regression: no-op A_hat=S[t]; the previous implementation scored A_hat=0.
+
+    This error did not change the discrete P6 nll hit-rates, but made the
+    reported physical no-op joint L1 artificially huge.
+    """
+    task = "push_T"
+    ep = ds["indexes"][task]["episodes"][0] if isinstance(
+        ds["indexes"][task].get("episodes"), list) else None
+    # Use an actual fixture episode without relying on index ordering.
+    if ep is None or not isinstance(ep, str):
+        ep = "episode_0000000.hdf5"
+    d = ds["indexes"][task]["hdf5_dir"]
+    with h5py.File(os.path.join(d, ep), "r") as h:
+        state = TC.read14(h, "state")
+        action = TC.read14(h, "action")
+    t = max(M2.MIN_HISTORY_FRAMES + 1, 5)
+    result = G.baseline_bins(ds["payload"], task, state, action, t)
+    correct = float(np.abs(state[t] - action[t]).mean())
+    zero_policy = float(np.abs(action[t]).mean())
+    assert result["l1_noop"] == pytest.approx(correct, abs=1e-8)
+    assert result["l1_cv"] == pytest.approx(
+        float(np.abs((2 * state[t] - state[t - 1]) - action[t]).mean()), abs=1e-8)
+    assert abs(correct - zero_policy) > 1e-3
