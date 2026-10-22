@@ -121,3 +121,45 @@ def test_legacy_standard_launcher_remains_r15_not_m2():
     assert "from OpenVLA_R42.model import Model" in server
     assert "from OpenVLA_R42.model_m2 import Model" not in server
     assert "task_name: push_T" in deploy
+
+
+def test_stage_must_contain_actual_trained_prompt_token_hashes(case):
+    """Text/keyword equality is NOT evidence of tokenizer-sequence parity."""
+    import json
+    p = Path(case["stage_evidence_path"])
+    original = json.loads(p.read_text())
+    original.pop("prompt_token_ids_sha256", None)
+    p.write_text(json.dumps(original))
+    with pytest.raises((ValueError, RuntimeError), match="prompt.*token|sha256|hash|evidence"):
+        C.build_session_metadata(**case)
+
+
+def test_session_meta_binds_trained_task_token_ids(case):
+    """The staging report must preserve the processor's exact token-id hash."""
+    import json
+    stage = json.loads(Path(case["stage_evidence_path"]).read_text())
+    meta = _meta(case, "stack_bowls")
+    assert meta["trained_prompt_token_ids_sha256"] == (
+        stage["prompt_token_ids_sha256"]["stack_bowls"])
+
+
+def test_wrong_training_prompt_ids_fail_closed_before_model_decode(monkeypatch, case):
+    meta = _meta(case)
+    srv = S.M2TaskDeployServer(meta, task="stack_bowls", backend=FakeBackend(),
+                               device="cpu")
+    # The real implementation creates these through PurePromptBuilder, but the
+    # CPU test isolates the hash guard with a deliberately WRONG tokenizer.
+    monkeypatch.setattr(S.MT, "_make_prompt",
+                        lambda proc, task, include_task_token: [123, 999])
+    with pytest.raises((ValueError, RuntimeError), match="prompt.*token|sha256|hash|mismatch"):
+        srv.build_prompt(object())
+
+
+def test_matching_training_prompt_ids_admitted(monkeypatch, case):
+    meta = _meta(case, "stack_bowls")
+    srv = S.M2TaskDeployServer(meta, task="stack_bowls", backend=FakeBackend(),
+                               device="cpu")
+    trained = R.normalize_prompt_ids([100, 222, 301])
+    monkeypatch.setattr(S.MT, "_make_prompt",
+                        lambda proc, task, include_task_token: trained)
+    assert srv.build_prompt(object()) == trained
