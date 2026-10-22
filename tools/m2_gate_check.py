@@ -151,7 +151,8 @@ def baseline_bins(payload, task, state, action, t):
     for name, res in (("true", r_true), ("noop", r_noop), ("cv", r_cv)):
         _idx, ids = R.token_ids_for_residual(res, ctx["q01"], ctx["q99"])
         out[name] = np.asarray(ids, np.int64) - R.TOKEN_BEGIN_IDX - 1
-    out["l1_noop"] = float(np.abs((s[t] - s[t]) - a[t]).mean())
+    # Identity/no-op predicts the CURRENT physical joint position S[t], not zero.
+    out["l1_noop"] = float(np.abs(s[t] - a[t]).mean())
     out["l1_cv"] = float(np.abs((s[t] + v) - a[t]).mean())
     return out
 
