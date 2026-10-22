@@ -68,9 +68,19 @@ class M2TaskDeployServer(S.R42DeployServer):
         """Use the EXACT M2 training prompt builder, including PurePromptBuilder wrapper."""
         if processor is None:
             raise D.M2DeployContractError("processor is required for trained prompt tokens")
-        self._prompt_ids = MT._make_prompt(
-            processor, self.task, include_task_token=self.metadata["include_task_token"])
-        self._prompt_ids = R.normalize_prompt_ids(self._prompt_ids)
+        computed_ids = R.normalize_prompt_ids(MT._make_prompt(
+            processor, self.task, include_task_token=self.metadata["include_task_token"]))
+        # These are the actual ids produced by training/m2_train_shared.py
+        # from the same prompt formatter. Textual prompt equality alone is
+        # insufficient, since a changed tokenizer/processor can alter ids.
+        expected_hash = self.metadata.get("trained_prompt_token_ids_sha256")
+        actual_hash = MT.sha256_json(computed_ids)
+        if actual_hash != expected_hash:
+            raise D.M2DeployContractError(
+                "M2 prompt token SHA256 mismatch for %s: training %s vs serving %s. "
+                "Refusing prefill, no model inference performed."
+                % (self.task, expected_hash, actual_hash))
+        self._prompt_ids = computed_ids
         return list(self._prompt_ids)
 
     def _decode_tokens(self, pixel_values, feat):
