@@ -393,3 +393,10 @@ opt-in (`R42_KV_CACHE=0` default) because it is equivalent up to bf16 rounding, 
 25 Hz is still not reached (1582 ms = 40x the 40 ms budget). The cache removes most redundant compute;
 closing the remaining 40x needs an architectural decision (action chunking / distillation / shorter
 context), which is not mine to take.
+
+### 2026-10-22 R17真实PushT/CV官方失败与M2物理SAFE同口径审计
+
+- 固定执行端 feature/r15-true-continuation@f34cc44495d34a9d42f15d265947c654cf8248c6。PushT FULL与CV在官方layout0、1个DEV episode各0/1，CV原生result跟本轮mtime窗口一致，但client最终rc=141、并非0；图像变化衰减与未接触物体属于观察证据，不是object 3D pose/contact时序直接测量。Covariate shift与无多步reaching学习是与证据相符的HYPOTHESIS，尚缺静止reset状态与TRAIN运动状态的真实输入/输出匹配诊断。
+- 关键P0：原tools/m2_physical_audit.py对模型做np.clip(raw,pmin,pmax)，CV=S+V/no-op=S未同样裁剪，且真实r42_adapter.decode_command会丢弃模型gripper dims6/13预测残差（fallback S+V），旧离线SAFE并未做到。旧汇总push_T raw0.000898<unclippedCV0.000944，但模型SAFE0.001450；stack_bowls raw0.002315≈unclippedCV0.002197但SAFE0.007007。原2→4 FAIL中关键的MODEL-SAFE vs CV-unclipped因不公平不可当成最终严格同口径能力比较。
+- 审计分支新增tools/m2_physical_audit_v2.py（模型/CV同256bin codec和R42 gripper fallback/bounds、no-op同bounds、原v1保留）+4 negative tests +report/R17_M2_SAFE_MATCHED_PHYSICAL_AUDIT_20261022.md；v2尚未在真实DEV HDF5运行，需要metadata safety limits和prev_cmd/dt率限制另外核验。此前FAIL暂保守阻断2→4大训练，状态更准确标REASSESSMENT_REQUIRED，不能偷改历史判据或自动晋级。
+- 发现报告自称交付mission/r17_realtime_architecture_analysis.md但f34cc44固定GitHub仓库无该路径，需执行者核实/推送或改正报告链接。后续独立CPU TaskSpec/专家工作线不停，禁止改main/旧权重、HDF5和WAL。
