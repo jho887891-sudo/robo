@@ -5,6 +5,14 @@ Intentional RED first.  This file must NOT normalize CPU stub activity into
 an authorized real robot action stream.
 """
 from pathlib import Path
+import os
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+for rel in ("training", "code/xpolicylab/policy", "code/xpolicylab/policy/OpenVLA_R42", "code/xpolicylab/policy/OpenVLA_Pure"):
+    path = str(ROOT / rel)
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
 import numpy as np
 import pytest
