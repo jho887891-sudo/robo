@@ -393,3 +393,32 @@ opt-in (`R42_KV_CACHE=0` default) because it is equivalent up to bf16 rounding, 
 25 Hz is still not reached (1582 ms = 40x the 40 ms budget). The cache removes most redundant compute;
 closing the remaining 40x needs an architectural decision (action chunking / distillation / shorter
 context), which is not mine to take.
+
+## 2026-10-22 — R24 训练收敛审计（`research/r24-training-convergence-audit` @ 8d0b693）
+
+**结论**：现有证据最支持 **H4（动作表征：残差近乎不可预测）**，H2（学习率）是真实加重因素，
+**H3（泛化恶化）被证伪**，H1（训练不足）在事实层面成立但不是瓶颈。
+
+### Stage A — 训练证据（原始日志，不插值）
+* R15 loss 300→1000：2.2456/1.9536/1.6732（300-500 段）与 2.2837/2.0664/2.2537/1.9444/1.8095/**1.5467**（500-1000 段，每 100 步）；gnorm 稳定 1.3–1.6。**0–300 段没有保留的原始日志，标 MISSING，不补插。**
+* M2 每 200 步：push_T 2.772→2.086（**2000 步比 1800 步更差**：1.854→2.086），stack_bowls 2.670→1.731。batch=1 下单步 loss 噪声过大，不能视为收敛证据。
+* 覆盖：2000 步 / 61,171 TRAIN 帧 = **0.0327 epoch**（R15：1000 / 25,313 = **0.0395**）。
+* **LR 配置错误**：`r11_train_pushT_r42.py:1044` 的 `--lr_milestone` 默认 1000，而 R15 恰好只跑 1000 步 → **唯一一次衰减发生在最后一步**，整条血缘都在峰值 5e-4 下训练。M2 milestones 为 1000,2500，实际在 1000 衰减、2500 从未到达。
+
+### Stage B — 先修口径，再评估
+* R17 的比较确实不公平（审计 PR#30 正确）：模型被 clip、基线未 clip，且三者都没做夹爪回退。新增 `tools/r24_fair_audit.py` 让 **model / CV / no-op 全部走同一个 `decode_command`**，同时报告 RAW 与 SAFE；旧 v1 原样保留。
+* 公平结果（DEV）：push_T model **0.00145** | CV 0.00153 | no-op 0.00426；stack_bowls 0.00700 | 0.00687 | 0.00940。配对 model−CV：−0.00008 [−0.00018,+0.00003] / +0.00013 [−0.00071,+0.00100] → **与恒速基线在统计上不可区分**（R17 的"输给 CV"部分来自不公平后处理），但显著优于 no-op。
+* 冻结分层清单（284 帧 / 6 个运动学分层，DEV 回合按 `sha256(episode)` 选，绝不按模型分数），**先公布 hash 再评估**：`71811453…`。
+* **拟合测试**（只推理、零优化步）：TRAIN ce 1.8983 vs DEV 1.9476（push_T）；TRAIN 2.2372 vs DEV 1.9456（stack_bowls，train **更差**）。过拟合应为 train ≪ dev，此处没有 → **H3 证伪**。
+* **残差可学性**：TRAIN-only 线性映射 (S,V)→R 的 DEV R² = **−19.95 / −8.72**，而**零残差在物理 SAFE L1 上优于所有测试过的预测器**。`|mean R|` 仅占 `|R|` 的 20%，所以 1-step 的 Bayes 最优预测就是 CV——这是数据属性，不是训练缺陷。
+* **分层**：模型"从状态出发的命令运动量"在**全部 6 个分层**上都与 CV 相差 3–10%（still 0.00160 vs 0.00137；fast 0.03108 vs 0.03115）。模型 = 恒速策略 + 噪声，正是 R17 观测到的"先滑行后冻结"闭环成因。
+
+### Stage C/D — 只预注册，**0 步训练**
+受控续训协议（A 臂严格续训 / B 臂 LR 实验，两臂分账，Gate-1@4000、Gate-2@8000，停止规则"CE 降而 SAFE L1 对 CV 仍跨 0 则停加步数"）与闭环协议（要求特权状态、拒绝相机帧差）已写入 `mission/r24/`，**等待研究负责人授权**。
+
+### 记录在案的阻断
+**M2 没有可用的部署元数据**：`r42_metadata_bridge.build_stage_metadata()` 是 R15 单任务契约，对多任务 payload fail-closed（`normalizer sha256 mismatch: 43a166c3 vs 13a80f91`）。因此 R17 的所有闭环都跑在 R15 step1000 上，**M2 从未被部署过**。Stage D 依赖先修此项。
+
+### 本轮另外修正的自身缺陷（均已加回归测试）
+1. `decode_command` 返回 `(cmd, r_hat, info)`，我早期把它解包成 `(raw, safe, info)`，等于拿**残差**当 SAFE 命令比动作（会让所有策略都显示 L1≈0.38）。
+2. 帧清单首版用 `t>=1` 而契约要求 `t>=2`；第二版 hash 未覆盖冻结标志。三次冻结都在模型运行之前，帧集合逐条相同。
