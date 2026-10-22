@@ -72,3 +72,17 @@ Neither cache moves the needle on its own terms: the exact one is 1.0002x, the 4
 equivalent. Per-action latency stays ~3.06 s p50 (clean loop) / 5.9-6.0 s (live server). That is 75-150x
 the 40 ms budget, so the control path is **OFFLINE_SIM_ONLY**, and reaching 25 Hz requires an
 architectural change (action chunking, distillation, shorter context) that needs a lead decision.
+
+## SUPERSEDED (2026-10-22, commit 7c24c13 -> f249cf2)
+
+**Everything above about "the incremental step is the defect" is wrong and is kept only as a record.**
+The divergence came from the diagnostic harness feeding bin indices 0..255 instead of legal window tokens
+31744..31999 into the FULL path. After that single missing offset was fixed, the cache is equivalent to
+bf16 rounding (teacher-forced per-k worst 0.5, k=0 exactly 0.0), only 5/448 free-running tokens differ by
+one bin, the physical impact is <= 0.16 mm, and the speedup is 4.42x. See
+`mission/r16_kv_root_cause_report.md`.
+
+The general lesson is recorded deliberately: a diagnostic whose REFERENCE path is illegal will produce a
+convincing mechanism story (k=0 matches, k=1 diverges, "INCREMENTAL_DEFECT") out of its own bug, and the
+cross-check that would have caught it immediately is "are the tokens I am feeding inside the legal
+window?" - which is now enforced by `needs_legal_token_check` and four regression tests.

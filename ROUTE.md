@@ -348,3 +348,48 @@ store it as a sentence — so `normalizer_for_task()` raised `AttributeError` on
 payload**, including the 2-task one the stage was trained with. The existing tests passed only because
 their fixtures were synthetic. Consequence: the M2 shared model could never have been served. Fixed and
 pinned; the 2->4 expansion itself remains a budget decision and was not started.
+
+## 2026-10-22 — R16 KV Cache: root cause found, fixed, verified, driven through the closed loop (append-only)
+
+### The root cause was in the diagnostic harness, not the model
+
+`tools/r16_kv_equivalence.py:decode_full()` appended the argmax **bin** (0..255) as the next token id while
+`decode_cached()` correctly appended `31744 + bin`. From step 1 on the "full reference" decoded from
+ordinary text tokens, saturated on the window edges (the 0/255 pattern) and manufactured gaps up to **31.4**
+logit units. Every R16 conclusion drawn from that tool - including the three-way attribution I reported
+earlier (reference == full 8/8, cached 0/8, "the incremental step is the defect") - is **withdrawn**.
+
+Proof that it was never the cache, from independent probes that force the same token into both paths:
+k=0 bit-identical; k=1 identical to 0.03-0.13 for the naive step, for an explicit
+mask+position+cache_position step, and for a cache built by the multimodal forward itself; the same on
+frames the broken tool called divergent (17.7 -> 0.125); the text-only LM control shows correct cache
+parity (0.031); the cache really carries 805 = 36 prompt + 769 multimodal entries; per-layer audit is at
+bf16 scale from layer 0.
+
+### Fix and verification (real 7B, step2000)
+
+`decode_full`/`decode_cached` are now module-level, backend-injected and refuse to append any token outside
+31744..31999; `tests/test_r16_kv_decode_tokens.py` pins it with a stub backend that records every call.
+
+| measurement | result |
+|---|---|
+| teacher-forced per-k worst logit delta, 32 inputs x 14 tokens | **0.5** (k=0 exactly 0.0) -> NOISE_LEVEL_PARITY |
+| free-running tokens differing | **5 / 448** (1.1%), one codec bin each |
+| physical residual impact | **<= 1.57e-4** (0.16 mm) |
+| speedup, 64 timed actions | **4.42x** (p50 5060.1 -> 1145.1 ms; p95 5162.4 -> 1175.1) |
+
+### Closed loop with the cache ON (Push-T DEV, job `loop_pushT_stage1_cache_r8`)
+
+| | full path (`..._r7`) | KV cached (`..._cache_r8`) |
+|---|---|---|
+| control steps | 600 | 600 |
+| latency p50 / p95 / p99 | 5529 / 7040 / 8166 ms | **1582 / 2021 / 2595 ms** |
+| episode wall | 64.0 min | **21.4 min** |
+| official `_result.json` | success_rate 0.0, Wilson [0, 0.7935] | success_rate 0.0, Wilson [0, 0.7935] |
+
+The verdict is unchanged, which is exactly what a noise-level cache should produce. The cache stays
+opt-in (`R42_KV_CACHE=0` default) because it is equivalent up to bf16 rounding, **not bit-identical**.
+
+25 Hz is still not reached (1582 ms = 40x the 40 ms budget). The cache removes most redundant compute;
+closing the remaining 40x needs an architectural decision (action chunking / distillation / shorter
+context), which is not mine to take.
