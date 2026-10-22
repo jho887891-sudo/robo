@@ -129,6 +129,36 @@ def newest_result_in_container(container, root_inner, task, max_age_minutes=1440
     return got[0].strip() if got else None
 
 
+def official_result_mtime(path, container=""):
+    """Get official result mtime in Unix seconds at the filesystem that owns it.
+
+    Docker eval_result may be a symlink into the container's /tmp; a HOST stat
+    against the same spelled path can silently inspect a different file.
+    """
+    if container:
+        p = subprocess.run(["docker", "exec", container, "stat", "-c", "%Y", path],
+                           capture_output=True, text=True)
+        if p.returncode != 0:
+            raise RuntimeError("cannot stat official result in container: %s" %
+                               (p.stderr or "")[-300:])
+        return float(p.stdout.strip())
+    return float(os.path.getmtime(path))
+
+
+def official_result_belongs_to_run(path, started_at, ended_at, container="",
+                                   clock_slack_s=2.0):
+    """Only a result WRITTEN during this launch can certify a fresh rollout.
+
+    Old --reparse-only evidence is handled in a separate explicit branch.
+    These bounds prevent 'newest in 24h' from stealing a result from an
+    earlier experiment that happened to share the task, seed and checkpoint.
+    """
+    mtime = official_result_mtime(path, container)
+    ok = (float(started_at) - float(clock_slack_s) <= mtime <=
+          float(ended_at) + float(clock_slack_s))
+    return ok, mtime
+
+
 def read_result_in_container(container, path):
     p = subprocess.run(["docker", "exec", container, "cat", path], capture_output=True, text=True)
     if p.returncode != 0:
@@ -301,6 +331,22 @@ def main():
                                          max_age_minutes=int(a.timeout_s / 60) + 30)
     if res is None:
         res = newest_result(a.root, a.task, a.policy_name)
+    rec["result_json_candidate"] = res
+    if res:
+        try:
+            fresh, mtime = official_result_belongs_to_run(
+                res, t0, time.time(), container=a.docker)
+            rec["result_mtime_epoch"] = mtime
+            rec["result_is_fresh"] = fresh
+            if not fresh:
+                rec["result_provenance_error"] = (
+                    "official result mtime %.0f is outside the active run's "
+                    "start/end timestamps; refusing to associate this "
+                    "pre-existing result with %s" % (mtime, run_id))
+                res = None
+        except (OSError, RuntimeError, ValueError) as exc:
+            rec["result_provenance_error"] = repr(exc)
+            res = None
     rec["result_json"] = res
     if res:
         try:
@@ -323,7 +369,8 @@ def main():
         except Exception as exc:                     # noqa: BLE001 - record, never crash silently
             rec["parse_error"] = repr(exc)
     else:
-        rec["parse_error"] = "no _result.json was produced"
+        rec["parse_error"] = rec.get("result_provenance_error") or (
+            "no _result.json was produced")
 
     if rec.get("successes"):
         rec["verdict"] = "OFFICIAL_SUCCESS"

@@ -393,3 +393,13 @@ opt-in (`R42_KV_CACHE=0` default) because it is equivalent up to bf16 rounding, 
 25 Hz is still not reached (1582 ms = 40x the 40 ms budget). The cache removes most redundant compute;
 closing the remaining 40x needs an architectural decision (action chunking / distillation / shorter
 context), which is not mine to take.
+
+### 2026-10-22 R16 KV bin/token诊断工具根因、真实加速及官方SIM provenance交叉审计
+
+- 执行者feature/r15-true-continuation@569677b5b6ec403458178c7036e2ef00e493052f。独立核实旧tools/r16_kv_equivalence.py的FULL路径把bin 0..255当token ID送回模型；正确action token需31744+bin，旧三方reference/full一致是共同喂错bin造成的伪证据，已有修正和SUPERSEDED，不得继续说KV自身严重偏离31.4 logits。
+- 修复后真实7B有噪声级近似等价：固定输入32x14=448 token，teacher-forced maxabs0.5，自由5/448个bin变化，非位级/严格14token一致；新strict脚本保留DIVERGED而另一新0.5容差协议为NOISE_LEVEL_PARITY，两者绝不能混称。1.57e-4是本地原生joint/gripper动作数值单位差，不能直接称0.16mm末端位移。
+- 真7B同脚本profiling p50 FULL5060ms/cache1145ms，4.42倍；官方DEV服务器缓存p50 1582ms ≈25Hz周期40倍，不是实时。M2 step2000 checkpoint用于缓存parity，但PushT官方1回合的ckpt label是R15 step1000，不能直接把前者对等结果迁移到后者。
+- 官方PushT full/cached目录均有layout0 success=false的1回合_ result，不能由n=1推断模型固有成功率=0。缓存目录的push_T_stage1_cache_reparsed.json明确reparse_only=true/exit=null、从04:48:44历史官方结果目录重新读取，非05:10新运行。需固定当时原client stdout/PID/run id、R42_KV_CACHE=1日志、视频/源checkpoint、原始result sha以证明该结果和缓存600步属于同一作业。
+- 新P0发现工具的容器 _result.json抓取使用find -L按task+时间窗取最近文件，没有运行开始/结束唯一校验，可能借到上一轮同seed结果。独立review分支增加"新LIVE结果mtime必须在当前任务UTC墙钟区间"的最小fail-closed保护和三条CPU回归；已有reparse分支保留历史恢复声明，绝不覆盖旧报表。这是必要但非充分的关联校验，完整唯一run_id绑定仍需实际原生result路径日志。
+- M2历史P6的no-op physical14D L1原算成零关节预测，需从此前独立PR#27合并修补，并新评测真实SAFE物理动作L1/遗忘；不能从8DEV帧概率Gate直接扩成12任务成功。继续并行12TaskSpec和专家数据工作。
+- 完整源码审计见report/R16_KV_AND_PUSH_T_DEV_INDEPENDENT_AUDIT_20261022.md。本审计没有新远程GPU作业，保护main/旧WAL/权重/HDF5/FINAL。

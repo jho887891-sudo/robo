@@ -59,3 +59,56 @@ def test_host_discovery_still_works(tmp_path):
     got = LD.newest_result(str(root), "push_T", "OpenVLA_R42")
     assert got is not None and os.path.isfile(got)
     assert LD.parse_result(got)[0]["success"] is False
+
+
+def test_fresh_result_only_belongs_to_own_run(tmp_path):
+    """A same-task/seed historical _result.json MUST NOT certify a new rollout."""
+    import os
+    p = tmp_path / "_result.json"
+    p.write_text(json.dumps(OFFICIAL))
+    os.utime(p, (100.0, 100.0))
+    ok, mt = LD.official_result_belongs_to_run(
+        str(p), started_at=200.0, ended_at=250.0, clock_slack_s=1.0)
+    assert not ok and mt == pytest.approx(100.0)
+
+    os.utime(p, (235.0, 235.0))
+    ok, mt = LD.official_result_belongs_to_run(
+        str(p), started_at=200.0, ended_at=250.0, clock_slack_s=1.0)
+    assert ok and mt == pytest.approx(235.0)
+
+    os.utime(p, (270.0, 270.0))
+    ok, _ = LD.official_result_belongs_to_run(
+        str(p), started_at=200.0, ended_at=250.0, clock_slack_s=1.0)
+    assert not ok
+
+
+def test_container_official_mtime_obtained_from_actual_container(monkeypatch):
+    """A Docker result symlink may point to container /tmp, not the host tree."""
+    from types import SimpleNamespace
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        return SimpleNamespace(returncode=0, stdout="207", stderr="")
+
+    monkeypatch.setattr(LD.subprocess, "run", fake_run)
+    ok, mt = LD.official_result_belongs_to_run(
+        "/workspace/RoboDojo/eval_result/_result.json",
+        started_at=200.0, ended_at=210.0, container="rd_setup")
+    assert ok and mt == 207
+    assert calls[0] == [
+        "docker", "exec", "rd_setup", "stat", "-c", "%Y",
+        "/workspace/RoboDojo/eval_result/_result.json"]
+
+
+def test_failed_container_stat_refuses_unproven_result(monkeypatch):
+    from types import SimpleNamespace
+
+    def fake_run(cmd, **kwargs):
+        return SimpleNamespace(returncode=1, stdout="", stderr="missing")
+
+    monkeypatch.setattr(LD.subprocess, "run", fake_run)
+    with pytest.raises(RuntimeError, match="cannot stat"):
+        LD.official_result_belongs_to_run(
+            "/tmp/missing/_result.json", started_at=10.0, ended_at=11.0,
+            container="rd_setup")
