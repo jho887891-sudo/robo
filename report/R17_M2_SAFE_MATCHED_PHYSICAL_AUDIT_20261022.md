@@ -55,3 +55,7 @@ PushT在**RAW下反而微小优于未裁剪CV**，而SAFE-v1相对MODEL raw增�
 5. GitHub独立审计PR/失败日志/不可变WAL/hash/append-only ROUTE。远程执行者自主继续已授权CPU/有界sim诊断；重型GPU/IsaacSim资源保护照旧，无人为小时配额，不购买新GPU、不动main/旧证据、未经负责人授权不开始大规模新训练。
 
 **结论等级**：官方full与CV的同布局失败结果 EXECUTOR_RECORDED、源码存在physical comparator不公平 VERIFIED_SOURCE、v2实现 IMPLEMENTED、模型真实有无可用物理能力 REASSESSMENT_REQUIRED、covariate-shift因果解释 HYPOTHESIS。
+## VI. 不能跨checkpoint做闭环因果结论
+
+- 当前具有完整官方600步闭环负结果的VLA策略是 **R15 step1000** checkpoint；M2双任务每任务8DEV帧物理审计和2000步过程曲线来自**另一套M2 step2000** checkpoint。两者模型参数、训练过程、任务条件可能不同。**不能用M2的R²和残差0.47比值解释R15 step1000当时为何冻结**，也不能拿R15的一次0/1宣称M2 step2000闭环能力为0。
+- 下一轮应在同checkpoint上收集真实闭环+离线物理配对，不能跨权重拼接一个“已验证根因”。同一任务下真实T没有移动是当前录制回合的事实，但“模型缺乏任何reach能力”属于更广的研究问题，必须检查物体相对末端的3D距离曲线与对应权重。
