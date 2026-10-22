@@ -87,3 +87,13 @@ def test_real_gpu_path_is_explicitly_blocked_without_smoke_authorisation(case):
     inst = Model(cfg)
     with pytest.raises((ValueError, RuntimeError), match="smoke|authoris|GPU|backend"):
         inst.warmup()
+
+
+def test_real_7b_actions_are_blocked_without_certified_rate_control(case):
+    """allow_real_7b_smoke permits loading only, never live robotic control."""
+    m, _ = model(case)
+    inst = Model({"task_id": "stack_bowls", "metadata": m.metadata,
+                  "device": "cpu", "allow_real_7b_smoke": True})
+    inst.update_obs(_obs(instruction=MD.TASK_PROMPTS["stack_bowls"]))
+    with pytest.raises((ValueError, RuntimeError), match="real.*action|robot|rate|deployment"):
+        inst.get_action()
