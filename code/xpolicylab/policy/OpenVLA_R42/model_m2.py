@@ -117,7 +117,8 @@ class Model(Legacy.Model):
                 "verified source artifacts and privileged DEV smoke gates")
         server = S.M2TaskDeployServer(
             self.metadata, task=self._m2_task, backend=backend, device=self.device,
-            tokenizer_prompt_ids=self.model_cfg.get("tokenizer_prompt_ids"))
+            tokenizer_prompt_ids=self.model_cfg.get("tokenizer_prompt_ids"),
+            allow_cv_diagnostic=self.model_cfg.get("allow_cv_diagnostic") is True)
         if backend is None:
             if not self.base_model_path:
                 raise M2ModelError("real M2 backend requires base_model_path")
@@ -168,7 +169,14 @@ class Model(Legacy.Model):
             raise M2ModelError(
                 "CPU stub action requires explicit test-only authorisation; "
                 "robot/deployment path is blocked")
-        return super().get_action()
+        payload = super().get_action()
+        policy_mode = getattr(self._server, "_last_policy_mode", None)
+        if policy_mode not in ("vla", "cv_diagnostic"):
+            raise M2ModelError("M2 inference did not attest a valid effective policy mode")
+        payload["policy_mode"] = policy_mode
+        payload["serving_task"] = self._m2_task
+        self.last_payload = payload
+        return payload
 
     def contract(self):
         ans = super().contract()
@@ -179,4 +187,6 @@ class Model(Legacy.Model):
         ans["cpu_stub_action_scope"] = ("EXPLICIT_TEST_ONLY" if
             self.model_cfg.get("allow_stub_action_for_contract_test") is True else "DENIED")
         ans["real_robot_action_emission"] = "BLOCKED_PENDING_RATE_AND_SAFETY_GATE"
+        ans["cv_diagnostic_authorised"] = (
+            self.model_cfg.get("allow_cv_diagnostic") is True)
         return ans
