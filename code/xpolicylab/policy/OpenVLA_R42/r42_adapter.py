@@ -415,14 +415,33 @@ def validate_normalizer(payload, require_legacy_fit=True):
     if is_task_normalizer(payload):
         raise R42Error("this is a multi-task payload; call normalizer_for_task(payload, task) so "
                        "the task is explicit")
-    src = payload.get("fit_source") or {}
+    # fit_source is a HUMAN-READABLE SENTENCE in the payloads the fitter writes
+    # ("train-only quantiles over 80 TRAIN episodes, DEV excluded"), not a mapping. Assuming a dict
+    # here made normalizer_for_task() crash with AttributeError on every REAL multi-task payload,
+    # including the 2-task one the stage was trained with - the synthetic payloads in the tests were
+    # the only ones that worked. The provenance counts are therefore read from the block fields that
+    # actually exist (fit_episodes / dev_episodes_excluded) and the guard keeps its meaning.
+    src = payload.get("fit_source")
+    src = src if isinstance(src, dict) else {}
+
+    def _count(block_key, src_key):
+        r"""Word-boundary-free integer from the block, then from fit_source, else -1."""
+        fe = payload.get(block_key)
+        if isinstance(fe, (list, tuple, dict)):
+            return len(fe)
+        val = src.get(src_key)
+        try:
+            return int(val)
+        except (TypeError, ValueError):
+            return -1
+
     return normalizer_payload(
         normalization_mode=payload.get("normalization_mode"),
         pmin=payload.get("pmin"), pmax=payload.get("pmax"), q01=payload.get("q01"),
         q99=payload.get("q99"), v_scale=payload.get("v_scale"), a_scale=payload.get("a_scale"),
         motion_quantile=payload.get("motion_quantile"),
-        n_train_episodes=src.get("n_train_episodes_for_quantiles", -1),
-        n_dev_episodes_excluded=src.get("n_dev_episodes_excluded", -1),
+        n_train_episodes=_count("fit_episodes", "n_train_episodes_for_quantiles"),
+        n_dev_episodes_excluded=_count("dev_episodes_excluded", "n_dev_episodes_excluded"),
         require_legacy_fit=require_legacy_fit)
 
 
