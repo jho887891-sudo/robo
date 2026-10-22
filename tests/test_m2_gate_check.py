@@ -481,11 +481,8 @@ def test_physical_noop_baseline_is_state_not_zero(ds):
     reported physical no-op joint L1 artificially huge.
     """
     task = "push_T"
-    ep = ds["indexes"][task]["episodes"][0] if isinstance(
-        ds["indexes"][task].get("episodes"), list) else None
-    # Use an actual fixture episode without relying on index ordering.
-    if ep is None or not isinstance(ep, str):
-        ep = "episode_0000000.hdf5"
+    # write_episode in ds fixture always creates this file.
+    ep = "episode_0000000.hdf5"
     d = ds["indexes"][task]["hdf5_dir"]
     with h5py.File(os.path.join(d, ep), "r") as h:
         state = TC.read14(h, "state")
