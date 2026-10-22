@@ -163,3 +163,41 @@ def test_matching_training_prompt_ids_admitted(monkeypatch, case):
     monkeypatch.setattr(S.MT, "_make_prompt",
                         lambda proc, task, include_task_token: trained)
     assert srv.build_prompt(object()) == trained
+
+
+def test_model_payload_marks_normal_vla_mode(monkeypatch, case):
+    """The WEBSOCKET-visible payload must identify the policy actually used."""
+    import m2_multitask_data as MD
+    from test_openvla_r42_server import _obs
+    monkeypatch.delenv("R42_POLICY", raising=False)
+    meta = _meta(case, "stack_bowls")
+    model = Model({"task_id": "stack_bowls", "metadata": meta,
+                   "backend": FakeBackend(), "device": "cpu",
+                   "allow_stub_action_for_contract_test": True,
+                   "tokenizer_prompt_ids": [9, 20], "expected_hw": None})
+    model.update_obs(_obs(instruction=MD.TASK_PROMPTS["stack_bowls"]))
+    payload = model.get_action()
+    assert payload["policy_mode"] == "vla"
+    assert payload["serving_task"] == "stack_bowls"
+
+
+def test_model_requires_config_optin_for_inherited_cv(monkeypatch, case):
+    import m2_multitask_data as MD
+    from test_openvla_r42_server import _obs
+    monkeypatch.setenv("R42_POLICY", "cv")
+    meta = _meta(case, "push_T")
+    def make(allow):
+        return Model({"task_id": "push_T", "metadata": meta,
+                      "backend": FakeBackend(), "device": "cpu",
+                      "allow_stub_action_for_contract_test": True,
+                      "allow_cv_diagnostic": allow,
+                      "tokenizer_prompt_ids": [9, 20], "expected_hw": None})
+    denied = make(False)
+    denied.update_obs(_obs(instruction=MD.TASK_PROMPTS["push_T"]))
+    with pytest.raises((ValueError, RuntimeError), match="CV|cv|diagnostic"):
+        denied.get_action()
+    enabled = make(True)
+    enabled.update_obs(_obs(instruction=MD.TASK_PROMPTS["push_T"]))
+    res = enabled.get_action()
+    assert res["policy_mode"] == "cv_diagnostic"
+    assert res["serving_task"] == "push_T"
