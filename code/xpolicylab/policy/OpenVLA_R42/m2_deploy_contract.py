@@ -325,8 +325,22 @@ class M2SessionContract:
             raise M2DeployContractError("strict task binding absent")
         if not isinstance(metadata.get("trained_prompt"), str) or not metadata["trained_prompt"]:
             raise M2DeployContractError("trained prompt missing")
-        _sha("trained_prompt_token_ids_sha256",
-             metadata.get("trained_prompt_token_ids_sha256"))
+        if not isinstance(metadata.get("include_task_token"), bool):
+            raise M2DeployContractError("M2 include_task_token must be a real boolean")
+        expected_text = MT.prompts_for(
+            [task], include_task_token=metadata["include_task_token"])[task]
+        if metadata["trained_prompt"] != expected_text:
+            raise M2DeployContractError(
+                "trained prompt for task %s differs from frozen M2 training prompt" % task)
+        for key in ("trained_prompt_token_ids_sha256",
+                    "m2_checkpoint_manifest_sha256",
+                    "m2_training_evidence_sha256",
+                    "m2_data_contract_sha256",
+                    "m2_safety_contract_sha256", "safety_contract_sha256"):
+            _sha(key, metadata.get(key))
+        if metadata["m2_safety_contract_sha256"] != metadata["safety_contract_sha256"]:
+            raise M2DeployContractError(
+                "M2 safety provenance SHA256 disagreement across metadata fields")
         self.metadata = metadata
         self.task = task
         self.expected_prompt = metadata["trained_prompt"]
