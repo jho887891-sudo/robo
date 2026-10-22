@@ -102,8 +102,11 @@ def main():
             rhat = R.residual_from_indices(bins[i], norm["q01"], norm["q99"])
             raw_legacy = state + vel + rhat
             old_clipped = np.clip(raw_legacy, norm["pmin"], norm["pmax"])
+            pmin, pmax = (np.asarray(norm[k], np.float32) for k in ("pmin", "pmax"))
             rows.append({
                 "episode": episode, "t": tick,
+                "gt_outside_bounds_dims": int(((target < pmin) | (target > pmax)).sum()),
+                "state_outside_bounds_dims": int(((state < pmin) | (state > pmax)).sum()),
                 "l1_model_safe_matched": mean_l1(model, target),
                 "l1_cv_safe_matched": mean_l1(cv, target),
                 "l1_noop_safe_matched": mean_l1(noop, target),
@@ -132,6 +135,8 @@ def main():
                 "frame_bootstrap_ci95_model_minus_cv": bootstrap_ci(dif),
                 "model_clipped_dims_mean": avg("model_clipped_dims"),
                 "cv_clipped_dims_mean": avg("cv_clipped_dims"),
+                "gt_outside_bounds_dims_mean": avg("gt_outside_bounds_dims"),
+                "state_outside_bounds_dims_mean": avg("state_outside_bounds_dims"),
                 "model_arm_l1": avg("l1_model_arm"),
                 "cv_arm_l1": avg("l1_cv_arm")},
             "frames": rows}
