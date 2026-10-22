@@ -1,0 +1,60 @@
+{
+  "schema": "r25-independent-archive-crosscheck-v1",
+  "source_commit": "a3db2a64a3d60664f51439461d0bfc197d41508d",
+  "source_blobs": {
+    "mission/r24/stratum_audit.json": "244e82d74bbb4b2ead0235763ade44378deebe7f",
+    "mission/r24/frame_manifest.json": "61526d7baab9415421d08e1953c25a5d3f634a88",
+    "mission/r24/frame_manifest_v1_hash_scope.json": "1d3623301321ffbc4361685ea1af7761d19c28ef"
+  },
+  "authoritative_manifest_sha256": "71811453c184efde635a02c07e201f05cae773f2d85ad06f7a1ad373b1db2c36",
+  "legacy_archive_manifest_sha256": "304513b7410f6b2849ecbe2385bb87d3a15032dfed75e47d6b0e92437c00df3e",
+  "arrays_identical": true,
+  "method": "R24 archived per-frame SAFE losses joined in order with frozen manifest, clustered at the episode level; 20k bootstrap with LCG seed=23 in independent JS recomputation; exploratory, not a pre-registered hypothesis test",
+  "tasks": {
+    "push_T": {
+      "frames": 68,
+      "episodes": 6,
+      "episode_counts": {
+        "episode_0000001.hdf5": 1,
+        "episode_0000041.hdf5": 3,
+        "episode_0000047.hdf5": 1,
+        "episode_0000048.hdf5": 61,
+        "episode_0000063.hdf5": 1,
+        "episode_0000080.hdf5": 1
+      },
+      "largest_episode_fraction": 0.8970588235294118,
+      "kish_effective_episodes_for_frame_weights": 1.2383502945902518,
+      "paired_model_minus_cv_pooled_frames": 0.00004453819693641408,
+      "paired_model_minus_cv_episode_macro": 0.0005527099901203826,
+      "episode_cluster_bootstrap95_illustrative": [
+        0.00014987884066873424,
+        0.001000479846407756
+      ]
+    },
+    "stack_bowls": {
+      "frames": 72,
+      "episodes": 4,
+      "episode_counts": {
+        "episode_0000037.hdf5": 3,
+        "episode_0000065.hdf5": 3,
+        "episode_0000084.hdf5": 4,
+        "episode_0000090.hdf5": 62
+      },
+      "largest_episode_fraction": 0.8611111111111112,
+      "kish_effective_episodes_for_frame_weights": 1.33677153171738,
+      "paired_model_minus_cv_pooled_frames": 0.00015139040859442807,
+      "paired_model_minus_cv_episode_macro": 0.00011963539589399466,
+      "episode_cluster_bootstrap95_illustrative": [
+        -0.000017049431335181,
+        0.0002680724913564821
+      ]
+    }
+  },
+  "limits": [
+    "M2 metadata missing, not deployment exact; rate limiter not evaluated",
+    "Only 6 PushT DEV episodes and 4 Stack Bowls DEV episodes",
+    "Do not interpret a CI containing/excluding zero as formal equivalence or population-generalization",
+    "GT out-of-bounds and clamp floor need inaccessible HDF5 files",
+    "Prior R24 headline 8-frame bootstrap cannot be compared directly with 284-frame cohort"
+  ]
+}
