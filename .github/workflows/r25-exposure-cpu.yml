@@ -1,0 +1,33 @@
+name: R25 gradient-exposure CPU gate
+
+on:
+  push:
+    branches:
+      - research/r25-seen-exposure
+  pull_request:
+    paths:
+      - 'tools/r24_seen_exposure_audit.py'
+      - 'tests/test_r24_seen_exposure_audit.py'
+      - '.github/workflows/r25-exposure-cpu.yml'
+
+jobs:
+  exposure-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install isolated test runner
+        run: python -m pip install pytest==8.3.5
+      - name: Compile strict sampler-exposure audit
+        run: python -m py_compile tools/r24_seen_exposure_audit.py
+      - name: Run CPU synthetic-negative regressions
+        run: pytest -q tests/test_r24_seen_exposure_audit.py
+      - name: Declare external-data boundary
+        run: |
+          echo 'UNIT_ONLY: real 2000-step M2 checkpoint and remote HDF5 are NOT in GitHub checkout'
+          echo 'Do not state actual SEEN counts or H1/H3 verdict based on these unit tests'
