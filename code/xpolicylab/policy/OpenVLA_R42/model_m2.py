@@ -41,9 +41,16 @@ class Model(Legacy.Model):
                                "R15 bridge fallback is forbidden")
         if model_cfg.get("metadata") is not None and model_cfg.get("metadata_path"):
             raise M2ModelError("ambiguous metadata sources: choose one")
-        if (model_cfg.get("backend") is not None and
-                str(model_cfg.get("device", "cuda")).startswith("cuda")):
-            raise M2ModelError("injected GPU backend cannot bypass the M2 real-action safety gate")
+        if model_cfg.get("backend") is not None:
+            # A duck-typed CPU stub can produce a perfectly valid 14D wire
+            # command. Only an explicit, literal test capability may use it;
+            # authorising 7B loading is NOT permission to emit stub actions.
+            if (model_cfg.get("device") != "cpu" or
+                    model_cfg.get("allow_stub_action_for_contract_test") is not True):
+                raise M2ModelError(
+                    "injected CPU stub backend requires explicit "
+                    "allow_stub_action_for_contract_test=True and device='cpu'; "
+                    "normal robot actions remain blocked")
         self._m2_task = task
         # Legacy __init__ checks the old Push-T prompt before it calls our own
         # metadata resolver. The override is restricted to the *exact* frozen
@@ -156,6 +163,11 @@ class Model(Legacy.Model):
             raise M2ModelError(
                 "real M2 robot action emission BLOCKED: certified per-step "
                 "rate control (prev_cmd/dt) and live deployment Gate not verified")
+        if (self.device != "cpu" or
+                self.model_cfg.get("allow_stub_action_for_contract_test") is not True):
+            raise M2ModelError(
+                "CPU stub action requires explicit test-only authorisation; "
+                "robot/deployment path is blocked")
         return super().get_action()
 
     def contract(self):
@@ -164,5 +176,7 @@ class Model(Legacy.Model):
         ans["trained_prompt"] = self.metadata["trained_prompt"]
         ans["tokenizer_prompt_parity"] = self.metadata["tokenizer_prompt_parity"]
         ans["m2_official_closed_loop"] = "NOT_VERIFIED"
+        ans["cpu_stub_action_scope"] = ("EXPLICIT_TEST_ONLY" if
+            self.model_cfg.get("allow_stub_action_for_contract_test") is True else "DENIED")
         ans["real_robot_action_emission"] = "BLOCKED_PENDING_RATE_AND_SAFETY_GATE"
         return ans
