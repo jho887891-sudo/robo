@@ -12,9 +12,36 @@
   "blocked_data": 2
  },
  "gate_2_to_4": {
-  "state": "PERMITTED_PENDING_BUDGET_DECISION",
-  "why": "P6_M2_TWO now PASSES on the corrected evidence (mission/m2_p6_two_corrected_report.json), so the pre-registered 2->4 condition is met. Starting a 4-task stage is a model/budget decision for the research lead and has NOT been started.",
-  "evidence": "mission/m2_p6_two_corrected_report.json (PASS, 20/20 checks)"
+  "state": "FAIL_ON_PHYSICAL_CONDITION",
+  "why": "the probability gate (P6) passes, but the PHYSICAL gate does not: on the frozen DEV frames the shared model's SAFE-14D error is worse than a zero-parameter constant-velocity extrapolator on both tasks, and its predicted residual has R^2 ~ 0. Per the pre-registered rule the 2->4 expansion stops and turns into mechanism diagnosis; the 2000-step checkpoint is preserved and no valid step is retrained.",
+  "evidence": [
+   "mission/m2_physical_audit_report.md",
+   "mission/m2_physical_audit.json",
+   "mission/m2_physical_curve.json",
+   "mission/m2_p6_two_corrected_report.json (PASS, probability only)"
+  ],
+  "per_task": {
+   "push_T": {
+    "model_safe_l1": 0.0014495879913738463,
+    "noop_l1": 0.004546212847344577,
+    "cv_l1": 0.0009436629861738766,
+    "beats_noop": true,
+    "beats_cv": false,
+    "residual_ratio": 0.46943343530817055,
+    "resid_r2": -0.03942957520484924,
+    "model_L1_over_quantisation_floor": 47.122568283695365
+   },
+   "stack_bowls": {
+    "model_safe_l1": 0.0070068540480860975,
+    "noop_l1": 0.009243518579751253,
+    "cv_l1": 0.002196996007114649,
+    "beats_noop": true,
+    "beats_cv": false,
+    "residual_ratio": 1.3441959067163072,
+    "resid_r2": -1.2796924896538258,
+    "model_L1_over_quantisation_floor": 242.46223723311897
+   }
+  }
  },
  "global_unknowns": [
   "NOTHING in the 12-task list is missing: all 12 task ids exist as task/RoboDojo/tasks/<id>.py + config/<id>.yml in BOTH /home/T7/ojh/robot_actual/RoboDojo (installed, runnable) and RoboDojo_official. Status VERIFIED, not BLOCKED_INTERFACE.",
@@ -37,7 +64,17 @@
    },
    "authorisation": "AUTHORISED",
    "next_action": "usable: TaskSpec verified, data present, included in the shared-model task pool",
-   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)",
+   "physical_capability": {
+    "model_safe_l1": 0.0070068540480860975,
+    "noop_l1": 0.009243518579751253,
+    "cv_l1": 0.002196996007114649,
+    "beats_noop": true,
+    "beats_cv": false,
+    "residual_ratio": 1.3441959067163072,
+    "resid_r2": -1.2796924896538258,
+    "model_L1_over_quantisation_floor": 242.46223723311897
+   }
   },
   {
    "task": "push_T",
@@ -50,7 +87,17 @@
    },
    "authorisation": "AUTHORISED",
    "next_action": "usable: TaskSpec verified, data present, included in the shared-model task pool",
-   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)"
+   "scene_layout_provenance": "UNKNOWN (the HDF5s carry no layout/seed metadata)",
+   "physical_capability": {
+    "model_safe_l1": 0.0014495879913738463,
+    "noop_l1": 0.004546212847344577,
+    "cv_l1": 0.0009436629861738766,
+    "beats_noop": true,
+    "beats_cv": false,
+    "residual_ratio": 0.46943343530817055,
+    "resid_r2": -0.03942957520484924,
+    "model_L1_over_quantisation_floor": 47.122568283695365
+   }
   },
   {
    "task": "pack_objects_into_box",

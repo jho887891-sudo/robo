@@ -240,29 +240,6 @@ class R42DeployServer:
             record=False):
         """One control step: 14 autoregressive tokens -> safe 14D joint command."""
         t_start = time.perf_counter()
-        # R17 diagnostic: a ZERO-PARAMETER constant-velocity baseline served through the exact same
-        # protocol, SAFE clip and metadata as the VLA. It exists to answer one closed-loop question the
-        # offline audit can only suggest: does "keep your current velocity" actually move the object?
-        # It never touches the model.
-        if os.environ.get("R42_POLICY", "").lower() == "cv":
-            feat_cv = self._features(env_idx, state, timestamp)
-            # EpisodeHistory.features() returns the 42D CONTRACT vector, not a dict; the raw current
-            # state is the one the client just sent and the raw velocity is history.velocity().
-            s = np.asarray(state, np.float32).reshape(-1)[:14]
-            v = np.asarray(self._history.velocity(env_idx), np.float32).reshape(-1)[:14]
-            if s.size != 14 or v.size != 14:
-                raise R.R42Error("cv baseline needs a 14D state and velocity, got %s / %s"
-                                 % (s.shape, v.shape))
-            limits = (self.metadata or {}).get("safety_limits") or {}
-            lo = np.asarray(limits.get("amin", [-np.inf] * 14), np.float32)
-            hi = np.asarray(limits.get("amax", [np.inf] * 14), np.float32)
-            action = np.clip(s + v, lo, hi)
-            return {"action": action, "residual": v.copy(), "bins": np.zeros(R.N_ACTIONS, np.int64),
-                    "ids": np.zeros(R.N_ACTIONS, np.int64), "features": feat_cv, "velocity": v,
-                    "info": {"policy": "cv_baseline"}, "n_action_tokens": 0,
-                    "prompt_len": 0,
-                    "latency_ms": {"preprocess": 0.0, "forward_total": 0.0, "decode": 0.0,
-                                   "total": (time.perf_counter() - t_start) * 1e3}}
         imgs = R.validate_images(images)
         feat = self._features(env_idx, state, timestamp)
         t_pre = time.perf_counter()
@@ -312,6 +289,22 @@ class R42DeployServer:
         remaining tokens are decoded incrementally against that cache. The cache is built and dropped
         inside this call, so it can never leak across control steps, frames, environments or resets.
         """
+        # R17 diagnostic baseline: "always predict a ZERO residual" == the constant-velocity policy
+        # A_hat = S + V. It is expressed as TOKENS, not as a shortcut around the decoder, so the
+        # response satisfies the 14-token contract and the action goes through the very same
+        # decode_with_metadata / SAFE clip as the VLA. Zero model cost - and it is checked BEFORE the
+        # prompt is needed, because a baseline needs no language prompt at all.
+        if os.environ.get("R42_POLICY", "").lower() == "cv":
+            ctx = (self.metadata or {}).get("normalizer") or {}
+            q01 = np.asarray(ctx.get("q01"), np.float32)
+            q99 = np.asarray(ctx.get("q99"), np.float32)
+            _idx, ids = R.token_ids_for_residual(np.zeros(R.N_ACTIONS, np.float32), q01, q99)
+            ids = [int(x) for x in ids]
+            if len(ids) != R.N_ACTIONS:
+                raise R.R42Error("cv baseline produced %d tokens, expected %d"
+                                 % (len(ids), R.N_ACTIONS))
+            return ids, [{"k": k, "bin": int(ids[k]) - R.TOKEN_BEGIN_IDX - 1, "id": int(ids[k]),
+                          "policy": "cv_baseline"} for k in range(R.N_ACTIONS)]
         prompt = self.prompt_ids()
         if getattr(self.backend, "kv_cache_enabled", False):
             return self._decode_tokens_cached(prompt, pixel_values, feat)

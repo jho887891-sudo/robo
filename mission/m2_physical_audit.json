@@ -742,5 +742,34 @@
     }
    ]
   }
+ },
+ "quantisation_analysis": {
+  "why": "is the 8-bit codec the accuracy limit? No: one bin is ~1.2e-04 rad while the model is ~1.4e-03 away, and the true residual spans only ~7.7 codec levels",
+  "per_task": {
+   "push_T": {
+    "bin_width_mean": 0.0001230483009879078,
+    "bin_width_min": 7.706452015554532e-05,
+    "bin_width_max": 0.00017285919602727517,
+    "quantisation_floor_L1": 3.076207524697695e-05,
+    "true_resid_mag": 0.0009436635391466552,
+    "model_resid_mag": 0.00044298721695668064,
+    "effective_codec_levels_for_true_residual": 7.6690497273862475,
+    "model_safe_L1": 0.0014495879913738463,
+    "model_L1_over_quantisation_floor": 47.122568283695365,
+    "model_L1_over_CV": 1.536128906837032
+   },
+   "stack_bowls": {
+    "bin_width_mean": 0.00011559497475640715,
+    "bin_width_min": 5.2477980716503225e-05,
+    "bin_width_max": 0.00038980034878477454,
+    "quantisation_floor_L1": 2.8898743689101787e-05,
+    "true_resid_mag": 0.002196996534621576,
+    "model_resid_mag": 0.002953193748908234,
+    "effective_codec_levels_for_true_residual": 19.00598654267885,
+    "model_safe_L1": 0.0070068540480860975,
+    "model_L1_over_quantisation_floor": 242.46223723311897,
+    "model_L1_over_CV": 3.1892884763538167
+   }
+  }
  }
 }
