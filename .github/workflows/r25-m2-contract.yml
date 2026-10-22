@@ -8,6 +8,7 @@ on:
     paths:
       - 'code/xpolicylab/policy/OpenVLA_R42/m2_deploy_contract.py'
       - 'tests/test_r25_m2_deploy_contract.py'
+      - 'tests/test_r25_m2_deploy_server.py'
       - 'docs/superpowers/specs/2026-10-22-r25-m2-deploy-boundary-design.md'
       - '.github/workflows/r25-m2-contract.yml'
 jobs:
@@ -26,7 +27,7 @@ jobs:
           python -m pip install numpy==1.26.4 pytest==8.3.5
       - name: Test real two-task normalizer and checkpoint preflight
         run: |
-          pytest -q tests/test_r25_m2_deploy_contract.py
+          pytest -q tests/test_r25_m2_deploy_contract.py tests/test_r25_m2_deploy_server.py
       - name: Verify legacy R42 metadata regression suite
         run: |
           pytest -q tests/test_r42_m2_normalizer.py tests/test_r42_metadata_bridge.py tests/test_r11_p0_metadata.py
