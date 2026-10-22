@@ -240,6 +240,29 @@ class R42DeployServer:
             record=False):
         """One control step: 14 autoregressive tokens -> safe 14D joint command."""
         t_start = time.perf_counter()
+        # R17 diagnostic: a ZERO-PARAMETER constant-velocity baseline served through the exact same
+        # protocol, SAFE clip and metadata as the VLA. It exists to answer one closed-loop question the
+        # offline audit can only suggest: does "keep your current velocity" actually move the object?
+        # It never touches the model.
+        if os.environ.get("R42_POLICY", "").lower() == "cv":
+            feat_cv = self._features(env_idx, state, timestamp)
+            # EpisodeHistory.features() returns the 42D CONTRACT vector, not a dict; the raw current
+            # state is the one the client just sent and the raw velocity is history.velocity().
+            s = np.asarray(state, np.float32).reshape(-1)[:14]
+            v = np.asarray(self._history.velocity(env_idx), np.float32).reshape(-1)[:14]
+            if s.size != 14 or v.size != 14:
+                raise R.R42Error("cv baseline needs a 14D state and velocity, got %s / %s"
+                                 % (s.shape, v.shape))
+            limits = (self.metadata or {}).get("safety_limits") or {}
+            lo = np.asarray(limits.get("amin", [-np.inf] * 14), np.float32)
+            hi = np.asarray(limits.get("amax", [np.inf] * 14), np.float32)
+            action = np.clip(s + v, lo, hi)
+            return {"action": action, "residual": v.copy(), "bins": np.zeros(R.N_ACTIONS, np.int64),
+                    "ids": np.zeros(R.N_ACTIONS, np.int64), "features": feat_cv, "velocity": v,
+                    "info": {"policy": "cv_baseline"}, "n_action_tokens": 0,
+                    "prompt_len": 0,
+                    "latency_ms": {"preprocess": 0.0, "forward_total": 0.0, "decode": 0.0,
+                                   "total": (time.perf_counter() - t_start) * 1e3}}
         imgs = R.validate_images(images)
         feat = self._features(env_idx, state, timestamp)
         t_pre = time.perf_counter()
