@@ -299,3 +299,12 @@ separate buckets, so P6 evidence can never be produced by borrowing M1 headroom.
 * The 2->4 task expansion is now *permitted* by the corrected P6, but it is a budget decision for the
   research lead and has not been started.
 * The 12-task expert data for the 9 missing tasks, and any official FINAL, are unchanged.
+
+### Issue #26 独立交叉审计收官（2026-10-22）
+
+- 固定执行者 feature/r15-true-continuation@9a973206a0fe71e44c65dfdbed34b925842a1234，前版b57d16a后9新提交。M2 2任务2000步记录DONE、machine P6修正后20/20 PASS，但8DEV帧/task、旧错误CE曲线仍在forgetting gate，缺模型与恒速同口径SAFE joint14D L1及可靠episode CI，不可据此声称双任务闭环能力或自动触发4任务GPU。
+- 关键源码错误：tools/m2_gate_check.py::baseline_bins 的no-op L1算了mean(abs(A[t]))，而不是mean(abs(S[t]-A[t]))，错误等同“零关节预测”而非identity。独立review分支最小修正并补HDF5 fixture回归；代码尚待执行者远端红绿测试/DEV重算，历史报告不能改写。无改变合法token NLL计算的证据。
+- 真7B加速实验：完整LLM KV路径32/32输入动作token不等价（4.05倍但不可部署），reference训练forward与旧full serving 8/8相同、与cache 0/8；仅缓存视觉32/32逐位等价但速度1.0002倍。模型延迟仍超过25Hz 40ms目标，闭环官方SUCCESS未测量，不能假称已达可用实时机器人系统。
+- 针对8帧×2prompt全量解码的448个action bin，full路径154个为0或255（34.375%）；端点率异常有诊断价值，但未对真值端点率和限幅干预，不能直接判动作越界/塌缩。增加同帧配对运动分层/clip率。
+- 12TaskSpec已对上游本地源码核对，历史仅3任务有100HDF5，其余9无数据/布料液体2个BLOCKED_DATA；12任务共同模型训练与官方FINAL尚未达成。官方sim FINAL25/任务协议维持原授权。
+- 详见 report/R16_M2_ISSUE26_INDEPENDENT_CLOSEOUT_AUDIT.md。独立分支只改最小no-op L1与CPU测试、生成审计，不修改main或旧权重/HDF5/WAL，尚无新GPU工作发生。
