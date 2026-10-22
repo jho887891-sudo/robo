@@ -299,3 +299,52 @@ separate buckets, so P6 evidence can never be produced by borrowing M1 headroom.
 * The 2->4 task expansion is now *permitted* by the corrected P6, but it is a budget decision for the
   research lead and has not been started.
 * The 12-task expert data for the 9 missing tasks, and any official FINAL, are unchanged.
+
+## 2026-10-22 (cont.) — first complete official DEV episode; corrected forgetting curve; third task (append-only)
+
+### R16 official DEV closed loop: 1 episode COMPLETED (job `loop_pushT_stage1_r7`)
+
+600 control steps (the task's `step_lim`), three 601-frame camera videos, driver wall 3842.9 s. Official
+`_result.json` from the container: `success_rate 0.0`, `details[0].success = false`, layout 0. Recovered
+record: `verdict=OFFICIAL_FAILURE`, n=1, Wilson 95% CI **[0.0, 0.7935]**, and the client's own stdout
+tally (`Success nums: 0, Fail nums: 1`) agrees independently.
+
+Live inference wall over that run, 20-action windows: **6749 ms** p50 at 100 actions (169x budget),
+5585 at 300, **5529 ms p50 / 7040 p95 / 8166 p99** at 600 (forward 5111 ms) = **138x** the 40 ms budget.
+`OFFLINE_SIM_ONLY`: the sim advances in lock-step behind a synchronous policy call, so wall clock inflates
+while the simulated timestep and control semantics are unchanged — which is why a bounded DEV episode is
+still evidence. It is not a realtime claim.
+
+The failure is consistent with the offline gate (M1 G5_1000 FAIL, SAFE macro L1 0.0025385 vs CV
+0.0020475), not a surprise. n=1: a data point, not a rate.
+
+Harness defect fixed: the driver recorded NO_RESULT although the client had written a verdict, because
+(a) with `--docker` the client writes into the CONTAINER's eval_result while discovery searched the host
+tree, and (b) `eval_result` is a symlink inside the container and `find` needs `-L` to descend into it.
+Now: container-side `find -L`, read there, cross-checked against the stdout tally, plus `--reparse-only`
+which recovers a verdict from a finished run without launching anything and stamps `reparse_only: true`.
+
+### Corrected DEV CE curve (erratum E5 closed) — `mission/m2_ce_curve_corrected.json`
+
+All ten sealed save points recomputed with the corrected alignment, no retraining,
+`alignment_verified = true` at every point:
+
+| step | 200 | 400 | 600 | 800 | 1000 | 1200 | 1400 | 1600 | 1800 | 2000 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| push_T | 2.3282 | 2.2882 | 2.2134 | 2.1817 | 2.1738 | 2.1563 | 2.1521 | 2.1436 | 2.1347 | **2.1214** |
+| stack_bowls | 3.4586 | 3.6332 | 3.2071 | 3.3341 | 3.3169 | 3.2301 | 3.1571 | 3.1136 | 3.1015 | **3.0963** |
+
+The legacy curve's absolute values were measured on vision-token rows and are not comparable; its
+forgetting conclusion stands because every point of it was measured the same way. Two early points
+(200, 400) initially failed my tool's exit check: the cause was my own criterion conflating **alignment**
+(the window rows must be the supervised positions — holds everywhere) with the **model's** argmax landing
+inside the legal window (0.91 and 0.78 at those steps). Separated; no point dropped.
+
+### Third task wired, and a real deploy bug found
+
+`data/m2_task_normalizer_3task.json` (80 TRAIN episodes/task, DEV excluded) plus deploy-consistency tests.
+Writing them exposed that `validate_normalizer()` read `fit_source` as a mapping while the fitted payloads
+store it as a sentence — so `normalizer_for_task()` raised `AttributeError` on **every real multi-task
+payload**, including the 2-task one the stage was trained with. The existing tests passed only because
+their fixtures were synthetic. Consequence: the M2 shared model could never have been served. Fixed and
+pinned; the 2->4 expansion itself remains a budget decision and was not started.

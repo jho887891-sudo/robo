@@ -142,13 +142,25 @@ def main():
     digest = M2.write_eval_archive(a.out, blocks, data_contract=None, extra=extra)
 
     pads = {k: sorted(v) for k, v in checks["pad"].items()}
-    ok_in = all(all(v) for v in checks["in_window"].values())
+    # The two properties are NOT the same thing and must not be conflated:
+    #   * labels_present  - the 14 rows the window reads are the rows that predict the 14 supervised
+    #     labels. This is the ALIGNMENT, and it is a hard requirement: if it fails the archive is junk.
+    #   * in_window       - the model's full-vocabulary argmax happens to land inside 31744..31999.
+    #     That is a property of the MODEL, not of the alignment. Early checkpoints legitimately emit
+    #     out-of-window tokens, and failing the archive for it discarded two perfectly valid curve
+    #     points (steps 200 and 400) before this was corrected. It is now measured and reported.
+    n_in = sum(sum(1 for x in v if x) for v in checks["in_window"].values())
+    n_all = sum(len(v) for v in checks["in_window"].values())
+    ok_in = bool(n_all and n_in == n_all)
+    frac_in = (n_in / n_all) if n_all else None
     ok_lab = all(all(v) for v in checks["labels_present"].values())
     rep = {"archive": os.path.abspath(a.out), "archive_sha256": digest, "tasks": tasks,
            "ce_window": {t: blocks[t]["ce_mean"] for t in tasks},
            "ce_full": {t: blocks[t]["ce_full_mean"] for t in tasks},
            "vision_prefix_tokens": pads,
            "all_argmax_inside_legal_window": ok_in,
+           "argmax_in_window_fraction": frac_in,
+           "argmax_in_window_counts": {"in": n_in, "of": n_all},
            "all_14_supervised_positions_present": ok_lab,
            "n_frames_per_task": {t: len(blocks[t]["frames"]) for t in tasks},
            "checkpoint_global_step": int(ts["global_step"]),
@@ -157,8 +169,13 @@ def main():
     with open(out_rep, "w") as fh:
         json.dump(rep, fh, indent=1)
     print(json.dumps(rep, indent=1))
-    if not (ok_in and ok_lab):
-        raise SystemExit("alignment verification FAILED - this archive must not be used for P6")
+    if not ok_lab:
+        raise SystemExit("ALIGNMENT verification FAILED (the window rows are not the supervised "
+                         "positions) - this archive must not be used for P6")
+    if not ok_in:
+        print("[regen] NOTE: only %d/%d of the argmaxes are inside the legal window; the alignment is "
+              "still correct - this is the model emitting out-of-window tokens at this checkpoint"
+              % (n_in, n_all))
     return 0
 
 

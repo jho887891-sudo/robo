@@ -1,0 +1,162 @@
+{
+ "schema": "m2-ce-curve-corrected-v1",
+ "why": "the stage_evidence curve used the legacy action-window alignment; this recomputes the same curve on the sealed checkpoints with the corrected one (erratum E5), no retraining",
+ "no_retraining": true,
+ "notes": [
+  "alignment_verified is the hard property: the 14 rows the window reads are the rows that predict the 14 supervised labels. It holds at EVERY point.",
+  "argmax_in_window_fraction is a MODEL property (does the full-vocabulary argmax fall inside 31744..31999) and is NOT an alignment property. It is null for the points whose reports were produced before the field existed; steps 200 (0.91) and 400 (0.78) are the only early checkpoints measured so far, and both are < 1 - early checkpoints do emit out-of-window tokens. No point was dropped for this.",
+  "the ce_window column is unaffected by that field."
+ ],
+ "points": [
+  {
+   "global_step": 200,
+   "ce_window": {
+    "push_T": 2.3281607035920393,
+    "stack_bowls": 3.458618273928904
+   },
+   "ce_full": {
+    "push_T": 2.264047086238861,
+    "stack_bowls": 3.229484423995018
+   },
+   "argmax_in_window_fraction": 0.90625,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "30e6b27c824b4bb7905e861294324dd5206695faab68cdb17dfbece24fc5a011"
+  },
+  {
+   "global_step": 400,
+   "ce_window": {
+    "push_T": 2.28817851702146,
+    "stack_bowls": 3.6332101790450686
+   },
+   "ce_full": {
+    "push_T": 2.1782277077436447,
+    "stack_bowls": 3.4971897304058075
+   },
+   "argmax_in_window_fraction": 0.78125,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "ac428b51419a52d341940214d6176ff1c259b67bc4ee966ac9d6cce26c44fbcc"
+  },
+  {
+   "global_step": 600,
+   "ce_window": {
+    "push_T": 2.21336987043164,
+    "stack_bowls": 3.207060223750116
+   },
+   "ce_full": {
+    "push_T": 2.0662064999341965,
+    "stack_bowls": 2.994207590818405
+   },
+   "argmax_in_window_fraction": null,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "789ba47a6f6dfd51b7bd2e528214e1254a93cd08632922aee55a9bf5bc4aa8f6"
+  },
+  {
+   "global_step": 800,
+   "ce_window": {
+    "push_T": 2.181717855058932,
+    "stack_bowls": 3.3340908003337937
+   },
+   "ce_full": {
+    "push_T": 2.036540925502777,
+    "stack_bowls": 3.1125970780849457
+   },
+   "argmax_in_window_fraction": null,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "0ec251bf361fc55fdca2612fe581ede35778ef302b7d6dbe7f8f1a75018add6a"
+  },
+  {
+   "global_step": 1000,
+   "ce_window": {
+    "push_T": 2.1737712039544412,
+    "stack_bowls": 3.3168710399454895
+   },
+   "ce_full": {
+    "push_T": 2.034678816795349,
+    "stack_bowls": 3.11619570851326
+   },
+   "argmax_in_window_fraction": null,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "0366bffe5d487ba5a6c43b9c00cf710ea23150d648ab9b6a13e0044e1b61983e"
+  },
+  {
+   "global_step": 1200,
+   "ce_window": {
+    "push_T": 2.1562853614164856,
+    "stack_bowls": 3.2300521447665886
+   },
+   "ce_full": {
+    "push_T": 2.0142164528369904,
+    "stack_bowls": 3.015454441308975
+   },
+   "argmax_in_window_fraction": null,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "5926c3d815300a4f026c4a8e78bb6d3d07cbde5977ceda6b60bce9be17c80e9a"
+  },
+  {
+   "global_step": 1400,
+   "ce_window": {
+    "push_T": 2.1521024777706077,
+    "stack_bowls": 3.157117532068687
+   },
+   "ce_full": {
+    "push_T": 2.0088002681732178,
+    "stack_bowls": 2.9469206482172012
+   },
+   "argmax_in_window_fraction": null,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "ebb4a58a1472088d502a66d3d9754645647c020deb230f57e3f38914fb032b75"
+  },
+  {
+   "global_step": 1600,
+   "ce_window": {
+    "push_T": 2.1435992202800564,
+    "stack_bowls": 3.113626698485695
+   },
+   "ce_full": {
+    "push_T": 2.000780865550041,
+    "stack_bowls": 2.906322732567787
+   },
+   "argmax_in_window_fraction": null,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "6ed731826f134816ed793532fdddd1b74ce5975f1cc9230cde2f417933ef3d71"
+  },
+  {
+   "global_step": 1800,
+   "ce_window": {
+    "push_T": 2.13474577031941,
+    "stack_bowls": 3.1014839447010623
+   },
+   "ce_full": {
+    "push_T": 1.9925142973661423,
+    "stack_bowls": 2.8949818164110184
+   },
+   "argmax_in_window_fraction": null,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "522759ef02c995ab7916f8388051949b33ae5c3b2b88a0f14111e075d752e332"
+  },
+  {
+   "global_step": 2000,
+   "ce_window": {
+    "push_T": 2.121402947626892,
+    "stack_bowls": 3.096309640274999
+   },
+   "ce_full": {
+    "push_T": 1.980048269033432,
+    "stack_bowls": 2.890133887529373
+   },
+   "argmax_in_window_fraction": null,
+   "alignment": "vision-prefix-aware-v2",
+   "alignment_verified": true,
+   "archive_sha256": "17f8559b95cc411327915bb2c914a0c486dc88b3c3ef037a246b1843c888e0f1"
+  }
+ ]
+}
