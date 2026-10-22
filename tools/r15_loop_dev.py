@@ -129,6 +129,35 @@ def newest_result_in_container(container, root_inner, task, max_age_minutes=1440
     return got[0].strip() if got else None
 
 
+def official_result_mtime(path, container=""):
+    """Write time of the official result, read on the filesystem that owns it.
+
+    Inside --docker the eval_result tree is a symlink into the container's /tmp, so a HOST stat of the
+    same spelled path can inspect a different file (or nothing at all).
+    """
+    if container:
+        p = subprocess.run(["docker", "exec", container, "stat", "-c", "%Y", path],
+                           capture_output=True, text=True)
+        if p.returncode != 0:
+            raise RuntimeError("cannot stat the official result in %s: %s"
+                               % (container, (p.stderr or "")[-300:]))
+        return float(p.stdout.strip())
+    return float(os.path.getmtime(path))
+
+
+def official_result_belongs_to_run(path, started_at, ended_at, container="", clock_slack_s=2.0):
+    """A result may only certify a run if it was WRITTEN during that run.
+
+    Without this, 'newest _result.json for this task' can silently hand an earlier seeded rollout to a
+    later launch that shares task, seed and checkpoint - which is exactly the misattribution risk audit
+    PR#29 raised for the cached DEBUG run.
+    """
+    mtime = official_result_mtime(path, container)
+    ok = (float(started_at) - float(clock_slack_s) <= mtime
+          <= float(ended_at) + float(clock_slack_s))
+    return ok, mtime
+
+
 def read_result_in_container(container, path):
     p = subprocess.run(["docker", "exec", container, "cat", path], capture_output=True, text=True)
     if p.returncode != 0:
@@ -262,7 +291,12 @@ def main():
             rec["success_rate"] = (k / n) if n else None
             rec["wilson_95_ci"] = [lo, hi]
             rec["official_success_rate"] = d.get("success_rate")
-            rec["verdict"] = "OFFICIAL_SUCCESS" if k else "OFFICIAL_FAILURE"
+            # A recovered verdict is EVIDENCE OF A PAST RUN, never a fresh one. It stays
+            # PROVENANCE_PENDING until the live client's stdout/rc and the server flag are matched to it
+            # in the same launch (audit PR#29).
+            rec["verdict"] = "PROVENANCE_PENDING"
+            rec["provenance"] = ("reparse_only: the official result was read from disk, not produced by "
+                                 "this invocation; it cannot certify a new rollout")
         append_ledger(ledger, rec)
         with open(a.out, "w") as fh:
             json.dump(rec, fh, indent=1)
@@ -301,6 +335,21 @@ def main():
                                          max_age_minutes=int(a.timeout_s / 60) + 30)
     if res is None:
         res = newest_result(a.root, a.task, a.policy_name)
+    rec["result_json_candidate"] = res
+    if res:
+        try:
+            fresh, mtime = official_result_belongs_to_run(res, t0, time.time(), container=a.docker)
+            rec["result_mtime_epoch"] = mtime
+            rec["result_is_fresh"] = fresh
+            if not fresh:
+                rec["result_provenance_error"] = (
+                    "the official result was written at %.0f, outside this launch's [%.0f, %.0f] window; "
+                    "refusing to attribute a pre-existing result to %s"
+                    % (mtime, t0, time.time(), run_id))
+                res = None
+        except (OSError, RuntimeError, ValueError) as exc:
+            rec["result_provenance_error"] = repr(exc)
+            res = None
     rec["result_json"] = res
     if res:
         try:

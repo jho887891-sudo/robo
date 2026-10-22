@@ -151,8 +151,14 @@ def baseline_bins(payload, task, state, action, t):
     for name, res in (("true", r_true), ("noop", r_noop), ("cv", r_cv)):
         _idx, ids = R.token_ids_for_residual(res, ctx["q01"], ctx["q99"])
         out[name] = np.asarray(ids, np.int64) - R.TOKEN_BEGIN_IDX - 1
-    out["l1_noop"] = float(np.abs((s[t] - s[t]) - a[t]).mean())
+    # Physical L1 of each baseline's 14D command against the true action.
+    # The no-op baseline COMMANDS THE CURRENT STATE (A_hat = S[t]), so its error is |S[t] - A[t]|.
+    # The previous expression, |(S[t] - S[t]) - A[t]| = |A[t]|, is the error of commanding ZERO JOINT
+    # POSITIONS - a different (and much worse) predictor - which silently understated every reported
+    # no-op margin (audit PR#27).
+    out["l1_noop"] = float(np.abs(s[t] - a[t]).mean())
     out["l1_cv"] = float(np.abs((s[t] + v) - a[t]).mean())
+    out["l1_zero_position_LEGACY"] = float(np.abs(np.zeros_like(a[t]) - a[t]).mean())
     return out
 
 
