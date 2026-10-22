@@ -292,6 +292,10 @@ class R42DeployServer:
         prompt = self.prompt_ids()
         if getattr(self.backend, "kv_cache_enabled", False):
             return self._decode_tokens_cached(prompt, pixel_values, feat)
+        if getattr(self.backend, "vision_cache_enabled", False):
+            # one vision encode for the whole 14-token decode of THIS step; invalidated at the start
+            # so frames/42D changes can never reuse stale patches
+            self.backend.reset_vision_cache()
         ids, logs = [], []
         for k in range(R.N_ACTIONS):
             prefix = prompt + ids
@@ -415,6 +419,43 @@ class _TorchBackend:
     # token as input: the multimodal prefix is already in the KV. Weights, codec and the pure-autoreg
     # conditioning are untouched; the full path stays the default (R42_KV_CACHE=0).
     kv_cache_enabled = False
+
+    # ------------------------------------------------------- R16 vision-only cache (opt-in, EXACT)
+    # The LLM-prefix cache above DIVERGED from the training forward (tools/r16_three_way.py: the
+    # deployed full path reproduces training 8/8, the incremental path 0/8, first split at k=1 with
+    # k=0 bit-identical), so it is not deployable. This second, much narrower optimisation touches only
+    # the TV tower: the three cameras are encoded once per control step and the resulting patch
+    # embeddings are reused by the 14 forwards. The LLM computation, the action-mask conditioning and
+    # the arithmetic performed on the language model are IDENTICAL to the full path, so equivalence is
+    # structural rather than approximate - and it is still measured, not assumed.
+    vision_cache_enabled = False
+    _vision_cache = None
+
+    def install_vision_cache(self):
+        """Patch the vision tower so the 14 forwards of one control step share its output."""
+        core = _core_model(self.model)
+        if core is None or not hasattr(core, "vision_backbone"):
+            raise R.R42Error("cannot install the vision cache: no vision_backbone on the model stack")
+        vb = core.vision_backbone
+        if getattr(vb, "_r42_vision_cached", False):
+            return core
+        orig = vb.forward
+
+        def cached_forward(pixel_values, *a, **k):
+            if self._vision_cache is None:
+                self._vision_cache = orig(pixel_values, *a, **k)
+            return self._vision_cache
+
+        vb.forward = cached_forward
+        vb._r42_vision_cached = True
+        vb._r42_vision_orig = orig
+        self._vision_core = core
+        self.vision_cache_enabled = True
+        return core
+
+    def reset_vision_cache(self):
+        """A new control step (new frames, new 42D) must NOT reuse the previous frames' patches."""
+        self._vision_cache = None
 
     def prefill_cached(self, input_ids, pixel_values=None, proprio=None):
         """One multimodal forward with use_cache=True -> (last-token logits, cache, n_past)."""
