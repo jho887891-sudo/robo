@@ -201,3 +201,19 @@ def test_model_requires_config_optin_for_inherited_cv(monkeypatch, case):
     res = enabled.get_action()
     assert res["policy_mode"] == "cv_diagnostic"
     assert res["serving_task"] == "push_T"
+
+
+def test_injected_metadata_cannot_spoof_the_frozen_task_prompt(case):
+    """Metadata can be injected; never treat an arbitrary label as trained text."""
+    meta = _meta(case, "stack_bowls")
+    meta["trained_prompt"] = "What action should the robot take to open a door?"
+    with pytest.raises((ValueError, RuntimeError), match="prompt|task"):
+        C.M2SessionContract(meta, "stack_bowls")
+
+
+def test_injected_metadata_requires_sealed_provenance_fields(case):
+    """A caller-supplied dict must not elide M2 checkpoint/stage provenance."""
+    meta = _meta(case, "push_T")
+    meta.pop("m2_training_evidence_sha256")
+    with pytest.raises((ValueError, RuntimeError), match="evidence|sha256|manifest|provenance"):
+        C.M2SessionContract(meta, "push_T")
