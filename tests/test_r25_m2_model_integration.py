@@ -93,7 +93,8 @@ def test_real_7b_actions_are_blocked_without_certified_rate_control(case):
     """allow_real_7b_smoke permits loading only, never live robotic control."""
     m, _ = model(case)
     inst = Model({"task_id": "stack_bowls", "metadata": m.metadata,
-                  "device": "cpu", "allow_real_7b_smoke": True})
+                  "device": "cpu", "allow_real_7b_smoke": True,
+                  "expected_hw": None})
     inst.update_obs(_obs(instruction=MD.TASK_PROMPTS["stack_bowls"]))
     with pytest.raises((ValueError, RuntimeError), match="real.*action|robot|rate|deployment"):
         inst.get_action()
