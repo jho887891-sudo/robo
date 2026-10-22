@@ -1,0 +1,4 @@
+[OpenVLA_R42] 540 actions | total p50 5526 p95 7040 p99 8144 ms | forward p50 5104 ms | budget 40 ms -> 138x real-time
+[OpenVLA_R42] 560 actions | total p50 5526 p95 7064 p99 8132 ms | forward p50 5108 ms | budget 40 ms -> 138x real-time
+[OpenVLA_R42] 580 actions | total p50 5527 p95 7040 p99 8121 ms | forward p50 5110 ms | budget 40 ms -> 138x real-time
+[OpenVLA_R42] 600 actions | total p50 5529 p95 7040 p99 8166 ms | forward p50 5111 ms | budget 40 ms -> 138x real-time

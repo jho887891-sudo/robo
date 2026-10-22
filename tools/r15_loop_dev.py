@@ -109,9 +109,53 @@ def newest_result(root, task, policy):
     return found[-1] if found else None
 
 
+def newest_result_in_container(container, root_inner, task, max_age_minutes=1440):
+    """Same discovery, but INSIDE --docker.
+
+    The container runs the official client and writes eval_result/<task>/.../_result.json into its own
+    filesystem (eval_result is a symlink to /tmp/eval_result there). Searching the HOST tree found nothing
+    and an otherwise complete official episode was recorded as NO_RESULT - the first 1-episode DEV run
+    finished 600 steps, wrote three 601-frame videos and an official _result.json with success_rate 0.0,
+    and the driver threw the verdict away because it looked on the wrong side of the mount.
+    """
+    # -L is required: inside the container eval_result is a SYMLINK to /tmp/eval_result and find does
+    # not descend into a symlinked start point without it, which is why the first discovery returned
+    # nothing even though the file was there.
+    scr = ("find -L %s/eval_result -name _result.json -path '*%s*' -mmin -%d 2>/dev/null "
+           "| xargs -r ls -t 2>/dev/null | head -1" % (root_inner, task, int(max_age_minutes)))
+    p = subprocess.run(["docker", "exec", container, "bash", "-lc", scr],
+                       capture_output=True, text=True)
+    got = [x for x in (p.stdout or "").splitlines() if x.strip()]
+    return got[0].strip() if got else None
+
+
+def read_result_in_container(container, path):
+    p = subprocess.run(["docker", "exec", container, "cat", path], capture_output=True, text=True)
+    if p.returncode != 0:
+        raise RuntimeError("could not read %s from %s: %s" % (path, container, p.stderr[-300:]))
+    return json.loads(p.stdout)
+
+
+def parse_official_tally(text):
+    """The official client's own stderr/stdout tally, used to CROSS-CHECK the _result.json.
+
+    Two independent reads of the same official outcome must agree; a disagreement is recorded rather
+    than silently resolved in favour of whichever was read first.
+    """
+    import re as _re
+    m = _re.search(r"Success nums:\s*(\d+),\s*Fail nums:\s*(\d+),\s*Unstable nums:\s*(\d+)",
+                   text or "")
+    if not m:
+        return None
+    return {"success": int(m.group(1)), "fail": int(m.group(2)), "unstable": int(m.group(3))}
+
+
 def parse_result(path):
     with open(path) as fh:
-        d = json.load(fh)
+        return parse_result_obj(json.load(fh))
+
+
+def parse_result_obj(d):
     details = d.get("details") or d
     entries = []
     if isinstance(details, dict):
@@ -153,6 +197,10 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--ledger", default=None)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--reparse-only", action="store_true",
+                    help="do NOT launch the client; discover and parse the official _result.json that "
+                         "an already-completed run left behind (used to recover a verdict from a run "
+                         "that finished but was recorded as NO_RESULT)")
     a = ap.parse_args()
 
     ledger = a.ledger or os.path.join(os.path.dirname(os.path.abspath(a.out)),
@@ -183,6 +231,46 @@ def main():
         print(json.dumps(rec, indent=1))
         return 0
 
+    if a.reparse_only:
+        # Recover the official verdict from a run that already finished. Nothing is executed and the
+        # record says so, so this can never be mistaken for a fresh episode.
+        rec["reparse_only"] = True
+        rec["note"] = ("no client was launched; the official _result.json left by an earlier run was "
+                       "discovered and parsed")
+        res = None
+        if a.docker:
+            res = newest_result_in_container(a.docker, a.root_inner, a.task,
+                                             max_age_minutes=int(a.timeout_s / 60) + 120)
+        if res is None:
+            res = newest_result(a.root, a.task, a.policy_name)
+        rec["result_json"] = res
+        rec["utc_end"] = utcnow()
+        rec["exit"] = None
+        if res is None:
+            rec["verdict"] = "NO_RESULT"
+            rec["parse_error"] = "no _result.json found to reparse"
+        else:
+            d = read_result_in_container(a.docker, res) if (a.docker and not os.path.isfile(res)) \
+                else json.load(open(res))
+            entries = parse_result_obj(d)
+            n = len(entries)
+            k = sum(1 for e in entries if e["success"])
+            lo, hi = S.wilson_ci(k, n) if n else (float("nan"), float("nan"))
+            rec["entries"] = entries
+            rec["episodes_observed"] = n
+            rec["successes"] = k
+            rec["success_rate"] = (k / n) if n else None
+            rec["wilson_95_ci"] = [lo, hi]
+            rec["official_success_rate"] = d.get("success_rate")
+            rec["verdict"] = "OFFICIAL_SUCCESS" if k else "OFFICIAL_FAILURE"
+        append_ledger(ledger, rec)
+        with open(a.out, "w") as fh:
+            json.dump(rec, fh, indent=1)
+        print(json.dumps({k: rec.get(k) for k in ("verdict", "result_json", "episodes_observed",
+                                                  "successes", "success_rate", "wilson_95_ci",
+                                                  "official_success_rate")}, indent=1))
+        return 0 if str(rec.get("verdict", "")).startswith("OFFICIAL") else 4
+
     t0 = time.time()
     rec["utc_end"] = None
     timed_out = False
@@ -205,11 +293,21 @@ def main():
     rec["stderr_tail"] = (err or "")[-4000:]
     rec["utc_end"] = utcnow()
 
-    res = newest_result(a.root, a.task, a.policy_name)
+    tally = parse_official_tally((out or "") + (err or ""))
+    rec["official_stdout_tally"] = tally
+    res = None
+    if a.docker:
+        res = newest_result_in_container(a.docker, a.root_inner, a.task,
+                                         max_age_minutes=int(a.timeout_s / 60) + 30)
+    if res is None:
+        res = newest_result(a.root, a.task, a.policy_name)
     rec["result_json"] = res
     if res:
         try:
-            entries = parse_result(res)
+            if a.docker and not os.path.isfile(res):
+                entries = parse_result_obj(read_result_in_container(a.docker, res))
+            else:
+                entries = parse_result(res)
             n = len(entries)
             k = sum(1 for e in entries if e["success"])
             lo, hi = S.wilson_ci(k, n) if n else (float("nan"), float("nan"))
