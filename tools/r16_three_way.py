@@ -100,12 +100,16 @@ def main():
             row = M2.row_for(payload, task, state_, action_, t, episode=ep)
             pv = M2._episode_images(proc, ep, t, a.cams, indexes[task]["hdf5_dir"])
             feat = np.asarray(row["features"], np.float32)
-            ids = []
+            toks, bins = [], []
             for k in range(R.N_ACTIONS):
-                lg = ref_step(prompt_ids[task], ids, pv, feat)
+                # the model must be fed LEGAL window tokens; feeding raw bin indices 0..255 (the bug
+                # this tool shared with the equivalence harness) makes the 'reference' meaningless
+                lg = ref_step(prompt_ids[task], toks, pv, feat)
                 w = window(lg)
-                ids.append(int(np.argmax(w)))
-            ref.append({"task": task, "episode": ep, "t": int(t), "bins_ref": ids})
+                b = int(np.argmax(w))
+                bins.append(b)
+                toks.append(R.TOKEN_BEGIN_IDX + 1 + b)
+            ref.append({"task": task, "episode": ep, "t": int(t), "bins_ref": bins})
     print("[three-way] reference bins done: %d inputs" % len(ref), flush=True)
 
     # ---- phase 2: install the pure-autoreg patch, then B (full deploy) and C (cached)
@@ -119,11 +123,14 @@ def main():
         pv = M2._episode_images(proc, ep, t, a.cams, indexes[task]["hdf5_dir"])
         feat = np.asarray(row["features"], np.float32)
         prompt = prompt_ids[task]
-        # B: full deploy path
-        ids_b, w_b = [], []
+        # B: full deploy path (legal window tokens, exactly as _TorchBackend._decode_tokens does)
+        toks_b, ids_b, w_b = [], [], []
         for k in range(R.N_ACTIONS):
-            w = window(backend.next_token_logits(prompt + ids_b, pv, feat))
-            w_b.append(w); ids_b.append(int(np.argmax(w)))
+            w = window(backend.next_token_logits(prompt + toks_b, pv, feat))
+            w_b.append(w)
+            b = int(np.argmax(w))
+            ids_b.append(b)
+            toks_b.append(R.TOKEN_BEGIN_IDX + 1 + b)
         # C: cached path
         lg, cache, n = backend.prefill_cached(prompt, pv, feat)
         ids_c, w_c = [], []

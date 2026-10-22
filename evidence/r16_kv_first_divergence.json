@@ -1,0 +1,57 @@
+{
+  "schema": "r16-kv-first-divergence-v1",
+  "source": "pristine OpenVLA full multimodal vs incremental Llama",
+  "checkpoint": "/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/checkpoints/step2000",
+  "modeling_sha256": "b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6",
+  "task": "push_T",
+  "episode": "episode_0000091.hdf5",
+  "t": 196,
+  "prompt_text_tokens": 36,
+  "expected_multimodal_extra_tokens": 769,
+  "k0_full_argmax_bin": 141,
+  "k1_ref_argmax_bin": 126,
+  "cases": {
+    "full_multimodal_use_cache_true": {
+      "max_abs_256": 0.0,
+      "p99_abs_256": 0.0,
+      "argmax": 126,
+      "same_argmax": true,
+      "logits_finite": true
+    },
+    "direct_old": {
+      "max_abs_256": 0.03125,
+      "p99_abs_256": 0.03125,
+      "argmax": 126,
+      "same_argmax": true,
+      "logits_finite": true
+    },
+    "direct_full_mask": {
+      "max_abs_256": 0.03125,
+      "p99_abs_256": 0.03125,
+      "argmax": 126,
+      "same_argmax": true,
+      "logits_finite": true
+    },
+    "wrapper_generation": {
+      "max_abs_256": 0.03125,
+      "p99_abs_256": 0.03125,
+      "argmax": 126,
+      "same_argmax": true,
+      "logits_finite": true
+    },
+    "text_only_cache_vs_full": {
+      "max_abs_256": 0.03125,
+      "p99_abs_256": 0.03125,
+      "argmax": 126,
+      "same_argmax": true,
+      "logits_finite": true
+    }
+  },
+  "actual_cache_length": 805,
+  "backend_reported_n_past": 36,
+  "cache_type": "tuple",
+  "text_vs_real_cache_delta": 769,
+  "cache_expected_length": 805,
+  "cache_length_correct": true,
+  "k0_prefill_max_abs": 0.0
+}

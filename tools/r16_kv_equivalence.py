@@ -63,6 +63,52 @@ def load_verified(checkpoint, cams):
     return proc, vla, proj, ts, modeling_sha
 
 
+# --------------------------------------------------------------------------- decode loops (testable)
+# These live at module level, with the backend injected, so a stub backend can assert the ONE property
+# whose absence invalidated the first three R16 parity reports: every token fed to the model must be a
+# LEGAL WINDOW TOKEN (31744..31999), never a bin index 0..255.
+def needs_legal_token_check(backend, input_ids):
+    for tok in input_ids:
+        if not (R.TOKEN_BEGIN_IDX + 1 <= int(tok) <= R.TOKEN_BEGIN_IDX + 256):
+            raise AssertionError(
+                "the model was fed token %r, which is outside the legal action window %d..%d - a bin "
+                "index leaked into the sequence" % (int(tok), R.TOKEN_BEGIN_IDX + 1,
+                                                    R.TOKEN_BEGIN_IDX + 256))
+
+
+def decode_full(backend, prompt, pixel_values, feat, window, n_actions=None, check=True):
+    """14 greedy steps through the full-recompute path. Returns (bins, logit_windows)."""
+    n = int(n_actions or R.N_ACTIONS)
+    toks, bins, logits = [], [], []
+    for _k in range(n):
+        if check:
+            needs_legal_token_check(backend, toks)
+        w = window(backend.next_token_logits(prompt + toks, pixel_values, feat))
+        logits.append(w)
+        b = int(np.argmax(w))
+        bins.append(b)
+        toks.append(R.TOKEN_BEGIN_IDX + 1 + b)
+    return bins, logits
+
+
+def decode_cached(backend, prompt, pixel_values, feat, window, n_actions=None, check=True):
+    """Same 14 greedy steps from ONE prefill plus incremental steps. Returns (bins, logit_windows)."""
+    n = int(n_actions or R.N_ACTIONS)
+    lg, cache, n_past = backend.prefill_cached(prompt, pixel_values, feat)
+    bins, logits = [], []
+    for k in range(n):
+        w = window(lg)
+        logits.append(w)
+        b = int(np.argmax(w))
+        bins.append(b)
+        if k + 1 < n:
+            tok = R.TOKEN_BEGIN_IDX + 1 + b
+            if check:
+                needs_legal_token_check(backend, [tok])
+            lg, cache, n_past = backend.step_cached(tok, cache, n_past)
+    return bins, logits
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--checkpoint", required=True)
@@ -98,25 +144,18 @@ def main():
             raise SystemExit("logits do not cover the legal 256 window")
         return w
 
+    def _token(bin_idx):
+        """BIN -> LEGAL WINDOW TOKEN. This single conversion was missing from the full path below,
+        which fed the model raw bin indices 0..255 (ordinary text tokens) from the second step on,
+        while the cached path correctly fed 31744+bin. Every 'divergence' reported by the earlier
+        versions of this harness came from that asymmetry, not from the cache."""
+        return R.TOKEN_BEGIN_IDX + 1 + int(bin_idx)
+
     def full_decode(prompt, pv, feat):
-        ids, logits_seq = [], []
-        for k in range(R.N_ACTIONS):
-            lg = backend.next_token_logits(prompt + ids, pv, feat)
-            w = window(lg)
-            logits_seq.append(w)
-            ids.append(int(np.argmax(w)))
-        return ids, logits_seq
+        return decode_full(backend, prompt, pv, feat, window)
 
     def cached_decode(prompt, pv, feat):
-        lg, cache, n = backend.prefill_cached(prompt, pv, feat)
-        ids, logits_seq = [], []
-        for k in range(R.N_ACTIONS):
-            w = window(lg)
-            logits_seq.append(w)
-            ids.append(int(np.argmax(w)))
-            if k + 1 < R.N_ACTIONS:
-                lg, cache, n = backend.step_cached(R.TOKEN_BEGIN_IDX + 1 + ids[-1], cache, n)
-        return ids, logits_seq
+        return decode_cached(backend, prompt, pv, feat, window)
 
     def residual_from_bins(task, bins):
         c = ctx[task]
