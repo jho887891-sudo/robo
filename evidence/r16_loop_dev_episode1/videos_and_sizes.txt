@@ -1,0 +1,7 @@
+total 1496
+-rw-rw-rw- 1 isaac-sim isaac-sim    162 Oct 22 03:57 _result.json
+drwxrwxrwx 2 isaac-sim isaac-sim      6 Oct 22 03:57 _stream
+-rw-rw-rw- 1 isaac-sim isaac-sim 390488 Oct 22 03:57 episode_0000000_cam_head_fail.mp4
+-rw-rw-rw- 1 isaac-sim isaac-sim 816355 Oct 22 03:57 episode_0000000_cam_left_wrist_fail.mp4
+-rw-rw-rw- 1 isaac-sim isaac-sim 313214 Oct 22 03:57 episode_0000000_cam_right_wrist_fail.mp4
+1.5M	/tmp/eval_result/RoboDojo/push_T/OpenVLA_R42/arx_x5/0_ckpt_name=step1000,action_type=joint/2026-10-22_02-53-10/

@@ -1,0 +1,24 @@
+2026-10-21 03:34:07.474849: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-21 03:34:07.576379: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Using ARX constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+[03:34:14] runtime contract: {"action_dim": 14, "action_token_begin_idx": 31743, "ignore_index": -100, "num_actions_chunk_unused": 25, "proprio_dim_unused": 14, "r42_action_tokens": 14, "r42_proprio_dim": 42, "robot_platform": "ARX", "stop_index": 2}
+10/21 [03:34:15] WARNING  | >> Expected                modeling_prismatic.py:332
+                          `transformers==4.40.1` and                            
+                          `tokenizers==0.19.1` but got                          
+                          `transformers==4.40.2` and                            
+                          `tokenizers==0.19.1`; there                           
+                          might be inference-time                               
+                          regressions due to                                    
+                          dependency changes. If in                             
+                          doubt, pleaseuse the above                            
+                          versions.                                             
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  3.40it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  3.56it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.88it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.76it/s]
+[03:34:59] pristine modeling sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+[03:35:35] LoRA trainable=110.83M | 42D projector=16.957M | llm_dim=4096 | modeling_sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+[03:39:30] DEV predictions (32 frames, global_step=300) -> runs/r15_stage_300_20261021T030423Z/preds_dev300.npz

@@ -1,0 +1,296 @@
+{
+ "gate": "P6_M2_TWO",
+ "evidence": "/home/T7/ojh/robot_actual/runs/m2_two_latest/stage_evidence.json",
+ "eval_archive": "/home/T7/ojh/robot_actual/runs/m2_two_latest/dev_eval_latest.npz",
+ "normalizer": "/home/T7/ojh/robot_actual/r11/data/m2_task_normalizer_2task.json",
+ "checks": [
+  {
+   "id": "P6.dev_disjoint",
+   "requirement": "every scored frame is a DEV episode of the same task",
+   "measured": {
+    "violations": [],
+    "n_violations": 0
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.ce_vs_noop.push_T",
+   "requirement": "per-task DEV CE is below the no-op baseline (A_hat=S) on the same frames",
+   "measured": {
+    "model_ce": 4.888308272601581,
+    "baseline_ce": 2.624057183548364,
+    "hit_rate": 0.5267857142857143,
+    "l1": 0.38056812807917595,
+    "margin_nats": -2.2642510890532166
+   },
+   "passed": false
+  },
+  {
+   "id": "P6.ce_vs_constant_velocity.push_T",
+   "requirement": "per-task DEV CE is below the constant-velocity baseline (A_hat=S+V) on the same frames",
+   "measured": {
+    "model_ce": 4.888308272601581,
+    "baseline_ce": 2.673567696445503,
+    "hit_rate": 0.5178571428571429,
+    "l1": 0.0009436629861738766,
+    "margin_nats": -2.214740576156078
+   },
+   "passed": false
+  },
+  {
+   "id": "P6.ce_vs_noop.stack_bowls",
+   "requirement": "per-task DEV CE is below the no-op baseline (A_hat=S) on the same frames",
+   "measured": {
+    "model_ce": 5.377518584593141,
+    "baseline_ce": 3.3667148770054487,
+    "hit_rate": 0.39285714285714285,
+    "l1": 0.4628685563802719,
+    "margin_nats": -2.0108037075876926
+   },
+   "passed": false
+  },
+  {
+   "id": "P6.ce_vs_constant_velocity.stack_bowls",
+   "requirement": "per-task DEV CE is below the constant-velocity baseline (A_hat=S+V) on the same frames",
+   "measured": {
+    "model_ce": 5.377518584593141,
+    "baseline_ce": 3.3172043641083095,
+    "hit_rate": 0.4017857142857143,
+    "l1": 0.002196996007114649,
+    "margin_nats": -2.0603142204848317
+   },
+   "passed": false
+  },
+  {
+   "id": "P6.routing_not_degenerate.own_prompt_wins",
+   "requirement": "on every scored frame the model is better (lower CE) with its OWN task prompt than with any other task prompt (ties never count as a win)",
+   "measured": {
+    "min_own_prompt_win_rate": 0.25,
+    "required": 0.9,
+    "per_pair": {
+     "push_T<-prompt:stack_bowls": {
+      "own_prompt_win_rate": 0.375,
+      "mean_ce_penalty_nats": 0.006342121264912071,
+      "n_frames": 8
+     },
+     "stack_bowls<-prompt:push_T": {
+      "own_prompt_win_rate": 0.25,
+      "mean_ce_penalty_nats": -0.052742701741055664,
+      "n_frames": 8
+     }
+    }
+   },
+   "passed": false
+  },
+  {
+   "id": "P6.routing_not_degenerate.wrong_prompt_penalty",
+   "requirement": "evaluating a frame under another task's prompt costs CE (the model really uses the task tag instead of one collapsed output distribution)",
+   "measured": {
+    "min_ce_penalty_nats": -0.052742701741055664,
+    "required": 0.05,
+    "prompt_identical_fraction": {
+     "push_T<-prompt:stack_bowls": 0.0,
+     "stack_bowls<-prompt:push_T": 0.0
+    }
+   },
+   "passed": false
+  },
+  {
+   "id": "P6.routing_not_degenerate.marginals_informational",
+   "requirement": "per-task marginal predicted distributions (reported, never required: the targets are standardised per task, so equal marginals are possible)",
+   "measured": {
+    "pairwise_js": {
+     "push_T|stack_bowls": 0.001072470497150346
+    },
+    "required_if_used": 0.02
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.routing_not_degenerate.not_constant",
+   "requirement": "the model does not emit one constant bin vector for every frame of every task",
+   "measured": {
+    "distinct_pred_bins_per_task": {
+     "push_T": 1,
+     "stack_bowls": 1
+    }
+   },
+   "passed": false
+  },
+  {
+   "id": "P6.no_catastrophic_forgetting.push_T",
+   "requirement": "every save-point DEV CE <= that task's step-0 CE + tolerance",
+   "measured": {
+    "step0_ce": 8.426583469592865,
+    "worst_ce": 5.048281966877951,
+    "worst_step": 800,
+    "final_ce": 4.888308272601581,
+    "best_ce": 4.320370810048008,
+    "delta_worst_minus_step0": -3.3783015027149137,
+    "tolerance": 0.1,
+    "n_save_points": 11
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.no_catastrophic_forgetting.stack_bowls",
+   "requirement": "every save-point DEV CE <= that task's step-0 CE + tolerance",
+   "measured": {
+    "step0_ce": 9.841333325106392,
+    "worst_ce": 5.659458856852284,
+    "worst_step": 200,
+    "final_ce": 5.377518584593141,
+    "best_ce": 4.940957321190805,
+    "delta_worst_minus_step0": -4.181874468254108,
+    "tolerance": 0.1,
+    "n_save_points": 11
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.task_count",
+   "requirement": "task count <= --max-tasks-stage",
+   "measured": {
+    "n_tasks": 2,
+    "max_tasks_stage": 2
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.cumulative_steps",
+   "requirement": "cumulative multi-task optimizer steps <= the stage cap",
+   "measured": {
+    "cap": 2000,
+    "target": 2000,
+    "reached": 2000
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.stage_completed",
+   "requirement": "the stage actually reached its declared cumulative target",
+   "measured": {
+    "target": 2000,
+    "reached": 2000
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.booking_matches_steps",
+   "requirement": "steps booked/claimed agree with the executed steps",
+   "measured": {
+    "executed": 2000,
+    "reached": 2000,
+    "start": 0,
+    "ledger_steps_booked": 2000
+   },
+   "passed": true
+  },
+  {
+   "id": "P6.cap.wal_steps",
+   "requirement": "the R15 WAL books exactly one step per executed step",
+   "measured": {
+    "run_id": "m2-2task-2000-20261021T123322Z",
+    "wal_steps": 2000,
+    "executed": 2000
+   },
+   "passed": true
+  }
+ ],
+ "per_task": {
+  "push_T": {
+   "n_frames": 8,
+   "true_bins_sha256": "b45fcbaa88dd096ec8c8993672990068b7171a0dd987081ffda22d10016d56c3",
+   "hit_rate_noop": 0.5267857142857143,
+   "hit_rate_cv": 0.5178571428571429,
+   "ce_noop": 2.624057183548364,
+   "ce_cv": 2.673567696445503,
+   "l1_noop": 0.38056812807917595,
+   "l1_cv": 0.0009436629861738766,
+   "model_ce": 4.888308272601581,
+   "margin_vs_noop": -2.2642510890532166,
+   "margin_vs_cv": -2.214740576156078
+  },
+  "stack_bowls": {
+   "n_frames": 8,
+   "true_bins_sha256": "2b97a64be199d8b2dfa21dc5cbe6991fab37ac9c5b95a11fa84d57da058ce599",
+   "hit_rate_noop": 0.39285714285714285,
+   "hit_rate_cv": 0.4017857142857143,
+   "ce_noop": 3.3667148770054487,
+   "ce_cv": 3.3172043641083095,
+   "l1_noop": 0.4628685563802719,
+   "l1_cv": 0.002196996007114649,
+   "model_ce": 5.377518584593141,
+   "margin_vs_noop": -2.0108037075876926,
+   "margin_vs_cv": -2.0603142204848317
+  }
+ },
+ "verdict": "FAIL",
+ "exit": 3,
+ "metric_definitions": {
+  "model_ce": "mean over the 14 action dims of -log p_window(true_bin), 256-way window renormalised (nats)",
+  "baseline_ce": "(1 - hit_rate) * ln(256): a point baseline pays 0 nats for an exact bin hit and ln(256) for a miss",
+  "forgetting": "worst save-point CE minus that task's step-0 CE",
+  "routing": "pairwise Jensen-Shannon divergence of the per-task mean predicted 256-bin distributions + leave-one-out nearest-centroid accuracy"
+ },
+ "tasks": [
+  "push_T",
+  "stack_bowls"
+ ],
+ "evidence_sha256": "9cfb9fffa7256395ebb48c5ceb88a7e9a462389a467e74364a4d5f276c29a1e6",
+ "run_id": "m2-2task-2000-20261021T123322Z",
+ "routing": {
+  "per_pair": {
+   "push_T<-prompt:stack_bowls": {
+    "own_prompt_win_rate": 0.375,
+    "mean_ce_penalty_nats": 0.006342121264912071,
+    "n_frames": 8
+   },
+   "stack_bowls<-prompt:push_T": {
+    "own_prompt_win_rate": 0.25,
+    "mean_ce_penalty_nats": -0.052742701741055664,
+    "n_frames": 8
+   }
+  },
+  "min_own_prompt_win_rate": 0.25,
+  "min_wrong_prompt_ce_penalty": -0.052742701741055664,
+  "min_win_rate_required": 0.9,
+  "prompt_identical_fraction": {
+   "push_T<-prompt:stack_bowls": 0.0,
+   "stack_bowls<-prompt:push_T": 0.0
+  },
+  "marginal_pairwise_js_informational": {
+   "push_T|stack_bowls": 0.001072470497150346
+  },
+  "distinct_pred_bins_per_task": {
+   "push_T": 1,
+   "stack_bowls": 1
+  },
+  "any_frame_variation": false
+ },
+ "forgetting": {
+  "push_T": {
+   "step0_ce": 8.426583469592865,
+   "worst_ce": 5.048281966877951,
+   "worst_step": 800,
+   "final_ce": 4.888308272601581,
+   "best_ce": 4.320370810048008,
+   "delta_worst_minus_step0": -3.3783015027149137,
+   "tolerance": 0.1,
+   "n_save_points": 11
+  },
+  "stack_bowls": {
+   "step0_ce": 9.841333325106392,
+   "worst_ce": 5.659458856852284,
+   "worst_step": 200,
+   "final_ce": 5.377518584593141,
+   "best_ce": 4.940957321190805,
+   "delta_worst_minus_step0": -4.181874468254108,
+   "tolerance": 0.1,
+   "n_save_points": 11
+  }
+ },
+ "cap": 2000,
+ "n_checks": 16,
+ "n_failed": 7
+}

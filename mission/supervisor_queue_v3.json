@@ -1,0 +1,56 @@
+{
+ "schema": "r15-r23-supervisor-queue-v3",
+ "written_utc": "2026-10-21T08:08:00Z",
+ "supersedes": "supervisor_queue_v2.json (attempt 2 stalled: supervisor and trainer both took the same GPU flock; killed at 0 GPU seconds)",
+ "note": "supervisor_locks_gpu=false for jobs whose own program takes the GpuJobLock (R15 trainer). count_gpu=false because the inner program books its own GPU seconds into the WAL. The gate job exits 0 only on PASS, so stage 3 is BLOCKED unless G5 really passed.",
+ "jobs": [
+  {
+   "id": "m1_700_step300_to_1000_r3",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s2_1000.sh",
+   "timeout_s": 5400,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  },
+  {
+   "id": "m1_dev_preds_step1000_r3",
+   "kind": "r15_devpreds",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_devpreds_1000.sh",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_700_step300_to_1000_r3"
+   ],
+   "gpu": true,
+   "count_gpu": false
+  },
+  {
+   "id": "gate_g5_1000_r3",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.json --out mission/r15_gate_G5_1000.json",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_dev_preds_step1000_r3"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "m1_2000_step1000_to_3000_r3",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s3_3000.sh",
+   "timeout_s": 10800,
+   "depends_on": [
+    "gate_g5_1000_r3"
+   ],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  }
+ ]
+}

@@ -1,0 +1,428 @@
+{
+ "gate": "G5_1000",
+ "pred": "runs/r15_dev_gate_1000_20261021T0803Z.npz",
+ "eval_version": "r15-dev-eval-v1",
+ "checks": [
+  {
+   "id": "cohort.frozen_frames",
+   "requirement": "predictions were produced on the pre-registered frozen DEV frame list",
+   "measured": {
+    "expected": "67b4320420249aef7cd560f33a66e2ae454960238c695e05a3910ebad3e50dff",
+    "actual": "67b4320420249aef7cd560f33a66e2ae454960238c695e05a3910ebad3e50dff",
+    "n": 32
+   },
+   "passed": true
+  },
+  {
+   "id": "G5.macro_relative_5pct",
+   "requirement": "SAFE macro L1 improves >=5 percent versus same-sample constant velocity",
+   "measured": {
+    "cv": 0.002047480782493949,
+    "vla": 0.0025384550062881317,
+    "rel_improvement": -0.23979430136391708,
+    "absolute_target_from_prereg": 0.002005,
+    "meets_absolute_prereg_number": false
+   },
+   "passed": false
+  },
+  {
+   "id": "G5.strata_3_of_4",
+   "requirement": ">=3 of 4 pre-registered |V| motion strata improve >=5 percent vs CV",
+   "measured": {
+    "strata_won": 0,
+    "strata": [
+     {
+      "stratum": "q1",
+      "n": 8,
+      "cv_l1": 0.0005099346162751317,
+      "vla_l1": 0.0005839948426000774,
+      "rel_improvement": -0.145234749635014,
+      "won": false
+     },
+     {
+      "stratum": "q2",
+      "n": 8,
+      "cv_l1": 0.001104715745896101,
+      "vla_l1": 0.0010942762019112706,
+      "rel_improvement": 0.00944998206426599,
+      "won": false
+     },
+     {
+      "stratum": "q3",
+      "n": 8,
+      "cv_l1": 0.001976152416318655,
+      "vla_l1": 0.0020370385609567165,
+      "rel_improvement": -0.03081044970786485,
+      "won": false
+     },
+     {
+      "stratum": "q4",
+      "n": 8,
+      "cv_l1": 0.00459912046790123,
+      "vla_l1": 0.006438510026782751,
+      "rel_improvement": -0.39994376570894896,
+      "won": false
+     }
+    ]
+   },
+   "passed": false
+  },
+  {
+   "id": "G5.no_collapse",
+   "requirement": "still_action_rate < 1.0 and 0.2 <= delta magnitude ratio <= 5.0",
+   "measured": {
+    "still_action_rate": 0.0,
+    "delta_magnitude_ratio": 1.0507606267929077
+   },
+   "passed": true
+  },
+  {
+   "id": "G5.sign_mag_not_worse_20pct",
+   "requirement": "delta sign agreement and delta magnitude ratio not worse than CV by >20 pct",
+   "measured": {
+    "vla_sign": 0.6897321428571429,
+    "cv_sign": 0.7857142857142857,
+    "sign_floor": 0.6285714285714286,
+    "vla_mag": 1.0507606267929077,
+    "cv_mag": 1.0402581691741943,
+    "mag_window": [
+     0.866881807645162,
+     1.2483098030090332
+    ]
+   },
+   "passed": true
+  },
+  {
+   "id": "G5.pass_rule",
+   "requirement": "PASS = (macro 5 pct OR 3/4 strata) AND no collapse AND sign/mag ok",
+   "measured": {
+    "macro_5pct": false,
+    "strata_3_of_4": false,
+    "no_collapse": true,
+    "sign_mag": true
+   },
+   "passed": false
+  }
+ ],
+ "verdict": "FAIL",
+ "exit": 3,
+ "prereg_sha256": "9242ebaf26542469e9c45e03144b2ab7a34b2304ee928918f2ef738cf8d3d474",
+ "pred_sha256": "c54d452977016ba6e274cfec5cc04e63c7f44f3b13f813bd97f665fbb2be603e",
+ "metric_definitions": {
+  "metric_version": "r15-dev-metrics-v2",
+  "gate_quantity": "physical_l1_macro on SAFE (clamped) commands",
+  "delta_definition": "dA = A_hat - S_t versus dA_true = A_t - S_t (commanded motion)",
+  "residual_definition": "R = (A - S_t) - V_t with V_t = S_t - S_{t-1}; A[t] == S[t+1]",
+  "sign_agreement": "mean(sign(dA) == sign(dA_true)) over all 14 coordinates (NOT absolute)",
+  "magnitude_ratio": "mean over dims of mean|dA| / max(mean|dA_true|, 1e-9) (NOT absolute)",
+  "residual_sign_agreement": "same sign test on the residual R",
+  "residual_magnitude_ratio": "same magnitude test on the residual R",
+  "absolute_sign_agreement": "legacy v1 definition, kept only for continuity, not gated",
+  "absolute_magnitude_ratio": "legacy v1 definition, kept only for continuity, not gated",
+  "raw_vs_safe": "every metric is reported twice: the unprefixed key is SAFE (decoder output clamped to the joint box, i.e. what the robot executes) and the raw_ prefix is the unclamped decoder output",
+  "clip_policy": "clamp each of the 14 coordinates to [amin, amax] from the frozen bounds npz; no other post-processing, no temporal filter, no re-scaling",
+  "sampling": "one deterministic greedy decode per frozen DEV frame, frozen frame list (16 DEV episodes x --per-episode frames, seed=0 for the registered gate); no test-time augmentation, no best-of-n, no per-frame selection",
+  "raw_oob_coord_rate": "fraction of the 14*N RAW coordinates outside the joint box",
+  "raw_oob_frame_rate": "fraction of frames with at least one RAW coordinate outside the box"
+ },
+ "dev_frames_sha256": "67b4320420249aef7cd560f33a66e2ae454960238c695e05a3910ebad3e50dff",
+ "n_dev_frames": 32,
+ "pred_global_step": 1000,
+ "pred_model_sha256": "de93b7fed08800925c912ab4f013b73e47db3358aa4e81dd1d60925cd374eaf1",
+ "models": {
+  "identity_A=S": {
+   "status": "OK",
+   "macro_l1_safe": 0.007737873223959468,
+   "macro_l1_raw": 0.007733860024018213,
+   "raw_oob_coord_rate": 0.004464285714285714
+  },
+  "constant_velocity_A=S+V": {
+   "status": "OK",
+   "macro_l1_safe": 0.002047480782493949,
+   "macro_l1_raw": 0.002110443303536158,
+   "raw_oob_coord_rate": 0.006696428571428571
+  },
+  "train_only_affine": {
+   "status": "OK",
+   "macro_l1_safe": 0.0032639326018397696,
+   "macro_l1_raw": 0.0035257016206742264,
+   "raw_oob_coord_rate": 0.11830357142857142
+  },
+  "train_only_mlp": {
+   "status": "NOT_AVAILABLE",
+   "macro_l1_safe": null,
+   "macro_l1_raw": null,
+   "raw_oob_coord_rate": null
+  },
+  "vla_r42": {
+   "status": "OK",
+   "macro_l1_safe": 0.0025384550062881317,
+   "macro_l1_raw": 0.0026050337801279966,
+   "raw_oob_coord_rate": 0.060267857142857144
+  }
+ },
+ "vla_metrics": {
+  "physical_l1_pooled": 0.0025384549517184496,
+  "physical_l1_macro": 0.0025384550062881317,
+  "physical_l1_per_episode": {
+   "episode_0000000.hdf5": 0.006272326223552227,
+   "episode_0000009.hdf5": 0.004279737360775471,
+   "episode_0000017.hdf5": 0.0008133719675242901,
+   "episode_0000022.hdf5": 0.002609632443636656,
+   "episode_0000028.hdf5": 0.0046345083974301815,
+   "episode_0000033.hdf5": 0.0007411921978928149,
+   "episode_0000038.hdf5": 0.0014173438539728522,
+   "episode_0000044.hdf5": 0.00192749360576272,
+   "episode_0000051.hdf5": 0.0019501167116686702,
+   "episode_0000058.hdf5": 0.0008567198528908193,
+   "episode_0000064.hdf5": 0.0020879385992884636,
+   "episode_0000070.hdf5": 0.004707287065684795,
+   "episode_0000075.hdf5": 0.0019952517468482256,
+   "episode_0000082.hdf5": 0.0010128524154424667,
+   "episode_0000088.hdf5": 0.0003025885089300573,
+   "episode_0000095.hdf5": 0.005006919149309397
+  },
+  "physical_l1_worst_episode": 0.006272326223552227,
+  "arm_l1": 0.0029615305829793215,
+  "gripper_l1": 1.0477378964424133e-09,
+  "correction_r2": -0.12078633062283917,
+  "sign_agreement": 0.6897321428571429,
+  "magnitude_ratio": 1.0507606267929077,
+  "delta_sign_agreement": 0.6897321428571429,
+  "delta_magnitude_ratio": 1.0507606267929077,
+  "residual_sign_agreement": 0.53125,
+  "residual_magnitude_ratio": 0.5830243825912476,
+  "delta_l1_pooled": 0.0025384549517184496,
+  "residual_l1_pooled": 0.0025384549517184496,
+  "absolute_sign_agreement": 0.8839285714285714,
+  "absolute_magnitude_ratio": 0.9986390471458435,
+  "still_action_rate": 0.0,
+  "motion_strata": {
+   "q1": {
+    "n": 8,
+    "l1": 0.0005839948426000774
+   },
+   "q2": {
+    "n": 8,
+    "l1": 0.0010942762019112706
+   },
+   "q3": {
+    "n": 8,
+    "l1": 0.0020370385609567165
+   },
+   "q4": {
+    "n": 8,
+    "l1": 0.006438510026782751
+   }
+  },
+  "motion_strata_edges": [
+   0.0021374098723754287,
+   0.00451990426518023,
+   0.009333071764558554
+  ],
+  "n_samples": 32,
+  "raw_physical_l1_pooled": 0.0026050338055938482,
+  "raw_physical_l1_macro": 0.0026050337801279966,
+  "raw_physical_l1_per_episode": {
+   "episode_0000000.hdf5": 0.006209800951182842,
+   "episode_0000009.hdf5": 0.004285812843590975,
+   "episode_0000017.hdf5": 0.0008133719675242901,
+   "episode_0000022.hdf5": 0.002609632443636656,
+   "episode_0000028.hdf5": 0.0046345083974301815,
+   "episode_0000033.hdf5": 0.0007533433381468058,
+   "episode_0000038.hdf5": 0.0014294948196038604,
+   "episode_0000044.hdf5": 0.00192749360576272,
+   "episode_0000051.hdf5": 0.0019561920780688524,
+   "episode_0000058.hdf5": 0.0019402995239943266,
+   "episode_0000064.hdf5": 0.0020898766815662384,
+   "episode_0000070.hdf5": 0.00470922514796257,
+   "episode_0000075.hdf5": 0.001997190061956644,
+   "episode_0000082.hdf5": 0.0010128524154424667,
+   "episode_0000088.hdf5": 0.0003025885089300573,
+   "episode_0000095.hdf5": 0.005008857697248459
+  },
+  "raw_physical_l1_worst_episode": 0.006209800951182842,
+  "raw_arm_l1": 0.002961080754175782,
+  "raw_gripper_l1": 0.00046875106636434793,
+  "raw_correction_r2": -0.17075689004763528,
+  "raw_sign_agreement": 0.6875,
+  "raw_magnitude_ratio": 1.0811465978622437,
+  "raw_delta_sign_agreement": 0.6875,
+  "raw_delta_magnitude_ratio": 1.0811465978622437,
+  "raw_residual_sign_agreement": 0.53125,
+  "raw_residual_magnitude_ratio": 0.5099161267280579,
+  "raw_delta_l1_pooled": 0.0026050338055938482,
+  "raw_residual_l1_pooled": 0.0026050338055938482,
+  "raw_absolute_sign_agreement": 0.8504464285714286,
+  "raw_absolute_magnitude_ratio": 0.9987612962722778,
+  "raw_still_action_rate": 0.0,
+  "raw_motion_strata": {
+   "q1": {
+    "n": 8,
+    "l1": 0.0005875172792002559
+   },
+   "q2": {
+    "n": 8,
+    "l1": 0.0010897666215896606
+   },
+   "q3": {
+    "n": 8,
+    "l1": 0.002040803199633956
+   },
+   "q4": {
+    "n": 8,
+    "l1": 0.006702047772705555
+   }
+  },
+  "raw_motion_strata_edges": [
+   0.0021374098723754287,
+   0.00451990426518023,
+   0.009333071764558554
+  ],
+  "raw_n_samples": 32,
+  "metric_version": "r15-dev-metrics-v2",
+  "gated_on": "SAFE",
+  "raw_oob_coord_rate": 0.060267857142857144,
+  "raw_oob_frame_rate": 0.5625,
+  "raw_oob_coord_count": 27,
+  "raw_oob_frame_count": 18,
+  "raw_oob_max_excursion": 0.030000001192092896,
+  "safe_clip_frame_rate": 0.5625,
+  "safe_clip_coord_rate": 0.060267857142857144,
+  "safe_clip_mean_abs": 7.460955384885892e-05,
+  "safe_clip_max_abs": 0.030000001192092896,
+  "joint_clip_rate": 0.060267857142857144
+ },
+ "cv_metrics": {
+  "physical_l1_pooled": 0.0020474810153245926,
+  "physical_l1_macro": 0.002047480782493949,
+  "physical_l1_per_episode": {
+   "episode_0000000.hdf5": 0.008315103128552437,
+   "episode_0000009.hdf5": 0.0014407148119062185,
+   "episode_0000017.hdf5": 0.0006477267015725374,
+   "episode_0000022.hdf5": 0.0026717940345406532,
+   "episode_0000028.hdf5": 0.004635972436517477,
+   "episode_0000033.hdf5": 0.000593602133449167,
+   "episode_0000038.hdf5": 0.0013682931894436479,
+   "episode_0000044.hdf5": 0.0018975593848153949,
+   "episode_0000051.hdf5": 0.0024553730618208647,
+   "episode_0000058.hdf5": 0.0008948632748797536,
+   "episode_0000064.hdf5": 0.0020425766706466675,
+   "episode_0000070.hdf5": 0.0011203376343473792,
+   "episode_0000075.hdf5": 0.0019639849197119474,
+   "episode_0000082.hdf5": 0.0010747595224529505,
+   "episode_0000088.hdf5": 0.0002650251262821257,
+   "episode_0000095.hdf5": 0.0013720064889639616
+  },
+  "physical_l1_worst_episode": 0.008315103128552437,
+  "arm_l1": 0.002388727618381381,
+  "gripper_l1": 1.0477378964424133e-09,
+  "correction_r2": 0.02835763441145367,
+  "sign_agreement": 0.7857142857142857,
+  "magnitude_ratio": 1.0402581691741943,
+  "delta_sign_agreement": 0.7857142857142857,
+  "delta_magnitude_ratio": 1.0402581691741943,
+  "residual_sign_agreement": 0.28348214285714285,
+  "residual_magnitude_ratio": 0.07423288375139236,
+  "delta_l1_pooled": 0.0020474810153245926,
+  "residual_l1_pooled": 0.0020474810153245926,
+  "absolute_sign_agreement": 0.9955357142857143,
+  "absolute_magnitude_ratio": 1.0007115602493286,
+  "still_action_rate": 0.0,
+  "motion_strata": {
+   "q1": {
+    "n": 8,
+    "l1": 0.0005099346162751317
+   },
+   "q2": {
+    "n": 8,
+    "l1": 0.001104715745896101
+   },
+   "q3": {
+    "n": 8,
+    "l1": 0.001976152416318655
+   },
+   "q4": {
+    "n": 8,
+    "l1": 0.00459912046790123
+   }
+  },
+  "motion_strata_edges": [
+   0.0021374098723754287,
+   0.00451990426518023,
+   0.009333071764558554
+  ],
+  "n_samples": 32,
+  "raw_physical_l1_pooled": 0.0021104433108121157,
+  "raw_physical_l1_macro": 0.002110443303536158,
+  "raw_physical_l1_per_episode": {
+   "episode_0000000.hdf5": 0.008251074701547623,
+   "episode_0000009.hdf5": 0.0014407148119062185,
+   "episode_0000017.hdf5": 0.0006477267015725374,
+   "episode_0000022.hdf5": 0.0026717940345406532,
+   "episode_0000028.hdf5": 0.004635972436517477,
+   "episode_0000033.hdf5": 0.000593602133449167,
+   "episode_0000038.hdf5": 0.0013682931894436479,
+   "episode_0000044.hdf5": 0.0018975593848153949,
+   "episode_0000051.hdf5": 0.0024553730618208647,
+   "episode_0000058.hdf5": 0.0019662920385599136,
+   "episode_0000064.hdf5": 0.0020425766706466675,
+   "episode_0000070.hdf5": 0.0011203376343473792,
+   "episode_0000075.hdf5": 0.0019639849197119474,
+   "episode_0000082.hdf5": 0.0010747595224529505,
+   "episode_0000088.hdf5": 0.0002650251262821257,
+   "episode_0000095.hdf5": 0.0013720064889639616
+  },
+  "raw_physical_l1_worst_episode": 0.008251074701547623,
+  "raw_arm_l1": 0.00238405866548419,
+  "raw_gripper_l1": 0.00046875106636434793,
+  "raw_correction_r2": -0.021605880822231027,
+  "raw_sign_agreement": 0.7879464285714286,
+  "raw_magnitude_ratio": 1.0703778266906738,
+  "raw_delta_sign_agreement": 0.7879464285714286,
+  "raw_delta_magnitude_ratio": 1.0703778266906738,
+  "raw_residual_sign_agreement": 0.28348214285714285,
+  "raw_residual_magnitude_ratio": 9.60123287541137e-08,
+  "raw_delta_l1_pooled": 0.0021104433108121157,
+  "raw_residual_l1_pooled": 0.0021104433108121157,
+  "raw_absolute_sign_agreement": 0.9977678571428571,
+  "raw_absolute_magnitude_ratio": 1.0008282661437988,
+  "raw_still_action_rate": 0.0,
+  "raw_motion_strata": {
+   "q1": {
+    "n": 8,
+    "l1": 0.0005099346162751317
+   },
+   "q2": {
+    "n": 8,
+    "l1": 0.0010966837871819735
+   },
+   "q3": {
+    "n": 8,
+    "l1": 0.001976152416318655
+   },
+   "q4": {
+    "n": 8,
+    "l1": 0.004859002772718668
+   }
+  },
+  "raw_motion_strata_edges": [
+   0.0021374098723754287,
+   0.00451990426518023,
+   0.009333071764558554
+  ],
+  "raw_n_samples": 32,
+  "metric_version": "r15-dev-metrics-v2",
+  "gated_on": "SAFE",
+  "raw_oob_coord_rate": 0.006696428571428571,
+  "raw_oob_frame_rate": 0.09375,
+  "raw_oob_coord_count": 3,
+  "raw_oob_frame_count": 3,
+  "raw_oob_max_excursion": 0.030000001192092896,
+  "safe_clip_frame_rate": 0.09375,
+  "safe_clip_coord_rate": 0.006696428571428571,
+  "safe_clip_mean_abs": 7.096608896972612e-05,
+  "safe_clip_max_abs": 0.030000001192092896,
+  "joint_clip_rate": 0.006696428571428571
+ }
+}

@@ -243,3 +243,153 @@ steps 0 of 3000):
   upstream gates are green, but the window ended before the 300/1000/3000 runs.
 * **Draft PR not created** — the box has no GitHub API credential (no `gh`, no token); the branch
   is pushed and this is recorded rather than papered over with a `/pull/new/` link.
+
+## 2026-10-22 — R16 round: P6 measurement defect fixed and re-verdicted, M2 booking corrected (append-only)
+
+Fixed source for this round: `feature/r15-true-continuation@b57d16a`, audited by PR #25 @`22e6061`.
+Server-verified state (not inferred from the previous report):
+
+* `m2_two_2000_r5` = **DONE exit 0**, `REACHED_TARGET`, global_step **2000**, 7742.6 s wall,
+  2.939 s/step, peak 23.04 GB, checkpoint `runs/m2_two_2000_20261021T123314Z/checkpoints/step2000`
+  with manifest-verified LoRA `c221e739…` and projector `1635bd02…`.
+* The WAL confirmed audit item 3 exactly: `job_end` booked `gpu_seconds=0.0` against a 7827 s wall.
+
+### P6 action-window alignment (RED -> GREEN, then re-verdict)
+
+`action_window_probs()` read the 14 action positions from `n_prompt-1` without the 769-token vision
+prefix, while `token_ce_from_logits()` applied it. Everything P6 compared - `ce_window`, `pred_bins`,
+the counterfactual task-routing distributions - came from vision-token rows. RED: 4 failing tests
+(`tests/test_m2_action_window_alignment.py`) on the old code. GREEN after the fix, and an archive
+without the `vision-prefix-aware-v2` marker is now refused (`LEGACY_INVALID_FOR_P6`).
+
+Corrected evidence, regenerated from the sealed step2000 checkpoint **without retraining**
+(`tools/m2_regen_dev.py`, same 8 DEV frames/task, same true bins - the push_T `true_bins_sha256`
+`b45fcbaa…` is byte-identical to the legacy run):
+
+| task | ce_window before | ce_window corrected | no-op | constant velocity |
+|---|---|---|---|---|
+| push_T | 4.8883 | **2.1214** | 2.6241 | 2.6736 |
+| stack_bowls | 5.3775 | **3.0963** | 3.3667 | 3.3172 |
+
+Coherent eps-smoothed NLL (eps = 1e-3 pre-registered, same eps on both sides): 2.122 vs 5.893 (no-op)
+and 6.005 (CV) for push_T; 3.096 vs 7.561 and 7.450 for stack_bowls. Routing: own-prompt win rate
+0.25 -> **1.0**, wrong-prompt penalty ~0 -> **0.65-0.77 nats**, distinct predicted bins 1 -> **8**.
+
+`mission/m2_p6_two_corrected_report.json`: **PASS, exit 0, 20/20 checks**. The previous FAIL was a
+measurement artefact, not the model. The legacy report and archive are untouched and remain permanently
+invalid for P6. Erratum: the per-save-point CE curve was recorded with the legacy alignment, so its
+absolute values are not comparable to the corrected final point; the forgetting conclusion still holds
+because every point of that curve was measured identically.
+
+### M2 GPU booking (append-only correction)
+
+`job_end` now books `wall - sum(step_seconds)`, so the 7B load, the DEV counterfactual CE and every
+full-state save are charged. The historical gap was corrected append-only:
+`tools/m2_wal_correction.py` booked +9937.7 s, but that summed supervisor wrappers *and* their inner
+trainers, so `tools/m2_wal_correction_fix.py` appends a documented reversal (-9937.7) and a correctly
+scoped rebooking (+2058.7 = 1933.7 for the completed run + 125 bounded for the crashed one).
+
+Ledger after correction: gpu **26242.6 s**; `TWO_TASK_PILOT` 7952.0 s / **2000** steps;
+`R15_TRAIN_FORMAL` 8261.6 s / 1664 steps - the M1 3000-step cap and the M2 20000-step budget are
+separate buckets, so P6 evidence can never be produced by borrowing M1 headroom.
+
+### What is still NOT claimed
+
+* M1 G5_1000 = FAIL stands; no further same-hypothesis Push-T steps were taken and none will be.
+* The 2->4 task expansion is now *permitted* by the corrected P6, but it is a budget decision for the
+  research lead and has not been started.
+* The 12-task expert data for the 9 missing tasks, and any official FINAL, are unchanged.
+
+## 2026-10-22 (cont.) — first complete official DEV episode; corrected forgetting curve; third task (append-only)
+
+### R16 official DEV closed loop: 1 episode COMPLETED (job `loop_pushT_stage1_r7`)
+
+600 control steps (the task's `step_lim`), three 601-frame camera videos, driver wall 3842.9 s. Official
+`_result.json` from the container: `success_rate 0.0`, `details[0].success = false`, layout 0. Recovered
+record: `verdict=OFFICIAL_FAILURE`, n=1, Wilson 95% CI **[0.0, 0.7935]**, and the client's own stdout
+tally (`Success nums: 0, Fail nums: 1`) agrees independently.
+
+Live inference wall over that run, 20-action windows: **6749 ms** p50 at 100 actions (169x budget),
+5585 at 300, **5529 ms p50 / 7040 p95 / 8166 p99** at 600 (forward 5111 ms) = **138x** the 40 ms budget.
+`OFFLINE_SIM_ONLY`: the sim advances in lock-step behind a synchronous policy call, so wall clock inflates
+while the simulated timestep and control semantics are unchanged — which is why a bounded DEV episode is
+still evidence. It is not a realtime claim.
+
+The failure is consistent with the offline gate (M1 G5_1000 FAIL, SAFE macro L1 0.0025385 vs CV
+0.0020475), not a surprise. n=1: a data point, not a rate.
+
+Harness defect fixed: the driver recorded NO_RESULT although the client had written a verdict, because
+(a) with `--docker` the client writes into the CONTAINER's eval_result while discovery searched the host
+tree, and (b) `eval_result` is a symlink inside the container and `find` needs `-L` to descend into it.
+Now: container-side `find -L`, read there, cross-checked against the stdout tally, plus `--reparse-only`
+which recovers a verdict from a finished run without launching anything and stamps `reparse_only: true`.
+
+### Corrected DEV CE curve (erratum E5 closed) — `mission/m2_ce_curve_corrected.json`
+
+All ten sealed save points recomputed with the corrected alignment, no retraining,
+`alignment_verified = true` at every point:
+
+| step | 200 | 400 | 600 | 800 | 1000 | 1200 | 1400 | 1600 | 1800 | 2000 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| push_T | 2.3282 | 2.2882 | 2.2134 | 2.1817 | 2.1738 | 2.1563 | 2.1521 | 2.1436 | 2.1347 | **2.1214** |
+| stack_bowls | 3.4586 | 3.6332 | 3.2071 | 3.3341 | 3.3169 | 3.2301 | 3.1571 | 3.1136 | 3.1015 | **3.0963** |
+
+The legacy curve's absolute values were measured on vision-token rows and are not comparable; its
+forgetting conclusion stands because every point of it was measured the same way. Two early points
+(200, 400) initially failed my tool's exit check: the cause was my own criterion conflating **alignment**
+(the window rows must be the supervised positions — holds everywhere) with the **model's** argmax landing
+inside the legal window (0.91 and 0.78 at those steps). Separated; no point dropped.
+
+### Third task wired, and a real deploy bug found
+
+`data/m2_task_normalizer_3task.json` (80 TRAIN episodes/task, DEV excluded) plus deploy-consistency tests.
+Writing them exposed that `validate_normalizer()` read `fit_source` as a mapping while the fitted payloads
+store it as a sentence — so `normalizer_for_task()` raised `AttributeError` on **every real multi-task
+payload**, including the 2-task one the stage was trained with. The existing tests passed only because
+their fixtures were synthetic. Consequence: the M2 shared model could never have been served. Fixed and
+pinned; the 2->4 expansion itself remains a budget decision and was not started.
+
+## 2026-10-22 — R16 KV Cache: root cause found, fixed, verified, driven through the closed loop (append-only)
+
+### The root cause was in the diagnostic harness, not the model
+
+`tools/r16_kv_equivalence.py:decode_full()` appended the argmax **bin** (0..255) as the next token id while
+`decode_cached()` correctly appended `31744 + bin`. From step 1 on the "full reference" decoded from
+ordinary text tokens, saturated on the window edges (the 0/255 pattern) and manufactured gaps up to **31.4**
+logit units. Every R16 conclusion drawn from that tool - including the three-way attribution I reported
+earlier (reference == full 8/8, cached 0/8, "the incremental step is the defect") - is **withdrawn**.
+
+Proof that it was never the cache, from independent probes that force the same token into both paths:
+k=0 bit-identical; k=1 identical to 0.03-0.13 for the naive step, for an explicit
+mask+position+cache_position step, and for a cache built by the multimodal forward itself; the same on
+frames the broken tool called divergent (17.7 -> 0.125); the text-only LM control shows correct cache
+parity (0.031); the cache really carries 805 = 36 prompt + 769 multimodal entries; per-layer audit is at
+bf16 scale from layer 0.
+
+### Fix and verification (real 7B, step2000)
+
+`decode_full`/`decode_cached` are now module-level, backend-injected and refuse to append any token outside
+31744..31999; `tests/test_r16_kv_decode_tokens.py` pins it with a stub backend that records every call.
+
+| measurement | result |
+|---|---|
+| teacher-forced per-k worst logit delta, 32 inputs x 14 tokens | **0.5** (k=0 exactly 0.0) -> NOISE_LEVEL_PARITY |
+| free-running tokens differing | **5 / 448** (1.1%), one codec bin each |
+| physical residual impact | **<= 1.57e-4** (0.16 mm) |
+| speedup, 64 timed actions | **4.42x** (p50 5060.1 -> 1145.1 ms; p95 5162.4 -> 1175.1) |
+
+### Closed loop with the cache ON (Push-T DEV, job `loop_pushT_stage1_cache_r8`)
+
+| | full path (`..._r7`) | KV cached (`..._cache_r8`) |
+|---|---|---|
+| control steps | 600 | 600 |
+| latency p50 / p95 / p99 | 5529 / 7040 / 8166 ms | **1582 / 2021 / 2595 ms** |
+| episode wall | 64.0 min | **21.4 min** |
+| official `_result.json` | success_rate 0.0, Wilson [0, 0.7935] | success_rate 0.0, Wilson [0, 0.7935] |
+
+The verdict is unchanged, which is exactly what a noise-level cache should produce. The cache stays
+opt-in (`R42_KV_CACHE=0` default) because it is equivalent up to bf16 rounding, **not bit-identical**.
+
+25 Hz is still not reached (1582 ms = 40x the 40 ms budget). The cache removes most redundant compute;
+closing the remaining 40x needs an architectural decision (action chunking / distillation / shorter
+context), which is not mine to take.

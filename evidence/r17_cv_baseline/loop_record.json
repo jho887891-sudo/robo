@@ -1,0 +1,44 @@
+{
+ "utc_start": "2026-10-22T06:06:47Z",
+ "task": "push_T",
+ "policy_name": "OpenVLA_R42",
+ "stage": 1,
+ "episodes_requested": 1,
+ "episodes_used_before": 4,
+ "seed": 0,
+ "robodojo_run_id": "r15loop-push_T-s1-20261022T060647Z",
+ "cmd": "docker exec -e SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0 -e CUROBO_KERNEL_BACKEND=cuda_core rd_setup bash -lc cd /workspace/RoboDojo && bash /workspace/RoboDojo/scripts/robodojo.sh client --dataset RoboDojo --task push_T --env-cfg arx_x5 --policy-name OpenVLA_R42 --policy-host 127.0.0.1 --policy-port 19002 --eval-num 1 --seed 0 --env-gpu 0 --ckpt step1000 --action-type joint",
+ "action_type": "joint",
+ "ckpt_label": "step1000",
+ "root": "/home/T7/ojh/robot_actual/RoboDojo",
+ "utc_end": "2026-10-22T06:15:26Z",
+ "exit": 141,
+ "timed_out": false,
+ "wall_clock_s": 518.3,
+ "stdout_tail": "0 step: \u001b[92m510 / 600\u001b[0m\nenv0 step: \u001b[92m511 / 600\u001b[0m\nenv0 step: \u001b[92m512 / 600\u001b[0m\nenv0 step: \u001b[92m513 / 600\u001b[0m\nenv0 step: \u001b[92m514 / 600\u001b[0m\nenv0 step: \u001b[92m515 / 600\u001b[0m\nenv0 step: \u001b[92m516 / 600\u001b[0m\nenv0 step: \u001b[92m517 / 600\u001b[0m\nenv0 step: \u001b[92m518 / 600\u001b[0m\nenv0 step: \u001b[92m519 / 600\u001b[0m\nenv0 step: \u001b[92m520 / 600\u001b[0m\nenv0 step: \u001b[92m521 / 600\u001b[0m\nenv0 step: \u001b[92m522 / 600\u001b[0m\nenv0 step: \u001b[92m523 / 600\u001b[0m\nenv0 step: \u001b[92m524 / 600\u001b[0m\nenv0 step: \u001b[92m525 / 600\u001b[0m\nenv0 step: \u001b[92m526 / 600\u001b[0m\nenv0 step: \u001b[92m527 / 600\u001b[0m\nenv0 step: \u001b[92m528 / 600\u001b[0m\nenv0 step: \u001b[92m529 / 600\u001b[0m\nenv0 step: \u001b[92m530 / 600\u001b[0m\nenv0 step: \u001b[92m531 / 600\u001b[0m\nenv0 step: \u001b[92m532 / 600\u001b[0m\nenv0 step: \u001b[92m533 / 600\u001b[0m\nenv0 step: \u001b[92m534 / 600\u001b[0m\nenv0 step: \u001b[92m535 / 600\u001b[0m\nenv0 step: \u001b[92m536 / 600\u001b[0m\nenv0 step: \u001b[92m537 / 600\u001b[0m\nenv0 step: \u001b[92m538 / 600\u001b[0m\nenv0 step: \u001b[92m539 / 600\u001b[0m\nenv0 step: \u001b[92m540 / 600\u001b[0m\nenv0 step: \u001b[92m541 / 600\u001b[0m\nenv0 step: \u001b[92m542 / 600\u001b[0m\nenv0 step: \u001b[92m543 / 600\u001b[0m\nenv0 step: \u001b[92m544 / 600\u001b[0m\nenv0 step: \u001b[92m545 / 600\u001b[0m\nenv0 step: \u001b[92m546 / 600\u001b[0m\nenv0 step: \u001b[92m547 / 600\u001b[0m\nenv0 step: \u001b[92m548 / 600\u001b[0m\nenv0 step: \u001b[92m549 / 600\u001b[0m\nenv0 step: \u001b[92m550 / 600\u001b[0m\nenv0 step: \u001b[92m551 / 600\u001b[0m\nenv0 step: \u001b[92m552 / 600\u001b[0m\nenv0 step: \u001b[92m553 / 600\u001b[0m\nenv0 step: \u001b[92m554 / 600\u001b[0m\nenv0 step: \u001b[92m555 / 600\u001b[0m\nenv0 step: \u001b[92m556 / 600\u001b[0m\nenv0 step: \u001b[92m557 / 600\u001b[0m\nenv0 step: \u001b[92m558 / 600\u001b[0m\nenv0 step: \u001b[92m559 / 600\u001b[0m\nenv0 step: \u001b[92m560 / 600\u001b[0m\nenv0 step: \u001b[92m561 / 600\u001b[0m\nenv0 step: \u001b[92m562 / 600\u001b[0m\nenv0 step: \u001b[92m563 / 600\u001b[0m\nenv0 step: \u001b[92m564 / 600\u001b[0m\nenv0 step: \u001b[92m565 / 600\u001b[0m\nenv0 step: \u001b[92m566 / 600\u001b[0m\nenv0 step: \u001b[92m567 / 600\u001b[0m\nenv0 step: \u001b[92m568 / 600\u001b[0m\nenv0 step: \u001b[92m569 / 600\u001b[0m\nenv0 step: \u001b[92m570 / 600\u001b[0m\nenv0 step: \u001b[92m571 / 600\u001b[0m\nenv0 step: \u001b[92m572 / 600\u001b[0m\nenv0 step: \u001b[92m573 / 600\u001b[0m\nenv0 step: \u001b[92m574 / 600\u001b[0m\nenv0 step: \u001b[92m575 / 600\u001b[0m\nenv0 step: \u001b[92m576 / 600\u001b[0m\nenv0 step: \u001b[92m577 / 600\u001b[0m\nenv0 step: \u001b[92m578 / 600\u001b[0m\nenv0 step: \u001b[92m579 / 600\u001b[0m\nenv0 step: \u001b[92m580 / 600\u001b[0m\nenv0 step: \u001b[92m581 / 600\u001b[0m\nenv0 step: \u001b[92m582 / 600\u001b[0m\nenv0 step: \u001b[92m583 / 600\u001b[0m\nenv0 step: \u001b[92m584 / 600\u001b[0m\nenv0 step: \u001b[92m585 / 600\u001b[0m\nenv0 step: \u001b[92m586 / 600\u001b[0m\nenv0 step: \u001b[92m587 / 600\u001b[0m\nenv0 step: \u001b[92m588 / 600\u001b[0m\nenv0 step: \u001b[92m589 / 600\u001b[0m\nenv0 step: \u001b[92m590 / 600\u001b[0m\nenv0 step: \u001b[92m591 / 600\u001b[0m\nenv0 step: \u001b[92m592 / 600\u001b[0m\nenv0 step: \u001b[92m593 / 600\u001b[0m\nenv0 step: \u001b[92m594 / 600\u001b[0m\nenv0 step: \u001b[92m595 / 600\u001b[0m\nenv0 step: \u001b[92m596 / 600\u001b[0m\nenv0 step: \u001b[92m597 / 600\u001b[0m\nenv0 step: \u001b[92m598 / 600\u001b[0m\nenv0 step: \u001b[92m599 / 600\u001b[0m\nenv0 step: \u001b[92m600 / 600\u001b[0m\n\ud83c\udfac Video is saved to `eval_result/RoboDojo/push_T/OpenVLA_R42/arx_x5/0_ckpt_name=step1000,action_type=joint/2026-10-22_06-06-48/episode_0000000_cam_head_fail.mp4`, containing \u001b[94m601\u001b[0m frames at 640\u00d7480 resolution and 25 FPS.\n\ud83c\udfac Video is saved to `eval_result/RoboDojo/push_T/OpenVLA_R42/arx_x5/0_ckpt_name=step1000,action_type=joint/2026-10-22_06-06-48/episode_0000000_cam_left_wrist_fail.mp4`, containing \u001b[94m601\u001b[0m frames at 640\u00d7480 resolution and 25 FPS.\n\ud83c\udfac Video is saved to `eval_result/RoboDojo/push_T/OpenVLA_R42/arx_x5/0_ckpt_name=step1000,action_type=joint/2026-10-22_06-06-48/episode_0000000_cam_right_wrist_fail.mp4`, containing \u001b[94m601\u001b[0m frames at 640\u00d7480 resolution and 25 FPS.\nSuccess nums: 0, Fail nums: 1, Unstable nums: 0\n[main] removed resume manifest eval_result/RoboDojo/push_T/OpenVLA_R42/arx_x5/0_ckpt_name=step1000,action_type=joint/_resume_2026-10-22_06-06-48.json (eval completed)\n2026-10-22T06:15:23Z [515,109ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.\n2026-10-22T06:15:23Z [515,109ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.5]) (impl: carb.windowing-glfw.plugin)\n[515.838s] Simulation App Shutting Down\n",
+ "stderr_tail": "cat: '/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor': No such file or directory\n/isaac-sim/exts/omni.pip.cloud/pip_prebundle/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.5.0) or chardet (7.6.0)/charset_normalizer (3.3.2) doesn't match a supported version!\n  warnings.warn(\n",
+ "official_stdout_tally": {
+  "success": 0,
+  "fail": 1,
+  "unstable": 0
+ },
+ "result_json_candidate": "/workspace/RoboDojo/eval_result/RoboDojo/push_T/OpenVLA_R42/arx_x5/0_ckpt_name=step1000,action_type=joint/2026-10-22_06-06-48/_result.json",
+ "result_mtime_epoch": 1792649722.0,
+ "result_is_fresh": true,
+ "result_json": "/workspace/RoboDojo/eval_result/RoboDojo/push_T/OpenVLA_R42/arx_x5/0_ckpt_name=step1000,action_type=joint/2026-10-22_06-06-48/_result.json",
+ "entries": [
+  {
+   "layout": "0",
+   "success": false,
+   "score": 0.0
+  }
+ ],
+ "episodes_observed": 1,
+ "successes": 0,
+ "success_rate": 0.0,
+ "wilson_95_ci": [
+  0.0,
+  0.7934506856227626
+ ],
+ "verdict": "OFFICIAL_FAILURE"
+}

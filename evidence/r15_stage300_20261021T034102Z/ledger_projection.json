@@ -1,0 +1,57 @@
+{
+ "schema_version": 2,
+ "totals": {
+  "buckets": {
+   "COLLECTOR": {
+    "cap_s": 14400.0,
+    "formal_steps": 0,
+    "used_s": 0.0
+   },
+   "R13_7B_ZERO_STEP": {
+    "cap_s": 1800.0,
+    "formal_steps": 0,
+    "used_s": 0.0
+   },
+   "R14_TRAIN_OVERFIT": {
+    "cap_s": 3600.0,
+    "formal_steps": 0,
+    "used_s": 0.0
+   },
+   "R15_TRAIN_FORMAL": {
+    "cap_s": 50400.0,
+    "formal_steps": 300,
+    "used_s": 576.9669999999998
+   },
+   "R16_SIM_DEV": {
+    "cap_s": 14400.0,
+    "formal_steps": 0,
+    "used_s": 0.0
+   },
+   "R16_SIM_FINAL": {
+    "cap_s": 21600.0,
+    "formal_steps": 0,
+    "used_s": 0.0
+   },
+   "RESERVE": {
+    "cap_s": 1800.0,
+    "formal_steps": 0,
+    "used_s": 0.0
+   },
+   "TWO_TASK_PILOT": {
+    "cap_s": 7200.0,
+    "formal_steps": 0,
+    "used_s": 0.0
+   }
+  },
+  "formal_steps_remaining": 2700,
+  "formal_steps_used": 300,
+  "gpu_seconds_remaining": 113595.533,
+  "gpu_seconds_used": 1604.4669999999994,
+  "n_events": 305
+ },
+ "wal_last_hash": "1e2cab03d35baf954ab12ef91134b3670ea5158daf734af761045a0ff504cf43",
+ "wal_last_seq": 305,
+ "wal_path": "/home/T7/ojh/robot_actual/r15_ledger/events.jsonl",
+ "wal_sha256": "7e82e69f202b396db054ffbeeb0ba07a652c4479e214880e62bc38e00d5d24c4",
+ "written_utc": "2026-10-21T03:17:03Z"
+}

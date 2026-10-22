@@ -1,0 +1,27 @@
+{
+ "schema": "ledger-correction-v1",
+ "written_utc": "2026-10-21T11:05:00Z",
+ "subject": "mission/R11_R16_BUDGET_LEDGER.json events for R14 (reconstructed 2026-10-20)",
+ "defect": "the reconstructed R14 events used utc_end for the 'start' event, so the event list is not time-monotonic, and they carry no separation between the real log timestamp and the reconstruction time",
+ "historical_file_untouched": true,
+ "authoritative_ledger_going_forward": "/home/T7/ojh/robot_actual/r15_ledger (WAL + projection)",
+ "real_log_timestamps": {
+  "source": "evidence/r14_overfit_20261020T200030Z/raw.log",
+  "sha256": "36b46d128d35a94f24e8e4a9afdf8544923d50ef640888aa4282dcfae0872be0",
+  "first": "19:46:12",
+  "last": "20:00:30",
+  "n_stamped_lines": 25
+ },
+ "figures_that_stand": {
+  "R13_7B_ZERO_STEP_s": 169.7,
+  "R14_TRAIN_OVERFIT_s": 857.8,
+  "aggregate_s": 1027.5,
+  "formal_steps": 0,
+  "overfit_steps": 100
+ },
+ "fields_added_by_this_correction": [
+  "actual_log_timestamp",
+  "reconstructed_timestamp"
+ ],
+ "action": "reading rule: for any event whose timestamp_provenance == 'reconstructed', the 'utc' field is the reconstruction marker and 'actual_log_timestamp' is the truth; no monetary/GPU second was changed by this correction"
+}

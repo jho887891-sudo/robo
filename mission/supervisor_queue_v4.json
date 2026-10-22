@@ -1,0 +1,55 @@
+{
+ "schema": "r15-r23-supervisor-queue-v4",
+ "written_utc": "2026-10-21T08:10:00Z",
+ "supersedes": "supervisor_queue_v3.json (attempt 3: the step300->1000 trainer had already been released by the killed supervisor and was adopted instead of restarted; restarting would have burned ~80 extra formal steps and a second run_id)",
+ "note": "adopt_wait_stage2_ckpt waits for the checkpoint produced by the already-running trainer, so the rest of the DAG triggers automatically. dev_preds was refused twice by the GPU lane: the trainer holds it.",
+ "jobs": [
+  {
+   "id": "adopt_wait_stage2_ckpt",
+   "kind": "wait",
+   "bucket": null,
+   "cmd": "bash scripts/wait_for_artifact.sh runs/r15_s2_1000_20261021T0803Z/checkpoints/step1000/MANIFEST.json 4800",
+   "timeout_s": 5400,
+   "depends_on": [],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "m1_dev_preds_step1000_r4",
+   "kind": "r15_devpreds",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_devpreds_1000.sh",
+   "timeout_s": 2400,
+   "depends_on": [
+    "adopt_wait_stage2_ckpt"
+   ],
+   "gpu": true,
+   "count_gpu": false
+  },
+  {
+   "id": "gate_g5_1000_r4",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.json --out mission/r15_gate_G5_1000.json",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_dev_preds_step1000_r4"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "m1_2000_step1000_to_3000_r4",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s3_3000.sh",
+   "timeout_s": 10800,
+   "depends_on": [
+    "gate_g5_1000_r4"
+   ],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  }
+ ]
+}

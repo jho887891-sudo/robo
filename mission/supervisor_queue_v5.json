@@ -1,0 +1,231 @@
+{
+ "schema": "r15-r23-supervisor-queue-v5",
+ "written_utc": "2026-10-21T08:30:00Z",
+ "supersedes": "supervisor_queue_v4.json (v4's wait target was step1000, but the single-job wall guard stops the first segment between save points, so the artifact is the LAST saved step)",
+ "note": "Stage 2 is deliberately split into 2a (300 -> last saved step) and 2b (last saved step -> 1000) because the per-job wall guard, not the step budget, ends 2a. Both segments resume exact saved state, so step1000 is exactly +700 optimizer steps after step300.",
+ "jobs": [
+  {
+   "id": "adopt_wait_trainer_exit",
+   "kind": "wait",
+   "bucket": null,
+   "cmd": "bash scripts/wait_for_trainer_exit.sh runs/r15_s2_1000_20261021T0758Z/checkpoints 4800",
+   "timeout_s": 5400,
+   "depends_on": [],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "m1_700b_continue_to_1000",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s2b_1000.sh",
+   "timeout_s": 9000,
+   "depends_on": [
+    "adopt_wait_trainer_exit"
+   ],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  },
+  {
+   "id": "m1_dev_preds_step1000",
+   "kind": "r15_devpreds",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_devpreds_1000.sh",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_700b_continue_to_1000"
+   ],
+   "gpu": true,
+   "count_gpu": false
+  },
+  {
+   "id": "gate_g5_1000",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.json --out mission/r15_gate_G5_1000.json",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_dev_preds_step1000"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "m1_2000_step1000_to_3000",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s3_3000.sh",
+   "timeout_s": 21600,
+   "depends_on": [
+    "gate_g5_1000"
+   ],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  },
+  {
+   "id": "lane_a_full_tests",
+   "kind": "tests",
+   "bucket": null,
+   "cmd": "cd /home/T7/ojh/robot_actual/r11 && /home/dgut/pusht_runtime/venv_oft/bin/python -m pytest tests/test_r15_dev_eval.py tests/test_r15_gate_check.py tests/test_r15_ledger.py tests/test_r15_resume.py -q 2>&1 | tail -25",
+   "timeout_s": 3600,
+   "depends_on": [],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "m1_700c_seg2b_to_1000",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s2b_1000.sh",
+   "timeout_s": 9000,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  },
+  {
+   "id": "m1_devpreds_seg2b",
+   "kind": "r15_devpreds",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_devpreds_1000.sh",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_700c_seg2b_to_1000"
+   ],
+   "gpu": true,
+   "count_gpu": false
+  },
+  {
+   "id": "gate_g5_1000_seg2b",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.json --eval-out runs/r15_gate_eval_1000_20261021T0803Z --out mission/r15_gate_G5_1000.json",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_devpreds_seg2b"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "m1_2000_seg3_to_3000",
+   "kind": "r15_train",
+   "bucket": "R15_TRAIN_FORMAL",
+   "cmd": "bash scripts/r15_s3_3000.sh",
+   "timeout_s": 21600,
+   "depends_on": [
+    "loop_pushT_stage1"
+   ],
+   "gpu": true,
+   "count_gpu": false,
+   "supervisor_locks_gpu": false
+  },
+  {
+   "id": "gate_verdict_recorded",
+   "kind": "gate_record",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.json --eval-out runs/r15_gate_eval_1000_20261021T0803Z --out mission/r15_gate_G5_1000.json; echo GATE_EXIT=$? >> logs/gate_verdict.txt; exit 0",
+   "timeout_s": 2400,
+   "depends_on": [
+    "m1_devpreds_seg2b"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "loop_pushT_stage1",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [
+    "gate_verdict_recorded"
+   ],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
+  },
+  {
+   "id": "gate_g5_1000_fixed",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/r15_gate_check.py --gate G5_1000 --pred runs/r15_dev_gate_1000_20261021T0803Z.npz --eval-out runs/r15_gate_eval_1000_20261021T0803Z_b --out mission/r15_gate_G5_1000.json; echo GATE_EXIT=$? >> logs/gate_verdict.txt; exit 0",
+   "timeout_s": 2400,
+   "depends_on": [],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "loop_pushT_stage1_fixed",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [
+    "gate_g5_1000_fixed"
+   ],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
+  },
+  {
+   "id": "loop_pushT_stage1_r3",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
+  },
+  {
+   "id": "loop_pushT_stage1_r4",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
+  },
+  {
+   "id": "m2_two_2000",
+   "kind": "m2_train",
+   "bucket": "TWO_TASK_PILOT",
+   "cmd": "bash scripts/m2_two_tasks.sh",
+   "timeout_s": 21600,
+   "depends_on": [
+    "loop_pushT_stage1_r5"
+   ],
+   "gpu": true,
+   "count_gpu": false
+  },
+  {
+   "id": "m2_gate_p6",
+   "kind": "gate",
+   "bucket": null,
+   "cmd": "/home/dgut/pusht_runtime/venv_oft/bin/python tools/m2_gate_check.py --evidence /home/T7/ojh/robot_actual/runs/m2_two_latest/stage_evidence.json --eval /home/T7/ojh/robot_actual/runs/m2_two_latest/dev_eval_latest.npz --normalizer data/m2_task_normalizer_2task.json --splits data/m2_splits.json --ledger-dir /home/T7/ojh/robot_actual/r15_ledger --out mission/m2_p6_two_report.json; echo P6_EXIT=$? >> logs/gate_verdict.txt; exit 0",
+   "timeout_s": 3600,
+   "depends_on": [
+    "m2_two_2000"
+   ],
+   "gpu": false,
+   "count_gpu": false
+  },
+  {
+   "id": "loop_pushT_stage1_r5",
+   "kind": "closed_loop",
+   "bucket": "R16_SIM_DEV",
+   "cmd": "bash scripts/r15_loop_pushT.sh runs/r15_s2b_1000_20261021T0803Z/checkpoints/step1000 1 1 19000",
+   "timeout_s": 7200,
+   "depends_on": [],
+   "gpu": true,
+   "count_gpu": true,
+   "supervisor_locks_gpu": true
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+{
+ "utc_start": "2026-10-22T03:59:47Z",
+ "task": "push_T",
+ "policy_name": "OpenVLA_R42",
+ "stage": 1,
+ "episodes_requested": 1,
+ "episodes_used_before": 0,
+ "seed": 0,
+ "robodojo_run_id": "r15loop-push_T-s1-20261022T035947Z",
+ "cmd": "docker exec rd_setup bash -lc cd /workspace/RoboDojo && bash /workspace/RoboDojo/scripts/robodojo.sh client --dataset RoboDojo --task push_T --env-cfg arx_x5 --policy-name OpenVLA_R42 --policy-host 127.0.0.1 --policy-port 19000 --eval-num 1 --seed 0 --env-gpu 0 --ckpt step1000 --action-type joint",
+ "action_type": "joint",
+ "ckpt_label": "step1000",
+ "root": "/home/T7/ojh/robot_actual/RoboDojo",
+ "reparse_only": true,
+ "note": "no client was launched; the official _result.json left by an earlier run was discovered and parsed",
+ "result_json": "/workspace/RoboDojo/eval_result/RoboDojo/push_T/OpenVLA_R42/arx_x5/0_ckpt_name=step1000,action_type=joint/2026-10-22_02-53-10/_result.json",
+ "utc_end": "2026-10-22T03:59:47Z",
+ "exit": null,
+ "entries": [
+  {
+   "layout": "0",
+   "success": false,
+   "score": 0.0
+  }
+ ],
+ "episodes_observed": 1,
+ "successes": 0,
+ "success_rate": 0.0,
+ "wilson_95_ci": [
+  0.0,
+  0.7934506856227626
+ ],
+ "official_success_rate": 0.0,
+ "verdict": "OFFICIAL_FAILURE"
+}
