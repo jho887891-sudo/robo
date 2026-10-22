@@ -89,7 +89,7 @@ def test_container_official_mtime_obtained_from_actual_container(monkeypatch):
 
     def fake_run(cmd, **kwargs):
         calls.append(cmd)
-        return SimpleNamespace(returncode=0, stdout="207\\n", stderr="")
+        return SimpleNamespace(returncode=0, stdout="207", stderr="")
 
     monkeypatch.setattr(LD.subprocess, "run", fake_run)
     ok, mt = LD.official_result_belongs_to_run(
