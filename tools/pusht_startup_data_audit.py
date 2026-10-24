@@ -149,6 +149,9 @@ def analyze_arrays(state, action, start_window=DEFAULT_START_WINDOW):
         }
 
     n_res_start = min(int(start_window), int(valid_t.size))
+    first_residual_window_t_range = (
+        [int(valid_t[0]), int(valid_t[n_res_start - 1])] if n_res_start else None
+    )
     return {
         "T": int(s.shape[0]),
         "state_dtype": str(s.dtype),
@@ -173,7 +176,11 @@ def analyze_arrays(state, action, start_window=DEFAULT_START_WINDOW):
                 action_delta[0, ARM_DIMS] ** 2))) if action_delta.size else None),
             "first_action_delta_gripper_max_abs": (float(np.max(
                 np.abs(action_delta[0, GRIPPER_DIMS]))) if action_delta.size else None),
+            # This is the first N VALID residual rows, not necessarily the first N
+            # source transitions. With start_window=25, valid t is 2..26 (25 rows).
             "first_residual_window_arm_rms": distribution(arm_rms_residual[:n_res_start]),
+            "first_residual_window_valid_rows": int(n_res_start),
+            "first_residual_window_source_t_range_inclusive": first_residual_window_t_range,
             "still_threshold_sensitivity": still_sensitivity,
             "first_motion_transition_by_threshold": first_moves,
         },
@@ -541,6 +548,12 @@ def run_audit(args):
             "alignment_atol": ALIGN_ATOL,
             "action_target_contract": "A[t] == S[t+1] for t=0..T-2",
             "residual_contract": "R[t]=(A[t]-S[t])-(S[t]-S[t-1]), valid t=2..T-2",
+            "startup_group_residual_source_t_rule": (
+                "Pooled startup groups select valid residual source indices t < start_window. "
+                "For start_window=25 and episodes with T>=27, this is t=2..24 (23 rows); "
+                "per-episode first_residual_window_arm_rms instead summarizes the first 25 "
+                "valid residual rows, t=2..26."
+            ),
             "timestamps_found": sorted(timestamp_paths),
             "pose_or_goal_like_dataset_paths_found": sorted(pose_like_paths),
             "task_phase_ground_truth_available_from_known_contract": False,
