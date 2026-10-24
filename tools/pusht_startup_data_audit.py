@@ -351,6 +351,7 @@ def run_audit(args):
     import cv2
     import h5py
     import m2_multitask_data as M2
+    import m2_train_shared as M2T
     import r42_train_contract as TC
 
     with open(args.splits, "r") as fh:
@@ -375,7 +376,7 @@ def run_audit(args):
         raise ValueError("split does not cover the available task episode inventory")
 
     # The checkpoint is two-task, so reconstruct both task indices and its actual consumed prefix.
-    _doc, all_splits, _payload, splits_path, normalizer_path = M2.load_m2_artifacts(
+    _doc, all_splits, _payload, splits_path, normalizer_path = M2T.load_m2_artifacts(
         ["push_T", "stack_bowls"], args.splits, args.normalizer)
     indexes = {"push_T": index}
     indexes["stack_bowls"] = M2.load_task_index("stack_bowls", args.hdf5_root,
