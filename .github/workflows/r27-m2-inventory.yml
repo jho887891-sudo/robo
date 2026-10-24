@@ -1,0 +1,26 @@
+name: R27 read-only M2 checkpoint inventory CPU
+
+on:
+  push:
+    branches:
+      - ops/r27-m2-readonly-evidence-collector
+  pull_request:
+    paths:
+      - 'tools/r27_m2_checkpoint_inventory.py'
+      - 'tests/test_r27_m2_checkpoint_inventory.py'
+      - '.github/workflows/r27-m2-inventory.yml'
+jobs:
+  cpu-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Compile and run complete read-only synthetic sealed-checkpoint tests
+        run: |
+          python -m compileall -q tools/r27_m2_checkpoint_inventory.py
+          python -m unittest discover -s tests -p test_r27_m2_checkpoint_inventory.py -v
