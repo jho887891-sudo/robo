@@ -1,3 +1,5 @@
+import ast
+import inspect
 import os
 import sys
 import unittest
@@ -7,6 +9,8 @@ import numpy as np
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO not in sys.path:
     sys.path.insert(0, REPO)
+
+import tools.pusht_startup_data_audit as startup_audit
 
 from tools.pusht_startup_data_audit import (
     ALIGN_ATOL,
@@ -27,6 +31,28 @@ def make_aligned_episode():
 
 
 class TestPushTStartupDataAudit(unittest.TestCase):
+    def test_run_audit_binds_artifact_loader_to_training_module(self):
+        # Regression for the remote BLOCKED run: m2_multitask_data has load_task_index,
+        # but load_m2_artifacts is defined in m2_train_shared. Catch module shadowing
+        # without requiring remote HDF5/checkpoint files or loading any model.
+        tree = ast.parse(inspect.getsource(startup_audit.run_audit))
+        imports = {
+            alias.asname or alias.name.split(".")[0]
+            for node in ast.walk(tree) if isinstance(node, ast.Import)
+            for alias in node.names
+        }
+        self.assertIn("M2", imports)
+        self.assertIn("M2T", imports)
+        calls = [
+            node.func for node in ast.walk(tree)
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "load_m2_artifacts"
+        ]
+        self.assertTrue(any(isinstance(fn.value, ast.Name) and fn.value.id == "M2T"
+                            for fn in calls), "load_m2_artifacts must be called via M2T")
+        self.assertFalse(any(isinstance(fn.value, ast.Name) and fn.value.id == "M2"
+                             for fn in calls), "M2 is m2_multitask_data, not the artifact loader")
+
     def test_alignment_and_second_difference_contract(self):
         state, action = make_aligned_episode()
         report = analyze_arrays(state, action, start_window=3)
