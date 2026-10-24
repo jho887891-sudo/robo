@@ -79,7 +79,8 @@ Run on the original data server, from a clean worktree at the exact PR HEAD. Use
 \`\`\`bash
 export CKPT="/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/checkpoints/step2000"
 export HDF5_ROOT="/home/T7/ojh/robot_actual/data/data/hdf5"
-export OUT="$(mktemp -u /tmp/pusht-startup-audit-XXXXXXXX).json"
+export OUTDIR="$(mktemp -d /tmp/pusht-startup-audit-XXXXXXXX)"
+export OUT="$OUTDIR/report.json"
 
 python tools/pusht_startup_data_audit.py \\
   --checkpoint "$CKPT" \\
@@ -95,7 +96,7 @@ printf 'exit_code=%s\noutput=%s\n' "$status" "$OUT"
 sha256sum "$OUT" "\${OUT%.json}.stdout.log" "\${OUT%.json}.stderr.log"
 \`\`\`
 
-Before executing, verify the selected output path does not exist; the tool itself refuses to overwrite. If the remote checkout has uncommitted changes, do not reset or overwrite them: create a clean temporary worktree at the PR's exact HEAD.
+The temporary output directory is created exclusively before the command; the report file itself must not exist, and the tool refuses to overwrite. If the remote checkout has uncommitted changes, do not reset or overwrite them: create a clean temporary worktree at the PR's exact HEAD.
 
 ## 6. Read the results in the correct order
 
