@@ -1,6 +1,12 @@
+import os
+import sys
 import unittest
 
 import numpy as np
+
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO not in sys.path:
+    sys.path.insert(0, REPO)
 
 from tools.pusht_startup_data_audit import (
     ALIGN_ATOL,
