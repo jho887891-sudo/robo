@@ -1,0 +1,39 @@
+{
+  "status": "DATA_INTEGRITY_PASS",
+  "output": "/tmp/pusht-startup-audit-r29-k4kKApNa/report.json",
+  "checkpoint_global_step": 2000,
+  "pushT_gradient_exposed_unique_frames": 827,
+  "frame_groups": {
+    "train_seen_all_valid": {
+      "n_rows": 827,
+      "residual_arm_rms_q50": 0.001637320733500391
+    },
+    "train_unseen_all_valid": {
+      "n_rows": 24486,
+      "residual_arm_rms_q50": 0.0016896405594440406
+    },
+    "train_seen_startup": {
+      "n_rows": 58,
+      "residual_arm_rms_q50": 0.009788268691108312
+    },
+    "train_unseen_startup": {
+      "n_rows": 1782,
+      "residual_arm_rms_q50": 0.008762389127659614
+    },
+    "dev_all_valid": {
+      "n_rows": 6691,
+      "residual_arm_rms_q50": 0.0017158323860008659
+    },
+    "dev_startup": {
+      "n_rows": 460,
+      "residual_arm_rms_q50": 0.008105864355418137
+    }
+  },
+  "integrity_counts": {
+    "episode_errors": [],
+    "action_alignment_episodes_over_atol": [],
+    "image_decode_failures": 0,
+    "malformed_jpeg_count": 0
+  },
+  "no_optimizer_steps": 0
+}
