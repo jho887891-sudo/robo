@@ -1,0 +1,37 @@
+name: Push-T startup data audit CPU tests
+
+on:
+  push:
+    branches:
+      - research/pusht-startup-data-audit
+    paths:
+      - 'tools/pusht_startup_data_audit.py'
+      - 'tests/test_pusht_startup_data_audit.py'
+      - '.github/workflows/pusht-startup-data-audit.yml'
+  pull_request:
+    paths:
+      - 'tools/pusht_startup_data_audit.py'
+      - 'tests/test_pusht_startup_data_audit.py'
+      - '.github/workflows/pusht-startup-data-audit.yml'
+
+jobs:
+  startup-audit-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install numerical test dependency
+        run: python -m pip install numpy==1.26.4
+      - name: Compile audit tool and tests
+        run: python -m py_compile tools/pusht_startup_data_audit.py tests/test_pusht_startup_data_audit.py
+      - name: Run CPU-only synthetic regressions
+        run: python tests/test_pusht_startup_data_audit.py
+      - name: State external data boundary
+        run: |
+          echo 'UNIT_ONLY: no HDF5, real checkpoint, CUDA, model weights, or robot simulation are present in this workflow.'
+          echo 'A green result validates the numerical contract only; remote data conclusions require the fixed server runbook.'
