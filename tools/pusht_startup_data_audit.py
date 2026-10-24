@@ -454,7 +454,7 @@ def run_audit(args):
                         {k: v[valid_t < int(args.start_window)] for k, v in row.items()})
 
                 # Decode only the first startup window and exact TRAIN-SEEN image indices.
-                sampled_indices = set(range(min(int(args.start_window), int(state.shape[0])))
+                sampled_indices = set(range(min(int(args.start_window), int(state.shape[0]))))
                 if split_name == "train":
                     sampled_indices.update(seen_ep_t.get(ep, set()))
                 sampled_indices = {t for t in sampled_indices if 0 <= t < state.shape[0]}
