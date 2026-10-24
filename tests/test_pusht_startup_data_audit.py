@@ -70,6 +70,23 @@ class TestPushTStartupDataAudit(unittest.TestCase):
                                     1.0))
         self.assertEqual(report["all_valid_rows"]["residual_arm_rms"]["n"], 3)
 
+    def test_startup_residual_window_source_indices_are_explicit(self):
+        state = np.zeros((40, 14), dtype=np.float32)
+        action = state.copy()
+        action[:-1] = state[1:]
+        report = analyze_arrays(state, action, start_window=25)
+
+        startup = report["startup_window"]
+        self.assertEqual(startup["first_residual_window_valid_rows"], 25)
+        self.assertEqual(startup["first_residual_window_source_t_range_inclusive"], [2, 26])
+
+        # Pooled startup groups use valid_t < start_window, so for a 25-transition
+        # window the valid residual rows are t=2..24 (23 rows), not t=2..26.
+        valid_t = report["_arrays"]["valid_t"]
+        group_startup_t = valid_t[valid_t < 25]
+        self.assertEqual(group_startup_t.tolist(), list(range(2, 25)))
+        self.assertEqual(len(group_startup_t), 23)
+
     def test_alignment_mismatch_is_detected_without_rewriting_data(self):
         state, action = make_aligned_episode()
         original = action.copy()
