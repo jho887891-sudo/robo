@@ -1,6 +1,13 @@
 name: Push-T startup data audit CPU tests
 
 on:
+  push:
+    branches:
+      - research/pusht-startup-data-audit
+    paths:
+      - 'tools/pusht_startup_data_audit.py'
+      - 'tests/test_pusht_startup_data_audit.py'
+      - '.github/workflows/pusht-startup-data-audit.yml'
   pull_request:
     paths:
       - 'tools/pusht_startup_data_audit.py'
