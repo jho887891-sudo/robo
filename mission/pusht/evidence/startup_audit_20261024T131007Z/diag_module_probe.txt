@@ -1,0 +1,6 @@
+m2_multitask_data.file /tmp/pusht-startup-audit-wt-r28a/training/m2_multitask_data.py
+m2_multitask_data.has_load_m2_artifacts False
+m2_multitask_data.has_load_task_index True
+m2_train_shared.file /tmp/pusht-startup-audit-wt-r28a/training/m2_train_shared.py
+m2_train_shared.has_load_m2_artifacts True
+m2_train_shared.has_load_task_index False

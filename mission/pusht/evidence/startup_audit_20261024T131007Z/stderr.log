@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/pusht-startup-audit-wt-r28a/tools/pusht_startup_data_audit.py", line 618, in <module>
+    sys.exit(main())
+  File "/tmp/pusht-startup-audit-wt-r28a/tools/pusht_startup_data_audit.py", line 614, in main
+    return run_audit(args)
+  File "/tmp/pusht-startup-audit-wt-r28a/tools/pusht_startup_data_audit.py", line 378, in run_audit
+    _doc, all_splits, _payload, splits_path, normalizer_path = M2.load_m2_artifacts(
+AttributeError: module 'm2_multitask_data' has no attribute 'load_m2_artifacts'

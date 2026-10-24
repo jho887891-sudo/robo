@@ -1,0 +1,4 @@
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /tmp/pusht-startup-audit-67JI8cz1/stdout.log
+12f5fa6869c12e06716600a91bc8bd8d4e67fcdbcab5d04fb99c6706d8ab9174  /tmp/pusht-startup-audit-67JI8cz1/stderr.log
+a869e3ac55422ea8cd87f8b134cc2b51c3b79b5938c31a0b9c8d5cff8f4835da  /tmp/pusht-startup-audit-67JI8cz1/EXECUTION.txt
+fd3a909b7284bd02dc9dc288bd934190845e60f4a4f373547061a85c9aba62c6  /tmp/pusht-startup-audit-67JI8cz1/ENV.txt
