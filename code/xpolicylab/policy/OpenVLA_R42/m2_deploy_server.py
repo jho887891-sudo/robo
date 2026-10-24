@@ -25,10 +25,14 @@ class M2TaskDeployServer(S.R42DeployServer):
     """One task per model instance, preventing cross-task state or decoder leakage."""
 
     def __init__(self, metadata, task, backend=None, processor=None, device="cuda",
-                 tokenizer_prompt_ids=None, use_kv_cache=False):
+                 tokenizer_prompt_ids=None, use_kv_cache=False,
+                 allow_cv_diagnostic=False):
         # Deliberately do not run the legacy parent constructor: it interprets
         # the WHOLE M2 normalizer object as one single-task normalization.
         self.session = D.M2SessionContract(metadata, task)
+        if type(allow_cv_diagnostic) is not bool:
+            raise D.M2DeployContractError("allow_cv_diagnostic must be a literal bool")
+        self.allow_cv_diagnostic = allow_cv_diagnostic
         self.task = task
         self.metadata = metadata
         self.backend = backend
@@ -64,14 +68,28 @@ class M2TaskDeployServer(S.R42DeployServer):
         """Use the EXACT M2 training prompt builder, including PurePromptBuilder wrapper."""
         if processor is None:
             raise D.M2DeployContractError("processor is required for trained prompt tokens")
-        self._prompt_ids = MT._make_prompt(
-            processor, self.task, include_task_token=self.metadata["include_task_token"])
-        self._prompt_ids = R.normalize_prompt_ids(self._prompt_ids)
+        computed_ids = R.normalize_prompt_ids(MT._make_prompt(
+            processor, self.task, include_task_token=self.metadata["include_task_token"]))
+        # These are the actual ids produced by training/m2_train_shared.py
+        # from the same prompt formatter. Textual prompt equality alone is
+        # insufficient, since a changed tokenizer/processor can alter ids.
+        expected_hash = self.metadata.get("trained_prompt_token_ids_sha256")
+        actual_hash = MT.sha256_json(computed_ids)
+        if actual_hash != expected_hash:
+            raise D.M2DeployContractError(
+                "M2 prompt token SHA256 mismatch for %s: training %s vs serving %s. "
+                "Refusing prefill, no model inference performed."
+                % (self.task, expected_hash, actual_hash))
+        self._prompt_ids = computed_ids
         return list(self._prompt_ids)
 
     def _decode_tokens(self, pixel_values, feat):
         """The legacy CV debug arm needs THIS task's q01/q99, not the M2 outer payload."""
         if os.environ.get("R42_POLICY", "").lower() == "cv":
+            if self.allow_cv_diagnostic is not True:
+                raise D.M2DeployContractError(
+                    "CV diagnostic policy override requires explicit "
+                    "allow_cv_diagnostic=True; refusing to mislabel CV as VLA")
             _idx, ids = R.token_ids_for_residual(
                 np.zeros(R.N_ACTIONS, np.float32),
                 self._norm["q01"], self._norm["q99"])
@@ -92,6 +110,11 @@ class M2TaskDeployServer(S.R42DeployServer):
         lat = {"preprocess": (time.perf_counter() - t_pre) * 1000.0}
         t_forward = time.perf_counter()
         ids, step_logs = self._decode_tokens(pixel_values, feature)
+        policy_mode = ("cv_diagnostic" if os.environ.get("R42_POLICY", "").lower() == "cv"
+                       else "vla")
+        # The legacy ModelTemplate serialiser drops server-specific fields;
+        # persist the mode for the strict M2 wrapper to publish to the caller.
+        self._last_policy_mode = policy_mode
         lat["forward_total"] = (time.perf_counter() - t_forward) * 1000.0
         t_decode = time.perf_counter()
         v = self._history.velocity(int(env_idx))
@@ -116,7 +139,7 @@ class M2TaskDeployServer(S.R42DeployServer):
                 os.environ.get("R42_POLICY", "").lower() == "cv"
                 and self._prompt_ids is None) else 0,
             "latency_ms": lat, "step_logs": step_logs,
-            "served_task": self.task,
+            "served_task": self.task, "policy_mode": policy_mode,
             "normalizer_sha256": self.metadata["normalizer_sha256"],
         }
         if record:
@@ -125,11 +148,21 @@ class M2TaskDeployServer(S.R42DeployServer):
                     self.prompt_ids() if self._prompt_ids is not None else []),
                 "features": feature.tolist(),
                 "state": np.asarray(state, np.float32).tolist(),
+                "policy_mode": policy_mode,
+                "replay_scope": "cpu_stub_only",
                 "velocity": v.tolist(), "env_idx": int(env_idx)}
         return out
 
     def replay(self, log):
         """Recompute the recorded frame through the SAME task normalizer and codec."""
+        # The logged token/features/state triple does NOT preserve three
+        # RGB camera tensors. A real multimodal 7B must not replay from
+        # pixel_values=None and call the output a faithful video-conditioned
+        # prediction. Only CPU-only contract stubs can use this path.
+        if self.processor is not None:
+            raise D.M2DeployContractError(
+                "multimodal 7B replay requires recorded RGB pixels; "
+                "CPU stub-only replay cannot reconstruct visual context")
         if log.get("task") != self.task:
             raise D.M2DeployContractError("replay task disagrees with frozen serving task")
         if "features" not in log or "prompt_ids" not in log:
@@ -150,4 +183,5 @@ class M2TaskDeployServer(S.R42DeployServer):
         action, residual, info = self.session.decode(bins, state, velocity)
         return {"action": action, "residual": residual,
                 "ids": np.asarray(ids, np.int64), "bins": bins,
-                "info": info, "n_action_tokens": len(ids), "served_task": self.task}
+                "info": info, "n_action_tokens": len(ids), "served_task": self.task,
+                "replay_scope": "cpu_stub_only"}

@@ -212,13 +212,19 @@ def verify_train_identity(trainer, stage, payload, splits_path):
     prompt_digests = {t: hashlib.sha256(trained_prompts[t].encode()).hexdigest()
                       for t in tasks}
     _eq("stage evidence prompt_sha256", stage.get("prompt_sha256"), prompt_digests)
+    token_digests = stage.get("prompt_token_ids_sha256")
+    if not isinstance(token_digests, dict) or sorted(token_digests) != sorted(tasks):
+        raise M2DeployContractError(
+            "stage evidence must carry exact per-task prompt token sha256 hashes")
+    for t in tasks:
+        _sha("stage prompt token sha256 " + t, token_digests[t])
     if not isinstance(stage.get("seed"), int):
         raise M2DeployContractError("stage evidence requires exact seed")
     base = trainer.get("base_model")
     if not isinstance(base, dict):
         raise M2DeployContractError("trainer base_model attestation missing")
     _sha("base_model.config.json", base.get("config.json"))
-    return tasks, frozen, trained_prompts
+    return tasks, frozen, trained_prompts, token_digests
 
 
 def build_session_metadata(checkpoint_dir, task, normalizer_path, splits_path,
@@ -233,7 +239,7 @@ def build_session_metadata(checkpoint_dir, task, normalizer_path, splits_path,
     except (ValueError, KeyError, TypeError) as exc:
         raise M2DeployContractError("normalizer payload invalid: %s" % exc)
     stage = checked_json(stage_evidence_path)
-    tasks, contract, prompts = verify_train_identity(
+    tasks, contract, prompts, prompt_token_hashes = verify_train_identity(
         trainer, stage, payload, splits_path)
     if task not in tasks:
         raise M2DeployContractError("task is not served by checkpoint")
@@ -260,6 +266,7 @@ def build_session_metadata(checkpoint_dir, task, normalizer_path, splits_path,
     meta.update({
         "serving_task": task,
         "trained_prompt": prompts[task],
+        "trained_prompt_token_ids_sha256": prompt_token_hashes[task],
         "include_task_token": stage["include_task_token"],
         "tokenizer_prompt_parity": "GPU_SMOKE_REQUIRED",
         "m2_checkpoint_manifest_sha256": manifest_sha,
@@ -284,6 +291,7 @@ def build_session_metadata(checkpoint_dir, task, normalizer_path, splits_path,
         "training_evidence_sha256": file_sha256(stage_evidence_path),
         "safety_contract_sha256": safety_sha,
         "serving_task": task,
+        "trained_prompt_token_ids_sha256": prompt_token_hashes[task],
         "other_tasks_preserved": [t for t in tasks if t != task],
         "no_optimizer_steps": True,
         "device": "CPU_PREFLIGHT",
@@ -317,6 +325,22 @@ class M2SessionContract:
             raise M2DeployContractError("strict task binding absent")
         if not isinstance(metadata.get("trained_prompt"), str) or not metadata["trained_prompt"]:
             raise M2DeployContractError("trained prompt missing")
+        if not isinstance(metadata.get("include_task_token"), bool):
+            raise M2DeployContractError("M2 include_task_token must be a real boolean")
+        expected_text = MT.prompts_for(
+            [task], include_task_token=metadata["include_task_token"])[task]
+        if metadata["trained_prompt"] != expected_text:
+            raise M2DeployContractError(
+                "trained prompt for task %s differs from frozen M2 training prompt" % task)
+        for key in ("trained_prompt_token_ids_sha256",
+                    "m2_checkpoint_manifest_sha256",
+                    "m2_training_evidence_sha256",
+                    "m2_data_contract_sha256",
+                    "m2_safety_contract_sha256", "safety_contract_sha256"):
+            _sha(key, metadata.get(key))
+        if metadata["m2_safety_contract_sha256"] != metadata["safety_contract_sha256"]:
+            raise M2DeployContractError(
+                "M2 safety provenance SHA256 disagreement across metadata fields")
         self.metadata = metadata
         self.task = task
         self.expected_prompt = metadata["trained_prompt"]

@@ -95,6 +95,11 @@ def case(tmp_path):
         "normalizer_sha256": TN.normalizer_sha256(payload),
         "split_sha256": file_sha(splits),
         "include_task_token": False, "seed": 0,
+        # The original M2 trainer records these hashes from its actual
+        # tokenized PurePromptBuilder output after initializing the processor.
+        "prompt_token_ids_sha256": {
+            t: M2.sha256_json(R.normalize_prompt_ids([100, 222, 300 + i]))
+            for i, t in enumerate(tasks)},
         "prompts": prompt_text,
         "prompt_sha256": {t: hashlib.sha256(prompt_text[t].encode()).hexdigest()
                           for t in tasks},

@@ -1,0 +1,33 @@
+name: R26 M2 safety and entrypoint guards
+on:
+  push:
+    branches:
+      - review/r26-m2-safety-entrypoint-20261022
+  pull_request:
+    paths:
+      - 'tests/test_r26_m2_runtime_guards.py'
+      - 'tests/test_r25_m2_model_integration.py'
+      - 'tests/test_r25_m2_deploy_server.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/model_m2.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/m2_deploy_server.py'
+      - '.github/workflows/r26-m2-safety-gates.yml'
+jobs:
+  m2-guards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install CPU only
+        run: python -m pip install numpy==1.26.4 pytest==8.3.5
+      - name: Check new R26 runtime negative guards and R25 M2 suite
+        run: |
+          python -m py_compile code/xpolicylab/policy/OpenVLA_R42/model_m2.py code/xpolicylab/policy/OpenVLA_R42/m2_deploy_server.py
+          pytest -q tests/test_r26_m2_runtime_guards.py tests/test_r25_m2_deploy_contract.py tests/test_r25_m2_deploy_server.py tests/test_r25_m2_model_integration.py
+      - name: Check old metadata/codec wiring unaffected
+        run: |
+          pytest -q tests/test_r42_m2_normalizer.py tests/test_r42_metadata_bridge.py tests/test_r11_p0_metadata.py

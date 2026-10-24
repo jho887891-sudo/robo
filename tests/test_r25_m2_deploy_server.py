@@ -29,13 +29,14 @@ class FakeBackend:
         return logits
 
 
-def server(case, task, ids):
+def server(case, task, ids, allow_cv_diagnostic=False):
     case["task"] = task
     meta, att = C.build_session_metadata(**case)
     assert att["server_status"].startswith("BLOCKED")
     backend = FakeBackend()
     service = S.M2TaskDeployServer(meta, task=task, backend=backend,
-                                   device="cpu", tokenizer_prompt_ids=ids)
+                                   device="cpu", tokenizer_prompt_ids=ids,
+                                   allow_cv_diagnostic=allow_cv_diagnostic)
     return service, backend
 
 
@@ -87,7 +88,8 @@ def test_incorrect_task_binding_fails_before_backend(case):
 
 
 def test_cv_policy_uses_selected_task_codec(monkeypatch, case):
-    x, backend = server(case.copy(), "stack_bowls", [45, 90])
+    x, backend = server(case.copy(), "stack_bowls", [45, 90],
+                        allow_cv_diagnostic=True)
     monkeypatch.setenv("R42_POLICY", "cv")
     state = np.zeros(14, np.float32)
     out = x.act(images(), state, timestamp=0.04)

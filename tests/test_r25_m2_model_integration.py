@@ -21,7 +21,8 @@ def model(case, task="stack_bowls", **config):
     opts = {"task_id": task, "metadata": meta,
             "backend": FakeBackend(), "device": "cpu",
             "tokenizer_prompt_ids": [100, 222, 333],
-            "control_hz": 25, "expected_hw": None}
+            "control_hz": 25, "expected_hw": None,
+            "allow_stub_action_for_contract_test": True}
     opts.update(config)
     return Model(opts), report
 
@@ -75,7 +76,8 @@ def test_bundle_metadata_path_is_supported(case, tmp_path):
                                   "attestation": {"no_optimizer_steps": True}}))
     inst = Model({"task_id": "stack_bowls", "metadata_path": str(bundle),
                   "backend": FakeBackend(), "device": "cpu",
-                  "tokenizer_prompt_ids": [10, 20], "expected_hw": None})
+                  "tokenizer_prompt_ids": [10, 20], "expected_hw": None,
+                  "allow_stub_action_for_contract_test": True})
     inst.update_obs(_obs(instruction=MD.TASK_PROMPTS["stack_bowls"]))
     assert inst.get_action()["n_action_tokens"] == 14
 
