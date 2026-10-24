@@ -1,0 +1,22 @@
+{
+  "sampler_position": 2000,
+  "unique_gradient_exposed_frames": 2000,
+  "tasks": {
+    "push_T": {
+      "selected_train": 64,
+      "selected_train_seen": 2,
+      "selected_train_unseen": 62,
+      "seen_fraction_of_selected_train": 0.03125,
+      "selected_dev": 68,
+      "selected_dev_seen_BAD_IF_NONZERO": 0
+    },
+    "stack_bowls": {
+      "selected_train": 72,
+      "selected_train_seen": 1,
+      "selected_train_unseen": 71,
+      "seen_fraction_of_selected_train": 0.013888888888888888,
+      "selected_dev": 72,
+      "selected_dev_seen_BAD_IF_NONZERO": 0
+    }
+  }
+}

@@ -1,0 +1,583 @@
+{
+  "checkpoint": "/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/checkpoints/step2000",
+  "checkpoint_global_step": 2000,
+  "checkpoint_manifest_sha256": "df62650015abf279204418a73410f6ea0c6eae7c2814cc5ed20577fa5630a68d",
+  "frame_manifest_sha256": "71811453c184efde635a02c07e201f05cae773f2d85ad06f7a1ad373b1db2c36",
+  "interpretation": "Only selected_train_seen examples have truly been exposed to gradients. The existing R24 fit archive mixes selected_train_seen and selected_train_unseen; do not use its TRAIN-vs-DEV means to rule out H1/H3.",
+  "no_optimizer_steps": true,
+  "sampler_order_hash": "7e452eb0d98e71296136fcdca57160667932e33d1fc14ca3ea8ea06de5e22181",
+  "sampler_position": 2000,
+  "schema": "r24-actual-exposure-v1",
+  "tasks": {
+    "push_T": {
+      "seen_fraction_of_selected_train": 0.03125,
+      "seen_selected_train": [
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 10
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 367
+        }
+      ],
+      "selected_dev": 68,
+      "selected_dev_seen_BAD_IF_NONZERO": 0,
+      "selected_train": 64,
+      "selected_train_seen": 2,
+      "selected_train_unseen": 62,
+      "unseen_selected_train": [
+        {
+          "episode": "episode_0000009.hdf5",
+          "t": 265
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 2
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 3
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 4
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 5
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 6
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 7
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 8
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 9
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 11
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 12
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 13
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 14
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 15
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 16
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 17
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 23
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 26
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 27
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 28
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 29
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 30
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 31
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 32
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 34
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 35
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 36
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 37
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 38
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 64
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 75
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 76
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 77
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 83
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 84
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 85
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 86
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 87
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 101
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 144
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 145
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 146
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 154
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 161
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 175
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 176
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 177
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 178
+        },
+        {
+          "episode": "episode_0000010.hdf5",
+          "t": 318
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 266
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 366
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 368
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 369
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 370
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 371
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 372
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 373
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 374
+        },
+        {
+          "episode": "episode_0000012.hdf5",
+          "t": 375
+        },
+        {
+          "episode": "episode_0000014.hdf5",
+          "t": 54
+        },
+        {
+          "episode": "episode_0000015.hdf5",
+          "t": 307
+        },
+        {
+          "episode": "episode_0000017.hdf5",
+          "t": 406
+        }
+      ]
+    },
+    "stack_bowls": {
+      "seen_fraction_of_selected_train": 0.013888888888888888,
+      "seen_selected_train": [
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 297
+        }
+      ],
+      "selected_dev": 72,
+      "selected_dev_seen_BAD_IF_NONZERO": 0,
+      "selected_train": 72,
+      "selected_train_seen": 1,
+      "selected_train_unseen": 71,
+      "unseen_selected_train": [
+        {
+          "episode": "episode_0000000.hdf5",
+          "t": 98
+        },
+        {
+          "episode": "episode_0000000.hdf5",
+          "t": 204
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 2
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 3
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 4
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 5
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 6
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 7
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 8
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 9
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 10
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 11
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 12
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 13
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 14
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 15
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 16
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 17
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 18
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 19
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 20
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 21
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 22
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 23
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 24
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 25
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 26
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 27
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 28
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 47
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 48
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 49
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 50
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 51
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 52
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 53
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 54
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 83
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 84
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 85
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 86
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 97
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 98
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 135
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 136
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 137
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 143
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 158
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 167
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 169
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 170
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 171
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 172
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 224
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 274
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 281
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 298
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 328
+        },
+        {
+          "episode": "episode_0000001.hdf5",
+          "t": 365
+        },
+        {
+          "episode": "episode_0000002.hdf5",
+          "t": 304
+        },
+        {
+          "episode": "episode_0000005.hdf5",
+          "t": 256
+        },
+        {
+          "episode": "episode_0000006.hdf5",
+          "t": 349
+        },
+        {
+          "episode": "episode_0000007.hdf5",
+          "t": 223
+        },
+        {
+          "episode": "episode_0000007.hdf5",
+          "t": 364
+        },
+        {
+          "episode": "episode_0000008.hdf5",
+          "t": 212
+        },
+        {
+          "episode": "episode_0000011.hdf5",
+          "t": 148
+        },
+        {
+          "episode": "episode_0000011.hdf5",
+          "t": 263
+        },
+        {
+          "episode": "episode_0000013.hdf5",
+          "t": 48
+        },
+        {
+          "episode": "episode_0000013.hdf5",
+          "t": 49
+        },
+        {
+          "episode": "episode_0000013.hdf5",
+          "t": 50
+        },
+        {
+          "episode": "episode_0000013.hdf5",
+          "t": 94
+        }
+      ]
+    }
+  },
+  "total_training_slots": 61171,
+  "unique_gradient_exposed_frames": 2000
+}

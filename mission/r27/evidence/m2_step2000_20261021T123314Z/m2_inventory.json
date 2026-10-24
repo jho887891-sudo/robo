@@ -1,0 +1,64 @@
+{
+  "attested": {
+    "actual_train_frame_identities_verified": false,
+    "manifest_file_hashes_verified": true,
+    "official_closed_loop_executed": false,
+    "real_7b_forward_executed": false,
+    "sampler_permutation_structure_verified": true,
+    "sampler_source_order_hash_recomputed": false,
+    "stage_crosscheck_verified": true
+  },
+  "checkpoint": {
+    "file_sizes_bytes": {
+      "lora_adapter/README.md": 5130,
+      "lora_adapter/adapter_config.json": 986,
+      "lora_adapter/adapter_model.safetensors": 484458600,
+      "optimizer_state.pt": 572904354,
+      "proprio_projector_42.pt": 67831992,
+      "rng.pt": 14144,
+      "sampler.json": 539683,
+      "scheduler_state.pt": 1088,
+      "trainer_state.json": 7317
+    },
+    "files_verified": 9,
+    "global_step": 2000,
+    "manifest_sha256": "df62650015abf279204418a73410f6ea0c6eae7c2814cc5ed20577fa5630a68d",
+    "model_kind": "peft",
+    "normalizer_sha256": "43a166c30f7b8eac9a8bbd64d4e2e8224cc2c6e634379356136807c326f1f714",
+    "run_id": "m2-2task-2000-20261021T123322Z",
+    "source_directory": "/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/checkpoints/step2000",
+    "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+    "task_ids": {
+      "push_T": 0,
+      "stack_bowls": 1
+    },
+    "tasks": [
+      "push_T",
+      "stack_bowls"
+    ]
+  },
+  "interpretation": "Read-only CPU identity check. Does not establish actual TRAIN-SEEN frame count or model closed-loop success.",
+  "optimizer_steps_executed_by_this_tool": 0,
+  "sampler": {
+    "actual_unique_gradient_exposed_frames": "UNKNOWN_REQUIRES_FROZEN_FRAME_MAPPING",
+    "claimed_order_hash": "7e452eb0d98e71296136fcdca57160667932e33d1fc14ca3ea8ea06de5e22181",
+    "consumed_schedule_slots": 2000,
+    "distinct_consumed_slot_indices": 2000,
+    "frames_sha256": "a2d277f1b9abeef4e3f5d9780729aef73ee5b855d4d9a1b6588e4fc6b6d44b77",
+    "frozen_sampler_slot_pool_size": 61171,
+    "mapping_note": "Slot indices can include repeated frames. The original TRAIN frame mapping requires HDF5 index/split/normalizer and tools/r24_seen_exposure_audit.py.",
+    "order_hash_source_recomputed": false,
+    "position": 2000
+  },
+  "schema": "r27-m2-readonly-checkpoint-inventory-v1",
+  "stage": {
+    "global_step_reached": 2000,
+    "note": "Crosschecked stage fields, NOT authenticity of the training execution against a remote GPU session or immutable WAL.",
+    "prompt_token_ids_sha256": {
+      "push_T": "acd221cafcceed97e20b88f03acd44bb0f5dffd9cefc8449808a92665657d6d2",
+      "stack_bowls": "0ffa17e930833f1a818fda7a79f88df657b2ebf5c3865e4859cc55306593226d"
+    },
+    "sha256": "9cfb9fffa7256395ebb48c5ceb88a7e9a462389a467e74364a4d5f276c29a1e6",
+    "status": "SOURCE_FIELDS_MATCHED"
+  }
+}

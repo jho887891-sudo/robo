@@ -1,0 +1,9 @@
+{
+  "actual_unique_seen_frames": "UNKNOWN_REQUIRES_FROZEN_FRAME_MAPPING",
+  "artifact": "/tmp/r27-m2-check-JfI3qsxZ/m2_inventory.json",
+  "global_step": 2000,
+  "optimizer_steps_executed": 0,
+  "run_id": "m2-2task-2000-20261021T123322Z",
+  "stage_status": "SOURCE_FIELDS_MATCHED",
+  "status": "VERIFIED_FULL_STATE_CPU_INVENTORY"
+}
