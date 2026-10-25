@@ -237,6 +237,29 @@ def test_official_model_path_refuses_response_without_rate_branch_evidence():
         model.get_action()
 
 
+def test_official_model_path_refuses_action_that_exceeds_rate_bound():
+    class _UnsafeRateServer(object):
+        metadata = _meta()
+        device = "cpu"
+
+        def act(self, images, state, env_idx=0, timestamp=None, prev_cmd=None, dt=None,
+                record=False):
+            action = np.asarray(state, np.float32).copy()
+            action[0] += 0.1
+            return {"action": action, "ids": [R.CODEC_WINDOW[0]] * R.N_ACTIONS,
+                    "n_action_tokens": R.N_ACTIONS,
+                    "info": {"dt": dt, "rate_limited": 0, "unsafe": None,
+                             "rate_conflict_dims": []},
+                    "latency_ms": {"preprocess": 1.0, "forward_total": 2.0, "decode": 1.0,
+                                   "total": 4.0}}
+
+    model = _model()
+    model.update_obs(_obs(state=_inside(0.5)))
+    model._server = _UnsafeRateServer()
+    with pytest.raises(M.R42ModelError, match="max_rate \\* control_dt"):
+        model.get_action()
+
+
 def test_runtime_audit_records_state_prediction_response_and_next_observation(tmp_path, monkeypatch):
     import r42_runtime_audit as Audit
 
