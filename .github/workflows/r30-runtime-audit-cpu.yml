@@ -16,6 +16,7 @@ on:
       - 'scripts/r15_loop_pushT.sh'
       - 'tests/test_r42_runtime_audit.py'
       - 'tests/test_openvla_r42_server.py'
+      - 'diagnostics/r42_rate_limit_gpu_smoke.py'
       - 'tests/test_r15_loop_dev.py'
       - 'tools/r42_runtime_audit_report.py'
       - 'tests/test_r42_runtime_audit_report.py'
@@ -33,6 +34,7 @@ on:
       - 'scripts/r15_loop_pushT.sh'
       - 'tests/test_r42_runtime_audit.py'
       - 'tests/test_openvla_r42_server.py'
+      - 'diagnostics/r42_rate_limit_gpu_smoke.py'
       - 'tests/test_r15_loop_dev.py'
       - 'tools/r42_runtime_audit_report.py'
       - 'tests/test_r42_runtime_audit_report.py'
@@ -62,6 +64,7 @@ jobs:
           python -m py_compile tools/r15_loop_dev.py
           python -m py_compile tests/test_r42_runtime_audit.py
           python -m py_compile tests/test_openvla_r42_server.py
+          python -m py_compile diagnostics/r42_rate_limit_gpu_smoke.py
           python -m py_compile tests/test_r15_loop_dev.py
           python -m py_compile tools/r42_runtime_audit_report.py
           python -m py_compile tests/test_r42_runtime_audit_report.py
