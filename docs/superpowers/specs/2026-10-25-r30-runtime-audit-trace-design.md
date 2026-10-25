@@ -61,12 +61,13 @@ Raw RGB pixel arrays and privileged state/goal labels must never be persisted by
 - `trace_integrity`: PASS only when JSONL/schema/record indices/references validate; PARTIAL for an incomplete tail; FAIL for invalid or unavailable trace input.
 - `first_observation` and `post_reset_observation`: require a valid observation and a reset record that precedes it in the same episode.
 - `first_server_response`: requires a successful `action_step` linked to the first observation.
+- `rate_limit_branch_active`: requires a valid configured 14D `max_rate` vector and every successful action's decoder `dt` to be positive and equal to the configured control period. A null `dt` means the decoder skipped the rate branch and blocks the gate. This is a post-run diagnostic gate, not a substitute for reviewing/fixing a known unsafe call path before authorizing a rollout.
 - The validator checks that flattening the four-key action dictionary in the frozen joint order reproduces `server_response.action14`, and that the recorded previous-response delta equals `state14 - previous_server_response_action14`.
 - Every report includes a `latency_caveat`: the writer fsyncs each record, `server_span_pre_audit_ms` includes observation audit overhead but excludes the action-step fsync, and the actual client receive time is not measured. Do not compare these timings directly with unaudited runs.
 - `client_acknowledgement`, `camera_state_sync`, and `robot_actuation`: always remain UNKNOWN unless another independently verified source is added.
 - `reset_vs_demo_S0`: remains BLOCKED until a separately verified demo-start vector is supplied; the report does not invent it.
 
-Exit codes: 0 means structurally valid, complete evidence with no action errors and a valid first-action gate; 2 means partial evidence, action errors, or a blocked required gate; 3 means invalid/unavailable trace; 4 means the report output cannot be written safely. Existing report paths are never overwritten.
+Exit codes: 0 means structurally valid, complete evidence with no action errors and required first-action/rate-limit gates PASS; 2 means partial evidence, action errors, or a blocked required gate; 3 means invalid/unavailable trace; 4 means the report output cannot be written safely. Existing report paths are never overwritten.
 
 ## Non-goals
 
