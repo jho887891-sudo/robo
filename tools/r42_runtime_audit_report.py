@@ -391,8 +391,40 @@ def main(argv=None):
     try:
         report = audit_trace(args.input)
     except OSError as exc:
-        print(json.dumps({"trace_integrity": "FAIL", "errors": [str(exc)]}, indent=2), file=sys.stderr)
-        return 3
+        abs_path = os.path.abspath(os.path.expanduser(args.input))
+        print("TRACE INPUT UNAVAILABLE: %s" % exc, file=sys.stderr)
+        report = {
+            "schema_version": REPORT_SCHEMA,
+            "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "input_path": abs_path,
+            "input_sha256": None,
+            "run_id": None,
+            "trace_integrity": "FAIL",
+            "run_outcome": "INVALID",
+            "counts": {"records": 0, "observations": 0, "actions": 0,
+                       "action_errors": 0, "resets": 0, "backend_ready": 0},
+            "unresolved_observation_records": [],
+            "gates": {
+                "first_observation": "BLOCKED",
+                "post_reset_observation": "BLOCKED",
+                "first_server_response": "BLOCKED",
+                "client_acknowledgement": "UNKNOWN",
+                "camera_state_sync": "UNKNOWN",
+                "robot_actuation": "UNKNOWN",
+                "reset_vs_demo_S0": "BLOCKED",
+            },
+            "gate_reasons": {
+                "first_observation": "trace file was unavailable",
+                "post_reset_observation": "trace file was unavailable",
+                "first_server_response": "trace file was unavailable",
+                "client_acknowledgement": "the server trace cannot observe client acceptance",
+                "camera_state_sync": "camera/state wall-clock synchronization is not established",
+                "robot_actuation": "server-generated actions do not prove execution",
+                "reset_vs_demo_S0": "no demo-start S0 reference vector was supplied",
+            },
+            "errors": [str(exc)],
+            "warnings": [],
+        }
 
     rendered = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
     if args.out:
