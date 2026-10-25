@@ -197,3 +197,20 @@ def test_cli_refuses_to_overwrite_existing_report(tmp_path, capsys):
     assert result == 4
     assert output.read_text(encoding="utf-8") == "preserve this report\\n"
     assert "REFUSING to overwrite report" in capsys.readouterr().err
+
+
+
+def test_cli_writes_failure_report_when_trace_file_is_missing(tmp_path, capsys):
+    missing = tmp_path / "missing.jsonl"
+    output = tmp_path / "missing_report.json"
+
+    result = main(["--input", str(missing), "--out", str(output)])
+
+    assert result == 3
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["trace_integrity"] == "FAIL"
+    assert report["run_outcome"] == "INVALID"
+    assert report["counts"]["records"] == 0
+    assert report["gates"]["first_observation"] == "BLOCKED"
+    assert report["errors"]
+    assert "No such file" in capsys.readouterr().err
