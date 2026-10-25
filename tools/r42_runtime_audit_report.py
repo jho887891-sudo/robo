@@ -124,6 +124,9 @@ def _validate_record(record, index, camera_order, dim_order, joint_group_order, 
         for key in ("stage", "error_type", "error_message"):
             if not isinstance(record.get(key), str):
                 _err(errors, index, "%s must be a string" % key)
+        overhead = record.get("observation_audit_overhead_ms")
+        if not _is_finite_number(overhead) or float(overhead) < 0:
+            _err(errors, index, "observation_audit_overhead_ms must be finite and >= 0")
         return
 
     if event == "action_step":
@@ -132,6 +135,18 @@ def _validate_record(record, index, camera_order, dim_order, joint_group_order, 
             _int_field(record, key, index, errors)
         state14_valid = _vector(record.get("state14"), 14, "state14", index, errors)
         _vector(record.get("velocity14"), 14, "velocity14", index, errors)
+        overhead = record.get("observation_audit_overhead_ms")
+        if not _is_finite_number(overhead) or float(overhead) < 0:
+            _err(errors, index, "observation_audit_overhead_ms must be finite and >= 0")
+        pre_audit_time = record.get("pre_audit_return_wall_utc")
+        if not isinstance(pre_audit_time, str) or not pre_audit_time:
+            _err(errors, index, "pre_audit_return_wall_utc must be a non-empty string")
+        span = record.get("server_span_pre_audit_ms")
+        if not _is_finite_number(span) or float(span) < 0:
+            _err(errors, index, "server_span_pre_audit_ms must be finite and >= 0")
+        timing_semantics = record.get("timing_semantics")
+        if not isinstance(timing_semantics, str) or "fsync" not in timing_semantics.lower():
+            _err(errors, index, "timing_semantics must explain the fsync boundary")
         _vector(record.get("features42"), 42, "features42", index, errors)
         dims = record.get("state_dim_order")
         if not isinstance(dims, list) or len(dims) != 14:
@@ -424,6 +439,11 @@ def audit_trace(path):
         "input_path": abs_path,
         "input_sha256": digest,
         "run_id": records[0].get("run_id") if records else None,
+        "latency_caveat": (
+            "The JSONL writer fsyncs each record. observation_audit_overhead_ms includes camera "
+            "hashing and observation persistence. server_span_pre_audit_ms includes observation "
+            "audit overhead but is sampled before action_step fsync; actual client receive time is "
+            "not measured. Do not compare these timings directly with unaudited runs."),
         "trace_integrity": integrity,
         "run_outcome": outcome,
         "counts": {
@@ -459,6 +479,9 @@ def main(argv=None):
             "input_path": abs_path,
             "input_sha256": None,
             "run_id": None,
+            "latency_caveat": (
+                "This run has no readable trace, so no runtime timing can be certified. "
+                "The audit writer is configured to fsync each record."),
             "trace_integrity": "FAIL",
             "run_outcome": "INVALID",
             "counts": {"records": 0, "observations": 0, "actions": 0,
