@@ -142,6 +142,10 @@ def _validate_record(record, index, camera_order, dim_order, joint_group_order, 
             rate_source = record.get("rate_limit_source")
             if rate_source != "safety_limits.max_rate":
                 _err(errors, index, "rate_limit_source must be safety_limits.max_rate")
+            reference_source = record.get("rate_reference_source")
+            if reference_source not in ("measured_state", "previous_server_response"):
+                _err(errors, index,
+                     "rate_reference_source must be measured_state or previous_server_response")
             action_dt = record.get("control_dt")
             if not _is_finite_number(action_dt) or float(action_dt) <= 0:
                 _err(errors, index, "control_dt must be finite and > 0")
@@ -400,6 +404,41 @@ def audit_trace(path):
                 _err(errors, idx, "action_step camera_inputs differ from referenced observation")
         terminal_by_observation.setdefault(ref, set()).add(record.get("event"))
         linked_actions.setdefault(ref, []).append(record)
+
+    # Independently verify that each schema-v2 rate reference matches its declared source.
+    # Per-environment history is used because the wrapper keeps separate previous commands by env.
+    last_action_by_episode_env = {}
+    for record in action_steps:
+        if record.get("schema_version") != TRACE_SCHEMA:
+            continue
+        idx = record.get("record_index")
+        key = (record.get("episode_index"), record.get("env_idx"))
+        source = record.get("rate_reference_source")
+        reference = record.get("rate_reference_action14")
+        state = record.get("state14")
+        if source == "measured_state":
+            if (isinstance(reference, list) and isinstance(state, list)
+                    and len(reference) == 14 and len(state) == 14
+                    and all(_is_finite_number(x) for x in reference + state)
+                    and any(abs(float(reference[i]) - float(state[i])) > 1e-5
+                            for i in range(14))):
+                _err(errors, idx, "measured_state rate reference differs from state14")
+        elif source == "previous_server_response":
+            previous = last_action_by_episode_env.get(key)
+            if previous is None:
+                _err(errors, idx,
+                     "previous_server_response rate reference has no prior action for this episode/env")
+            elif (isinstance(reference, list) and len(reference) == 14
+                    and all(_is_finite_number(x) for x in reference)
+                    and any(abs(float(reference[i]) - float(previous[i])) > 1e-5
+                            for i in range(14))):
+                _err(errors, idx,
+                     "previous_server_response rate reference differs from prior action_step action14")
+        response = record.get("server_response")
+        action = response.get("action14") if isinstance(response, dict) else None
+        if (isinstance(action, list) and len(action) == 14
+                and all(_is_finite_number(x) for x in action)):
+            last_action_by_episode_env[key] = [float(x) for x in action]
 
     unresolved = []
     for ref, observation in observations.items():
