@@ -82,13 +82,14 @@ def valid_rows():
             timing_semantics="sampled before action_step fsync; not client receive time",
             observation_audit_overhead_ms=3.5,
             state_dim_order=DIM_NAMES, state14=STATE,
-            rate_reference_action14=STATE, rate_limit_source="safety_limits.max_rate",
-            control_dt=0.04, velocity14=[0.0] * 14,
+            rate_reference_action14=STATE, rate_reference_source="measured_state",
+            rate_limit_source="safety_limits.max_rate", control_dt=0.04,
+            velocity14=[0.0] * 14,
             features42=[0.0] * 42, camera_inputs=camera_inputs(),
             prediction={"token_ids14": list(range(14)), "bins14": list(range(14)),
                         "residual14": [0.0] * 14},
             server_response={"action14": ACTION, "action_dict": action_dict_from14(ACTION),
-                             "decoder_info": {"clipped_joint": 0, "rate_limited": 2, "dt": 0.04},
+                             "decoder_info": {"clipped_joint": 0, "rate_limited": 0, "dt": 0.04},
                              "semantics": "server-generated response; execution is not observed"},
             previous_server_response_action14=None, previous_response_global_step_index=None,
             observed_state_minus_previous_server_response14=None,
@@ -120,6 +121,7 @@ def test_audit_report_accepts_complete_trace_but_keeps_execution_unknown(tmp_pat
     assert report["gates"]["first_observation"] == "PASS"
     assert report["gates"]["first_server_response"] == "PASS"
     assert report["gates"]["rate_limit_branch_active"] == "PASS"
+    assert report["gates"]["rate_limit_compliance"] == "PASS"
     assert report["gates"]["client_acknowledgement"] == "UNKNOWN"
     assert report["gates"]["camera_state_sync"] == "UNKNOWN"
     assert report["gates"]["robot_actuation"] == "UNKNOWN"
@@ -318,6 +320,8 @@ def test_audit_report_checks_previous_response_delta_math(tmp_path):
         "episode_step_index": 1,
         "global_step_index": 1,
         "state14": second_state,
+        "rate_reference_action14": ACTION,
+        "rate_reference_source": "previous_server_response",
         "previous_server_response_action14": ACTION,
         "previous_response_global_step_index": 0,
         "observed_state_minus_previous_server_response14": [
@@ -388,3 +392,45 @@ def test_rate_limit_gate_blocks_when_configured_rule_is_bypassed(tmp_path, capsy
     assert result == 2
     cli_report = json.loads(capsys.readouterr().out)
     assert cli_report["gates"]["rate_limit_branch_active"] == "BLOCKED"
+
+
+
+def test_audit_report_blocks_action_that_exceeds_configured_rate_step(tmp_path, capsys):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()
+    action = list(rows[-1]["server_response"]["action14"])
+    action[0] += 0.1
+    rows[-1]["server_response"]["action14"] = action
+    rows[-1]["server_response"]["action_dict"] = action_dict_from14(action)
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "PASS"
+    assert report["gates"]["rate_limit_branch_active"] == "PASS"
+    assert report["gates"]["rate_limit_compliance"] == "BLOCKED"
+    assert "max_rate * control_dt" in report["gate_reasons"]["rate_limit_compliance"]
+
+    result = main(["--input", str(path)])
+    assert result == 2
+    cli_report = json.loads(capsys.readouterr().out)
+    assert cli_report["gates"]["rate_limit_compliance"] == "BLOCKED"
+
+
+def test_schema_v1_trace_remains_readable_but_cannot_certify_rate_compliance(tmp_path):
+    path = tmp_path / "legacy-v1.jsonl"
+    rows = valid_rows()
+    for row in rows:
+        row["schema_version"] = "r42-runtime-audit/v1"
+    rows[-1].pop("rate_reference_action14")
+    rows[-1].pop("rate_reference_source")
+    rows[-1].pop("rate_limit_source")
+    rows[-1].pop("control_dt")
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "PASS"
+    assert report["gates"]["rate_limit_branch_active"] == "PASS"
+    assert report["gates"]["rate_limit_compliance"] == "BLOCKED"
+    assert "reference vectors" in report["gate_reasons"]["rate_limit_compliance"]
