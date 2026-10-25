@@ -317,10 +317,12 @@ class R42RoboDojoAdapter:
                   .reset, .replay with the same signatures); a stub backend makes it CPU-testable.
     control_dt  : the client control period in seconds (25 Hz -> 0.04).  The action returned by
                   one step() is held for exactly this long by the sim before the next observation.
-    max_rate    : optional 14D rad/s override of the checkpoint rate rule.  None (default) uses
-                  metadata safety_limits.max_rate when present, exactly as decode_with_metadata
-                  would with prev_cmd/dt supplied; if the checkpoint declares no max_rate, no
-                  rate rule is applied and only the physical box (applied by the server) binds.
+    max_rate    : optional 14D per-coordinate-units/second override of the checkpoint rate rule.
+                  Arm-joint coordinates and normalized gripper coordinates have different units;
+                  this vector is applied in each coordinate's native state units per second. None
+                  (default) uses metadata safety_limits.max_rate when present. This wrapper applies
+                  its own limiter only when used as the standalone adapter path; do not stack it
+                  around the official Model path, which enforces the same rule in the decoder.
     recorder    : LatencyRecorder; created with control_dt when omitted.
     """
 
