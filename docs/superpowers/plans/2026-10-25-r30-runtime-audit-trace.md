@@ -1,49 +1,104 @@
-# R30 Runtime Audit Trace: implementation plan
+# R30 Runtime Audit Trace Implementation Plan
 
-Date: 2026-10-25
-Base: `9b94823d7af6909811bd3e7039db23d855c09559`
-Branch: `feature/r30-runtime-audit-trace-20261025`
-Related evidence: `evidence/pusht-startup-data-audit@0b974aea73f4ecf55c503d8528297c1e084f2045`
+> **For agentic workers:** This plan was executed inline with Superpowers TDD and an isolated GitHub feature branch. Each production behavior was preceded by tests; the CI log records both expected RED checkpoints and subsequent GREEN results.
 
-## Problem and evidence
+**Goal:** Persist enough server-boundary evidence for a future authorized R15 run to compare the observed 14D state, model output, and server-generated action response.
 
-R30 verified the dataset start state but could not compare it with the real R15 deployment because the policy-server process did not persist per-request proprio, decoded tokens/residual, or the response action. Existing R15 episode output stores the official task verdict, not the 14D policy boundary values. The client episode directory formerly under `/tmp/eval_result` is gone.
+**Architecture:** A standard-library JSONL writer is opt-in via environment variables and fails closed if configured but unable to persist. The existing model boundary records state/features/tokens/residual/decoder output and the generated action; the launcher assigns unique artifact names and shares one run ID with the client ledger. No action semantics are changed.
 
-Code inspection at the fixed source base shows `OpenVLA_R42.model.Model.update_obs()` already receives the 14D state and three RGB arrays; `get_action()` receives the decoded 14D command, token IDs/bins, residual, velocity, 42D features, and decoder safety info from `R42DeployServer.act()`. These values can be logged at the server boundary without changing inference or action computation.
+**Tech Stack:** Python 3.10+, standard library, NumPy already used by the R42 model, pytest, Bash, GitHub Actions CPU runner.
 
-A second evidence-preservation risk was found: `scripts/r15_loop_pushT.sh` currently names server logs only by port and opens them with shell truncation (`>`), so reusing a port can overwrite an earlier server log.
+**Spec:** `docs/superpowers/specs/2026-10-25-r30-runtime-audit-trace-design.md`
 
-## Chosen approach
+## Global Constraints
 
-Add an opt-in-by-path, fail-closed JSONL writer on the server boundary, enabled by the official R15 launcher. Do not modify RoboDojo's external simulator/client checkout, change the action contract, save image pixels, or run any rollout.
+- Base source SHA: `9b94823d7af6909811bd3e7039db23d855c09559`.
+- Preserve R30 evidence branch at `0b974aea73f4ecf55c503d8528297c1e084f2045`.
+- Never change `main`, rewrite historical evidence, or merge this PR.
+- Never store raw RGB pixels; camera evidence is SHA256 + shape + dtype only.
+- Never claim a server-generated response is client-acknowledged or executed.
+- No model load, inference, training, optimizer step, CUDA, HDF5/checkpoint mutation, simulator, or robot execution during implementation/CI.
 
-The trace will distinguish:
-- observed 14D state arriving at the policy server;
-- velocity and normalized 42D features used by the policy;
-- model token IDs/bins and decoded residual;
-- final 14D absolute action returned to the client, plus the four-key wire action dict and decoder safety metadata;
-- next-step observed state compared with the previous server response (a diagnostic comparison, not proof that the command was applied);
-- camera input SHA256 hashes, not raw images;
-- episode/reset, sequence, timestamp, checkpoint/normalizer provenance and latency.
+## Review Focus
 
-Every record is JSONL, flushed and fsynced. File creation is exclusive; an existing path, missing run ID, serialization error, or write error refuses the audited run rather than silently losing evidence. With no audit path set, the model's existing behavior remains unchanged.
+- Existing trace path: must fail rather than truncate prior evidence.
+- Missing or unsafe run ID: must be rejected before policy backend loading.
+- Non-finite or unserializable record: must fail closed without writing a malformed partial record.
+- Episode reset: must clear previous-response comparison state and restart episode-local step index.
+- Docker client run ID: must be explicitly forwarded via `docker exec -e`; host environment alone is insufficient.
 
-The launcher will generate one unique run stamp and one run ID shared by the policy-server trace and the client ledger, and will use unique server log/output filenames so existing evidence cannot be truncated.
+---
 
-## Implementation tasks
+### Task 1: Durable JSONL writer
 
-1. Add CPU tests first for the writer: run-start record, ordered append-only events, no overwrite, required run ID, invalid JSON values refused, and exact SHA256/image metadata fields.
-2. Add model integration tests with the existing stub backend: first state/action trace, token/bin/residual/feature fields, camera hashes without image bytes, reset episode indexing, previous-response vs next-state comparison, and opt-out preserving behavior.
-3. Implement `r42_runtime_audit.py` using only the standard library. Open with `O_CREAT|O_EXCL`, mode 0600; use a schema version; add UTC/monotonic sequence metadata; flush/fsync each record.
-4. Integrate in `OpenVLA_R42/model.py` behind `R42_AUDIT_LOG_PATH` and `R42_AUDIT_RUN_ID`. Log only after the action payload passes the existing 14-token contract. Do not pass new arguments into `server.act()` or change its result.
-5. Add an optional `--run-id` to `tools/r15_loop_dev.py`; validate a conservative identifier format and use it for `ROBODOJO_RUN_ID`.
-6. Update `scripts/r15_loop_pushT.sh` to produce unique, non-truncating server-log/output/audit names and pass the same run ID to server and client.
-7. Run focused CPU tests, the full existing R42/R15 relevant CPU suite, compile checks, shell syntax check, and inspect GitHub Actions. Open a PR against `audit/pusht-startup-import-fix-20261024`; do not merge it.
+**Files:**
+- Create: `code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py`
+- Test: `tests/test_r42_runtime_audit.py`
 
-## Acceptance / stop conditions
+**Interfaces:**
+- `RuntimeAuditWriter(path, run_id, run_metadata=None)`
+- `write(record: dict) -> dict`
+- `close() -> None`
 
-- No model weights, CUDA, optimizer, HDF5, checkpoint, or simulator touched during implementation.
-- No changes to `main`, the R30 evidence branch, or historical evidence files.
-- The logger never writes raw RGB pixels and never labels a server-generated action as an acknowledged/executed command.
-- The next observation is compared against the previous server response, but any causal claim about actuator execution remains UNKNOWN without client/robot acknowledgement.
-- If test infrastructure cannot run the required suite, report exactly which checks ran and which remain BLOCKED. Do not claim full verification from a subset.
+- [x] Write tests for ordered records, shared run ID, exclusive create, invalid run IDs, JSON safety, and missing parent directory.
+- [x] Observe RED on the missing writer module at the initial CPU workflow.
+- [x] Implement exclusive creation, mode 0600, optional O_NOFOLLOW, schema/version metadata, JSON validation, flush/fsync, and fail-closed errors.
+- [x] Verify writer regressions: **5 passed**.
+
+### Task 2: R42 model boundary instrumentation
+
+**Files:**
+- Modify: `code/xpolicylab/policy/OpenVLA_R42/model.py`
+- Test: `tests/test_openvla_r42_server.py`
+
+**Interfaces:**
+- Opt-in environment variables: `R42_AUDIT_LOG_PATH`, `R42_AUDIT_RUN_ID`.
+- Events: `run_start`, `episode_reset`, `backend_ready`, `action_step`.
+
+- [x] Write tests for 14D state, 42D features, token IDs/bins, residual, decoder info, response action, camera hashes, reset indices, previous response vs next observed state, disabled-by-default behavior, and no-overwrite behavior.
+- [x] Observe RED: model lacked `_audit_trace`; explicit audit path did not yet refuse an existing file.
+- [x] Integrate trace writes after existing action-contract validation, with no changes to `server.act()` arguments or returned action.
+- [x] Verify model trace regressions: **3 passed, 19 deselected**.
+- [x] Record response semantics explicitly as server-generated; keep client acknowledgement and camera/state synchronization UNKNOWN.
+
+### Task 3: Shared run ID in the R15 driver
+
+**Files:**
+- Modify: `tools/r15_loop_dev.py`
+- Test: `tests/test_r15_loop_dev.py`
+
+- [x] Add `--run-id`, validate it against `[A-Za-z0-9][A-Za-z0-9._-]{0,127}`, and preserve generated IDs when omitted.
+- [x] Add dry-run tests for propagation and unsafe-ID rejection.
+- [x] Verify driver regressions: **9 passed** before adding the launcher static regression; the launcher test then provided a separate RED checkpoint.
+
+### Task 4: Non-overwriting launcher integration
+
+**Files:**
+- Modify: `scripts/r15_loop_pushT.sh`
+- Test: `tests/test_r15_loop_dev.py`
+
+- [x] Add a static regression test for timestamped server logs, trace path, unique result path, shared run ID, and explicit Docker environment forwarding.
+- [x] Observe RED: baseline launcher failed the `RUN_STAMP` assertion.
+- [x] Use one UTC stamp/run ID across server trace, server log, output JSON, host ledger and Docker client.
+- [x] Refuse pre-existing output paths and remove the port-only server log naming that could truncate old logs.
+- [x] Validate shell syntax with `bash -n scripts/r15_loop_pushT.sh`.
+
+### Task 5: CI, cross-check, and handoff
+
+**Files:**
+- Create: `.github/workflows/r30-runtime-audit-cpu.yml`
+- Create: `docs/superpowers/specs/2026-10-25-r30-runtime-audit-trace-design.md`
+- Modify: this plan.
+
+- [x] Add focused CPU-only CI; no simulator or model weights.
+- [x] Verify focused suite on the implementation before the launcher-specific test: writer **5 passed**, model integration **3 passed**, driver **9 passed**, shell syntax **PASS**.
+- [x] Observe launcher regression RED, then restore implementation and re-run the workflow.
+- [x] Keep PR #45 draft/open/unmerged.
+- [ ] Final CI on the latest branch SHA and final diff review.
+- [ ] Separate follow-up issue for the rate-limiter call-path concern; do not alter action behavior in this instrumentation PR.
+
+## Rulings
+
+- **Ruling:** log at the existing server boundary instead of patching the external RoboDojo checkout — the needed vectors already exist in memory and this avoids an unversioned client mutation. Cost if wrong: the trace still cannot prove client acknowledgement, so the schema explicitly preserves that limitation.
+- **Ruling:** enable tracing by default only through the official R15 launcher; direct model callers remain unchanged unless they set the explicit path. Cost if wrong: any alternate launcher must set the two environment variables to obtain trace coverage.
+- **Ruling:** leave rate-limiter behavior untouched — the current `Model.get_action -> R42DeployServer.act` call supplies no `prev_cmd` or `dt`, so the adapter's rate-limiting branch appears inactive on this path. This is a separate safety/behavior change and needs its own spec and tests.
