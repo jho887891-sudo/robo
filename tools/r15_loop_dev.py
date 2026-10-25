@@ -252,9 +252,17 @@ def main():
         print(cap_note)
         return 3
 
-    cmd = build_cmd(a)
     run_id = a.run_id or "r15loop-%s-s%d-%s" % (
         a.task, a.stage, datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"))
+    # Docker does not inherit the host subprocess environment. Make the chosen run ID authoritative
+    # inside the official client container even if a stale ROBODOJO_RUN_ID was supplied in docker-env.
+    if a.docker:
+        a.docker_env = [
+            kv for kv in (a.docker_env or [])
+            if kv.partition("=")[0] != "ROBODOJO_RUN_ID"
+        ]
+        a.docker_env.append("ROBODOJO_RUN_ID=" + run_id)
+    cmd = build_cmd(a)
     env = dict(os.environ)
     env["ROBODOJO_RUN_ID"] = run_id
     rec = {"utc_start": utcnow(), "task": a.task, "policy_name": a.policy_name, "stage": a.stage,
