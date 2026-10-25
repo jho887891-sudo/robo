@@ -58,6 +58,7 @@
 - [x] Persist validated observation state/camera hashes before inference.
 - [x] Link backend-load, server-act and response-contract errors to the exact observation record and observation index.
 - [x] Measure observation audit overhead (camera hashing + durable observation write) in memory and attach it to the linked action/error record without adding another fsync.
+- [x] Include the frozen configured `max_rate[14]`, `control_dt` and `control_hz` in run-start metadata for later safety-gate verification.
 - [x] Rename trace timing fields to `pre_audit_return_wall_utc` / `server_span_pre_audit_ms`; explicitly state that the action-step fsync is excluded and client receive time is not measured.
 - [x] Keep the action contract and returned action unchanged; label actions as server-generated.
 - [x] Keep client acknowledgement and camera/state synchronization UNKNOWN.
@@ -102,14 +103,15 @@
 - [x] Block the first-response gate when the first observation has no successful action, and block evidence gates when trace integrity is not PASS.
 - [x] Require the reset record to precede the first observation in the same episode.
 - [x] Cross-check that the four-key action dict flattens to the recorded action14 and that the previous-response delta equals `state14 - previous_server_response_action14`.
+- [x] Add `rate_limit_branch_active`: require a valid configured 14D rate vector and positive decoder `dt` matching the configured control period for every successful action. A null `dt` blocks the report/launcher gate.
 - [x] Include a latency caveat: per-record fsync affects runtime; `server_span_pre_audit_ms` includes observation audit overhead but excludes action-step fsync, and actual client receive time is not measured.
 - [x] Refuse to overwrite an existing report; if trace input is missing, still write a machine-readable failure report.
 - [x] CLI exit codes: 0 valid complete evidence with no action errors and first-action gate PASS; 2 partial/action-error/blocked gate; 3 invalid or unavailable trace; 4 report write refusal/failure.
-- [x] Verify report regressions: **14 passed**.
+- [x] Verify report regressions: **15 passed**.
 
 ### Task 6: CI, cross-audit, and handoff
 
-- [x] Focused CPU workflow runs writer **5 passed**, model trace **5 passed**, R15 driver **10 passed**, report validator **14 passed**, Python compilation and Bash syntax.
+- [x] Focused CPU workflow runs writer **5 passed**, model trace **5 passed**, R15 driver **10 passed**, report validator **15 passed**, Python compilation and Bash syntax.
 - [x] R4 CPU contracts: **PASS**.
 - [x] R5 CPU contracts: **PASS**.
 - [x] Recompute SHA256 for all 8 files listed by the R30 evidence directory's `SHA256SUMS.txt`: **8/8 match**. This verifies file integrity, not a second HDF5 execution.
@@ -123,5 +125,6 @@
 - **Ruling:** enable trace logging only through explicit environment variables, set by the official R15 launcher — direct callers remain unchanged unless opted in. Cost if wrong: alternate launchers must set both variables to obtain trace coverage.
 - **Ruling:** add Bash PID to the timestamp — the prior seconds-only stamp plus a preflight existence check was not atomic under concurrent launch. Cost if wrong: artifact names are longer, but evidence collisions are less likely.
 - **Ruling:** make report generation part of the launcher finalizer — otherwise startup failures could leave no machine-readable audit report. Cost if wrong: a failed audit gate changes a zero launcher exit into code 5, intentionally preventing silent promotion.
+- **Ruling:** the report gate explicitly checks whether the decoder's rate-limiting branch was entered. It does not change action behavior; the known bypass remains BLOCKED and must be fixed/reviewed before a real rollout is authorized.
 - **Ruling:** timing fields describe the actual measurement boundary: the observation record is fsynced before inference, while the action record is fsynced after the pre-audit response timestamp is sampled. The report warns that audit-enabled timing is not directly comparable to unaudited runs. Cost if wrong: an extra caveat, but no false claim about client receive latency.
 - **Ruling:** leave the adapter's rate-limiter behavior untouched — the current `Model.get_action -> R42DeployServer.act` call supplies no `prev_cmd` or `dt`, so the configured rate-limit branch appears inactive on this path. This is a separate safety-sensitive change requiring its own contract, tests and authorization.
