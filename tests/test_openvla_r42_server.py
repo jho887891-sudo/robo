@@ -223,6 +223,31 @@ def test_runtime_audit_persists_observation_before_backend_failure(tmp_path, mon
     assert not any(row["event"] == "action_step" for row in rows)
 
 
+def test_runtime_audit_records_backend_load_failure_against_received_observation(tmp_path, monkeypatch):
+    path = tmp_path / "runtime.jsonl"
+    monkeypatch.setenv("R42_AUDIT_LOG_PATH", str(path))
+    monkeypatch.setenv("R42_AUDIT_RUN_ID", "r30-backend-failure-001")
+    model = _model()
+    model.reset()
+    state = _inside(0.5).copy()
+    model.update_obs(_obs(state=state, seed=3))
+
+    def fail_backend():
+        raise RuntimeError("backend load exploded")
+
+    monkeypatch.setattr(model, "_ensure_server", fail_backend)
+    with pytest.raises(RuntimeError, match="backend load exploded"):
+        model.get_action()
+    model._audit_trace.close()
+
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    observation = next(row for row in rows if row["event"] == "observation_received")
+    error = next(row for row in rows if row["event"] == "action_error")
+    assert error["stage"] == "backend_load"
+    assert error["observation_record_index"] == observation["record_index"]
+    assert error["observation_index"] == observation["observation_index"]
+
+
 def test_runtime_audit_is_disabled_without_an_explicit_path(tmp_path, monkeypatch):
     monkeypatch.delenv("R42_AUDIT_LOG_PATH", raising=False)
     monkeypatch.delenv("R42_AUDIT_RUN_ID", raising=False)
