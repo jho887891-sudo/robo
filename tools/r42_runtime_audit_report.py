@@ -17,8 +17,9 @@ import sys
 from datetime import datetime, timezone
 
 
-TRACE_SCHEMA = "r42-runtime-audit/v1"
-REPORT_SCHEMA = "r42-runtime-audit-report/v1"
+TRACE_SCHEMA = "r42-runtime-audit/v2"
+SUPPORTED_TRACE_SCHEMAS = {"r42-runtime-audit/v1", TRACE_SCHEMA}
+REPORT_SCHEMA = "r42-runtime-audit-report/v2"
 EVENTS = {
     "run_start", "episode_reset", "observation_received", "backend_ready",
     "action_error", "action_step",
@@ -135,6 +136,15 @@ def _validate_record(record, index, camera_order, dim_order, joint_group_order, 
             _int_field(record, key, index, errors)
         state14_valid = _vector(record.get("state14"), 14, "state14", index, errors)
         _vector(record.get("velocity14"), 14, "velocity14", index, errors)
+        if record.get("schema_version") == TRACE_SCHEMA:
+            _vector(record.get("rate_reference_action14"), 14,
+                    "rate_reference_action14", index, errors)
+            rate_source = record.get("rate_limit_source")
+            if rate_source != "safety_limits.max_rate":
+                _err(errors, index, "rate_limit_source must be safety_limits.max_rate")
+            action_dt = record.get("control_dt")
+            if not _is_finite_number(action_dt) or float(action_dt) <= 0:
+                _err(errors, index, "control_dt must be finite and > 0")
         overhead = record.get("observation_audit_overhead_ms")
         if not _is_finite_number(overhead) or float(overhead) < 0:
             _err(errors, index, "observation_audit_overhead_ms must be finite and >= 0")
@@ -308,9 +318,9 @@ def audit_trace(path):
             if not _is_int(index) or index != position:
                 _err(errors, index if _is_int(index) else position,
                      "record_index must be contiguous from zero (expected %d)" % position)
-            if record.get("schema_version") != TRACE_SCHEMA:
+            if record.get("schema_version") not in SUPPORTED_TRACE_SCHEMAS:
                 _err(errors, index if _is_int(index) else position,
-                     "schema_version must be %s" % TRACE_SCHEMA)
+                     "schema_version must be one of %s" % sorted(SUPPORTED_TRACE_SCHEMAS))
         starts = [i for i, r in enumerate(records) if r.get("event") == "run_start"]
         if starts != [0]:
             errors.append("exactly one run_start must be the first record")
@@ -438,11 +448,61 @@ def audit_trace(path):
         rate_reason = "decoder dt does not match the configured control_dt or rate metadata is invalid"
     else:
         rate_reason = "configured max_rate exists and every successful action reports the expected positive dt"
+
+    rate_compliance_checks = []
+    rate_compliance_problem = None
+    if rate_config_valid and rate_steps_active and action_steps:
+        max_step = [float(value) * float(control_dt) for value in configured_rate]
+        for record in action_steps:
+            response = record.get("server_response")
+            action14 = response.get("action14") if isinstance(response, dict) else None
+            reference14 = record.get("rate_reference_action14")
+            record_dt = record.get("control_dt")
+            vectors_valid = (
+                isinstance(action14, list) and len(action14) == 14
+                and all(_is_finite_number(value) for value in action14)
+                and isinstance(reference14, list) and len(reference14) == 14
+                and all(_is_finite_number(value) for value in reference14))
+            if not vectors_valid:
+                rate_compliance_checks.append(False)
+                rate_compliance_problem = "an action lacks finite 14D action/reference vectors"
+                continue
+            if (not _is_finite_number(record_dt)
+                    or abs(float(record_dt) - float(control_dt)) > 1e-6):
+                rate_compliance_checks.append(False)
+                rate_compliance_problem = "action control_dt differs from run_start control_dt"
+                continue
+            within_bound = all(
+                abs(float(action14[i]) - float(reference14[i])) <= max_step[i] + 1e-5
+                for i in range(14))
+            rate_compliance_checks.append(within_bound)
+            if not within_bound:
+                rate_compliance_problem = (
+                    "server_response.action14 exceeds max_rate * control_dt relative to "
+                    "rate_reference_action14")
+    rate_compliance_gate = (
+        "PASS" if rate_config_valid and rate_steps_active and action_steps
+        and len(rate_compliance_checks) == len(action_steps)
+        and all(rate_compliance_checks) else "BLOCKED")
+    if not rate_config_valid:
+        rate_compliance_reason = "run_start metadata has no valid configured_max_rate14/control_dt"
+    elif not rate_steps_active:
+        rate_compliance_reason = "rate-limit decoder branch is not certified active"
+    elif not action_steps:
+        rate_compliance_reason = "no successful action_step exists to verify rate compliance"
+    elif rate_compliance_problem:
+        rate_compliance_reason = rate_compliance_problem
+    elif rate_compliance_gate == "PASS":
+        rate_compliance_reason = "every action delta is within configured max_rate * control_dt"
+    else:
+        rate_compliance_reason = "one or more action deltas could not be verified"
+
     gates = {
         "first_observation": "PASS" if first_observation else "BLOCKED",
         "post_reset_observation": "PASS" if post_reset else "BLOCKED",
         "first_server_response": first_response,
         "rate_limit_branch_active": rate_gate,
+        "rate_limit_compliance": rate_compliance_gate,
         "client_acknowledgement": "UNKNOWN",
         "camera_state_sync": "UNKNOWN",
         "robot_actuation": "UNKNOWN",
@@ -457,6 +517,7 @@ def audit_trace(path):
                                   if first_response == "PASS"
                                   else "first observation has no linked successful action_step"),
         "rate_limit_branch_active": rate_reason,
+        "rate_limit_compliance": rate_compliance_reason,
         "client_acknowledgement": "the server trace cannot observe client acceptance",
         "camera_state_sync": "camera/state wall-clock synchronization is not established by this schema",
         "robot_actuation": "server-generated actions do not prove simulator or robot execution",
@@ -471,7 +532,7 @@ def audit_trace(path):
         integrity = "PASS"
     if integrity != "PASS":
         for gate in ("first_observation", "post_reset_observation", "first_server_response",
-                     "rate_limit_branch_active"):
+                     "rate_limit_branch_active", "rate_limit_compliance"):
             gates[gate] = "BLOCKED"
             gate_reasons[gate] = (
                 "trace integrity is %s; this gate cannot be certified" % integrity)
@@ -543,6 +604,7 @@ def main(argv=None):
                 "post_reset_observation": "BLOCKED",
                 "first_server_response": "BLOCKED",
                 "rate_limit_branch_active": "BLOCKED",
+                "rate_limit_compliance": "BLOCKED",
                 "client_acknowledgement": "UNKNOWN",
                 "camera_state_sync": "UNKNOWN",
                 "robot_actuation": "UNKNOWN",
@@ -553,6 +615,7 @@ def main(argv=None):
                 "post_reset_observation": "trace file was unavailable",
                 "first_server_response": "trace file was unavailable",
                 "rate_limit_branch_active": "trace file was unavailable; rate limiting cannot be certified",
+                "rate_limit_compliance": "trace file was unavailable; action deltas cannot be checked",
                 "client_acknowledgement": "the server trace cannot observe client acceptance",
                 "camera_state_sync": "camera/state wall-clock synchronization is not established",
                 "robot_actuation": "server-generated actions do not prove execution",
@@ -589,7 +652,8 @@ def main(argv=None):
             or report["gates"]["first_observation"] != "PASS"
             or report["gates"]["post_reset_observation"] != "PASS"
             or report["gates"]["first_server_response"] != "PASS"
-            or report["gates"]["rate_limit_branch_active"] != "PASS"):
+            or report["gates"]["rate_limit_branch_active"] != "PASS"
+            or report["gates"]["rate_limit_compliance"] != "PASS"):
         return 2
     return 0
 
