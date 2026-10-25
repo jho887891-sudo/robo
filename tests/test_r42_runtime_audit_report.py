@@ -7,7 +7,7 @@ import pytest
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "tools"))
 
-from r42_runtime_audit_report import audit_trace
+from r42_runtime_audit_report import audit_trace, main
 
 
 SCHEMA = "r42-runtime-audit/v1"
@@ -170,3 +170,30 @@ def test_audit_report_rejects_action_link_to_unknown_observation(tmp_path):
 
     assert report["trace_integrity"] == "FAIL"
     assert any("observation_record_index" in error for error in report["errors"])
+
+
+
+def test_audit_report_returns_failure_for_unhashable_corrupt_identity_fields(tmp_path):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()
+    rows[0]["run_id"] = ["not-a-string"]
+    rows[2]["record_index"] = {"not": "an integer"}
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "FAIL"
+    assert report["errors"]
+
+
+def test_cli_refuses_to_overwrite_existing_report(tmp_path, capsys):
+    trace = tmp_path / "runtime.jsonl"
+    write_trace(trace, valid_rows())
+    output = tmp_path / "report.json"
+    output.write_text("preserve this report\\n", encoding="utf-8")
+
+    result = main(["--input", str(trace), "--out", str(output)])
+
+    assert result == 4
+    assert output.read_text(encoding="utf-8") == "preserve this report\\n"
+    assert "REFUSING to overwrite report" in capsys.readouterr().err
