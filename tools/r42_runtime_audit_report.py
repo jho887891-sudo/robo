@@ -79,7 +79,7 @@ def _validate_camera_inputs(record, camera_order, index, errors):
             _err(errors, index, "camera_inputs.%s.dtype must be uint8" % name)
 
 
-def _validate_record(record, index, camera_order, dim_order, errors):
+def _validate_record(record, index, camera_order, dim_order, joint_group_order, errors):
     event = record.get("event")
     if not isinstance(event, str) or event not in EVENTS:
         _err(errors, index, "unknown event %r" % event)
@@ -130,7 +130,7 @@ def _validate_record(record, index, camera_order, dim_order, errors):
         for key in ("observation_record_index", "observation_index", "episode_index",
                     "episode_step_index", "global_step_index", "env_idx"):
             _int_field(record, key, index, errors)
-        _vector(record.get("state14"), 14, "state14", index, errors)
+        state14_valid = _vector(record.get("state14"), 14, "state14", index, errors)
         _vector(record.get("velocity14"), 14, "velocity14", index, errors)
         _vector(record.get("features42"), 42, "features42", index, errors)
         dims = record.get("state_dim_order")
@@ -155,20 +155,67 @@ def _validate_record(record, index, camera_order, dim_order, errors):
         if not isinstance(response, dict):
             _err(errors, index, "server_response must be an object")
         else:
-            _vector(response.get("action14"), 14, "server_response.action14", index, errors)
-            if not isinstance(response.get("action_dict"), dict):
+            action14_valid = _vector(
+                response.get("action14"), 14, "server_response.action14", index, errors)
+            action_dict = response.get("action_dict")
+            if not isinstance(action_dict, dict):
                 _err(errors, index, "server_response.action_dict must be an object")
+            elif joint_group_order:
+                if set(action_dict) != set(joint_group_order):
+                    _err(errors, index, "server_response.action_dict keys differ from joint_group_order")
+                flattened = []
+                flatten_valid = True
+                for group in joint_group_order:
+                    values = action_dict.get(group)
+                    expected_dim = sum(
+                        1 for name in dim_order
+                        if isinstance(name, str) and name.startswith(group + "["))
+                    if (not isinstance(values, list) or len(values) != expected_dim
+                            or not all(_is_finite_number(value) for value in values)):
+                        _err(errors, index,
+                             "server_response.action_dict.%s must contain %d finite values"
+                             % (group, expected_dim))
+                        flatten_valid = False
+                    else:
+                        flattened.extend(float(value) for value in values)
+                action14 = response.get("action14")
+                if (flatten_valid and action14_valid and len(flattened) == 14
+                        and any(abs(flattened[i] - float(action14[i])) > 1e-6
+                                for i in range(14))):
+                    _err(errors, index,
+                         "server_response.action_dict flattened values differ from action14")
             if not isinstance(response.get("decoder_info"), dict):
                 _err(errors, index, "server_response.decoder_info must be an object")
             semantics = response.get("semantics")
             if not isinstance(semantics, str) or "server-generated" not in semantics:
                 _err(errors, index, "server_response semantics must say server-generated")
 
-        for key in ("previous_server_response_action14",
-                    "observed_state_minus_previous_server_response14"):
-            value = record.get(key)
-            if value is not None:
-                _vector(value, 14, key, index, errors)
+        previous_action = record.get("previous_server_response_action14")
+        observed_delta = record.get("observed_state_minus_previous_server_response14")
+        previous_step = record.get("previous_response_global_step_index")
+        if previous_action is None:
+            if observed_delta is not None:
+                _err(errors, index, "delta must be null when no previous server response exists")
+            if previous_step is not None:
+                _err(errors, index, "previous response step index must be null without a previous response")
+        else:
+            previous_valid = _vector(
+                previous_action, 14, "previous_server_response_action14", index, errors)
+            delta_valid = _vector(
+                observed_delta, 14, "observed_state_minus_previous_server_response14", index, errors)
+            current_step = record.get("global_step_index")
+            if (not _is_int(previous_step) or not _is_int(current_step)
+                    or previous_step >= current_step):
+                _err(errors, index, "previous_response_global_step_index must precede global_step_index")
+            if state14_valid and previous_valid and delta_valid:
+                expected_delta = [
+                    float(state) - float(previous)
+                    for state, previous in zip(record["state14"], previous_action)
+                ]
+                if any(abs(float(actual) - expected) > 1e-5
+                       for actual, expected in zip(observed_delta, expected_delta)):
+                    _err(errors, index,
+                         "observed_state_minus_previous_server_response14 is inconsistent with state14 - previous response")
 
         latency = record.get("latency_ms")
         if not isinstance(latency, dict):
@@ -248,6 +295,7 @@ def audit_trace(path):
         metadata = records[0].get("metadata", {}) if records[0].get("event") == "run_start" else {}
         camera_order = metadata.get("camera_order", []) if isinstance(metadata, dict) else []
         dim_order = metadata.get("state_dim_order", []) if isinstance(metadata, dict) else []
+        joint_group_order = metadata.get("joint_group_order", []) if isinstance(metadata, dict) else []
         if (not isinstance(camera_order, list) or not camera_order
                 or not all(isinstance(x, str) and x for x in camera_order)
                 or len(set(camera_order)) != len(camera_order)):
@@ -257,12 +305,18 @@ def audit_trace(path):
                 or not all(isinstance(x, str) and x for x in dim_order)):
             errors.append("run_start metadata must include 14 state_dim_order names")
             dim_order = []
+        if (not isinstance(joint_group_order, list) or not joint_group_order
+                or not all(isinstance(x, str) and x for x in joint_group_order)
+                or len(set(joint_group_order)) != len(joint_group_order)):
+            errors.append("run_start metadata must include unique joint_group_order names")
+            joint_group_order = []
         for position, record in enumerate(records):
             idx = record.get("record_index", position)
-            _validate_record(record, idx, camera_order, dim_order, errors)
+            _validate_record(record, idx, camera_order, dim_order, joint_group_order, errors)
     else:
         camera_order = []
         dim_order = []
+        joint_group_order = []
 
     observations = {r.get("record_index"): r for r in records
                     if r.get("event") == "observation_received"
