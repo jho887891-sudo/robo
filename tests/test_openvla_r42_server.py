@@ -120,6 +120,11 @@ def test_model_constructs_without_a_gpu_and_without_loading_weights():
     assert contract["codec_mode"] == "fixed"
     assert contract["latency_phases"] == ["preprocess", "forward_total", "decode", "total"]
     assert contract["reset_scope"] == "all_envs"
+    assert contract["rate_limit"]["enabled"] is True
+    assert contract["rate_limit"]["source"] == "safety_limits.max_rate"
+    assert contract["rate_limit"]["units"] == "per-dimension state-coordinate units per second"
+    assert contract["rate_limit"]["control_dt"] == pytest.approx(0.04)
+    assert contract["rate_limit"]["client_acknowledgement"] == "UNKNOWN"
     assert contract["env_io"]["camera_order"] == ["cam_head", "cam_left_wrist",
                                                   "cam_right_wrist"]
 
@@ -147,6 +152,112 @@ def test_one_step_yields_fourteen_tokens_and_the_four_latency_phases():
     assert 0.0 <= flat[6] <= 1.0 and 0.0 <= flat[13] <= 1.0
     assert payload["stamp"]["server_span_ms"] >= 0.0
     assert payload["stamp"]["obs_iso"] != payload["stamp"]["reply_iso"]
+
+
+def test_official_model_path_enforces_rate_limit_and_reset_scoped_previous_command(monkeypatch):
+    model = _model()
+    server = model._ensure_server()
+    ids = np.full(R.N_ACTIONS, R.CODEC_WINDOW[1], dtype=np.int64)
+    monkeypatch.setattr(server, "_decode_tokens", lambda pixel_values, feat: (ids.copy(), []))
+
+    calls = []
+    original_act = server.act
+
+    def tracked_act(images, state, env_idx=0, timestamp=None, prev_cmd=None, dt=None, record=False):
+        call = {"state": np.asarray(state, np.float32).copy(),
+                "prev_cmd": None if prev_cmd is None else np.asarray(prev_cmd, np.float32).copy(),
+                "dt": dt}
+        out = original_act(images, state, env_idx=env_idx, timestamp=timestamp,
+                           prev_cmd=prev_cmd, dt=dt, record=record)
+        call["info"] = dict(out["info"])
+        call["action14"] = np.asarray(out["action"], np.float32).copy()
+        calls.append(call)
+        return out
+
+    monkeypatch.setattr(server, "act", tracked_act)
+    rate = np.asarray(model.metadata["safety_limits"]["max_rate"], np.float32)
+    lo = np.asarray(model.metadata["safety_limits"]["amin"], np.float32)
+    hi = np.asarray(model.metadata["safety_limits"]["amax"], np.float32)
+    dt = 1.0 / model.control_hz
+
+    state0 = _inside(0.5).copy()
+    model.update_obs(_obs(state=state0, seed=10))
+    first = model.get_action()
+    assert calls[0]["prev_cmd"] == pytest.approx(state0.tolist())
+    assert calls[0]["dt"] == pytest.approx(0.04)
+    assert calls[0]["info"]["dt"] == pytest.approx(dt)
+    assert calls[0]["info"]["rate_limited"] > 0
+    assert np.all(np.abs(np.asarray(first["action14"]) - state0) <= rate * dt + 1e-6)
+    assert np.all(np.asarray(first["action14"]) >= lo - 1e-5)
+    assert np.all(np.asarray(first["action14"]) <= hi + 1e-5)
+
+    state1 = state0.copy()
+    model.update_obs(_obs(state=state1, seed=11))
+    second = model.get_action()
+    assert calls[1]["prev_cmd"] == pytest.approx(first["action14"])
+    assert calls[1]["dt"] == pytest.approx(dt)
+    assert np.all(np.abs(np.asarray(second["action14"]) - np.asarray(first["action14"]))
+                  <= rate * dt + 1e-6)
+    assert np.all(np.asarray(second["action14"]) >= lo - 1e-5)
+    assert np.all(np.asarray(second["action14"]) <= hi + 1e-5)
+
+    model.reset()
+    state2 = _inside(0.4).copy()
+    model.update_obs(_obs(state=state2, seed=12))
+    third = model.get_action()
+    assert calls[2]["prev_cmd"] == pytest.approx(state2.tolist())
+    assert calls[2]["dt"] == pytest.approx(dt)
+    assert np.all(np.abs(np.asarray(third["action14"]) - state2) <= rate * dt + 1e-6)
+
+
+def test_official_model_path_refuses_missing_rate_limit_metadata():
+    meta = _meta()
+    del meta["safety_limits"]["max_rate"]
+    with pytest.raises((M.R42ModelError, R.R42Error), match="max_rate"):
+        _model(meta=meta)
+
+
+def test_official_model_path_refuses_response_without_rate_branch_evidence():
+    class _NoRateInfo(object):
+        metadata = _meta()
+        device = "cpu"
+
+        def act(self, images, state, env_idx=0, timestamp=None, prev_cmd=None, dt=None,
+                record=False):
+            return {"action": _inside(0.5), "ids": [R.CODEC_WINDOW[0]] * R.N_ACTIONS,
+                    "n_action_tokens": R.N_ACTIONS,
+                    "info": {"dt": None, "rate_limited": 0},
+                    "latency_ms": {"preprocess": 1.0, "forward_total": 2.0, "decode": 1.0,
+                                   "total": 4.0}}
+
+    model = _model()
+    model.update_obs(_obs())
+    model._server = _NoRateInfo()
+    with pytest.raises(M.R42ModelError, match="rate|dt"):
+        model.get_action()
+
+
+def test_official_model_path_refuses_action_that_exceeds_rate_bound():
+    class _UnsafeRateServer(object):
+        metadata = _meta()
+        device = "cpu"
+
+        def act(self, images, state, env_idx=0, timestamp=None, prev_cmd=None, dt=None,
+                record=False):
+            action = np.asarray(state, np.float32).copy()
+            action[0] += 0.1
+            return {"action": action, "ids": [R.CODEC_WINDOW[0]] * R.N_ACTIONS,
+                    "n_action_tokens": R.N_ACTIONS,
+                    "info": {"dt": dt, "rate_limited": 0, "unsafe": None,
+                             "rate_conflict_dims": []},
+                    "latency_ms": {"preprocess": 1.0, "forward_total": 2.0, "decode": 1.0,
+                                   "total": 4.0}}
+
+    model = _model()
+    model.update_obs(_obs(state=_inside(0.5)))
+    model._server = _UnsafeRateServer()
+    with pytest.raises(M.R42ModelError, match="max_rate \\* control_dt"):
+        model.get_action()
 
 
 def test_runtime_audit_records_state_prediction_response_and_next_observation(tmp_path, monkeypatch):
@@ -188,7 +299,13 @@ def test_runtime_audit_records_state_prediction_response_and_next_observation(tm
     assert len(steps[0]["prediction"]["residual14"]) == 14
     assert len(steps[0]["features42"]) == 42
     assert steps[0]["previous_server_response_action14"] is None
+    assert steps[0]["rate_reference_action14"] == pytest.approx(state0.tolist())
+    assert steps[0]["rate_reference_source"] == "measured_state"
     assert steps[1]["previous_server_response_action14"] == pytest.approx(first_payload["action14"])
+    assert steps[1]["rate_reference_action14"] == pytest.approx(first_payload["action14"])
+    assert steps[1]["rate_reference_source"] == "previous_server_response"
+    assert steps[0]["control_dt"] == pytest.approx(0.04)
+    assert steps[0]["rate_limit_source"] == "safety_limits.max_rate"
     expected_delta = state1 - np.asarray(first_payload["action14"], np.float32)
     assert steps[1]["observed_state_minus_previous_server_response14"] == pytest.approx(
         expected_delta.tolist())

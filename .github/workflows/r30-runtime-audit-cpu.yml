@@ -6,6 +6,11 @@ on:
       - feature/r30-runtime-audit-trace-20261025
     paths:
       - 'code/xpolicylab/policy/OpenVLA_R42/model.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_adapter.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_robodojo_adapter.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_env_io.py'
+      - 'tests/test_r42_robodojo_adapter.py'
       - 'code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py'
       - 'tools/r15_loop_dev.py'
       - 'scripts/r15_loop_pushT.sh'
@@ -18,6 +23,11 @@ on:
   pull_request:
     paths:
       - 'code/xpolicylab/policy/OpenVLA_R42/model.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_adapter.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_robodojo_adapter.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_env_io.py'
+      - 'tests/test_r42_robodojo_adapter.py'
       - 'code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py'
       - 'tools/r15_loop_dev.py'
       - 'scripts/r15_loop_pushT.sh'
@@ -44,6 +54,10 @@ jobs:
       - name: Compile changed Python files
         run: |
           python -m py_compile code/xpolicylab/policy/OpenVLA_R42/model.py
+          python -m py_compile code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py
+          python -m py_compile code/xpolicylab/policy/OpenVLA_R42/r42_adapter.py
+          python -m py_compile code/xpolicylab/policy/OpenVLA_R42/r42_robodojo_adapter.py
+          python -m py_compile code/xpolicylab/policy/OpenVLA_R42/r42_env_io.py
           python -m py_compile code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py
           python -m py_compile tools/r15_loop_dev.py
           python -m py_compile tests/test_r42_runtime_audit.py
@@ -53,8 +67,10 @@ jobs:
           python -m py_compile tests/test_r42_runtime_audit_report.py
       - name: Run audit-writer regressions
         run: pytest -q tests/test_r42_runtime_audit.py
-      - name: Run model trace integration regressions
-        run: pytest -q tests/test_openvla_r42_server.py -k runtime_audit
+      - name: Run model trace and official rate-limit integration regressions
+        run: pytest -q tests/test_openvla_r42_server.py -k 'runtime_audit or official_model_path or missing_rate_limit_metadata'
+      - name: Run standalone RoboDojo adapter regressions
+        run: pytest -q tests/test_r42_robodojo_adapter.py
       - name: Run R15 driver regressions
         run: pytest -q tests/test_r15_loop_dev.py
       - name: Run runtime audit report regressions

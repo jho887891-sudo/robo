@@ -205,6 +205,24 @@ class Model(ModelTemplate):
         self._audit_current_observation_overhead_ms = None
         self._audit_backend_ready_logged = False
         self.metadata = self._resolve_metadata()
+        safety_limits = self.metadata.get("safety_limits") or {}
+        raw_max_rate = safety_limits.get("max_rate")
+        if raw_max_rate is None:
+            raise R42ModelError(
+                "safety_limits.max_rate is required on the official Model deployment path")
+        try:
+            max_rate14 = np.asarray(raw_max_rate, dtype=np.float32)
+        except (TypeError, ValueError) as exc:
+            raise R42ModelError("safety_limits.max_rate must be a finite non-negative 14D vector: %s"
+                                % exc)
+        if (max_rate14.shape != (R.BASE_DIM,) or not np.isfinite(max_rate14).all()
+                or (max_rate14 < 0).any()):
+            raise R42ModelError(
+                "safety_limits.max_rate must be a finite non-negative 14D vector")
+        self._max_rate14 = max_rate14.copy()
+        # Per-environment previous server-generated, rate-limited response. The first step
+        # after reset is seeded from measured state; client acknowledgement is not observable.
+        self._rate_prev_cmd = {}
 
         # G12: the served codec mode is printed and asserted, never implied
         self.codec_mode = str(self.metadata["codec_mode"])
@@ -346,7 +364,8 @@ class Model(ModelTemplate):
             "error_message": str(exc)[:2000],
         })
 
-    def _audit_action_step(self, inputs, out, payload, stamp, phases):
+    def _audit_action_step(self, inputs, out, payload, stamp, phases, rate_reference,
+                           rate_reference_source):
         """Persist the generated response associated with the preceding observation record."""
         if self._audit_trace is None:
             return
@@ -378,6 +397,10 @@ class Model(ModelTemplate):
             "observation_audit_overhead_ms": self._audit_current_observation_overhead_ms,
             "state_dim_order": list(_STATE_DIM_ORDER),
             "state14": state.tolist(),
+            "rate_reference_action14": np.asarray(rate_reference, np.float32).reshape(-1).tolist(),
+            "rate_reference_source": str(rate_reference_source),
+            "rate_limit_source": "safety_limits.max_rate",
+            "control_dt": self.control_dt,
             "velocity14": np.asarray(out.get("velocity", []), np.float32).reshape(-1).tolist(),
             "features42": np.asarray(out.get("features", []), np.float32).reshape(-1).tolist(),
             "camera_inputs": camera_inputs,
@@ -554,10 +577,19 @@ class Model(ModelTemplate):
                 "checkpoint_dir": self.checkpoint_dir,
             })
             self._audit_backend_ready_logged = True
+        env_idx = int(inputs["env_idx"])
+        prev_cmd = self._rate_prev_cmd.get(env_idx)
+        rate_reference_source = (
+            "measured_state" if prev_cmd is None else "previous_server_response")
+        if prev_cmd is None:
+            prev_cmd = np.asarray(inputs["state"], dtype=np.float32).copy()
+        else:
+            prev_cmd = np.asarray(prev_cmd, dtype=np.float32).copy()
         t0 = time.perf_counter()
         try:
-            out = server.act(inputs["images"], inputs["state"], env_idx=inputs["env_idx"],
-                             timestamp=inputs["timestamp"])
+            out = server.act(inputs["images"], inputs["state"], env_idx=env_idx,
+                             timestamp=inputs["timestamp"], prev_cmd=prev_cmd,
+                             dt=self.control_dt)
         except Exception as exc:
             self._audit_action_error(inputs, "server_act", exc)
             raise
@@ -581,12 +613,47 @@ class Model(ModelTemplate):
                 raise R42ModelError("server produced %d action token(s) / %d id(s); the 42D contract "
                                     "is %d" % (payload["n_action_tokens"], len(payload["ids"]),
                                                R.N_ACTIONS))
+            rate_info = out.get("info")
+            if not isinstance(rate_info, dict):
+                raise R42ModelError("server response is missing decoder rate-limit info")
+            try:
+                reported_dt = float(rate_info.get("dt"))
+            except (TypeError, ValueError):
+                raise R42ModelError("decoder rate-limit dt is missing or invalid")
+            if (not np.isfinite(reported_dt) or reported_dt <= 0.0
+                    or abs(reported_dt - self.control_dt) > 1e-6):
+                raise R42ModelError(
+                    "decoder rate-limit dt %r != configured control_dt %.9g"
+                    % (rate_info.get("dt"), self.control_dt))
+            rate_limited = rate_info.get("rate_limited")
+            if (isinstance(rate_limited, bool)
+                    or not isinstance(rate_limited, (int, np.integer))
+                    or int(rate_limited) < 0):
+                raise R42ModelError("decoder rate_limited must be an integer >= 0")
+            if rate_info.get("unsafe") is not None or rate_info.get("rate_conflict_dims"):
+                raise R42ModelError("decoder reported an unsafe rate/physical-bound conflict")
+            action14 = np.asarray(payload["action14"], dtype=np.float32)
+            prev14 = np.asarray(prev_cmd, dtype=np.float32)
+            lo = np.asarray(self.metadata["safety_limits"]["amin"], dtype=np.float32)
+            hi = np.asarray(self.metadata["safety_limits"]["amax"], dtype=np.float32)
+            if (action14.shape != (R.BASE_DIM,) or not np.isfinite(action14).all()
+                    or not np.all(action14 >= lo - 1e-5)
+                    or not np.all(action14 <= hi + 1e-5)):
+                raise R42ModelError("server action violates the finite 14D physical-bound contract")
+            max_step = self._max_rate14 * self.control_dt
+            if np.any(np.abs(action14 - prev14) > max_step + 1e-5):
+                raise R42ModelError(
+                    "server action violates max_rate * control_dt relative to prev_cmd")
         except Exception as exc:
             self._audit_action_error(inputs, "response_contract", exc)
             raise
         # Log only after the existing action-token contract passes; an enabled trace failure is
         # fatal so the audited run cannot silently continue without evidence.
-        self._audit_action_step(inputs, out, payload, stamp, phases)
+        self._audit_action_step(inputs, out, payload, stamp, phases, prev_cmd,
+                                rate_reference_source)
+        # Only latch a command after it passes the response contract and audit persistence.
+        # The trace still cannot prove that the client accepted or physically executed it.
+        self._rate_prev_cmd[env_idx] = np.asarray(payload["action14"], dtype=np.float32).copy()
         self._n_steps += 1
         self.last_payload = payload
         return payload
@@ -601,6 +668,7 @@ class Model(ModelTemplate):
         env_idx, so a per-env reset would leak history across episodes."""
         if self._server is not None:
             self._server.reset_all()
+        self._rate_prev_cmd.clear()
         self._inputs = None
         self.n_resets += 1
         self._audit_episode_index += 1
@@ -640,5 +708,16 @@ class Model(ModelTemplate):
                 "lora_sha256": self.metadata["lora_sha256"],
                 "projector_sha256": self.metadata["projector_sha256"],
                 "reset_scope": "all_envs",
+                "rate_limit": {
+                    "enabled": True,
+                    "source": "safety_limits.max_rate",
+                    "units": "per-dimension state-coordinate units per second",
+                    "control_dt": self.control_dt,
+                    "control_hz": self.control_hz,
+                    "previous_command_source": (
+                        "previous server-generated rate-limited response; first step uses measured state"),
+                    "reset_scope": "all_envs",
+                    "client_acknowledgement": "UNKNOWN",
+                },
                 "n_steps": self._n_steps,
                 "n_resets": self.n_resets}
