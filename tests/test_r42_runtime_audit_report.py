@@ -436,3 +436,42 @@ def test_schema_v1_trace_remains_readable_but_cannot_certify_rate_compliance(tmp
     assert report["gates"]["rate_limit_branch_active"] == "PASS"
     assert report["gates"]["rate_limit_compliance"] == "BLOCKED"
     assert "reference vectors" in report["gate_reasons"]["rate_limit_compliance"]
+
+
+
+def test_audit_report_rejects_rate_reference_not_linked_to_prior_action(tmp_path):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()
+    second_state = [value + 0.1 for value in STATE]
+    second_observation = copy.deepcopy(rows[2])
+    second_observation.update({
+        "record_index": 5,
+        "observation_index": 1,
+        "episode_step_index": 1,
+        "global_step_index": 1,
+        "state14": second_state,
+    })
+    second_action = copy.deepcopy(rows[4])
+    second_action.update({
+        "record_index": 6,
+        "observation_record_index": 5,
+        "observation_index": 1,
+        "episode_step_index": 1,
+        "global_step_index": 1,
+        "state14": second_state,
+        "rate_reference_action14": STATE,
+        "rate_reference_source": "previous_server_response",
+        "previous_server_response_action14": ACTION,
+        "previous_response_global_step_index": 0,
+        "observed_state_minus_previous_server_response14": [
+            state - action for state, action in zip(second_state, ACTION)
+        ],
+    })
+    rows.extend([second_observation, second_action])
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "FAIL"
+    assert any("rate reference differs from prior action_step" in error
+               for error in report["errors"])
