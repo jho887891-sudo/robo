@@ -120,6 +120,11 @@ def test_model_constructs_without_a_gpu_and_without_loading_weights():
     assert contract["codec_mode"] == "fixed"
     assert contract["latency_phases"] == ["preprocess", "forward_total", "decode", "total"]
     assert contract["reset_scope"] == "all_envs"
+    assert contract["rate_limit"]["enabled"] is True
+    assert contract["rate_limit"]["source"] == "safety_limits.max_rate"
+    assert contract["rate_limit"]["units"] == "per-dimension state-coordinate units per second"
+    assert contract["rate_limit"]["control_dt"] == pytest.approx(0.04)
+    assert contract["rate_limit"]["client_acknowledgement"] == "UNKNOWN"
     assert contract["env_io"]["camera_order"] == ["cam_head", "cam_left_wrist",
                                                   "cam_right_wrist"]
 
