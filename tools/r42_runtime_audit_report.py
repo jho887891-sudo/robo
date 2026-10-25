@@ -315,10 +315,11 @@ def audit_trace(path):
     first_observation = next(iter(observations.values()), None)
     first_ref = first_observation.get("record_index") if first_observation else None
     first_linked = terminal_by_observation.get(first_ref, set()) if first_observation else set()
-    reset_episodes = {r.get("episode_index") for r in resets
-                      if _is_int(r.get("episode_index"))}
-    post_reset = bool(first_observation and
-                      first_observation.get("episode_index") in reset_episodes)
+    post_reset = bool(first_observation and any(
+        _is_int(r.get("record_index"))
+        and r.get("record_index") < first_observation.get("record_index")
+        and r.get("episode_index") == first_observation.get("episode_index")
+        for r in resets))
     first_response = "PASS" if "action_step" in first_linked else "BLOCKED"
     gates = {
         "first_observation": "PASS" if first_observation else "BLOCKED",
@@ -349,6 +350,11 @@ def audit_trace(path):
         integrity = "PARTIAL"
     else:
         integrity = "PASS"
+    if integrity != "PASS":
+        for gate in ("first_observation", "post_reset_observation", "first_server_response"):
+            gates[gate] = "BLOCKED"
+            gate_reasons[gate] = (
+                "trace integrity is %s; this gate cannot be certified" % integrity)
     if integrity == "FAIL":
         outcome = "INVALID"
     elif integrity == "PARTIAL" or unresolved:
