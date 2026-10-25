@@ -40,7 +40,7 @@ The separate `R42RoboDojoAdapter` path should remain behaviorally consistent, bu
 
 1. **First action:** stub the server, provide measured state (S_0), and prove the actual model call receives `prev_cmd=S_0` and `dt=control_dt).
 2. **Second action:** prove the actual model call receives the previous rate-limited 14D command, not the raw model target or a stale episode command.
-3. **Rate bound:** for every dimension, assert (|A_t - A_{t-1}| leq max\_rate \cdot dt + tolerance).
+3. **Rate bound:** for every dimension, assert `abs(A_t - A_{t-1}) <= max_rate * dt + tolerance`.
 4. **Physical bound:** simultaneously assert `amin <= A_t <= amax` for all 14 dimensions.
 5. **Reset:** after reset, the first rate reference is the new measured state; no previous episode command leaks.
 6. **Failure modes:** invalid `dt`, malformed/missing `max_rate`, out-of-range previous command and incompatible bounds fail closed with the documented exception/hold policy.
