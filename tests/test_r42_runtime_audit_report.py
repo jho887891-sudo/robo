@@ -242,6 +242,8 @@ def test_post_reset_gate_requires_reset_record_before_first_observation(tmp_path
     rows = valid_rows()
     observation = rows[2]
     reset = rows[1]
+    observation["record_index"] = 1
+    reset["record_index"] = 2
     rows[1] = observation
     rows[2] = reset
     rows[-1]["observation_record_index"] = observation["record_index"]
