@@ -199,6 +199,8 @@ class Model(ModelTemplate):
         self._audit_prev_response_action14 = None
         self._audit_prev_response_global_step_index = None
         self._audit_current_observation_record_index = None
+        self._audit_current_observation_index = None
+        self._audit_observation_index = 0
         self._audit_current_camera_inputs = None
         self._audit_backend_ready_logged = False
         self.metadata = self._resolve_metadata()
@@ -278,6 +280,7 @@ class Model(ModelTemplate):
             }
         record = self._audit_trace.write({
             "event": "observation_received",
+            "observation_index": int(self._audit_observation_index),
             "episode_index": int(self._audit_episode_index),
             "episode_step_index": int(self._audit_episode_step),
             "global_step_index": int(self._n_steps),
@@ -292,6 +295,8 @@ class Model(ModelTemplate):
             "raw_images_persisted": False,
         })
         self._audit_current_observation_record_index = int(record["record_index"])
+        self._audit_current_observation_index = int(self._audit_observation_index)
+        self._audit_observation_index += 1
         self._audit_current_camera_inputs = camera_inputs
 
     def _audit_action_error(self, inputs, stage, exc):
@@ -305,13 +310,14 @@ class Model(ModelTemplate):
             "global_step_index": int(self._n_steps),
             "env_idx": int(inputs["env_idx"]),
             "observation_record_index": self._audit_current_observation_record_index,
+            "observation_index": self._audit_current_observation_index,
             "stage": str(stage),
             "error_type": type(exc).__name__,
             "error_message": str(exc)[:2000],
         })
 
     def _audit_action_step(self, inputs, out, payload, stamp, phases):
-        """Persist one server-boundary observation and the response generated from it."""
+        """Persist the generated response associated with the preceding observation record."""
         if self._audit_trace is None:
             return
 
@@ -326,6 +332,7 @@ class Model(ModelTemplate):
         self._audit_trace.write({
             "event": "action_step",
             "observation_record_index": self._audit_current_observation_record_index,
+            "observation_index": self._audit_current_observation_index,
             "episode_index": int(self._audit_episode_index),
             "episode_step_index": int(self._audit_episode_step),
             "global_step_index": int(self._n_steps),
@@ -498,7 +505,12 @@ class Model(ModelTemplate):
         """One control step -> 4-key absolute joint action dict + the four latency phases."""
         if self._inputs is None:
             raise R42ModelError("get_action() requires a preceding update_obs(observation)")
-        server = self._ensure_server()
+        inputs = self._inputs
+        try:
+            server = self._ensure_server()
+        except Exception as exc:
+            self._audit_action_error(inputs, "backend_load", exc)
+            raise
         if self._audit_trace is not None and not self._audit_backend_ready_logged:
             self._audit_trace.write({
                 "event": "backend_ready",
@@ -508,7 +520,6 @@ class Model(ModelTemplate):
                 "checkpoint_dir": self.checkpoint_dir,
             })
             self._audit_backend_ready_logged = True
-        inputs = self._inputs
         t0 = time.perf_counter()
         try:
             out = server.act(inputs["images"], inputs["state"], env_idx=inputs["env_idx"],
@@ -516,25 +527,29 @@ class Model(ModelTemplate):
         except Exception as exc:
             self._audit_action_error(inputs, "server_act", exc)
             raise
-        phases = _check_phases(out.get("latency_ms"))
-        action = E.cmd14_to_action_dict(out["action"])
-        stamp = {"obs_iso": _iso(self._t_obs_wall),
-                 "reply_iso": _iso(time.time()),
-                 "server_span_ms": (time.perf_counter() - self._t_obs_perf) * 1e3}
-        payload = {"actions": action,
-                   "latency_ms": phases,
-                   "stamp": stamp,
-                   "n_action_tokens": int(out.get("n_action_tokens", -1)),
-                   "codec_mode": self.codec_mode,
-                   "env_idx": int(inputs["env_idx"]),
-                   "action14": [float(x) for x in np.asarray(out["action"], np.float32).reshape(-1)],
-                   "ids": [int(x) for x in np.asarray(out.get("ids", []), np.int64).reshape(-1)],
-                   "bins": [int(x) for x in np.asarray(out.get("bins", []), np.int64).reshape(-1)],
-                   "model_total_ms": (time.perf_counter() - t0) * 1e3}
-        if payload["n_action_tokens"] != R.N_ACTIONS or len(payload["ids"]) != R.N_ACTIONS:
-            raise R42ModelError("server produced %d action token(s) / %d id(s); the 42D contract "
-                                "is %d" % (payload["n_action_tokens"], len(payload["ids"]),
-                                           R.N_ACTIONS))
+        try:
+            phases = _check_phases(out.get("latency_ms"))
+            action = E.cmd14_to_action_dict(out["action"])
+            stamp = {"obs_iso": _iso(self._t_obs_wall),
+                     "reply_iso": _iso(time.time()),
+                     "server_span_ms": (time.perf_counter() - self._t_obs_perf) * 1e3}
+            payload = {"actions": action,
+                       "latency_ms": phases,
+                       "stamp": stamp,
+                       "n_action_tokens": int(out.get("n_action_tokens", -1)),
+                       "codec_mode": self.codec_mode,
+                       "env_idx": int(inputs["env_idx"]),
+                       "action14": [float(x) for x in np.asarray(out["action"], np.float32).reshape(-1)],
+                       "ids": [int(x) for x in np.asarray(out.get("ids", []), np.int64).reshape(-1)],
+                       "bins": [int(x) for x in np.asarray(out.get("bins", []), np.int64).reshape(-1)],
+                       "model_total_ms": (time.perf_counter() - t0) * 1e3}
+            if payload["n_action_tokens"] != R.N_ACTIONS or len(payload["ids"]) != R.N_ACTIONS:
+                raise R42ModelError("server produced %d action token(s) / %d id(s); the 42D contract "
+                                    "is %d" % (payload["n_action_tokens"], len(payload["ids"]),
+                                               R.N_ACTIONS))
+        except Exception as exc:
+            self._audit_action_error(inputs, "response_contract", exc)
+            raise
         # Log only after the existing action-token contract passes; an enabled trace failure is
         # fatal so the audited run cannot silently continue without evidence.
         self._audit_action_step(inputs, out, payload, stamp, phases)
@@ -559,6 +574,8 @@ class Model(ModelTemplate):
         self._audit_prev_response_action14 = None
         self._audit_prev_response_global_step_index = None
         self._audit_current_observation_record_index = None
+        self._audit_current_observation_index = None
+        self._audit_observation_index = 0
         self._audit_current_camera_inputs = None
         if self._audit_trace is not None:
             self._audit_trace.write({
