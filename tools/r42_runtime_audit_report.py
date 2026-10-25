@@ -2,8 +2,8 @@
 """Validate R42 runtime JSONL evidence without repairing or rewriting the source trace.
 
 Exit codes:
-  0: trace is structurally valid and every observation has an action or recorded action error
-  2: evidence is partial (e.g. interrupted JSONL tail or an unresolved observation)
+  0: trace is valid, complete, and has no action errors; the first server response is present
+  2: evidence is partial, an action failed, or a required first-action gate is blocked
   3: trace is invalid (malformed records, schema violations, or broken references)
   4: report output path already exists or cannot be written safely
 """
@@ -447,7 +447,12 @@ def main(argv=None):
     print(rendered, end="")
     if report["trace_integrity"] == "FAIL":
         return 3
-    if report["trace_integrity"] == "PARTIAL" or report["run_outcome"] == "PARTIAL":
+    if (report["trace_integrity"] == "PARTIAL"
+            or report["run_outcome"] == "PARTIAL"
+            or report["counts"]["action_errors"] > 0
+            or report["gates"]["first_observation"] != "PASS"
+            or report["gates"]["post_reset_observation"] != "PASS"
+            or report["gates"]["first_server_response"] != "PASS"):
         return 2
     return 0
 
