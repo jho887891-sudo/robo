@@ -1,0 +1,67 @@
+name: R30 runtime audit CPU tests
+
+on:
+  push:
+    branches:
+      - feature/r30-runtime-audit-trace-20261025
+    paths:
+      - 'code/xpolicylab/policy/OpenVLA_R42/model.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py'
+      - 'tools/r15_loop_dev.py'
+      - 'scripts/r15_loop_pushT.sh'
+      - 'tests/test_r42_runtime_audit.py'
+      - 'tests/test_openvla_r42_server.py'
+      - 'tests/test_r15_loop_dev.py'
+      - 'tools/r42_runtime_audit_report.py'
+      - 'tests/test_r42_runtime_audit_report.py'
+      - '.github/workflows/r30-runtime-audit-cpu.yml'
+  pull_request:
+    paths:
+      - 'code/xpolicylab/policy/OpenVLA_R42/model.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py'
+      - 'tools/r15_loop_dev.py'
+      - 'scripts/r15_loop_pushT.sh'
+      - 'tests/test_r42_runtime_audit.py'
+      - 'tests/test_openvla_r42_server.py'
+      - 'tests/test_r15_loop_dev.py'
+      - 'tools/r42_runtime_audit_report.py'
+      - 'tests/test_r42_runtime_audit_report.py'
+      - '.github/workflows/r30-runtime-audit-cpu.yml'
+
+jobs:
+  runtime-audit-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install CPU test dependencies
+        run: python -m pip install numpy==1.26.4 pytest==8.3.5
+      - name: Compile changed Python files
+        run: |
+          python -m py_compile code/xpolicylab/policy/OpenVLA_R42/model.py
+          python -m py_compile code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py
+          python -m py_compile tools/r15_loop_dev.py
+          python -m py_compile tests/test_r42_runtime_audit.py
+          python -m py_compile tests/test_openvla_r42_server.py
+          python -m py_compile tests/test_r15_loop_dev.py
+          python -m py_compile tools/r42_runtime_audit_report.py
+          python -m py_compile tests/test_r42_runtime_audit_report.py
+      - name: Run audit-writer regressions
+        run: pytest -q tests/test_r42_runtime_audit.py
+      - name: Run model trace integration regressions
+        run: pytest -q tests/test_openvla_r42_server.py -k runtime_audit
+      - name: Run R15 driver regressions
+        run: pytest -q tests/test_r15_loop_dev.py
+      - name: Run runtime audit report regressions
+        run: pytest -q tests/test_r42_runtime_audit_report.py
+      - name: Validate launcher shell syntax
+        run: bash -n scripts/r15_loop_pushT.sh
+      - name: Declare execution boundary
+        run: |
+          echo 'CPU_ONLY: no model weights, CUDA, HDF5, checkpoint mutation, simulator, or robot execution.'
+          echo 'This workflow validates audit logging and launch metadata contracts only.'
