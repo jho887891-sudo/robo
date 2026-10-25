@@ -252,6 +252,11 @@ class Model(ModelTemplate):
                 self.metadata["normalizer"], sort_keys=True, separators=(",", ":"),
                 allow_nan=False).encode("utf-8")
             normalizer_payload_sha256 = hashlib.sha256(canonical_normalizer).hexdigest()
+        safety_limits = self.metadata.get("safety_limits") or {}
+        configured_rate = safety_limits.get("max_rate")
+        configured_rate14 = (
+            None if configured_rate is None else
+            [float(x) for x in np.asarray(configured_rate, np.float32).reshape(-1)])
         run_metadata = {
             "policy_name": self.policy_name,
             "checkpoint_dir": self.checkpoint_dir,
@@ -266,6 +271,8 @@ class Model(ModelTemplate):
             "task_id": self.metadata.get("task_id"),
             "device": self.device,
             "control_hz": self.control_hz,
+            "control_dt": self.control_dt,
+            "configured_max_rate14": configured_rate14,
             "codec_mode": self.codec_mode,
             "normalizer_sha256": self.metadata.get("normalizer_sha256"),
             "lora_sha256": self.metadata.get("lora_sha256"),
