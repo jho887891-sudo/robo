@@ -13,7 +13,7 @@ import threading
 import time
 
 
-SCHEMA_VERSION = "r42-runtime-audit/v1"
+SCHEMA_VERSION = "r42-runtime-audit/v2"
 _RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 
 
