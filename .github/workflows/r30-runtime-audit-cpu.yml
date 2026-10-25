@@ -54,7 +54,7 @@ jobs:
       - name: Run audit-writer regressions
         run: pytest -q tests/test_r42_runtime_audit.py
       - name: Run model trace integration regressions
-        run: pytest -q tests/test_openvla_r42_server.py -k runtime_audit
+        run: pytest -q tests/test_openvla_r42_server.py -k 'runtime_audit or official_model_path or missing_rate_limit_metadata'
       - name: Run R15 driver regressions
         run: pytest -q tests/test_r15_loop_dev.py
       - name: Run runtime audit report regressions
