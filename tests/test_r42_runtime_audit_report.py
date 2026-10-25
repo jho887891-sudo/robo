@@ -358,6 +358,8 @@ def test_audit_report_rejects_incorrect_previous_response_delta(tmp_path):
         "episode_step_index": 1,
         "global_step_index": 1,
         "state14": second_state,
+        "rate_reference_action14": ACTION,
+        "rate_reference_source": "previous_server_response",
         "previous_server_response_action14": ACTION,
         "previous_response_global_step_index": 0,
         "observed_state_minus_previous_server_response14": [
