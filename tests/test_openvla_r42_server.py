@@ -277,8 +277,10 @@ def test_runtime_audit_records_state_prediction_response_and_next_observation(tm
     assert len(steps[0]["features42"]) == 42
     assert steps[0]["previous_server_response_action14"] is None
     assert steps[0]["rate_reference_action14"] == pytest.approx(state0.tolist())
+    assert steps[0]["rate_reference_source"] == "measured_state"
     assert steps[1]["previous_server_response_action14"] == pytest.approx(first_payload["action14"])
     assert steps[1]["rate_reference_action14"] == pytest.approx(first_payload["action14"])
+    assert steps[1]["rate_reference_source"] == "previous_server_response"
     assert steps[0]["control_dt"] == pytest.approx(0.04)
     assert steps[0]["rate_limit_source"] == "safety_limits.max_rate"
     expected_delta = state1 - np.asarray(first_payload["action14"], np.float32)
