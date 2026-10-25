@@ -105,3 +105,33 @@ def test_dry_run_never_launches_the_simulator(tmp_path):
     assert rec["dry_run"] is True
     assert "robodojo.sh client" in rec["cmd"]
     assert not (tmp_path / "l.jsonl").exists()      # nothing booked for a dry run
+
+
+
+def test_dry_run_accepts_shared_run_id_for_server_trace_and_client_ledger(tmp_path):
+    out = tmp_path / "o.json"
+    run_id = "r15loop-push_T-s1-20261025T120000Z-port19000"
+    r = subprocess.run([
+        sys.executable, os.path.join(REPO, "tools", "r15_loop_dev.py"),
+        "--task", "push_T", "--port", "19000", "--episodes", "1",
+        "--out", str(out), "--ledger", str(tmp_path / "ledger.jsonl"),
+        "--dry-run", "--run-id", run_id,
+    ], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    rec = json.loads(r.stdout)
+    assert rec["robodojo_run_id"] == run_id
+    assert rec["dry_run"] is True
+    assert not (tmp_path / "ledger.jsonl").exists()
+
+
+def test_explicit_run_id_rejects_shell_unsafe_characters(tmp_path):
+    out = tmp_path / "o.json"
+    r = subprocess.run([
+        sys.executable, os.path.join(REPO, "tools", "r15_loop_dev.py"),
+        "--task", "push_T", "--port", "19000", "--episodes", "1",
+        "--out", str(out), "--ledger", str(tmp_path / "ledger.jsonl"),
+        "--dry-run", "--run-id", "bad run;touch /tmp/pwned",
+    ], capture_output=True, text=True)
+    assert r.returncode != 0
+    assert "run-id" in (r.stdout + r.stderr).lower()
+    assert not (tmp_path / "ledger.jsonl").exists()
