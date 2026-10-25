@@ -58,6 +58,9 @@ def valid_rows():
             "camera_order": CAMERAS,
             "state_dim_order": DIM_NAMES,
             "joint_group_order": JOINT_GROUPS,
+            "configured_max_rate14": [0.5] * 14,
+            "control_dt": 0.04,
+            "control_hz": 25.0,
             "raw_images_persisted": False,
             "camera_state_wallclock_sync": "UNKNOWN",
         }),
@@ -83,7 +86,7 @@ def valid_rows():
             prediction={"token_ids14": list(range(14)), "bins14": list(range(14)),
                         "residual14": [0.0] * 14},
             server_response={"action14": ACTION, "action_dict": action_dict_from14(ACTION),
-                             "decoder_info": {"clipped_joint": 0},
+                             "decoder_info": {"clipped_joint": 0, "rate_limited": 2, "dt": 0.04},
                              "semantics": "server-generated response; execution is not observed"},
             previous_server_response_action14=None, previous_response_global_step_index=None,
             observed_state_minus_previous_server_response14=None,
@@ -114,6 +117,7 @@ def test_audit_report_accepts_complete_trace_but_keeps_execution_unknown(tmp_pat
     }
     assert report["gates"]["first_observation"] == "PASS"
     assert report["gates"]["first_server_response"] == "PASS"
+    assert report["gates"]["rate_limit_branch_active"] == "PASS"
     assert report["gates"]["client_acknowledgement"] == "UNKNOWN"
     assert report["gates"]["camera_state_sync"] == "UNKNOWN"
     assert report["gates"]["robot_actuation"] == "UNKNOWN"
@@ -363,3 +367,22 @@ def test_audit_report_rejects_incorrect_previous_response_delta(tmp_path):
     assert report["trace_integrity"] == "FAIL"
     assert any("observed_state_minus_previous_server_response14" in error
                for error in report["errors"])
+
+
+
+def test_rate_limit_gate_blocks_when_configured_rule_is_bypassed(tmp_path, capsys):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()
+    rows[-1]["server_response"]["decoder_info"]["dt"] = None
+    rows[-1]["server_response"]["decoder_info"]["rate_limited"] = 0
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+    assert report["trace_integrity"] == "PASS"
+    assert report["gates"]["rate_limit_branch_active"] == "BLOCKED"
+    assert "dt" in report["gate_reasons"]["rate_limit_branch_active"].lower()
+
+    result = main(["--input", str(path)])
+    assert result == 2
+    cli_report = json.loads(capsys.readouterr().out)
+    assert cli_report["gates"]["rate_limit_branch_active"] == "BLOCKED"
