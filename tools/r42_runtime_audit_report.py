@@ -199,8 +199,15 @@ def _validate_record(record, index, camera_order, dim_order, joint_group_order, 
                                 for i in range(14))):
                     _err(errors, index,
                          "server_response.action_dict flattened values differ from action14")
-            if not isinstance(response.get("decoder_info"), dict):
+            decoder_info = response.get("decoder_info")
+            if not isinstance(decoder_info, dict):
                 _err(errors, index, "server_response.decoder_info must be an object")
+            else:
+                if "dt" not in decoder_info:
+                    _err(errors, index, "server_response.decoder_info.dt is required (null means rate branch skipped)")
+                rate_limited = decoder_info.get("rate_limited")
+                if not _is_int(rate_limited) or rate_limited < 0:
+                    _err(errors, index, "server_response.decoder_info.rate_limited must be an integer >= 0")
             semantics = response.get("semantics")
             if not isinstance(semantics, str) or "server-generated" not in semantics:
                 _err(errors, index, "server_response semantics must say server-generated")
@@ -325,6 +332,17 @@ def audit_trace(path):
                 or len(set(joint_group_order)) != len(joint_group_order)):
             errors.append("run_start metadata must include unique joint_group_order names")
             joint_group_order = []
+        configured_rate = metadata.get("configured_max_rate14") if isinstance(metadata, dict) else None
+        if configured_rate is not None and (
+                not isinstance(configured_rate, list) or len(configured_rate) != 14
+                or not all(_is_finite_number(x) and float(x) >= 0 for x in configured_rate)):
+            errors.append("run_start configured_max_rate14 must be null or 14 finite non-negative values")
+        control_dt = metadata.get("control_dt") if isinstance(metadata, dict) else None
+        control_hz = metadata.get("control_hz") if isinstance(metadata, dict) else None
+        if (not _is_finite_number(control_dt) or float(control_dt) <= 0
+                or not _is_finite_number(control_hz) or float(control_hz) <= 0
+                or abs(float(control_dt) * float(control_hz) - 1.0) > 1e-4):
+            errors.append("run_start metadata must include consistent positive control_dt and control_hz")
         for position, record in enumerate(records):
             idx = record.get("record_index", position)
             _validate_record(record, idx, camera_order, dim_order, joint_group_order, errors)
@@ -332,6 +350,7 @@ def audit_trace(path):
         camera_order = []
         dim_order = []
         joint_group_order = []
+        metadata = {}
 
     observations = {r.get("record_index"): r for r in records
                     if r.get("event") == "observation_received"
@@ -390,10 +409,40 @@ def audit_trace(path):
         and r.get("episode_index") == first_observation.get("episode_index")
         for r in resets))
     first_response = "PASS" if "action_step" in first_linked else "BLOCKED"
+    configured_rate = metadata.get("configured_max_rate14") if isinstance(metadata, dict) else None
+    control_dt = metadata.get("control_dt") if isinstance(metadata, dict) else None
+    rate_config_valid = (
+        isinstance(configured_rate, list) and len(configured_rate) == 14
+        and all(_is_finite_number(x) and float(x) >= 0 for x in configured_rate)
+        and _is_finite_number(control_dt) and float(control_dt) > 0)
+    action_rate_info = [
+        (r.get("server_response") or {}).get("decoder_info")
+        for r in action_steps
+    ]
+    rate_steps_active = bool(action_rate_info) and all(
+        isinstance(info, dict)
+        and _is_finite_number(info.get("dt"))
+        and float(info["dt"]) > 0
+        and abs(float(info["dt"]) - float(control_dt)) <= 1e-6
+        and _is_int(info.get("rate_limited")) and info["rate_limited"] >= 0
+        for info in action_rate_info)
+    rate_gate = "PASS" if rate_config_valid and rate_steps_active else "BLOCKED"
+    if not rate_config_valid:
+        rate_reason = "run_start metadata has no valid configured_max_rate14/control_dt"
+    elif not action_rate_info:
+        rate_reason = "no successful action_step exists to prove the decoder rate branch was entered"
+    elif any(not isinstance(info, dict) or info.get("dt") is None for info in action_rate_info):
+        rate_reason = ("one or more decoder_info.dt values are null; the decoder skips rate limiting "
+                       "when prev_cmd and dt are both absent")
+    elif not rate_steps_active:
+        rate_reason = "decoder dt does not match the configured control_dt or rate metadata is invalid"
+    else:
+        rate_reason = "configured max_rate exists and every successful action reports the expected positive dt"
     gates = {
         "first_observation": "PASS" if first_observation else "BLOCKED",
         "post_reset_observation": "PASS" if post_reset else "BLOCKED",
         "first_server_response": first_response,
+        "rate_limit_branch_active": rate_gate,
         "client_acknowledgement": "UNKNOWN",
         "camera_state_sync": "UNKNOWN",
         "robot_actuation": "UNKNOWN",
@@ -407,6 +456,7 @@ def audit_trace(path):
         "first_server_response": ("first observation has a linked server-generated action_step"
                                   if first_response == "PASS"
                                   else "first observation has no linked successful action_step"),
+        "rate_limit_branch_active": rate_reason,
         "client_acknowledgement": "the server trace cannot observe client acceptance",
         "camera_state_sync": "camera/state wall-clock synchronization is not established by this schema",
         "robot_actuation": "server-generated actions do not prove simulator or robot execution",
@@ -420,7 +470,8 @@ def audit_trace(path):
     else:
         integrity = "PASS"
     if integrity != "PASS":
-        for gate in ("first_observation", "post_reset_observation", "first_server_response"):
+        for gate in ("first_observation", "post_reset_observation", "first_server_response",
+                     "rate_limit_branch_active"):
             gates[gate] = "BLOCKED"
             gate_reasons[gate] = (
                 "trace integrity is %s; this gate cannot be certified" % integrity)
@@ -491,6 +542,7 @@ def main(argv=None):
                 "first_observation": "BLOCKED",
                 "post_reset_observation": "BLOCKED",
                 "first_server_response": "BLOCKED",
+                "rate_limit_branch_active": "BLOCKED",
                 "client_acknowledgement": "UNKNOWN",
                 "camera_state_sync": "UNKNOWN",
                 "robot_actuation": "UNKNOWN",
@@ -500,6 +552,7 @@ def main(argv=None):
                 "first_observation": "trace file was unavailable",
                 "post_reset_observation": "trace file was unavailable",
                 "first_server_response": "trace file was unavailable",
+                "rate_limit_branch_active": "trace file was unavailable; rate limiting cannot be certified",
                 "client_acknowledgement": "the server trace cannot observe client acceptance",
                 "camera_state_sync": "camera/state wall-clock synchronization is not established",
                 "robot_actuation": "server-generated actions do not prove execution",
@@ -535,7 +588,8 @@ def main(argv=None):
             or report["counts"]["action_errors"] > 0
             or report["gates"]["first_observation"] != "PASS"
             or report["gates"]["post_reset_observation"] != "PASS"
-            or report["gates"]["first_server_response"] != "PASS"):
+            or report["gates"]["first_server_response"] != "PASS"
+            or report["gates"]["rate_limit_branch_active"] != "PASS"):
         return 2
     return 0
 
