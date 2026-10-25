@@ -28,16 +28,6 @@ The call-path bug is VERIFIED. The contract below wires the existing checkpoint 
 - **Single enforcement point:** the official `Model.get_action -> R42DeployServer.act -> decode_with_metadata -> decode_command` path applies the decoder's limiter. `R42RoboDojoAdapter` remains a separate standalone wrapper path; do not stack it around the official `Model` path.
 - **Failure:** missing/malformed `max_rate`, missing or mismatched decoder `dt`, non-finite action, physical-bound violation, rate-bound violation, or a reported decoder conflict fails closed. No silent fallback to physical bounds alone on the official path.
 
-Original recommended-contract notes:
-
-- **Rate source:** use the checkpoint's frozen `metadata["safety_limits"]["max_rate"]`; do not fit or tune it on DEV/held-out episodes.
-- **Units:** define each component as coordinate-units per second. Arm-joint dimensions must use the simulator's verified joint-coordinate unit; gripper dimensions use normalized-gripper units per second. If the checkpoint metadata cannot express or document this distinction, fix the schema/docs before claiming physical-unit semantics.
-- **Time step:** use the frozen control period `dt = 1 / control_hz` only if the simulator contract confirms one policy response corresponds to one held control period. If the actual command interval is different, measure and define that contract before choosing elapsed-wall-time semantics.
-- **Previous command:** seed the first step of each episode from the measured 14D state; subsequent steps use the previous rate-limited command emitted by the same policy environment. This matches the existing wrapper's semantics. A server-generated command is not proof of client acknowledgement or actuator execution.
-- **Reset:** clear the held command and seed again from the first post-reset measured state. Never carry a previous command across episodes.
-- **Single enforcement point:** the official server/model path must not depend on an uninvoked client wrapper. Choose one rate-limiting owner and explicitly prevent accidental double limiting if the wrapper path is used elsewhere.
-- **Failure:** out-of-box previous command, non-finite/non-positive `dt`, malformed rate vector, or incompatible physical/rate bounds must fail closed. Do not silently fall back to “physical bounds only” in the official deployment path when rate limiting is required.
-
 ## 3. Minimal implementation proposal
 
 **Implementation:** `Model` now requires a valid 14D checkpoint rate vector, passes the reset-scoped previous command and configured `control_dt` to `server.act`, checks decoder branch evidence and independently verifies physical/rate bounds, then latches the returned command only after the response contract and audit persistence succeed. The 14D output shape, joint order, normalization, token codec, physical bounds and checkpoint rate values are unchanged.
