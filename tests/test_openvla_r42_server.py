@@ -198,6 +198,31 @@ def test_runtime_audit_records_state_prediction_response_and_next_observation(tm
     assert any(row["event"] == "backend_ready" for row in rows)
 
 
+def test_runtime_audit_persists_observation_before_backend_failure(tmp_path, monkeypatch):
+    path = tmp_path / "runtime.jsonl"
+    monkeypatch.setenv("R42_AUDIT_LOG_PATH", str(path))
+    monkeypatch.setenv("R42_AUDIT_RUN_ID", "r30-failure-evidence-001")
+    model = _model(backend=StubBackend(bail=True))
+    model.reset()
+    state = _inside(0.5).copy()
+    model.update_obs(_obs(state=state, seed=2))
+
+    with pytest.raises(RuntimeError, match="backend exploded"):
+        model.get_action()
+    model._audit_trace.close()
+
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    observations = [row for row in rows if row["event"] == "observation_received"]
+    errors = [row for row in rows if row["event"] == "action_error"]
+    assert len(observations) == 1
+    assert observations[0]["state14"] == pytest.approx(state.tolist())
+    assert set(observations[0]["camera_inputs"]) == set(R.CAMERA_ORDER)
+    assert len(errors) == 1
+    assert errors[0]["error_type"] == "RuntimeError"
+    assert errors[0]["observation_record_index"] == observations[0]["record_index"]
+    assert not any(row["event"] == "action_step" for row in rows)
+
+
 def test_runtime_audit_is_disabled_without_an_explicit_path(tmp_path, monkeypatch):
     monkeypatch.delenv("R42_AUDIT_LOG_PATH", raising=False)
     monkeypatch.delenv("R42_AUDIT_RUN_ID", raising=False)
