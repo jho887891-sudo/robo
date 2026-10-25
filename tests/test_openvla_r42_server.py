@@ -171,6 +171,8 @@ def test_official_model_path_enforces_rate_limit_and_reset_scoped_previous_comma
 
     monkeypatch.setattr(server, "act", tracked_act)
     rate = np.asarray(model.metadata["safety_limits"]["max_rate"], np.float32)
+    lo = np.asarray(model.metadata["safety_limits"]["amin"], np.float32)
+    hi = np.asarray(model.metadata["safety_limits"]["amax"], np.float32)
     dt = 1.0 / model.control_hz
 
     state0 = _inside(0.5).copy()
@@ -181,6 +183,8 @@ def test_official_model_path_enforces_rate_limit_and_reset_scoped_previous_comma
     assert calls[0]["info"]["dt"] == pytest.approx(dt)
     assert calls[0]["info"]["rate_limited"] > 0
     assert np.all(np.abs(np.asarray(first["action14"]) - state0) <= rate * dt + 1e-6)
+    assert np.all(np.asarray(first["action14"]) >= lo - 1e-5)
+    assert np.all(np.asarray(first["action14"]) <= hi + 1e-5)
 
     state1 = state0.copy()
     model.update_obs(_obs(state=state1, seed=11))
@@ -189,6 +193,8 @@ def test_official_model_path_enforces_rate_limit_and_reset_scoped_previous_comma
     assert calls[1]["dt"] == pytest.approx(dt)
     assert np.all(np.abs(np.asarray(second["action14"]) - np.asarray(first["action14"]))
                   <= rate * dt + 1e-6)
+    assert np.all(np.asarray(second["action14"]) >= lo - 1e-5)
+    assert np.all(np.asarray(second["action14"]) <= hi + 1e-5)
 
     model.reset()
     state2 = _inside(0.4).copy()
