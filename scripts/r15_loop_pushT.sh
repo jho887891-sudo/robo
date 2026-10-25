@@ -19,20 +19,52 @@ CKPT=${1:?checkpoint dir}
 EPISODES=${2:-1}
 STAGE=${3:-1}
 PORT=${4:-19000}
-SRVLOG=logs/r15_policyserver_${PORT}.log
+RUN_STAMP="$(date -u +%Y%m%dT%H%M%SZ)-pid${BASHPID}"
+RUN_ID="r15loop-push_T-s${STAGE}-${RUN_STAMP}-port${PORT}"
+SRVLOG="logs/r15_policyserver_${PORT}_${RUN_STAMP}.log"
+AUDIT_LOG="$PWD/runs/r15_loop_dev/runtime_audit_push_T_stage${STAGE}_${RUN_STAMP}.jsonl"
+AUDIT_REPORT="$PWD/runs/r15_loop_dev/runtime_audit_report_push_T_stage${STAGE}_${RUN_STAMP}.json"
+OUT="runs/r15_loop_dev/push_T_stage${STAGE}_${RUN_STAMP}.json"
 if [ ! -f "$CKPT/MANIFEST.json" ]; then echo "REFUSING: $CKPT has no MANIFEST.json"; exit 9; fi
 mkdir -p logs runs/r15_loop_dev
-echo "# closed loop $(date -u +%Y-%m-%dT%H:%M:%SZ) ckpt=$CKPT episodes=$EPISODES stage=$STAGE port=$PORT"
+for path in "$SRVLOG" "$AUDIT_LOG" "$AUDIT_REPORT" "$OUT"; do
+  if [ -e "$path" ]; then echo "REFUSING: output already exists: $path"; exit 10; fi
+done
+echo "# closed loop $(date -u +%Y-%m-%dT%H:%M:%SZ) ckpt=$CKPT episodes=$EPISODES stage=$STAGE port=$PORT run_id=$RUN_ID"
+echo "# runtime audit trace: $AUDIT_LOG"
+echo "# runtime audit report: $AUDIT_REPORT"
 # R42_KV_CACHE / R42_VISION_CACHE are passed through to the server (default 0 = full recompute).
 # A cached run must be recorded as such: the KV path is noise-level equivalent, not bit-identical.
 ROBODOJO_ROOT=$ROBODOJO_ROOT PYTHONPATH=$ROBODOJO_ROOT:$ROBODOJO_ROOT/XPolicyLab:$OFT:$OFT/vla-scripts \
   R42_KV_CACHE=${R42_KV_CACHE:-0} R42_VISION_CACHE=${R42_VISION_CACHE:-0} R42_POLICY=${R42_POLICY:-} \
+  R42_AUDIT_LOG_PATH="$AUDIT_LOG" R42_AUDIT_RUN_ID="$RUN_ID" \
   "$PY" code/xpolicylab/policy/OpenVLA_R42/r42_serve.py \
   --config_path code/xpolicylab/policy/OpenVLA_R42/deploy.yml \
   --host 0.0.0.0 --port "$PORT" --overrides checkpoint_dir="$CKPT" > "$SRVLOG" 2>&1 &
 SRV=$!
-cleanup() { kill -TERM "$SRV" 2>/dev/null; sleep 3; kill -KILL "$SRV" 2>/dev/null; }
-trap cleanup EXIT INT TERM
+cleanup() {
+  kill -TERM "$SRV" 2>/dev/null || true
+  sleep 3
+  kill -KILL "$SRV" 2>/dev/null || true
+}
+CLIENT_RC=NOT_STARTED
+AUDIT_RC=3
+finalize() {
+  local original_rc=$?
+  trap - EXIT INT TERM
+  cleanup
+  "$PY" tools/r42_runtime_audit_report.py --input "$AUDIT_LOG" --out "$AUDIT_REPORT"
+  AUDIT_RC=$?
+  echo "# audit report rc=$AUDIT_RC path=$AUDIT_REPORT"
+  if [ "$original_rc" -eq 0 ] && [ "$AUDIT_RC" -ne 0 ]; then
+    original_rc=5
+  fi
+  echo "# closed loop finished client_rc=$CLIENT_RC audit_rc=$AUDIT_RC final_rc=$original_rc at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  exit "$original_rc"
+}
+trap finalize EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 READY=0
 for i in $(seq 1 240); do
   if timeout 2 bash -c ">/dev/tcp/127.0.0.1/$PORT" 2>/dev/null; then READY=1; break; fi
@@ -51,8 +83,7 @@ grep -a "OpenVLA_R42\|codec\|metadata" "$SRVLOG" | tail -8
   --episodes "$EPISODES" --stage "$STAGE" --docker rd_setup --ckpt-label "$(basename "$CKPT")" \
   --docker-env SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0 \
   --docker-env CUROBO_KERNEL_BACKEND=cuda_core \
-  --timeout-s 5400 \
-  --out "runs/r15_loop_dev/push_T_stage${STAGE}_$(date -u +%Y%m%dT%H%M%SZ).json"
-RC=$?
-echo "# closed loop finished rc=$RC at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-exit $RC
+  --timeout-s 5400 --run-id "$RUN_ID" \
+  --out "$OUT"
+CLIENT_RC=$?
+exit "$CLIENT_RC"

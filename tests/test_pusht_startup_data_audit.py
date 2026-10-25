@@ -1,3 +1,4 @@
+import ast
 import os
 import sys
 import unittest
@@ -27,6 +28,35 @@ def make_aligned_episode():
 
 
 class TestPushTStartupDataAudit(unittest.TestCase):
+    def test_run_audit_binds_artifact_loader_to_shared_module(self):
+        # This is a wiring regression: run_audit must import the module that owns
+        # load_m2_artifacts and call it through that same local alias.
+        path = os.path.join(REPO, "tools", "pusht_startup_data_audit.py")
+        with open(path, "r", encoding="utf-8") as fh:
+            tree = ast.parse(fh.read(), filename=path)
+        run_audit = next(
+            node for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == "run_audit"
+        )
+        imports = {
+            (alias.name, alias.asname)
+            for node in ast.walk(run_audit)
+            if isinstance(node, ast.Import)
+            for alias in node.names
+        }
+        self.assertIn(("m2_train_shared", "M2T"), imports)
+        loader_calls = [
+            node.func for node in ast.walk(run_audit)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "load_m2_artifacts"
+        ]
+        self.assertTrue(loader_calls, "run_audit must load the M2 artefact contract")
+        self.assertTrue(all(
+            isinstance(func.value, ast.Name) and func.value.id == "M2T"
+            for func in loader_calls
+        ), "load_m2_artifacts must be called through the M2T alias")
+
     def test_alignment_and_second_difference_contract(self):
         state, action = make_aligned_episode()
         report = analyze_arrays(state, action, start_window=3)
