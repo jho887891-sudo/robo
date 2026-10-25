@@ -6,6 +6,9 @@ on:
       - feature/r30-runtime-audit-trace-20261025
     paths:
       - 'code/xpolicylab/policy/OpenVLA_R42/model.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_adapter.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_robodojo_adapter.py'
       - 'code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py'
       - 'tools/r15_loop_dev.py'
       - 'scripts/r15_loop_pushT.sh'
@@ -18,6 +21,9 @@ on:
   pull_request:
     paths:
       - 'code/xpolicylab/policy/OpenVLA_R42/model.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_adapter.py'
+      - 'code/xpolicylab/policy/OpenVLA_R42/r42_robodojo_adapter.py'
       - 'code/xpolicylab/policy/OpenVLA_R42/r42_runtime_audit.py'
       - 'tools/r15_loop_dev.py'
       - 'scripts/r15_loop_pushT.sh'
