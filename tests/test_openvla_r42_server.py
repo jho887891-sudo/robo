@@ -179,6 +179,12 @@ def test_runtime_audit_records_state_prediction_response_and_next_observation(tm
     assert steps[0]["prediction"]["bins14"] == first_payload["bins"]
     assert steps[0]["server_response"]["action14"] == pytest.approx(first_payload["action14"])
     assert steps[0]["server_response"]["action_dict"] == first_payload["actions"]
+    assert "pre_audit_return_wall_utc" in steps[0]
+    assert "response_wall_utc" not in steps[0]
+    assert "server_span_pre_audit_ms" in steps[0]
+    assert "server_span_ms" not in steps[0]
+    assert "fsync" in steps[0]["timing_semantics"].lower()
+    assert steps[0]["observation_audit_overhead_ms"] >= 0.0
     assert len(steps[0]["prediction"]["residual14"]) == 14
     assert len(steps[0]["features42"]) == 42
     assert steps[0]["previous_server_response_action14"] is None
