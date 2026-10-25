@@ -30,7 +30,7 @@ File: `runs/r15_loop_dev/runtime_audit_push_T_stage<stage>_<UTC stamp>.jsonl`
 One JSON object per line; schema `r42-runtime-audit/v1`. Each record includes a shared run ID, monotonically increasing record index, UTC recording time and process-monotonic timestamp.
 
 Required events:
-- run_start: checkpoint/model metadata, normalizer/adapter/projector hashes, state and camera order, Python/runtime info, and explicit statements that raw images are not stored and wall-clock sensor synchronization remains UNKNOWN.
+- run_start: checkpoint/model metadata including checkpoint MANIFEST SHA256 and embedded-normalizer payload fingerprint, normalizer/adapter/projector hashes, state and camera order, Python/runtime info, and explicit statements that raw images are not stored and wall-clock sensor synchronization remains UNKNOWN.
 - episode_reset: reset count and episode index; clear previous-response comparison and episode-local observation/action indices.
 - observation_received: persist the validated 14D state and per-camera SHA256/shape/dtype before inference, with a unique episode-local observation index. This survives a later backend or inference failure.
 - backend_ready: backend class, device, checkpoint and metadata source.
