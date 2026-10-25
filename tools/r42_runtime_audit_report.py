@@ -206,8 +206,8 @@ def audit_trace(path):
     else:
         lines = raw.splitlines(keepends=True)
         for line_number, raw_line in enumerate(lines, 1):
-            has_newline = raw_line.endswith(b"\\n")
-            payload = raw_line.rstrip(b"\\r\\n")
+            has_newline = raw_line.endswith(b"\n")
+            payload = raw_line.rstrip(b"\r\n")
             if not payload:
                 _err(errors, line_number, "blank JSONL line")
                 continue
@@ -382,7 +382,7 @@ def main(argv=None):
         print(json.dumps({"trace_integrity": "FAIL", "errors": [str(exc)]}, indent=2), file=sys.stderr)
         return 3
 
-    rendered = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\\n"
+    rendered = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
     if args.out:
         out_path = os.path.abspath(os.path.expanduser(args.out))
         try:
