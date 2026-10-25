@@ -258,6 +258,7 @@ class Model(ModelTemplate):
             "checkpoint_manifest_sha256": manifest_sha256,
             "embedded_normalizer_payload_sha256": normalizer_payload_sha256,
             "base_model_path": self.base_model_path,
+            "base_model_sha256": self.metadata.get("base_model_sha256"),
             "lora_dir": self.lora_dir,
             "projector_path": self.projector_path,
             "metadata_source": self._metadata_source,
