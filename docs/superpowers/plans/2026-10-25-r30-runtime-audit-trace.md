@@ -109,11 +109,11 @@
 - [x] Include a latency caveat: per-record fsync affects runtime; `server_span_pre_audit_ms` includes observation audit overhead but excludes action-step fsync, and actual client receive time is not measured.
 - [x] Refuse to overwrite an existing report; if trace input is missing, still write a machine-readable failure report.
 - [x] CLI exit codes: 0 valid complete evidence with no action errors and first-action gate PASS; 2 partial/action-error/blocked gate; 3 invalid or unavailable trace; 4 report write refusal/failure.
-- [x] Verify report regressions: **18 passed**.
+- [x] Verify report regressions: **20 passed**.
 
 ### Task 6: CI, cross-audit, and handoff
 
-- [x] Focused CPU workflow runs writer **5 passed**, model trace/rate integration **9 passed**, standalone RoboDojo adapter **36 passed**, R15 driver **10 passed**, report validator **18 passed**, Python compilation and Bash syntax.
+- [x] Focused CPU workflow runs writer **5 passed**, model trace/rate integration **9 passed**, standalone RoboDojo adapter **36 passed**, R15 driver **10 passed**, report validator **20 passed**, Python compilation and Bash syntax.
 - [x] R4 CPU contracts: **PASS**.
 - [x] R5 CPU contracts: **PASS**.
 - [x] Recompute SHA256 for all 8 files listed by the R30 evidence directory's `SHA256SUMS.txt`: **8/8 match**. This verifies file integrity, not a second HDF5 execution.
