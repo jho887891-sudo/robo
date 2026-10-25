@@ -237,9 +237,26 @@ class Model(ModelTemplate):
             return
         path = os.environ.get("R42_AUDIT_LOG_PATH")
         run_id = os.environ.get("R42_AUDIT_RUN_ID")
+        manifest_path = None
+        manifest_sha256 = None
+        if self.checkpoint_dir:
+            candidate = os.path.join(self.checkpoint_dir, "MANIFEST.json")
+            if os.path.isfile(candidate):
+                with open(candidate, "rb") as fh:
+                    manifest_sha256 = hashlib.sha256(fh.read()).hexdigest()
+                manifest_path = candidate
+        normalizer_payload_sha256 = None
+        if self.metadata.get("normalizer") is not None:
+            canonical_normalizer = json.dumps(
+                self.metadata["normalizer"], sort_keys=True, separators=(",", ":"),
+                allow_nan=False).encode("utf-8")
+            normalizer_payload_sha256 = hashlib.sha256(canonical_normalizer).hexdigest()
         run_metadata = {
             "policy_name": self.policy_name,
             "checkpoint_dir": self.checkpoint_dir,
+            "checkpoint_manifest_path": manifest_path,
+            "checkpoint_manifest_sha256": manifest_sha256,
+            "embedded_normalizer_payload_sha256": normalizer_payload_sha256,
             "base_model_path": self.base_model_path,
             "lora_dir": self.lora_dir,
             "projector_path": self.projector_path,
