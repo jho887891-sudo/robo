@@ -1,6 +1,6 @@
 # R30 Runtime Audit Trace Design
 
-**Status:** Implementation in progress on an isolated feature branch. No rollout has been authorized or started.
+**Status:** Implementation committed on an isolated feature branch and ready for review. No rollout has been authorized or started.
 
 ## Context
 
@@ -10,12 +10,13 @@ The source checkout at `9b94823d7af6909811bd3e7039db23d855c09559` already has al
 
 ## Goal
 
-Make the next separately authorized R15 evaluation produce durable, step-level evidence to compare:
+Make the next separately authorized R15 evaluation produce durable, step-level evidence and an automatically generated gate report to compare:
 1. the 14D proprio observation received by the policy server;
 2. the normalized 42D features and motion features used for inference;
 3. the 14 token IDs / bins and decoded residual;
 4. the final 14D action returned to the client after the existing decode/safety logic;
-5. the next observed state relative to the previous server-generated response.
+5. the next observed state relative to the previous server-generated response;
+6. whether the JSONL is structurally complete, observations are linked to actions/errors, and the first post-reset response exists.
 
 ## Alternatives considered
 
@@ -25,7 +26,8 @@ Make the next separately authorized R15 evaluation produce durable, step-level e
 
 ## Record contract
 
-File: `runs/r15_loop_dev/runtime_audit_push_T_stage<stage>_<UTC stamp>.jsonl`
+Trace file: `runs/r15_loop_dev/runtime_audit_push_T_stage<stage>_<UTC stamp>-pid<PID>.jsonl`
+Report file: `runs/r15_loop_dev/runtime_audit_report_push_T_stage<stage>_<UTC stamp>-pid<PID>.json`
 
 One JSON object per line; schema `r42-runtime-audit/v1`. Each record includes a shared run ID, monotonically increasing record index, UTC recording time and process-monotonic timestamp.
 
@@ -48,7 +50,21 @@ Raw RGB pixel arrays and privileged state/goal labels must never be persisted by
 - Open the file exclusively (`O_CREAT | O_EXCL`, mode 0600, and `O_NOFOLLOW` when available). Never truncate an existing trace.
 - Parent directory must already exist. The R15 launcher creates it before starting the server.
 - Each complete JSONL record is flushed and fsynced. Non-JSON-safe values or write/fsync errors raise and fail the request closed; the run must not silently continue without trace evidence.
-- Server log, trace, and official result filenames share one unique UTC run stamp. The same run ID is passed to the server trace, the host-side ledger, and the Docker client via explicit `docker exec -e ROBODOJO_RUN_ID=...`.
+- Server log, trace, audit report, and official result filenames share one UTC timestamp plus the Bash process ID. The launcher refuses existing paths before launch; the PID suffix avoids the seconds-only collision where two concurrent launchers could both pass a preflight existence check.
+- The launcher installs a finalizer after starting the server. On every later exit path, it stops the server, runs the report validator, and preserves a report even if the trace file is missing. If the client exits successfully but the audit gate fails, the launcher returns a nonzero audit-gate exit code.
+- The same run ID is passed to the server trace and host-side ledger; the driver forwards it into the Docker client via `docker exec -e ROBODOJO_RUN_ID=...`.
+
+## Post-run validator and gates
+
+`tools/r42_runtime_audit_report.py --input <trace.jsonl> --out <report.json>` reads the source trace without repairing or rewriting it. The report contains the trace SHA256, record counts, schema/reference errors, unresolved observations, and explicit gates.
+
+- `trace_integrity`: PASS only when JSONL/schema/record indices/references validate; PARTIAL for an incomplete tail; FAIL for invalid or unavailable trace input.
+- `first_observation` and `post_reset_observation`: require a valid observation and a reset record that precedes it in the same episode.
+- `first_server_response`: requires a successful `action_step` linked to the first observation.
+- `client_acknowledgement`, `camera_state_sync`, and `robot_actuation`: always remain UNKNOWN unless another independently verified source is added.
+- `reset_vs_demo_S0`: remains BLOCKED until a separately verified demo-start vector is supplied; the report does not invent it.
+
+Exit codes: 0 means structurally valid, complete evidence with no action errors and a valid first-action gate; 2 means partial evidence, action errors, or a blocked required gate; 3 means invalid/unavailable trace; 4 means the report output cannot be written safely. Existing report paths are never overwritten.
 
 ## Non-goals
 
@@ -62,6 +78,7 @@ Raw RGB pixel arrays and privileged state/goal labels must never be persisted by
 1. Unit tests prove exclusive creation, stable run IDs, ordered records, required event names, non-finite JSON rejection, and preservation of an existing file.
 2. Stub-backend model tests prove that state, features, camera hashes, tokens/bins/residual, decoder info, server response and next-observation comparison are captured without raw image bytes.
 3. R15 driver tests prove a caller-supplied safe run ID is propagated and unsafe IDs are rejected.
-4. Launcher tests prove the trace and server log paths are timestamp-unique and the Docker client receives the same run ID.
-5. GitHub Actions CPU tests pass; shell syntax and Python compilation pass.
-6. PR remains unmerged. A real run requires a separate explicit decision after code review.
+4. Launcher tests prove process-unique artifact names, report generation on all post-launch exits, and a nonzero final gate when the trace is missing or incomplete.
+5. Report-validator tests cover complete traces, action errors, missing files, incomplete tails, malformed identities, broken references, reset ordering, and report no-overwrite behavior.
+6. GitHub Actions CPU tests pass; shell syntax and Python compilation pass.
+7. PR remains unmerged. A real run requires a separate explicit decision after code review.
