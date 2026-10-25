@@ -16,6 +16,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -220,6 +221,8 @@ def main():
     ap.add_argument("--env-cfg", default="arx_x5")
     ap.add_argument("--env-gpu", default="0")
     ap.add_argument("--ckpt-label", default="external")
+    ap.add_argument("--run-id", default=None,
+                    help="explicit run ID shared with the policy-server audit trace")
     ap.add_argument("--action-type", default="joint",
                     help="the env accepts joint or ee; our policy emits ABSOLUTE JOINT targets")
     ap.add_argument("--timeout-s", type=int, default=3600)
@@ -231,6 +234,8 @@ def main():
                          "an already-completed run left behind (used to recover a verdict from a run "
                          "that finished but was recorded as NO_RESULT)")
     a = ap.parse_args()
+    if a.run_id is not None and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}", a.run_id):
+        ap.error("--run-id must match [A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 
     ledger = a.ledger or os.path.join(os.path.dirname(os.path.abspath(a.out)),
                                       "loop_dev_ledger.jsonl")
@@ -248,7 +253,8 @@ def main():
         return 3
 
     cmd = build_cmd(a)
-    run_id = "r15loop-%s-s%d-%s" % (a.task, a.stage, datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"))
+    run_id = a.run_id or "r15loop-%s-s%d-%s" % (
+        a.task, a.stage, datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"))
     env = dict(os.environ)
     env["ROBODOJO_RUN_ID"] = run_id
     rec = {"utc_start": utcnow(), "task": a.task, "policy_name": a.policy_name, "stage": a.stage,
