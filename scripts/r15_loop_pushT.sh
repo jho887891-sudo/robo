@@ -60,7 +60,6 @@ grep -a "OpenVLA_R42\|codec\|metadata" "$SRVLOG" | tail -8
   --episodes "$EPISODES" --stage "$STAGE" --docker rd_setup --ckpt-label "$(basename "$CKPT")" \
   --docker-env SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0 \
   --docker-env CUROBO_KERNEL_BACKEND=cuda_core \
-  --docker-env "ROBODOJO_RUN_ID=$RUN_ID" \
   --timeout-s 5400 --run-id "$RUN_ID" \
   --out "$OUT"
 RC=$?
