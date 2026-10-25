@@ -364,7 +364,8 @@ class Model(ModelTemplate):
             "error_message": str(exc)[:2000],
         })
 
-    def _audit_action_step(self, inputs, out, payload, stamp, phases, rate_reference):
+    def _audit_action_step(self, inputs, out, payload, stamp, phases, rate_reference,
+                           rate_reference_source):
         """Persist the generated response associated with the preceding observation record."""
         if self._audit_trace is None:
             return
@@ -397,6 +398,7 @@ class Model(ModelTemplate):
             "state_dim_order": list(_STATE_DIM_ORDER),
             "state14": state.tolist(),
             "rate_reference_action14": np.asarray(rate_reference, np.float32).reshape(-1).tolist(),
+            "rate_reference_source": str(rate_reference_source),
             "rate_limit_source": "safety_limits.max_rate",
             "control_dt": self.control_dt,
             "velocity14": np.asarray(out.get("velocity", []), np.float32).reshape(-1).tolist(),
@@ -577,6 +579,8 @@ class Model(ModelTemplate):
             self._audit_backend_ready_logged = True
         env_idx = int(inputs["env_idx"])
         prev_cmd = self._rate_prev_cmd.get(env_idx)
+        rate_reference_source = (
+            "measured_state" if prev_cmd is None else "previous_server_response")
         if prev_cmd is None:
             prev_cmd = np.asarray(inputs["state"], dtype=np.float32).copy()
         else:
@@ -645,7 +649,8 @@ class Model(ModelTemplate):
             raise
         # Log only after the existing action-token contract passes; an enabled trace failure is
         # fatal so the audited run cannot silently continue without evidence.
-        self._audit_action_step(inputs, out, payload, stamp, phases, prev_cmd)
+        self._audit_action_step(inputs, out, payload, stamp, phases, prev_cmd,
+                                rate_reference_source)
         # Only latch a command after it passes the response contract and audit persistence.
         # The trace still cannot prove that the client accepted or physically executed it.
         self._rate_prev_cmd[env_idx] = np.asarray(payload["action14"], dtype=np.float32).copy()
