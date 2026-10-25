@@ -1,0 +1,6 @@
+{
+ "ok": true,
+ "train": 80,
+ "dev": 20,
+ "csv_rows": 112
+}
