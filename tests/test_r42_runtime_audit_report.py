@@ -214,3 +214,22 @@ def test_cli_writes_failure_report_when_trace_file_is_missing(tmp_path, capsys):
     assert report["gates"]["first_observation"] == "BLOCKED"
     assert report["errors"]
     assert "No such file" in capsys.readouterr().err
+
+
+
+def test_cli_blocks_next_gate_when_first_action_is_an_error(tmp_path, capsys):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()[:3]
+    rows.append(rec("action_error", 3, episode_index=1, episode_step_index=0,
+                    global_step_index=0, env_idx=0, observation_record_index=2,
+                    observation_index=0, stage="backend_load", error_type="RuntimeError",
+                    error_message="backend load failed"))
+    write_trace(path, rows)
+
+    result = main(["--input", str(path)])
+
+    assert result == 2
+    report = json.loads(capsys.readouterr().out)
+    assert report["trace_integrity"] == "PASS"
+    assert report["run_outcome"] == "ACTION_ERRORS"
+    assert report["gates"]["first_server_response"] == "BLOCKED"
