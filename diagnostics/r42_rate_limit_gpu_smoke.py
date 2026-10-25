@@ -28,8 +28,25 @@ for _path in (POLICY_ROOT, POLICY_DIR, PURE_DIR):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
+# Prismatic selects ACTION_DIM from sys.argv at import time. Match the official R42 serving
+# entrypoint and force ARX before importing policy modules, then remove the marker so argparse
+# sees only the user's actual CLI arguments.
+_ARX_MARKER = "arx_x5_push_T"
+
+
+def _force_arx_marker():
+    joined = " ".join(sys.argv).lower()
+    if "arx" not in joined and "goai" not in joined:
+        sys.argv.append(_ARX_MARKER)
+        return True
+    return False
+
+
+_TOP_LEVEL_MARKER_ADDED = _force_arx_marker()
 import r42_adapter as R  # noqa: E402
 import OpenVLA_R42.model as M  # noqa: E402
+if _TOP_LEVEL_MARKER_ADDED:
+    sys.argv.remove(_ARX_MARKER)
 
 CAMERAS = tuple(R.CAMERA_ORDER)
 REPORT_SCHEMA = "r42-rate-limit-gpu-smoke/v1"
@@ -186,6 +203,19 @@ def main():
     original_decode = None
 
     try:
+        # Import/validate the real Prismatic constants under the same ARX marker as r42_serve.py.
+        marker_added = _force_arx_marker()
+        try:
+            runtime_contract = R.assert_runtime_contract()
+        finally:
+            if marker_added and _ARX_MARKER in sys.argv:
+                sys.argv.remove(_ARX_MARKER)
+        report["prismatic_runtime_contract"] = runtime_contract
+        require(report, "prismatic_runtime_is_14d_arx",
+                int(runtime_contract.get("action_dim", -1)) == 14
+                and int(runtime_contract.get("r42_proprio_dim", -1)) == 42
+                and "arx" in str(runtime_contract.get("robot_platform", "")).lower(),
+                runtime_contract)
         deploy_path = resolve_path(args.deploy_yml)
         if not (deploy_path and os.path.isfile(deploy_path)):
             raise SmokeBlocked("deployment YAML is missing: %s" % deploy_path)
