@@ -37,7 +37,7 @@ Required events:
 - observation_received: persist the validated 14D state and per-camera SHA256/shape/dtype before inference, with a unique episode-local observation index. This survives a later backend or inference failure.
 - backend_ready: backend class, device, checkpoint and metadata source.
 - action_error: failure stage/type/message linked to the observation record/index. Capture backend-load, inference and response-contract failures. The trace writer itself remains fail-closed.
-- action_step: reference the observation record/index and record velocity [14], normalized features [42], source timestamp if present, observation/reply timestamps, token IDs [14], bins [14], decoded residual [14], decoder safety metadata, final server response [14] and four-key action dict, latency, and the previous server response plus the current observed-state difference from it when available.
+- action_step: reference the observation record/index and record velocity [14], normalized features [42], source timestamp if present, token IDs [14], bins [14], decoded residual [14], decoder safety metadata, final server response [14] and four-key action dict, latency, and the previous server response plus the current observed-state difference from it when available. The trace uses `pre_audit_return_wall_utc` and `server_span_pre_audit_ms` for timestamps sampled before the action-step fsync, and records `observation_audit_overhead_ms` (camera hashing + observation record persistence).
 
 The response must be labeled **server-generated**, not client-acknowledged or confirmed as executed. The next observation provides a comparison point but is not proof of actuation. Camera/state wall-clock synchronization remains `UNKNOWN`.
 
@@ -61,6 +61,8 @@ Raw RGB pixel arrays and privileged state/goal labels must never be persisted by
 - `trace_integrity`: PASS only when JSONL/schema/record indices/references validate; PARTIAL for an incomplete tail; FAIL for invalid or unavailable trace input.
 - `first_observation` and `post_reset_observation`: require a valid observation and a reset record that precedes it in the same episode.
 - `first_server_response`: requires a successful `action_step` linked to the first observation.
+- The validator checks that flattening the four-key action dictionary in the frozen joint order reproduces `server_response.action14`, and that the recorded previous-response delta equals `state14 - previous_server_response_action14`.
+- Every report includes a `latency_caveat`: the writer fsyncs each record, `server_span_pre_audit_ms` includes observation audit overhead but excludes the action-step fsync, and the actual client receive time is not measured. Do not compare these timings directly with unaudited runs.
 - `client_acknowledgement`, `camera_state_sync`, and `robot_actuation`: always remain UNKNOWN unless another independently verified source is added.
 - `reset_vs_demo_S0`: remains BLOCKED until a separately verified demo-start vector is supplied; the report does not invent it.
 
