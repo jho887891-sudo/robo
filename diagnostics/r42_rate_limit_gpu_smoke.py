@@ -187,8 +187,9 @@ def main():
 
     try:
         deploy_path = resolve_path(args.deploy_yml)
-        require(report, "deploy_yaml_exists", bool(deploy_path and os.path.isfile(deploy_path)),
-                {"path": deploy_path})
+        if not (deploy_path and os.path.isfile(deploy_path)):
+            raise SmokeBlocked("deployment YAML is missing: %s" % deploy_path)
+        record(report, "deploy_yaml_exists", True, {"path": deploy_path})
         try:
             import yaml
         except ImportError as exc:
@@ -218,9 +219,12 @@ def main():
         except ImportError as exc:
             raise SmokeBlocked("PyTorch is unavailable: %s" % exc)
         cuda_available = bool(torch.cuda.is_available())
-        require(report, "cuda_available", cuda_available, {"available": cuda_available})
         if not cuda_available:
+            report["checks"].append({"name": "cuda_available", "result": "BLOCKED",
+                                     "detail": {"available": False}})
+            print("[BLOCKED] cuda_available {\"available\": false}", flush=True)
             raise SmokeBlocked("CUDA is unavailable; no model weights were loaded")
+        record(report, "cuda_available", True, {"available": True})
         device_name = torch.cuda.get_device_name(0)
         free_bytes, total_bytes = torch.cuda.mem_get_info()
         free_gb = float(free_bytes) / 1e9
@@ -232,12 +236,15 @@ def main():
             "total_vram_gb": round(total_gb, 3),
             "minimum_free_gb": float(args.min_free_gb),
         }
-        record(report, "minimum_free_vram", free_gb >= args.min_free_gb,
-               report["gpu"])
         if free_gb < args.min_free_gb:
+            report["checks"].append({"name": "minimum_free_vram", "result": "BLOCKED",
+                                     "detail": report["gpu"]})
+            print("[BLOCKED] minimum_free_vram " +
+                  json.dumps(report["gpu"], sort_keys=True), flush=True)
             raise SmokeBlocked(
                 "free VRAM %.3f GB is below the %.3f GB gate; nothing was loaded"
                 % (free_gb, args.min_free_gb))
+        record(report, "minimum_free_vram", True, report["gpu"])
 
         checkpoint = resolve_path(config.get("checkpoint_dir"))
         base_model = resolve_path(config.get("base_model_path"))
@@ -265,7 +272,6 @@ def main():
                                % ", ".join(missing))
         report["artifacts_before"] = {
             name: artifact_record(path) for name, path in required_paths.items()
-            if name != "physical_bounds" and name != "episode_split"
         }
         report["artifact_hash_policy"] = (
             "Hashes small checkpoint/config artifacts and MANIFEST; does not re-hash the full "
@@ -480,7 +486,6 @@ def main():
             float(torch.cuda.max_memory_allocated()) / 1e9, 3)
         report["artifacts_after"] = {
             name: artifact_record(path) for name, path in required_paths.items()
-            if name != "physical_bounds" and name != "episode_split"
         }
         require(report, "checkpoint_and_config_artifacts_unchanged",
                 report["artifacts_before"] == report["artifacts_after"],
@@ -511,6 +516,23 @@ def main():
                 server.act = original_act
         except Exception:
             pass
+        try:
+            if "required_paths" in locals() and report.get("artifacts_before"):
+                after = {name: artifact_record(path) for name, path in required_paths.items()}
+                report["artifacts_after"] = after
+                unchanged = report["artifacts_before"] == after
+                if not any(item.get("name") == "checkpoint_and_config_artifacts_unchanged"
+                           for item in report["checks"]):
+                    record(report, "checkpoint_and_config_artifacts_unchanged", unchanged,
+                           {"before": report["artifacts_before"], "after": after})
+                if not unchanged and report.get("status") == "PASS":
+                    report["status"] = "FAIL"
+                    exit_code = 1
+        except Exception as exc:
+            report["artifact_hash_after_error"] = "%s: %s" % (type(exc).__name__, exc)
+            if report.get("status") == "PASS":
+                report["status"] = "FAIL"
+                exit_code = 1
         try:
             if model is not None:
                 model._server = None
