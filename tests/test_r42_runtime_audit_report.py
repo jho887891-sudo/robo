@@ -133,16 +133,17 @@ def test_audit_report_marks_observation_without_terminal_event_partial(tmp_path)
     assert report["warnings"]
 
 
-def test_audit_report_rejects_noncontiguous_record_indices(tmp_path):
+def test_audit_report_rejects_noncontiguous_record_indices_and_blocks_gates(tmp_path):
     path = tmp_path / "runtime.jsonl"
     rows = valid_rows()
-    rows[2]["record_index"] = 20
+    rows[3]["record_index"] = 20
     write_trace(path, rows)
 
     report = audit_trace(str(path))
 
     assert report["trace_integrity"] == "FAIL"
     assert any("record_index" in error for error in report["errors"])
+    assert report["gates"]["first_server_response"] == "BLOCKED"
 
 
 def test_audit_report_detects_incomplete_jsonl_tail_without_rewriting_evidence(tmp_path):
@@ -233,3 +234,21 @@ def test_cli_blocks_next_gate_when_first_action_is_an_error(tmp_path, capsys):
     assert report["trace_integrity"] == "PASS"
     assert report["run_outcome"] == "ACTION_ERRORS"
     assert report["gates"]["first_server_response"] == "BLOCKED"
+
+
+
+def test_post_reset_gate_requires_reset_record_before_first_observation(tmp_path):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()
+    observation = rows[2]
+    reset = rows[1]
+    rows[1] = observation
+    rows[2] = reset
+    rows[-1]["observation_record_index"] = observation["record_index"]
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "PASS"
+    assert report["gates"]["first_observation"] == "PASS"
+    assert report["gates"]["post_reset_observation"] == "BLOCKED"
