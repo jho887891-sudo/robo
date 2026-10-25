@@ -81,7 +81,7 @@ def _validate_camera_inputs(record, camera_order, index, errors):
 
 def _validate_record(record, index, camera_order, dim_order, errors):
     event = record.get("event")
-    if event not in EVENTS:
+    if not isinstance(event, str) or event not in EVENTS:
         _err(errors, index, "unknown event %r" % event)
         return
 
@@ -230,9 +230,10 @@ def audit_trace(path):
             records.append(record)
 
     if records:
-        run_ids = {r.get("run_id") for r in records}
-        if len(run_ids) != 1 or not isinstance(next(iter(run_ids)), str) or not next(iter(run_ids)):
-            errors.append("all records must share one non-empty run_id")
+        run_ids = [r.get("run_id") for r in records]
+        if (not all(isinstance(value, str) and value for value in run_ids)
+                or len(set(run_ids)) != 1):
+            errors.append("all records must share one non-empty string run_id")
         for position, record in enumerate(records):
             index = record.get("record_index")
             if not _is_int(index) or index != position:
@@ -247,10 +248,13 @@ def audit_trace(path):
         metadata = records[0].get("metadata", {}) if records[0].get("event") == "run_start" else {}
         camera_order = metadata.get("camera_order", []) if isinstance(metadata, dict) else []
         dim_order = metadata.get("state_dim_order", []) if isinstance(metadata, dict) else []
-        if not isinstance(camera_order, list) or not camera_order:
-            errors.append("run_start metadata must include camera_order")
+        if (not isinstance(camera_order, list) or not camera_order
+                or not all(isinstance(x, str) and x for x in camera_order)
+                or len(set(camera_order)) != len(camera_order)):
+            errors.append("run_start metadata must include unique camera_order names")
             camera_order = []
-        if not isinstance(dim_order, list) or len(dim_order) != 14:
+        if (not isinstance(dim_order, list) or len(dim_order) != 14
+                or not all(isinstance(x, str) and x for x in dim_order)):
             errors.append("run_start metadata must include 14 state_dim_order names")
             dim_order = []
         for position, record in enumerate(records):
@@ -261,7 +265,8 @@ def audit_trace(path):
         dim_order = []
 
     observations = {r.get("record_index"): r for r in records
-                    if r.get("event") == "observation_received"}
+                    if r.get("event") == "observation_received"
+                    and _is_int(r.get("record_index"))}
     action_steps = [r for r in records if r.get("event") == "action_step"]
     action_errors = [r for r in records if r.get("event") == "action_error"]
     resets = [r for r in records if r.get("event") == "episode_reset"]
@@ -272,11 +277,17 @@ def audit_trace(path):
     for record in action_steps + action_errors:
         idx = record.get("record_index")
         ref = record.get("observation_record_index")
+        if not _is_int(idx):
+            _err(errors, idx, "action/error record_index must be an integer")
+            continue
+        if not _is_int(ref):
+            _err(errors, idx, "observation_record_index must be an integer")
+            continue
         observation = observations.get(ref)
         if observation is None:
             _err(errors, idx, "observation_record_index does not reference an observation_received record")
             continue
-        if not _is_int(ref) or ref >= idx:
+        if ref >= idx:
             _err(errors, idx, "observation_record_index must point to an earlier record")
         if record.get("observation_index") != observation.get("observation_index"):
             _err(errors, idx, "observation_index does not match referenced observation")
@@ -304,7 +315,8 @@ def audit_trace(path):
     first_observation = next(iter(observations.values()), None)
     first_ref = first_observation.get("record_index") if first_observation else None
     first_linked = terminal_by_observation.get(first_ref, set()) if first_observation else set()
-    reset_episodes = {r.get("episode_index") for r in resets}
+    reset_episodes = {r.get("episode_index") for r in resets
+                      if _is_int(r.get("episode_index"))}
     post_reset = bool(first_observation and
                       first_observation.get("episode_index") in reset_episodes)
     first_response = "PASS" if "action_step" in first_linked else "BLOCKED"
