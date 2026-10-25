@@ -53,12 +53,14 @@
 
 **Interfaces:**
 - Opt-in environment variables: `R42_AUDIT_LOG_PATH`, `R42_AUDIT_RUN_ID`.
-- Events: `run_start`, `episode_reset`, `backend_ready`, `action_step`.
+- Events: `run_start`, `episode_reset`, `observation_received`, `backend_ready`, `action_error`, `action_step`.
 
 - [x] Write tests for 14D state, 42D features, token IDs/bins, residual, decoder info, response action, camera hashes, reset indices, previous response vs next observed state, disabled-by-default behavior, and no-overwrite behavior.
 - [x] Observe RED: model lacked `_audit_trace`; explicit audit path did not yet refuse an existing file.
 - [x] Integrate trace writes after existing action-contract validation, with no changes to `server.act()` arguments or returned action.
-- [x] Verify model trace regressions: **3 passed, 19 deselected**.
+- [x] Persist validated observation state/camera hashes before inference, so backend/inference failure still leaves the received input.
+- [x] Link backend-load, server-act and response-contract errors to the exact observation record; add unique episode-local observation indices.
+- [x] Verify model trace regressions: **5 passed, 19 deselected** at the last completed model test run before the newest backend-failure case; latest run pending.
 - [x] Record response semantics explicitly as server-generated; keep client acknowledgement and camera/state synchronization UNKNOWN.
 
 ### Task 3: Shared run ID in the R15 driver
@@ -95,7 +97,7 @@
 - [x] Observe launcher regression RED, then restore implementation and re-run the workflow.
 - [x] Keep PR #45 draft/open/unmerged.
 - [ ] Final CI on the latest branch SHA and final diff review.
-- [ ] Separate follow-up issue for the rate-limiter call-path concern; do not alter action behavior in this instrumentation PR.
+- [x] Opened separate follow-up issue #46 for the rate-limiter call-path concern; do not alter action behavior in this instrumentation PR.
 
 ## Rulings
 
