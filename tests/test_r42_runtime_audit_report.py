@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import sys
@@ -13,9 +14,23 @@ from r42_runtime_audit_report import audit_trace, main
 SCHEMA = "r42-runtime-audit/v1"
 RUN_ID = "r30-report-test-001"
 CAMERAS = ["cam0", "cam1", "cam2"]
-DIM_NAMES = ["joint[%d]" % i for i in range(14)]
+JOINT_GROUPS = ["left_arm_joint_state", "left_ee_joint_state",
+                "right_arm_joint_state", "right_ee_joint_state"]
+DIM_NAMES = ["left_arm_joint_state[%d]" % i for i in range(6)]
+DIM_NAMES += ["left_ee_joint_state[0]"]
+DIM_NAMES += ["right_arm_joint_state[%d]" % i for i in range(6)]
+DIM_NAMES += ["right_ee_joint_state[0]"]
 STATE = [float(i) / 10 for i in range(14)]
 ACTION = [float(i) / 20 for i in range(14)]
+
+
+def action_dict_from14(vector):
+    return {
+        "left_arm_joint_state": list(vector[:6]),
+        "left_ee_joint_state": list(vector[6:7]),
+        "right_arm_joint_state": list(vector[7:13]),
+        "right_ee_joint_state": list(vector[13:14]),
+    }
 
 
 def rec(event, index, **fields):
@@ -42,6 +57,7 @@ def valid_rows():
         rec("run_start", 0, path="/tmp/run.jsonl", metadata={
             "camera_order": CAMERAS,
             "state_dim_order": DIM_NAMES,
+            "joint_group_order": JOINT_GROUPS,
             "raw_images_persisted": False,
             "camera_state_wallclock_sync": "UNKNOWN",
         }),
@@ -254,3 +270,90 @@ def test_post_reset_gate_requires_reset_record_before_first_observation(tmp_path
     assert report["trace_integrity"] == "PASS"
     assert report["gates"]["first_observation"] == "PASS"
     assert report["gates"]["post_reset_observation"] == "BLOCKED"
+
+
+
+def test_audit_report_rejects_action_dict_that_differs_from_flat_14d_response(tmp_path):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()
+    rows[-1]["server_response"]["action_dict"]["left_arm_joint_state"][0] += 0.25
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "FAIL"
+    assert any("action_dict" in error and "action14" in error
+               for error in report["errors"])
+
+
+def test_audit_report_checks_previous_response_delta_math(tmp_path):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()
+    second_state = [value + 0.1 for value in STATE]
+    second_observation = copy.deepcopy(rows[2])
+    second_observation.update({
+        "record_index": 5,
+        "observation_index": 1,
+        "episode_step_index": 1,
+        "global_step_index": 1,
+        "state14": second_state,
+    })
+    second_action = copy.deepcopy(rows[4])
+    second_action.update({
+        "record_index": 6,
+        "observation_record_index": 5,
+        "observation_index": 1,
+        "episode_step_index": 1,
+        "global_step_index": 1,
+        "state14": second_state,
+        "previous_server_response_action14": ACTION,
+        "previous_response_global_step_index": 0,
+        "observed_state_minus_previous_server_response14": [
+            state - action for state, action in zip(second_state, ACTION)
+        ],
+    })
+    rows.extend([second_observation, second_action])
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "PASS"
+    assert report["counts"]["observations"] == 2
+    assert report["counts"]["actions"] == 2
+
+
+def test_audit_report_rejects_incorrect_previous_response_delta(tmp_path):
+    path = tmp_path / "runtime.jsonl"
+    rows = valid_rows()
+    second_state = [value + 0.1 for value in STATE]
+    second_observation = copy.deepcopy(rows[2])
+    second_observation.update({
+        "record_index": 5,
+        "observation_index": 1,
+        "episode_step_index": 1,
+        "global_step_index": 1,
+        "state14": second_state,
+    })
+    second_action = copy.deepcopy(rows[4])
+    second_action.update({
+        "record_index": 6,
+        "observation_record_index": 5,
+        "observation_index": 1,
+        "episode_step_index": 1,
+        "global_step_index": 1,
+        "state14": second_state,
+        "previous_server_response_action14": ACTION,
+        "previous_response_global_step_index": 0,
+        "observed_state_minus_previous_server_response14": [
+            state - action for state, action in zip(second_state, ACTION)
+        ],
+    })
+    second_action["observed_state_minus_previous_server_response14"][0] += 0.5
+    rows.extend([second_observation, second_action])
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "FAIL"
+    assert any("observed_state_minus_previous_server_response14" in error
+               for error in report["errors"])
