@@ -225,6 +225,7 @@ def test_runtime_audit_persists_observation_before_backend_failure(tmp_path, mon
     assert set(observations[0]["camera_inputs"]) == set(R.CAMERA_ORDER)
     assert len(errors) == 1
     assert errors[0]["error_type"] == "RuntimeError"
+    assert errors[0]["observation_audit_overhead_ms"] >= 0.0
     assert errors[0]["observation_record_index"] == observations[0]["record_index"]
     assert not any(row["event"] == "action_step" for row in rows)
 
