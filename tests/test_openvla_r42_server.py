@@ -149,6 +149,78 @@ def test_one_step_yields_fourteen_tokens_and_the_four_latency_phases():
     assert payload["stamp"]["obs_iso"] != payload["stamp"]["reply_iso"]
 
 
+def test_runtime_audit_records_state_prediction_response_and_next_observation(tmp_path, monkeypatch):
+    import r42_runtime_audit as Audit
+
+    path = tmp_path / "runtime.jsonl"
+    monkeypatch.setenv("R42_AUDIT_LOG_PATH", str(path))
+    monkeypatch.setenv("R42_AUDIT_RUN_ID", "r30-test-001")
+    model = _model()
+    model.reset()
+
+    state0 = _inside(0.5).copy()
+    model.update_obs(_obs(state=state0, seed=0))
+    first_payload = model.get_action()
+
+    state1 = state0.copy()
+    state1[0] += 0.02
+    model.update_obs(_obs(state=state1, seed=1))
+    second_payload = model.get_action()
+    model.reset()
+    model._audit_trace.close()
+
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    steps = [row for row in rows if row["event"] == "action_step"]
+    assert [row["episode_step_index"] for row in steps] == [0, 1]
+    assert [row["global_step_index"] for row in steps] == [0, 1]
+    assert all(row["run_id"] == "r30-test-001" for row in rows)
+    assert steps[0]["state14"] == pytest.approx(state0.tolist())
+    assert steps[0]["prediction"]["token_ids14"] == first_payload["ids"]
+    assert steps[0]["prediction"]["bins14"] == first_payload["bins"]
+    assert steps[0]["server_response"]["action14"] == pytest.approx(first_payload["action14"])
+    assert steps[0]["server_response"]["action_dict"] == first_payload["actions"]
+    assert len(steps[0]["prediction"]["residual14"]) == 14
+    assert len(steps[0]["features42"]) == 42
+    assert steps[0]["previous_server_response_action14"] is None
+    assert steps[1]["previous_server_response_action14"] == pytest.approx(first_payload["action14"])
+    expected_delta = state1 - np.asarray(first_payload["action14"], np.float32)
+    assert steps[1]["observed_state_minus_previous_server_response14"] == pytest.approx(
+        expected_delta.tolist())
+    assert set(steps[0]["camera_inputs"]) == set(R.CAMERA_ORDER)
+    for camera, item in steps[0]["camera_inputs"].items():
+        assert len(item["sha256"]) == 64
+        assert item["dtype"] == "uint8"
+        assert item["shape"] == [6, 8, 3]
+    assert "raw_image_bytes" not in steps[0]
+    assert "images" not in steps[0]
+    assert [row["event"] for row in rows].count("episode_reset") == 2
+    assert rows[0]["event"] == "run_start"
+    assert any(row["event"] == "backend_ready" for row in rows)
+
+
+def test_runtime_audit_is_disabled_without_an_explicit_path(tmp_path, monkeypatch):
+    monkeypatch.delenv("R42_AUDIT_LOG_PATH", raising=False)
+    monkeypatch.delenv("R42_AUDIT_RUN_ID", raising=False)
+    model = _model()
+    assert model._audit_trace is None
+    model.update_obs(_obs())
+    payload = model.get_action()
+    assert payload["n_action_tokens"] == 14
+    assert not list(tmp_path.iterdir())
+
+
+def test_runtime_audit_refuses_to_overwrite_existing_evidence(tmp_path, monkeypatch):
+    import r42_runtime_audit as Audit
+
+    path = tmp_path / "runtime.jsonl"
+    path.write_text("historical evidence\\n", encoding="utf-8")
+    monkeypatch.setenv("R42_AUDIT_LOG_PATH", str(path))
+    monkeypatch.setenv("R42_AUDIT_RUN_ID", "r30-test-002")
+    with pytest.raises(Audit.RuntimeAuditError, match="already exists"):
+        _model()
+    assert path.read_text(encoding="utf-8") == "historical evidence\\n"
+
+
 def test_gripper_channels_of_the_served_action_are_state_plus_velocity():
     model = _model()
     state = _inside(0.5).copy()
