@@ -4,7 +4,7 @@
 
 **Goal:** Persist enough server-boundary evidence for an authorized R15 run to compare the observed 14D state, model output, and server-generated response, then automatically produce a report that says which evidence gates are open or blocked.
 
-**Architecture:** An opt-in standard-library JSONL writer fails closed when enabled but unable to persist. The R42 model boundary records observation/action/error events. The R15 driver shares one run ID. The launcher uses collision-resistant artifact names and a finalizer that stops the server and validates the trace on every post-launch exit path. A read-only report validator never repairs source evidence.
+**Architecture:** An opt-in standard-library JSONL writer fails closed when enabled but unable to persist. The R42 model boundary records observation/action/error events. The R15 driver shares one run ID. The launcher uses collision-resistant artifact names and a finalizer that stops the server and validates the trace on every post-launch exit path. A read-only report validator never repairs source evidence. Schema v2 adds the exact per-step rate reference so the report can independently recompute rate compliance; schema v1 remains readable but cannot certify that gate.
 
 **Tech Stack:** Python 3.10+, standard library, NumPy already used by the R42 model, pytest, Bash, GitHub Actions CPU runner.
 
@@ -62,7 +62,7 @@
 - [x] Rename trace timing fields to `pre_audit_return_wall_utc` / `server_span_pre_audit_ms`; explicitly state that the action-step fsync is excluded and client receive time is not measured.
 - [x] Keep the action contract and returned action unchanged; label actions as server-generated.
 - [x] Keep client acknowledgement and camera/state synchronization UNKNOWN.
-- [x] Verify model trace regressions: **5 passed**.
+- [x] Verify model trace and official rate-limit regressions: **8 passed**.
 
 ### Task 3: Shared run ID in the R15 driver
 
@@ -96,27 +96,29 @@
 - Create: `tests/test_r42_runtime_audit_report.py`
 - Modify: `.github/workflows/r30-runtime-audit-cpu.yml`
 
-- [x] Define report schema `r42-runtime-audit-report/v1` with input SHA256, event counts, trace integrity, run outcome, unresolved observations, and explicit gate statuses.
-- [x] Validate JSONL line termination, schema version, contiguous record indices, shared run ID, event contracts, vector sizes/finite values, camera fingerprints, and observation-to-action/error references.
+- [x] Define report schema `r42-runtime-audit-report/v2` with input SHA256, event counts, trace integrity, run outcome, unresolved observations, and explicit gate statuses.
+- [x] Write trace schema `r42-runtime-audit/v2` with exact `rate_reference_action14`, `rate_reference_source`, `rate_limit_source`, and `control_dt`; continue reading v1 traces but do not certify rate compliance without the v2 evidence.
+- [x] Validate JSONL line termination, supported schema versions, contiguous record indices, shared run ID, event contracts, vector sizes/finite values, camera fingerprints, and observation-to-action/error references.
 - [x] Treat missing/incomplete trace data as FAIL/PARTIAL; never rewrite the input JSONL.
 - [x] Keep client acknowledgement, camera/state wall-clock sync and robot actuation UNKNOWN; keep demo-S0 comparison BLOCKED unless a verified reference vector is supplied.
 - [x] Block the first-response gate when the first observation has no successful action, and block evidence gates when trace integrity is not PASS.
 - [x] Require the reset record to precede the first observation in the same episode.
 - [x] Cross-check that the four-key action dict flattens to the recorded action14 and that the previous-response delta equals `state14 - previous_server_response_action14`.
 - [x] Add `rate_limit_branch_active`: require a valid configured 14D rate vector and positive decoder `dt` matching the configured control period for every successful action. A null `dt` blocks the report/launcher gate.
+- [x] Add `rate_limit_compliance`: independently verify every action delta against `configured_max_rate14 * control_dt + tolerance` using the recorded reference vector, and verify the reference is either the same-step measured state or the prior response for the same environment.
 - [x] Include a latency caveat: per-record fsync affects runtime; `server_span_pre_audit_ms` includes observation audit overhead but excludes action-step fsync, and actual client receive time is not measured.
 - [x] Refuse to overwrite an existing report; if trace input is missing, still write a machine-readable failure report.
 - [x] CLI exit codes: 0 valid complete evidence with no action errors and first-action gate PASS; 2 partial/action-error/blocked gate; 3 invalid or unavailable trace; 4 report write refusal/failure.
-- [x] Verify report regressions: **15 passed**.
+- [x] Verify report regressions: **17 passed**.
 
 ### Task 6: CI, cross-audit, and handoff
 
-- [x] Focused CPU workflow runs writer **5 passed**, model trace **5 passed**, R15 driver **10 passed**, report validator **15 passed**, Python compilation and Bash syntax.
+- [x] Focused CPU workflow runs writer **5 passed**, model trace/rate integration **8 passed**, standalone RoboDojo adapter **36 passed**, R15 driver **10 passed**, report validator **17 passed**, Python compilation and Bash syntax.
 - [x] R4 CPU contracts: **PASS**.
 - [x] R5 CPU contracts: **PASS**.
 - [x] Recompute SHA256 for all 8 files listed by the R30 evidence directory's `SHA256SUMS.txt`: **8/8 match**. This verifies file integrity, not a second HDF5 execution.
-- [x] Open separate issue #46 for the adapter `max_rate` call-path concern; action behavior remains unchanged in this PR.
-- [x] Keep PR #45 open and unmerged. `main` and the R30 evidence branch remain unchanged.
+- [x] Track Issue #46 as a separate behavior-change PR (#47); this branch changes action behavior only in the isolated model path and does not authorize rollout.
+- [x] PR #45 was merged into `audit/pusht-startup-import-fix-20261024` at `0f1f98366e8a400d530a62cc5998c4eefdb43fe0`; `main` and the R30 evidence branch remain unchanged.
 - [x] No model weights, CUDA, training, optimizer step, HDF5/checkpoint mutation, simulator, or robot execution occurred.
 
 ## Rulings
