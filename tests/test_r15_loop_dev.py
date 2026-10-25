@@ -115,11 +115,15 @@ def test_dry_run_accepts_shared_run_id_for_server_trace_and_client_ledger(tmp_pa
         sys.executable, os.path.join(REPO, "tools", "r15_loop_dev.py"),
         "--task", "push_T", "--port", "19000", "--episodes", "1",
         "--out", str(out), "--ledger", str(tmp_path / "ledger.jsonl"),
-        "--dry-run", "--run-id", run_id,
+        "--dry-run", "--docker", "rd_setup", "--run-id", run_id,
+        "--docker-env", "ROBODOJO_RUN_ID=stale-run-id",
     ], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
     rec = json.loads(r.stdout)
     assert rec["robodojo_run_id"] == run_id
+    assert "ROBODOJO_RUN_ID=" + run_id in rec["cmd"]
+    assert "ROBODOJO_RUN_ID=stale-run-id" not in rec["cmd"]
+    assert rec["cmd"].count("ROBODOJO_RUN_ID=") == 1
     assert rec["dry_run"] is True
     assert not (tmp_path / "ledger.jsonl").exists()
 
@@ -147,6 +151,7 @@ def test_pushT_launcher_persists_unique_trace_and_never_truncates_port_only_logs
     assert 'SRVLOG="logs/r15_policyserver_${PORT}_${RUN_STAMP}.log"' in source
     assert 'AUDIT_LOG="$PWD/runs/r15_loop_dev/runtime_audit_push_T_stage${STAGE}_${RUN_STAMP}.jsonl"' in source
     assert 'R42_AUDIT_LOG_PATH="$AUDIT_LOG" R42_AUDIT_RUN_ID="$RUN_ID"' in source
-    assert '--docker-env "ROBODOJO_RUN_ID=$RUN_ID"' in source
+    assert '--run-id "$RUN_ID"' in source
+    assert '--docker-env "ROBODOJO_RUN_ID=$RUN_ID"' not in source
     assert 'for path in "$SRVLOG" "$AUDIT_LOG" "$OUT"; do' in source
     assert 'SRVLOG=logs/r15_policyserver_${PORT}.log' not in source
