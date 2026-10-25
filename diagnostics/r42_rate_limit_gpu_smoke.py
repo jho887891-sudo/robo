@@ -20,6 +20,9 @@ import traceback
 
 import numpy as np
 
+# Keep the smoke checkout read-only; the caller also sets PYTHONDONTWRITEBYTECODE=1.
+sys.dont_write_bytecode = True
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 POLICY_ROOT = os.path.join(ROOT, "code", "xpolicylab", "policy")
 POLICY_DIR = os.path.join(POLICY_ROOT, "OpenVLA_R42")
@@ -416,6 +419,12 @@ def main():
                 {"n_action_tokens": payload.get("n_action_tokens"),
                  "token_min": min(payload["ids"]) if payload["ids"] else None,
                  "token_max": max(payload["ids"]) if payload["ids"] else None})
+        require(report, "first_rate_reference_is_measured_state",
+                call["prev_cmd"] is not None
+                and np.allclose(call["prev_cmd"], state, atol=1e-6, rtol=0.0),
+                {"previous_command14": (call["prev_cmd"].tolist()
+                                         if call["prev_cmd"] is not None else None),
+                 "measured_state14": state.tolist()})
         require(report, "real_inference_decoder_received_dt",
                 call["dt"] is not None and abs(float(call["dt"]) - model.control_dt) <= 1e-6
                 and abs(float(info.get("dt", -1.0)) - model.control_dt) <= 1e-6,
@@ -490,6 +499,13 @@ def main():
         forced_action = np.asarray(forced_payload["action14"], dtype=np.float32).reshape(-1)
         forced_info = forced_call["info"]
         forced_delta = np.abs(forced_action - previous)
+        require(report, "forced_previous_command_reached_official_path",
+                forced_call["prev_cmd"] is not None
+                and np.allclose(forced_call["prev_cmd"], previous, atol=1e-6, rtol=0.0),
+                {"passed_previous_command14": (
+                    forced_call["prev_cmd"].tolist()
+                    if forced_call["prev_cmd"] is not None else None),
+                 "expected_previous_command14": previous.tolist()})
         require(report, "forced_token_rate_branch_activated",
                 int(forced_info.get("rate_limited", 0)) > 0,
                 {"rate_limited_dims": forced_info.get("rate_limited"),
