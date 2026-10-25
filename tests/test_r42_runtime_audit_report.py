@@ -388,6 +388,7 @@ def test_rate_limit_gate_blocks_when_configured_rule_is_bypassed(tmp_path, capsy
     report = audit_trace(str(path))
     assert report["trace_integrity"] == "PASS"
     assert report["gates"]["rate_limit_branch_active"] == "BLOCKED"
+    assert report["gates"]["rate_limit_compliance"] == "BLOCKED"
     assert "dt" in report["gate_reasons"]["rate_limit_branch_active"].lower()
 
     result = main(["--input", str(path)])
