@@ -1,0 +1,922 @@
+{
+  "artifact_hash_policy": "Hashes small checkpoint/config artifacts and MANIFEST; does not re-hash the full multi-GB base-model weight shards. No source/checkpoint file is written.",
+  "artifacts_after": {
+    "base_model_config": {
+      "exists": true,
+      "path": "/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine/config.json",
+      "sha256": "bcb688a66f3e94a42311b77d37b7e1484886701f7b2aa8e36d165dfccac92ae6",
+      "size_bytes": 60711
+    },
+    "checkpoint_manifest": {
+      "exists": true,
+      "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/MANIFEST.json",
+      "sha256": "7c4bb685ed931c4bb390f27ad40de22c32e35ca0b7e62a8801e542b13c42fd17",
+      "size_bytes": 1003
+    },
+    "episode_split": {
+      "exists": true,
+      "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/split80.json",
+      "sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2",
+      "size_bytes": 2648
+    },
+    "frozen_normalizer_contract": {
+      "exists": true,
+      "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/evidence/r9_gate_20261020/frozen_contract_64train.json",
+      "sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+      "size_bytes": 4519
+    },
+    "lora_config": {
+      "exists": true,
+      "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_config.json",
+      "sha256": "bc842ecc420a81cd11ec7df2e394de2fea7f5d04f87aeef72cf133ebc19c7d23",
+      "size_bytes": 986
+    },
+    "lora_weights": {
+      "exists": true,
+      "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_model.safetensors",
+      "sha256": "f0316a91a7e50d117c9665736c8c171c2450aa06bb650cacb158ed04d9014779",
+      "size_bytes": 484458600
+    },
+    "physical_bounds": {
+      "exists": true,
+      "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/push_T_bounds.npz",
+      "sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+      "size_bytes": 1206
+    },
+    "proprio_projector": {
+      "exists": true,
+      "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/proprio_projector_42.pt",
+      "sha256": "b71ec79f5dad5670cc70d761e1e3bde122aa9feaad55b430ce3a0f47ef2bf830",
+      "size_bytes": 67831992
+    }
+  },
+  "artifacts_before": {
+    "base_model_config": {
+      "exists": true,
+      "path": "/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine/config.json",
+      "sha256": "bcb688a66f3e94a42311b77d37b7e1484886701f7b2aa8e36d165dfccac92ae6",
+      "size_bytes": 60711
+    },
+    "checkpoint_manifest": {
+      "exists": true,
+      "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/MANIFEST.json",
+      "sha256": "7c4bb685ed931c4bb390f27ad40de22c32e35ca0b7e62a8801e542b13c42fd17",
+      "size_bytes": 1003
+    },
+    "episode_split": {
+      "exists": true,
+      "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/split80.json",
+      "sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2",
+      "size_bytes": 2648
+    },
+    "frozen_normalizer_contract": {
+      "exists": true,
+      "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/evidence/r9_gate_20261020/frozen_contract_64train.json",
+      "sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+      "size_bytes": 4519
+    },
+    "lora_config": {
+      "exists": true,
+      "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_config.json",
+      "sha256": "bc842ecc420a81cd11ec7df2e394de2fea7f5d04f87aeef72cf133ebc19c7d23",
+      "size_bytes": 986
+    },
+    "lora_weights": {
+      "exists": true,
+      "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_model.safetensors",
+      "sha256": "f0316a91a7e50d117c9665736c8c171c2450aa06bb650cacb158ed04d9014779",
+      "size_bytes": 484458600
+    },
+    "physical_bounds": {
+      "exists": true,
+      "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/push_T_bounds.npz",
+      "sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+      "size_bytes": 1206
+    },
+    "proprio_projector": {
+      "exists": true,
+      "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/proprio_projector_42.pt",
+      "sha256": "b71ec79f5dad5670cc70d761e1e3bde122aa9feaad55b430ce3a0f47ef2bf830",
+      "size_bytes": 67831992
+    }
+  },
+  "checks": [
+    {
+      "detail": {
+        "action_dim": 14,
+        "action_token_begin_idx": 31743,
+        "ignore_index": -100,
+        "num_actions_chunk_unused": 25,
+        "proprio_dim_unused": 14,
+        "r42_action_tokens": 14,
+        "r42_proprio_dim": 42,
+        "robot_platform": "ARX",
+        "stop_index": 2
+      },
+      "name": "prismatic_runtime_is_14d_arx",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/code/xpolicylab/policy/OpenVLA_R42/deploy.yml"
+      },
+      "name": "deploy_yaml_exists",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "available": true
+      },
+      "name": "cuda_available",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "device_index": 0,
+        "device_name": "NVIDIA RTX A6000",
+        "free_vram_gb_after_smoke": 13.514,
+        "free_vram_gb_before_load": 47.393,
+        "minimum_free_gb": 24.0,
+        "peak_allocated_gb": 16.085,
+        "total_vram_gb": 50.897
+      },
+      "name": "minimum_free_vram",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "missing": [],
+        "paths": {
+          "base_model_config": "/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine/config.json",
+          "checkpoint_manifest": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/MANIFEST.json",
+          "episode_split": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/split80.json",
+          "frozen_normalizer_contract": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/evidence/r9_gate_20261020/frozen_contract_64train.json",
+          "lora_config": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_config.json",
+          "lora_weights": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_model.safetensors",
+          "physical_bounds": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/push_T_bounds.npz",
+          "proprio_projector": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/proprio_projector_42.pt"
+        }
+      },
+      "name": "required_local_artifacts_present",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "amax_dim": 14,
+        "amin_dim": 14,
+        "max_rate_dim": 14
+      },
+      "name": "metadata_has_valid_14d_rate_contract",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "control_dt": 0.04,
+        "control_hz": 25.0,
+        "max_rate14": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      "name": "metadata_rate_and_control_period_frozen",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "backend_type": "_TorchBackend"
+      },
+      "name": "real_torch_backend_loaded",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "backend_type": "_TorchBackend"
+      },
+      "name": "all_loaded_parameters_frozen",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "processor_type": "PrismaticProcessor",
+        "prompt_tokens": 31
+      },
+      "name": "real_processor_and_prompt_loaded",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "server_calls": 1,
+        "token_count": 14
+      },
+      "name": "one_real_model_forward_completed",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "all_finite": true,
+        "shape": [
+          14
+        ]
+      },
+      "name": "real_inference_action_is_finite_14d",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "n_action_tokens": 14,
+        "token_max": 31892,
+        "token_min": 31853
+      },
+      "name": "real_inference_tokens_are_14_legal_ids",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "measured_state14": [
+          -0.3831038177013397,
+          1.2672092914581299,
+          1.1233934164047241,
+          -0.6291608810424805,
+          -0.11082664132118225,
+          -0.2481663078069687,
+          0.5,
+          -0.0003172755241394043,
+          1.1389247179031372,
+          0.9343398213386536,
+          -0.6241511106491089,
+          -0.03633911907672882,
+          -0.27350127696990967,
+          0.5
+        ],
+        "previous_command14": [
+          -0.3831038177013397,
+          1.2672092914581299,
+          1.1233934164047241,
+          -0.6291608810424805,
+          -0.11082664132118225,
+          -0.2481663078069687,
+          0.5,
+          -0.0003172755241394043,
+          1.1389247179031372,
+          0.9343398213386536,
+          -0.6241511106491089,
+          -0.03633911907672882,
+          -0.27350127696990967,
+          0.5
+        ]
+      },
+      "name": "first_rate_reference_is_measured_state",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "decoder_info_dt": 0.04,
+        "expected_dt": 0.04,
+        "passed_dt": 0.04
+      },
+      "name": "real_inference_decoder_received_dt",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "max_action": 1.2671732902526855,
+        "min_action": -0.6292875409126282
+      },
+      "name": "real_inference_action_satisfies_physical_bounds",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "max_allowed_delta": [
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164
+        ],
+        "max_observed_delta": 0.00012665987014770508,
+        "rate_limited_dims": 0
+      },
+      "name": "real_inference_action_satisfies_rate_bound",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "rate_conflict_dims": [],
+        "unsafe": null
+      },
+      "name": "real_inference_decoder_has_no_safety_conflict",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "expected_previous_command14": [
+          -0.3831038177013397,
+          1.2672092914581299,
+          1.1233934164047241,
+          -0.6291608810424805,
+          -0.11082664132118225,
+          -0.2481663078069687,
+          0.5,
+          -0.0003172755241394043,
+          1.2389247417449951,
+          0.9343398213386536,
+          -0.6241511106491089,
+          -0.03633911907672882,
+          -0.27350127696990967,
+          0.5
+        ],
+        "passed_previous_command14": [
+          -0.3831038177013397,
+          1.2672092914581299,
+          1.1233934164047241,
+          -0.6291608810424805,
+          -0.11082664132118225,
+          -0.2481663078069687,
+          0.5,
+          -0.0003172755241394043,
+          1.2389247417449951,
+          0.9343398213386536,
+          -0.6241511106491089,
+          -0.03633911907672882,
+          -0.27350127696990967,
+          0.5
+        ]
+      },
+      "name": "forced_previous_command_reached_official_path",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "forced_dimension": 8,
+        "forced_endpoint_residual": -0.02291058748960495,
+        "rate_limited_dims": 4,
+        "synthetic_previous_command_offset": 0.1
+      },
+      "name": "forced_token_rate_branch_activated",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "max_allowed_delta": [
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164,
+          0.019999999552965164
+        ],
+        "max_observed_delta": 0.019999980926513672
+      },
+      "name": "forced_token_action_respects_rate_bound",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "max_action": 1.2872092723846436,
+        "min_action": -0.6441510915756226
+      },
+      "name": "forced_token_action_respects_physical_bounds",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "rate_conflict_dims": [],
+        "unsafe": null
+      },
+      "name": "forced_token_decoder_has_no_safety_conflict",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "after": {
+          "base_model_config": {
+            "exists": true,
+            "path": "/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine/config.json",
+            "sha256": "bcb688a66f3e94a42311b77d37b7e1484886701f7b2aa8e36d165dfccac92ae6",
+            "size_bytes": 60711
+          },
+          "checkpoint_manifest": {
+            "exists": true,
+            "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/MANIFEST.json",
+            "sha256": "7c4bb685ed931c4bb390f27ad40de22c32e35ca0b7e62a8801e542b13c42fd17",
+            "size_bytes": 1003
+          },
+          "episode_split": {
+            "exists": true,
+            "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/split80.json",
+            "sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2",
+            "size_bytes": 2648
+          },
+          "frozen_normalizer_contract": {
+            "exists": true,
+            "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/evidence/r9_gate_20261020/frozen_contract_64train.json",
+            "sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+            "size_bytes": 4519
+          },
+          "lora_config": {
+            "exists": true,
+            "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_config.json",
+            "sha256": "bc842ecc420a81cd11ec7df2e394de2fea7f5d04f87aeef72cf133ebc19c7d23",
+            "size_bytes": 986
+          },
+          "lora_weights": {
+            "exists": true,
+            "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_model.safetensors",
+            "sha256": "f0316a91a7e50d117c9665736c8c171c2450aa06bb650cacb158ed04d9014779",
+            "size_bytes": 484458600
+          },
+          "physical_bounds": {
+            "exists": true,
+            "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/push_T_bounds.npz",
+            "sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+            "size_bytes": 1206
+          },
+          "proprio_projector": {
+            "exists": true,
+            "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/proprio_projector_42.pt",
+            "sha256": "b71ec79f5dad5670cc70d761e1e3bde122aa9feaad55b430ce3a0f47ef2bf830",
+            "size_bytes": 67831992
+          }
+        },
+        "before": {
+          "base_model_config": {
+            "exists": true,
+            "path": "/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine/config.json",
+            "sha256": "bcb688a66f3e94a42311b77d37b7e1484886701f7b2aa8e36d165dfccac92ae6",
+            "size_bytes": 60711
+          },
+          "checkpoint_manifest": {
+            "exists": true,
+            "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/MANIFEST.json",
+            "sha256": "7c4bb685ed931c4bb390f27ad40de22c32e35ca0b7e62a8801e542b13c42fd17",
+            "size_bytes": 1003
+          },
+          "episode_split": {
+            "exists": true,
+            "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/split80.json",
+            "sha256": "2654e31912fd04ca403a3c03e19e2f8ad527d7d8eec3aa99305bcc2661d685f2",
+            "size_bytes": 2648
+          },
+          "frozen_normalizer_contract": {
+            "exists": true,
+            "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/evidence/r9_gate_20261020/frozen_contract_64train.json",
+            "sha256": "2ab68fd34ad2bb5f8075450758f46f37b2df6d1fa5ce75d849b6fd09ff5b9f55",
+            "size_bytes": 4519
+          },
+          "lora_config": {
+            "exists": true,
+            "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_config.json",
+            "sha256": "bc842ecc420a81cd11ec7df2e394de2fea7f5d04f87aeef72cf133ebc19c7d23",
+            "size_bytes": 986
+          },
+          "lora_weights": {
+            "exists": true,
+            "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter/adapter_model.safetensors",
+            "sha256": "f0316a91a7e50d117c9665736c8c171c2450aa06bb650cacb158ed04d9014779",
+            "size_bytes": 484458600
+          },
+          "physical_bounds": {
+            "exists": true,
+            "path": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/data/push_T_bounds.npz",
+            "sha256": "5c567abcd5e6afa9e579038bb2d3cd1e9919e8e439ab4cb2ddadbcd8aa9f7855",
+            "size_bytes": 1206
+          },
+          "proprio_projector": {
+            "exists": true,
+            "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/proprio_projector_42.pt",
+            "sha256": "b71ec79f5dad5670cc70d761e1e3bde122aa9feaad55b430ce3a0f47ef2bf830",
+            "size_bytes": 67831992
+          }
+        }
+      },
+      "name": "checkpoint_and_config_artifacts_unchanged",
+      "result": "PASS"
+    }
+  ],
+  "completed_at_utc": "2026-10-25T09:35:06.740559+00:00",
+  "deploy_yaml": "/tmp/robo-r42-gpu-smoke-20261025T093237Z/code/xpolicylab/policy/OpenVLA_R42/deploy.yml",
+  "deployment_config": {
+    "base_model_path": "/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine",
+    "checkpoint_dir": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300",
+    "control_hz": 25,
+    "device": "cuda",
+    "policy_name": "OpenVLA_R42",
+    "task_name": "push_T"
+  },
+  "exit_code": 0,
+  "forced_rate_path_test": {
+    "action14": [
+      -0.3997935950756073,
+      1.2872092723846436,
+      1.1407010555267334,
+      -0.6125307083129883,
+      -0.12524394690990448,
+      -0.2606751620769501,
+      0.5,
+      0.017193660140037537,
+      1.2189247608184814,
+      0.9143398404121399,
+      -0.6441510915756226,
+      -0.0198246818035841,
+      -0.2592828571796417,
+      0.5
+    ],
+    "decoder_info": {
+      "clipped_joint": 0,
+      "dt": 0.04,
+      "gripper_fallback_dims": [
+        6,
+        13
+      ],
+      "rate_conflict_dims": [],
+      "rate_limited": 4,
+      "unsafe": null
+    },
+    "decoder_output_overridden_for_test": true,
+    "endpoint_residual": -0.02291058748960495,
+    "forced_bins14": [
+      0,
+      255,
+      255,
+      255,
+      0,
+      0,
+      0,
+      255,
+      0,
+      0,
+      0,
+      255,
+      255,
+      0
+    ],
+    "forced_dimension": 8,
+    "forced_token_ids14": [
+      31744,
+      31999,
+      31999,
+      31999,
+      31744,
+      31744,
+      31744,
+      31999,
+      31744,
+      31744,
+      31744,
+      31999,
+      31999,
+      31744
+    ],
+    "is_model_prediction": false,
+    "max_allowed_delta14": [
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164
+    ],
+    "measured_state14": [
+      -0.3831038177013397,
+      1.2672092914581299,
+      1.1233934164047241,
+      -0.6291608810424805,
+      -0.11082664132118225,
+      -0.2481663078069687,
+      0.5,
+      -0.0003172755241394043,
+      1.1389247179031372,
+      0.9343398213386536,
+      -0.6241511106491089,
+      -0.03633911907672882,
+      -0.27350127696990967,
+      0.5
+    ],
+    "synthetic_previous_command14": [
+      -0.3831038177013397,
+      1.2672092914581299,
+      1.1233934164047241,
+      -0.6291608810424805,
+      -0.11082664132118225,
+      -0.2481663078069687,
+      0.5,
+      -0.0003172755241394043,
+      1.2389247417449951,
+      0.9343398213386536,
+      -0.6241511106491089,
+      -0.03633911907672882,
+      -0.27350127696990967,
+      0.5
+    ],
+    "uses_loaded_real_model_instance": true
+  },
+  "gpu": {
+    "device_index": 0,
+    "device_name": "NVIDIA RTX A6000",
+    "free_vram_gb_after_smoke": 13.514,
+    "free_vram_gb_before_load": 47.393,
+    "minimum_free_gb": 24.0,
+    "peak_allocated_gb": 16.085,
+    "total_vram_gb": 50.897
+  },
+  "metadata_contract": {
+    "action_token_window": [
+      31744,
+      31999
+    ],
+    "amax14": [
+      0.4786161780357361,
+      2.5344955921173096,
+      2.2467868328094482,
+      0.016035402193665504,
+      0.3997131586074829,
+      0.47987064719200134,
+      1.0,
+      1.0852547883987427,
+      2.2778494358062744,
+      1.8686796426773071,
+      0.023378165438771248,
+      0.35455232858657837,
+      0.33268600702285767,
+      1.0
+    ],
+    "amin14": [
+      -1.2448238134384155,
+      -7.699453999521211e-05,
+      1.6999936693015027e-16,
+      -1.2743571996688843,
+      -0.6213664412498474,
+      -0.9762032628059387,
+      0.0,
+      -1.0858893394470215,
+      -3.659989131020837e-15,
+      1.6999125394270235e-16,
+      -1.2716803550720215,
+      -0.427230566740036,
+      -0.879688560962677,
+      0.0
+    ],
+    "codec_mode": "fixed",
+    "lora_sha256": "f0316a91a7e50d117c9665736c8c171c2450aa06bb650cacb158ed04d9014779",
+    "max_rate14": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "model_contract": {
+      "action_token_window": [
+        31744,
+        31999
+      ],
+      "codec_mode": "fixed",
+      "control_dt": 0.04,
+      "control_hz": 25.0,
+      "device": "cuda",
+      "env_io": {
+        "action_keys": [
+          "left_arm_joint_state",
+          "left_ee_joint_state",
+          "right_arm_joint_state",
+          "right_ee_joint_state"
+        ],
+        "camera_annotator": "color",
+        "camera_order": [
+          "cam_head",
+          "cam_left_wrist",
+          "cam_right_wrist"
+        ],
+        "control_dt": 0.04,
+        "control_hz": 25.0,
+        "expected_image_shape": [
+          480,
+          640,
+          3
+        ],
+        "gripper_dims": [
+          6,
+          13
+        ],
+        "gripper_range": [
+          0.0,
+          1.0
+        ],
+        "image_dtype": "uint8",
+        "joint_dims": [
+          6,
+          1,
+          6,
+          1
+        ],
+        "joint_order": [
+          "left_arm_joint_state",
+          "left_ee_joint_state",
+          "right_arm_joint_state",
+          "right_ee_joint_state"
+        ],
+        "obs_dropped_keys": [
+          "action",
+          "additional_info",
+          "data_format_version",
+          "instruction",
+          "env_idx",
+          "timestamp",
+          "record",
+          "camera_names",
+          "channel_order"
+        ],
+        "state_dim": 14,
+        "state_ignored_keys": [
+          "left_ee_pose",
+          "right_ee_pose"
+        ]
+      },
+      "latency_phases": [
+        "preprocess",
+        "forward_total",
+        "decode",
+        "total"
+      ],
+      "lora_sha256": "f0316a91a7e50d117c9665736c8c171c2450aa06bb650cacb158ed04d9014779",
+      "metadata_source": "r42_metadata_bridge(/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300)",
+      "n_action_tokens": 14,
+      "n_resets": 0,
+      "n_steps": 0,
+      "normalizer_sha256": "13a80f91780499b121430aa9ec6b60e7327a6f317179700b0850aafe8ce18512",
+      "policy_name": "OpenVLA_R42",
+      "projector_sha256": "b71ec79f5dad5670cc70d761e1e3bde122aa9feaad55b430ce3a0f47ef2bf830",
+      "rate_limit": {
+        "client_acknowledgement": "UNKNOWN",
+        "control_dt": 0.04,
+        "control_hz": 25.0,
+        "enabled": true,
+        "previous_command_source": "previous server-generated rate-limited response; first step uses measured state",
+        "reset_scope": "all_envs",
+        "source": "safety_limits.max_rate",
+        "units": "per-dimension state-coordinate units per second"
+      },
+      "reset_scope": "all_envs",
+      "task_id": "push_T",
+      "template_source": "XPolicyLab.model_template"
+    },
+    "normalizer_sha256": "13a80f91780499b121430aa9ec6b60e7327a6f317179700b0850aafe8ce18512",
+    "projector_sha256": "b71ec79f5dad5670cc70d761e1e3bde122aa9feaad55b430ce3a0f47ef2bf830",
+    "proprio_dim": 42,
+    "task_id": "push_T"
+  },
+  "model_load_seconds": 116.257,
+  "prismatic_runtime_contract": {
+    "action_dim": 14,
+    "action_token_begin_idx": 31743,
+    "ignore_index": -100,
+    "num_actions_chunk_unused": 25,
+    "proprio_dim_unused": 14,
+    "r42_action_tokens": 14,
+    "r42_proprio_dim": 42,
+    "robot_platform": "ARX",
+    "stop_index": 2
+  },
+  "real_inference": {
+    "action14": [
+      -0.38311269879341125,
+      1.2671732902526855,
+      1.1233662366867065,
+      -0.6292875409126282,
+      -0.11085972189903259,
+      -0.24822118878364563,
+      0.5,
+      -0.00039044860750436783,
+      1.1388269662857056,
+      0.9342674612998962,
+      -0.6242128014564514,
+      -0.03641176223754883,
+      -0.27352920174598694,
+      0.5
+    ],
+    "decoder_info": {
+      "clipped_joint": 0,
+      "dt": 0.04,
+      "gripper_fallback_dims": [
+        6,
+        13
+      ],
+      "rate_conflict_dims": [],
+      "rate_limited": 0,
+      "unsafe": null
+    },
+    "input_kind": "synthetic RGB/state, not a real observation",
+    "latency_ms": {
+      "decode": 12.84190732985735,
+      "forward_total": 10842.165341135114,
+      "preprocess": 1043.9216708764434,
+      "total": 11899.143476039171
+    },
+    "n_action_tokens": 14,
+    "previous_command14": [
+      -0.3831038177013397,
+      1.2672092914581299,
+      1.1233934164047241,
+      -0.6291608810424805,
+      -0.11082664132118225,
+      -0.2481663078069687,
+      0.5,
+      -0.0003172755241394043,
+      1.1389247179031372,
+      0.9343398213386536,
+      -0.6241511106491089,
+      -0.03633911907672882,
+      -0.27350127696990967,
+      0.5
+    ],
+    "token_ids": [
+      31886,
+      31871,
+      31869,
+      31870,
+      31878,
+      31882,
+      31892,
+      31857,
+      31877,
+      31886,
+      31875,
+      31853,
+      31865,
+      31871
+    ],
+    "wall_seconds": 11.9
+  },
+  "report_path": "/tmp/r42-rate-limit-gpu-smoke-20261025T093237Z/report.json",
+  "runtime_env": {
+    "R42_AUDIT_LOG_PATH_present": false,
+    "R42_KV_CACHE": "0",
+    "R42_POLICY": "",
+    "R42_VISION_CACHE": "0"
+  },
+  "schema_version": "r42-rate-limit-gpu-smoke/v1",
+  "scope": {
+    "checkpoint_or_hdf5_mutation": false,
+    "real_model_inference_steps": 1,
+    "real_observations_used": false,
+    "robot_connected_or_commanded": false,
+    "simulator_started": false,
+    "synthetic_rgb_state_used": true,
+    "training_or_optimizer_steps": 0
+  },
+  "source": {
+    "git_branch": "",
+    "git_sha": "d99635c4cebff1a5b8ee459ad60aea7695408bc6",
+    "git_worktree_status": "",
+    "repo_root": "/tmp/robo-r42-gpu-smoke-20261025T093237Z"
+  },
+  "started_at_utc": "2026-10-25T09:32:47.864681+00:00",
+  "status": "PASS"
+}

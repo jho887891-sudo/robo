@@ -1,0 +1,8 @@
+python 3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]
+torch 2.4.1+cu121
+transformers 4.40.2
+pyyaml 6.0.3
+cuda_available True
+cuda_version 12.1
+device NVIDIA RTX A6000
+free_vram_gb 47.397666816 total_vram_gb 50.897289216
