@@ -25,6 +25,7 @@ The deployed file layout is identical to the other XPolicyLab policies:
                                    setup_eval_policy_server.sh, r42_serving pieces}
 """
 import datetime
+import hashlib
 import json
 import os
 import sys
@@ -41,6 +42,7 @@ for _p in (_HERE, _PURE):
 import r42_adapter as R          # noqa: E402
 import r42_deploy_server as S    # noqa: E402  (torch is only imported inside .load())
 import r42_env_io as E           # noqa: E402
+import r42_runtime_audit as Audit  # noqa: E402 (stdlib-only, no model/GPU imports)
 
 LATENCY_PHASES = ("preprocess", "forward_total", "decode", "total")
 LORA_DIRNAME = "lora_adapter"
@@ -104,6 +106,11 @@ def _resolve_template():
 
 ModelTemplate, TEMPLATE_SOURCE = _resolve_template()
 _CODE = "OpenVLA_R42"
+_STATE_DIM_ORDER = tuple(
+    "%s[%d]" % (key, i)
+    for key, dim in zip(E.JOINT_ORDER, E.JOINT_DIMS)
+    for i in range(dim)
+)
 
 
 class R42ModelError(R.R42Error):
@@ -186,6 +193,12 @@ class Model(ModelTemplate):
         self._n_steps = 0
         self.n_resets = 0
         self.last_payload = None
+        self._audit_trace = None
+        self._audit_episode_index = 0
+        self._audit_episode_step = 0
+        self._audit_prev_response_action14 = None
+        self._audit_prev_response_global_step_index = None
+        self._audit_backend_ready_logged = False
         self.metadata = self._resolve_metadata()
 
         # G12: the served codec mode is printed and asserted, never implied
@@ -198,6 +211,7 @@ class Model(ModelTemplate):
             raise R42ModelError("action_token_window %s != %s"
                                 % (self.metadata["action_token_window"],
                                    list(R.CODEC_WINDOW)))
+        self._configure_runtime_audit()
         print("[%s] template=%s codec_mode=%s (asserted) window=%s n_actions=%d "
               "camera_order=%s control_hz=%.3g metadata=%s device=%s"
               % (_CODE, TEMPLATE_SOURCE, self.codec_mode.upper(), list(R.CODEC_WINDOW),
@@ -206,6 +220,108 @@ class Model(ModelTemplate):
         if self.device.startswith("cuda"):
             print("[%s] backend is lazy: no model is loaded until the first get_action()"
                   % _CODE, flush=True)
+
+    # ------------------------------------------------------------------ optional runtime audit
+    def _configure_runtime_audit(self):
+        """Enable a durable per-request trace only when an explicit path is supplied.
+
+        If the path is set, a run ID and writable, non-existing destination are mandatory. The
+        writer is initialized before lazy model loading so an audit setup failure cannot launch an
+        unlogged policy server.
+        """
+        if "R42_AUDIT_LOG_PATH" not in os.environ:
+            return
+        path = os.environ.get("R42_AUDIT_LOG_PATH")
+        run_id = os.environ.get("R42_AUDIT_RUN_ID")
+        run_metadata = {
+            "policy_name": self.policy_name,
+            "checkpoint_dir": self.checkpoint_dir,
+            "base_model_path": self.base_model_path,
+            "lora_dir": self.lora_dir,
+            "projector_path": self.projector_path,
+            "metadata_source": self._metadata_source,
+            "task_id": self.metadata.get("task_id"),
+            "device": self.device,
+            "control_hz": self.control_hz,
+            "codec_mode": self.codec_mode,
+            "normalizer_sha256": self.metadata.get("normalizer_sha256"),
+            "lora_sha256": self.metadata.get("lora_sha256"),
+            "projector_sha256": self.metadata.get("projector_sha256"),
+            "state_dim_order": list(_STATE_DIM_ORDER),
+            "joint_group_order": list(E.JOINT_ORDER),
+            "camera_order": list(E.CAMERA_ORDER),
+            "raw_images_persisted": False,
+            "camera_state_wallclock_sync": "UNKNOWN",
+            "python_version": sys.version.split()[0],
+            "pid": os.getpid(),
+            "durability": "flush_and_fsync_each_record",
+        }
+        self._audit_trace = Audit.RuntimeAuditWriter(path, run_id, run_metadata)
+        print("[%s] runtime audit enabled: %s (run_id=%s)"
+              % (_CODE, self._audit_trace.path, run_id), flush=True)
+
+    def _audit_action_step(self, inputs, out, payload, stamp, phases):
+        """Persist one server-boundary observation and the response generated from it."""
+        if self._audit_trace is None:
+            return
+
+        state = np.asarray(inputs["state"], np.float32).reshape(-1)
+        response_action = np.asarray(out["action"], np.float32).reshape(-1)
+        previous = self._audit_prev_response_action14
+        state_minus_previous = None
+        if previous is not None:
+            state_minus_previous = (state - previous).astype(np.float32).tolist()
+
+        camera_inputs = {}
+        for camera in E.CAMERA_ORDER:
+            arr = np.ascontiguousarray(inputs["images"][camera])
+            camera_inputs[camera] = {
+                "sha256": hashlib.sha256(arr.tobytes()).hexdigest(),
+                "shape": [int(x) for x in arr.shape],
+                "dtype": str(arr.dtype),
+            }
+
+        self._audit_trace.write({
+            "event": "action_step",
+            "episode_index": int(self._audit_episode_index),
+            "episode_step_index": int(self._audit_episode_step),
+            "global_step_index": int(self._n_steps),
+            "env_idx": int(inputs["env_idx"]),
+            "source_timestamp": inputs.get("timestamp"),
+            "frequency_hz": inputs.get("frequency"),
+            "observation_wall_utc": stamp["obs_iso"],
+            "response_wall_utc": stamp["reply_iso"],
+            "server_span_ms": float(stamp["server_span_ms"]),
+            "state_dim_order": list(_STATE_DIM_ORDER),
+            "state14": state.tolist(),
+            "velocity14": np.asarray(out.get("velocity", []), np.float32).reshape(-1).tolist(),
+            "features42": np.asarray(out.get("features", []), np.float32).reshape(-1).tolist(),
+            "camera_inputs": camera_inputs,
+            "prediction": {
+                "token_ids14": list(payload["ids"]),
+                "bins14": list(payload["bins"]),
+                "residual14": np.asarray(out.get("residual", []), np.float32).reshape(-1).tolist(),
+            },
+            "server_response": {
+                "action14": list(payload["action14"]),
+                "action_dict": payload["actions"],
+                "decoder_info": out.get("info", {}),
+                "semantics": "server-generated response; client acknowledgement/execution is not observed here",
+            },
+            "previous_server_response_action14": (
+                None if previous is None else previous.astype(np.float32).tolist()),
+            "previous_response_global_step_index": self._audit_prev_response_global_step_index,
+            "observed_state_minus_previous_server_response14": state_minus_previous,
+            "comparison_semantics": (
+                "current observed state minus previous server-generated response; not proof of actuation"),
+            "camera_state_wallclock_sync": "UNKNOWN",
+            "latency_ms": dict(phases),
+            "n_action_tokens": int(payload["n_action_tokens"]),
+            "codec_mode": self.codec_mode,
+        })
+        self._audit_prev_response_action14 = response_action.copy()
+        self._audit_prev_response_global_step_index = int(self._n_steps)
+        self._audit_episode_step += 1
 
     # ------------------------------------------------------------------ metadata resolution
     def _resolve_metadata(self):
@@ -339,6 +455,15 @@ class Model(ModelTemplate):
         if self._inputs is None:
             raise R42ModelError("get_action() requires a preceding update_obs(observation)")
         server = self._ensure_server()
+        if self._audit_trace is not None and not self._audit_backend_ready_logged:
+            self._audit_trace.write({
+                "event": "backend_ready",
+                "backend_type": type(server.backend).__name__ if server.backend is not None else None,
+                "device": self.device,
+                "metadata_source": self._metadata_source,
+                "checkpoint_dir": self.checkpoint_dir,
+            })
+            self._audit_backend_ready_logged = True
         inputs = self._inputs
         t0 = time.perf_counter()
         out = server.act(inputs["images"], inputs["state"], env_idx=inputs["env_idx"],
@@ -362,6 +487,9 @@ class Model(ModelTemplate):
             raise R42ModelError("server produced %d action token(s) / %d id(s); the 42D contract "
                                 "is %d" % (payload["n_action_tokens"], len(payload["ids"]),
                                            R.N_ACTIONS))
+        # Log only after the existing action-token contract passes; an enabled trace failure is
+        # fatal so the audited run cannot silently continue without evidence.
+        self._audit_action_step(inputs, out, payload, stamp, phases)
         self._n_steps += 1
         self.last_payload = payload
         return payload
@@ -378,6 +506,17 @@ class Model(ModelTemplate):
             self._server.reset_all()
         self._inputs = None
         self.n_resets += 1
+        self._audit_episode_index += 1
+        self._audit_episode_step = 0
+        self._audit_prev_response_action14 = None
+        self._audit_prev_response_global_step_index = None
+        if self._audit_trace is not None:
+            self._audit_trace.write({
+                "event": "episode_reset",
+                "episode_index": int(self._audit_episode_index),
+                "reset_count": int(self.n_resets),
+                "global_step_count": int(self._n_steps),
+            })
         return True
 
     # --------------------------------------------------------------------------- evidence
