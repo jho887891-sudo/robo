@@ -32,6 +32,7 @@ for path in "$SRVLOG" "$AUDIT_LOG" "$AUDIT_REPORT" "$OUT"; do
 done
 echo "# closed loop $(date -u +%Y-%m-%dT%H:%M:%SZ) ckpt=$CKPT episodes=$EPISODES stage=$STAGE port=$PORT run_id=$RUN_ID"
 echo "# runtime audit trace: $AUDIT_LOG"
+echo "# runtime audit report: $AUDIT_REPORT"
 # R42_KV_CACHE / R42_VISION_CACHE are passed through to the server (default 0 = full recompute).
 # A cached run must be recorded as such: the KV path is noise-level equivalent, not bit-identical.
 ROBODOJO_ROOT=$ROBODOJO_ROOT PYTHONPATH=$ROBODOJO_ROOT:$ROBODOJO_ROOT/XPolicyLab:$OFT:$OFT/vla-scripts \
