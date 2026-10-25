@@ -364,7 +364,7 @@ class Model(ModelTemplate):
             "error_message": str(exc)[:2000],
         })
 
-    def _audit_action_step(self, inputs, out, payload, stamp, phases):
+    def _audit_action_step(self, inputs, out, payload, stamp, phases, rate_reference):
         """Persist the generated response associated with the preceding observation record."""
         if self._audit_trace is None:
             return
@@ -396,6 +396,9 @@ class Model(ModelTemplate):
             "observation_audit_overhead_ms": self._audit_current_observation_overhead_ms,
             "state_dim_order": list(_STATE_DIM_ORDER),
             "state14": state.tolist(),
+            "rate_reference_action14": np.asarray(rate_reference, np.float32).reshape(-1).tolist(),
+            "rate_limit_source": "safety_limits.max_rate",
+            "control_dt": self.control_dt,
             "velocity14": np.asarray(out.get("velocity", []), np.float32).reshape(-1).tolist(),
             "features42": np.asarray(out.get("features", []), np.float32).reshape(-1).tolist(),
             "camera_inputs": camera_inputs,
@@ -642,7 +645,7 @@ class Model(ModelTemplate):
             raise
         # Log only after the existing action-token contract passes; an enabled trace failure is
         # fatal so the audited run cannot silently continue without evidence.
-        self._audit_action_step(inputs, out, payload, stamp, phases)
+        self._audit_action_step(inputs, out, payload, stamp, phases, prev_cmd)
         # Only latch a command after it passes the response contract and audit persistence.
         # The trace still cannot prove that the client accepted or physically executed it.
         self._rate_prev_cmd[env_idx] = np.asarray(payload["action14"], dtype=np.float32).copy()
