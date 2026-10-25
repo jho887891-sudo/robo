@@ -29,7 +29,7 @@ Make the next separately authorized R15 evaluation produce durable, step-level e
 Trace file: `runs/r15_loop_dev/runtime_audit_push_T_stage<stage>_<UTC stamp>-pid<PID>.jsonl`
 Report file: `runs/r15_loop_dev/runtime_audit_report_push_T_stage<stage>_<UTC stamp>-pid<PID>.json`
 
-One JSON object per line; schema `r42-runtime-audit/v1`. Each record includes a shared run ID, monotonically increasing record index, UTC recording time and process-monotonic timestamp.
+One JSON object per line; current schema `r42-runtime-audit/v2` (the validator remains able to read v1 traces, but v1 traces cannot pass the new rate-compliance gate without the explicit rate-reference evidence). Each record includes a shared run ID, monotonically increasing record index, UTC recording time and process-monotonic timestamp.
 
 Required events:
 - run_start: checkpoint/model metadata including checkpoint MANIFEST SHA256 and embedded-normalizer payload fingerprint, normalizer/adapter/projector hashes, state and camera order, Python/runtime info, and explicit statements that raw images are not stored and wall-clock sensor synchronization remains UNKNOWN.
@@ -38,6 +38,7 @@ Required events:
 - backend_ready: backend class, device, checkpoint and metadata source.
 - action_error: failure stage/type/message linked to the observation record/index. Capture backend-load, inference and response-contract failures. The trace writer itself remains fail-closed.
 - action_step: reference the observation record/index and record velocity [14], normalized features [42], source timestamp if present, token IDs [14], bins [14], decoded residual [14], decoder safety metadata, final server response [14] and four-key action dict, latency, and the previous server response plus the current observed-state difference from it when available. The trace uses `pre_audit_return_wall_utc` and `server_span_pre_audit_ms` for timestamps sampled before the action-step fsync, and records `observation_audit_overhead_ms` (camera hashing + observation record persistence).
+- Schema v2 additionally records the exact `rate_reference_action14`, its source (`measured_state` on first step after reset or `previous_server_response` later for that environment), `rate_limit_source`, and `control_dt`. The report independently verifies the reference linkage and checks every `abs(action14 - rate_reference_action14) <= configured_max_rate14 * control_dt + tolerance`.
 
 The response must be labeled **server-generated**, not client-acknowledged or confirmed as executed. The next observation provides a comparison point but is not proof of actuation. Camera/state wall-clock synchronization remains `UNKNOWN`.
 
