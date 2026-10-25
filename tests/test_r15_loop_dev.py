@@ -157,9 +157,10 @@ def test_pushT_launcher_persists_unique_trace_and_never_truncates_port_only_logs
     assert '--docker-env "ROBODOJO_RUN_ID=$RUN_ID"' not in source
     assert 'for path in "$SRVLOG" "$AUDIT_LOG" "$AUDIT_REPORT" "$OUT"; do' in source
     assert 'CLIENT_RC=$?' in source
+    assert 'trap finalize EXIT' in source
+    assert 'finalize() {' in source
     assert 'trap - EXIT INT TERM' in source
     assert '"$PY" tools/r42_runtime_audit_report.py --input "$AUDIT_LOG" --out "$AUDIT_REPORT"' in source
     assert 'AUDIT_RC=$?' in source
-    assert 'if [ "$CLIENT_RC" -ne 0 ]; then' in source
-    assert 'elif [ "$AUDIT_RC" -ne 0 ]; then' in source
+    assert 'if [ "$original_rc" -eq 0 ] && [ "$AUDIT_RC" -ne 0 ]; then' in source
     assert 'SRVLOG=logs/r15_policyserver_${PORT}.log' not in source
