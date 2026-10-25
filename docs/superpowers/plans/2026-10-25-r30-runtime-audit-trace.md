@@ -71,7 +71,8 @@
 
 - [x] Add `--run-id`, validate it against `[A-Za-z0-9][A-Za-z0-9._-]{0,127}`, and preserve generated IDs when omitted.
 - [x] Add dry-run tests for propagation and unsafe-ID rejection.
-- [x] Verify driver regressions: **9 passed** before adding the launcher static regression; the launcher test then provided a separate RED checkpoint.
+- [x] Make the driver authoritative for Docker run-ID propagation: remove any stale ROBODOJO_RUN_ID from docker-env and append the chosen run ID exactly once.
+- [x] Verify driver regressions: **10 passed**, including a Docker dry-run proving stale run IDs are overridden.
 
 ### Task 4: Non-overwriting launcher integration
 
@@ -82,6 +83,7 @@
 - [x] Add a static regression test for timestamped server logs, trace path, unique result path, shared run ID, and explicit Docker environment forwarding.
 - [x] Observe RED: baseline launcher failed the `RUN_STAMP` assertion.
 - [x] Use one UTC stamp/run ID across server trace, server log, output JSON, host ledger and Docker client.
+- [x] Keep Docker run-ID forwarding in the driver, not duplicated in the launcher.
 - [x] Refuse pre-existing output paths and remove the port-only server log naming that could truncate old logs.
 - [x] Validate shell syntax with `bash -n scripts/r15_loop_pushT.sh`.
 
@@ -96,7 +98,8 @@
 - [x] Verify focused suite on the implementation before the launcher-specific test: writer **5 passed**, model integration **3 passed**, driver **9 passed**, shell syntax **PASS**.
 - [x] Observe launcher regression RED, then restore implementation and re-run the workflow.
 - [x] Keep PR #45 draft/open/unmerged.
-- [ ] Final CI on the latest branch SHA and final diff review.
+- [x] Final runtime CI on code SHA `b9c92351259ed4b15ca7978daff455ce6cb4d6a3`: writer 5 passed, model trace 5 passed, R15 driver 10 passed, Python compile + Bash syntax passed; R4/R5 CPU contracts passed.
+- [x] Final diff review: PR #45 changes only the R42 policy boundary trace, R15 run-ID/unique artifact wiring, tests, CPU workflow and Superpowers docs. No main/evidence branch changes and no rollout.
 - [x] Opened separate follow-up issue #46 for the rate-limiter call-path concern; do not alter action behavior in this instrumentation PR.
 
 ## Rulings
