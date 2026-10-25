@@ -1,9 +1,14 @@
 import json
 import os
+import sys
 
 import pytest
 
-from code.xpolicylab.policy.OpenVLA_R42.r42_runtime_audit import (
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+POLICY_DIR = os.path.join(REPO, "code", "xpolicylab", "policy", "OpenVLA_R42")
+sys.path.insert(0, POLICY_DIR)
+
+from r42_runtime_audit import (
     RuntimeAuditError,
     RuntimeAuditWriter,
 )
