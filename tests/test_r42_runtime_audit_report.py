@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(REPO, "tools"))
 from r42_runtime_audit_report import audit_trace, main
 
 
-SCHEMA = "r42-runtime-audit/v1"
+SCHEMA = "r42-runtime-audit/v2"
 RUN_ID = "r30-report-test-001"
 CAMERAS = ["cam0", "cam1", "cam2"]
 JOINT_GROUPS = ["left_arm_joint_state", "left_ee_joint_state",
@@ -20,8 +20,8 @@ DIM_NAMES = ["left_arm_joint_state[%d]" % i for i in range(6)]
 DIM_NAMES += ["left_ee_joint_state[0]"]
 DIM_NAMES += ["right_arm_joint_state[%d]" % i for i in range(6)]
 DIM_NAMES += ["right_ee_joint_state[0]"]
-STATE = [float(i) / 10 for i in range(14)]
-ACTION = [float(i) / 20 for i in range(14)]
+STATE = [0.1 + i * 0.02 for i in range(14)]
+ACTION = [value + 0.01 for value in STATE]
 
 
 def action_dict_from14(vector):
@@ -81,7 +81,9 @@ def valid_rows():
             pre_audit_return_wall_utc="2026-10-25T00:00:01.1Z", server_span_pre_audit_ms=100.0,
             timing_semantics="sampled before action_step fsync; not client receive time",
             observation_audit_overhead_ms=3.5,
-            state_dim_order=DIM_NAMES, state14=STATE, velocity14=[0.0] * 14,
+            state_dim_order=DIM_NAMES, state14=STATE,
+            rate_reference_action14=STATE, rate_limit_source="safety_limits.max_rate",
+            control_dt=0.04, velocity14=[0.0] * 14,
             features42=[0.0] * 42, camera_inputs=camera_inputs(),
             prediction={"token_ids14": list(range(14)), "bins14": list(range(14)),
                         "residual14": [0.0] * 14},
