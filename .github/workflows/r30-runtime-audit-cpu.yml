@@ -12,6 +12,8 @@ on:
       - 'tests/test_r42_runtime_audit.py'
       - 'tests/test_openvla_r42_server.py'
       - 'tests/test_r15_loop_dev.py'
+      - 'tools/r42_runtime_audit_report.py'
+      - 'tests/test_r42_runtime_audit_report.py'
       - '.github/workflows/r30-runtime-audit-cpu.yml'
   pull_request:
     paths:
@@ -22,6 +24,8 @@ on:
       - 'tests/test_r42_runtime_audit.py'
       - 'tests/test_openvla_r42_server.py'
       - 'tests/test_r15_loop_dev.py'
+      - 'tools/r42_runtime_audit_report.py'
+      - 'tests/test_r42_runtime_audit_report.py'
       - '.github/workflows/r30-runtime-audit-cpu.yml'
 
 jobs:
@@ -45,12 +49,16 @@ jobs:
           python -m py_compile tests/test_r42_runtime_audit.py
           python -m py_compile tests/test_openvla_r42_server.py
           python -m py_compile tests/test_r15_loop_dev.py
+          python -m py_compile tools/r42_runtime_audit_report.py
+          python -m py_compile tests/test_r42_runtime_audit_report.py
       - name: Run audit-writer regressions
         run: pytest -q tests/test_r42_runtime_audit.py
       - name: Run model trace integration regressions
         run: pytest -q tests/test_openvla_r42_server.py -k runtime_audit
       - name: Run R15 driver regressions
         run: pytest -q tests/test_r15_loop_dev.py
+      - name: Run runtime audit report regressions
+        run: pytest -q tests/test_r42_runtime_audit_report.py
       - name: Validate launcher shell syntax
         run: bash -n scripts/r15_loop_pushT.sh
       - name: Declare execution boundary
