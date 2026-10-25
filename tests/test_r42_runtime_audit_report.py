@@ -476,3 +476,28 @@ def test_audit_report_rejects_rate_reference_not_linked_to_prior_action(tmp_path
     assert report["trace_integrity"] == "FAIL"
     assert any("rate reference differs from prior action_step" in error
                for error in report["errors"])
+
+
+
+def test_audit_report_rejects_mixed_schema_versions(tmp_path):
+    path = tmp_path / "mixed-schema.jsonl"
+    rows = valid_rows()
+    rows[-1]["schema_version"] = "r42-runtime-audit/v1"
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "FAIL"
+    assert any("share one schema_version" in error for error in report["errors"])
+
+
+def test_audit_report_rejects_non_string_schema_version(tmp_path):
+    path = tmp_path / "bad-schema.jsonl"
+    rows = valid_rows()
+    rows[-1]["schema_version"] = ["r42-runtime-audit/v2"]
+    write_trace(path, rows)
+
+    report = audit_trace(str(path))
+
+    assert report["trace_integrity"] == "FAIL"
+    assert any("schema_version must be one of" in error for error in report["errors"])
