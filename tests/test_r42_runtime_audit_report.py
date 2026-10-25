@@ -127,7 +127,8 @@ def test_audit_report_links_action_error_without_calling_trace_corrupt(tmp_path)
     rows = valid_rows()[:3]
     rows.append(rec("action_error", 3, episode_index=1, episode_step_index=0,
                     global_step_index=0, env_idx=0, observation_record_index=2,
-                    observation_index=0, stage="server_act", error_type="RuntimeError",
+                    observation_index=0, observation_audit_overhead_ms=3.5,
+                    stage="server_act", error_type="RuntimeError",
                     error_message="backend exploded"))
     write_trace(path, rows)
 
@@ -243,7 +244,8 @@ def test_cli_blocks_next_gate_when_first_action_is_an_error(tmp_path, capsys):
     rows = valid_rows()[:3]
     rows.append(rec("action_error", 3, episode_index=1, episode_step_index=0,
                     global_step_index=0, env_idx=0, observation_record_index=2,
-                    observation_index=0, stage="backend_load", error_type="RuntimeError",
+                    observation_index=0, observation_audit_overhead_ms=3.5,
+                    stage="backend_load", error_type="RuntimeError",
                     error_message="backend load failed"))
     write_trace(path, rows)
 
