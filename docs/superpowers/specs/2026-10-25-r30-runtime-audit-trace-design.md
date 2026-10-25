@@ -30,10 +30,12 @@ File: `runs/r15_loop_dev/runtime_audit_push_T_stage<stage>_<UTC stamp>.jsonl`
 One JSON object per line; schema `r42-runtime-audit/v1`. Each record includes a shared run ID, monotonically increasing record index, UTC recording time and process-monotonic timestamp.
 
 Required events:
-- `run_start`: checkpoint/model metadata, normalizer/adapter/projector hashes, state and camera order, Python/runtime info, explicit statement that raw images are not stored and wall-clock sensor synchronization remains UNKNOWN.
-- `episode_reset`: reset count and episode index.
-- `backend_ready`: backend class, device, checkpoint and metadata source.
-- `action_step`: raw received state [14], state dimension order, current velocity [14], normalized features [42], per-camera SHA256/shape/dtype, source timestamp if present, observation/reply timestamps, token IDs [14], bins [14], decoded residual [14], decoder safety metadata, final server response [14] and four-key action dict, latency, and the previous server response plus the current observed-state difference from it when available.
+- run_start: checkpoint/model metadata, normalizer/adapter/projector hashes, state and camera order, Python/runtime info, and explicit statements that raw images are not stored and wall-clock sensor synchronization remains UNKNOWN.
+- episode_reset: reset count and episode index; clear previous-response comparison and episode-local observation/action indices.
+- observation_received: persist the validated 14D state and per-camera SHA256/shape/dtype before inference, with a unique episode-local observation index. This survives a later backend or inference failure.
+- backend_ready: backend class, device, checkpoint and metadata source.
+- action_error: failure stage/type/message linked to the observation record/index. Capture backend-load, inference and response-contract failures. The trace writer itself remains fail-closed.
+- action_step: reference the observation record/index and record velocity [14], normalized features [42], source timestamp if present, observation/reply timestamps, token IDs [14], bins [14], decoded residual [14], decoder safety metadata, final server response [14] and four-key action dict, latency, and the previous server response plus the current observed-state difference from it when available.
 
 The response must be labeled **server-generated**, not client-acknowledged or confirmed as executed. The next observation provides a comparison point but is not proof of actuation. Camera/state wall-clock synchronization remains `UNKNOWN`.
 
