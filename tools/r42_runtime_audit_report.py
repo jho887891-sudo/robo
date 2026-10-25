@@ -2,8 +2,8 @@
 """Validate R42 runtime JSONL evidence without repairing or rewriting the source trace.
 
 Exit codes:
-  0: trace is valid, complete, and has no action errors; the first server response is present
-  2: evidence is partial, an action failed, or a required first-action gate is blocked
+  0: trace is valid and complete, with no action errors and required first-action/rate gates PASS
+  2: evidence is partial, an action failed, or a required evidence gate is blocked
   3: trace is invalid (malformed records, schema violations, or broken references)
   4: report output path already exists or cannot be written safely
 """
