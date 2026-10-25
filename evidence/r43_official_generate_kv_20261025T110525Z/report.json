@@ -1,0 +1,406 @@
+{
+  "artifacts": {
+    "files": [
+      "base_model_weight_hashes.json",
+      "checkpoint_hashes.json",
+      "environment.txt",
+      "equivalence_report.json",
+      "latency_by_token.jsonl",
+      "logits_window_A.npy",
+      "logits_window_B.npy",
+      "logits_window_C.npy",
+      "sequences.json"
+    ]
+  },
+  "checks": [
+    {
+      "detail": {
+        "free_gb": 47.68,
+        "min_free_gb": 24.0,
+        "name": "NVIDIA RTX A6000",
+        "total_gb": 50.897
+      },
+      "name": "free_vram_gate",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "backend": "_TorchBackend",
+        "load_s": 29.38
+      },
+      "name": "model_loaded",
+      "result": "PASS"
+    },
+    {
+      "name": "pure_autoreg_installed",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "num_images": 3
+      },
+      "name": "three_camera_vision",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "max_rate14": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      "name": "rate_contract_14d",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "base_model_bytes": 15084602956,
+        "base_model_files": 12,
+        "base_model_sha256_of_manifest": "4f3a9b497a6f6c4800621894398284dff48ac99c2c1fb6187c9b2e5d772facad",
+        "checkpoint_bytes": 1125377222,
+        "checkpoint_files": 9,
+        "checkpoint_sha256_of_manifest": "1dd11065527bd36231e91932bcb8100acc02395a75054d5dd204d0d790bc0435"
+      },
+      "name": "weights_identified",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "prompt_len": 31
+      },
+      "name": "prompt_frozen",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "max_abs_logit_delta": 0.0,
+        "note": "core() must apply the same LoRA weights as PeftModel(); otherwise generate() on the core would silently drop the adapter"
+      },
+      "name": "core_path_equals_peft_path",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "tokens_equal": 280,
+        "tokens_total": 280
+      },
+      "name": "A_vs_B_token_identical",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "tokens_equal": 276,
+        "tokens_total": 280
+      },
+      "name": "A_vs_C_token_identical",
+      "result": "FAIL"
+    }
+  ],
+  "deployment_config": {
+    "base_model_path": "/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine",
+    "checkpoint_dir": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300",
+    "control_hz": 25,
+    "device": "cuda",
+    "policy_name": "OpenVLA_R42"
+  },
+  "environment": {
+    "cuda_available": true,
+    "executable": "/home/dgut/pusht_runtime/venv_oft/bin/python",
+    "files": {
+      "modeling_prismatic.py": {
+        "path": "/tmp/r43-wt-20261025T1855Z/code/openvla_dynamic_modules/modeling_prismatic.py",
+        "sha256": "b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6"
+      },
+      "pure_autoreg_mode.py": {
+        "path": "/tmp/r43-wt-20261025T1855Z/code/xpolicylab/policy/OpenVLA_Pure/pure_autoreg_mode.py",
+        "sha256": "bade1533c87a631127d7e1a8fa40296693e8bcad4348ddfe9f5ce30cdc8121ca"
+      },
+      "r42_adapter.py": {
+        "path": "/tmp/r43-wt-20261025T1855Z/code/xpolicylab/policy/OpenVLA_R42/r42_adapter.py",
+        "sha256": "fd6ace114378cab11fe760c38d771db7d7670b86212f77b5cf4d74a55307c619"
+      },
+      "r42_deploy_server.py": {
+        "path": "/tmp/r43-wt-20261025T1855Z/code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py",
+        "sha256": "9e1c0bb207aad552a3ad019adaef9319f1b1f7d83871f48eb03cd10a1c6adac6"
+      },
+      "r42_official_generate.py": {
+        "path": "/tmp/r43-wt-20261025T1855Z/code/xpolicylab/policy/OpenVLA_R42/r42_official_generate.py",
+        "sha256": "5e5abe317c56983e1a0701c42487b0eb5563366cbbef2e0363482300250d4800"
+      },
+      "transformers_generation_utils.py": {
+        "path": "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/transformers/generation/utils.py",
+        "sha256": "b0ee2fbd103de7436d31dc5c3d1034ff6c38acb76941889d57af8eaed3366d23"
+      }
+    },
+    "gpu": "NVIDIA RTX A6000",
+    "peft": "0.11.1",
+    "prismatic_constants": {
+      "ACTION_DIM": 14,
+      "ACTION_TOKEN_BEGIN_IDX": 31743,
+      "STOP_INDEX": 2
+    },
+    "prismatic_file": "/home/dgut/pusht_runtime/openvla_oft_src/prismatic/__init__.py",
+    "python": "3.10.12",
+    "torch": "2.4.1+cu121",
+    "torch_cuda": "12.1",
+    "transformers": "4.40.2",
+    "transformers_file": "/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/transformers/__init__.py"
+  },
+  "equivalence": {
+    "A_vs_B": {
+      "all_identical": true,
+      "cases_identical": 20,
+      "first_divergence": null,
+      "label": "A_vs_B",
+      "requests": 20,
+      "token_agreement_rate": 1.0,
+      "tokens_equal": 280,
+      "tokens_total": 280
+    },
+    "A_vs_C": {
+      "all_identical": false,
+      "cases_identical": 19,
+      "first_divergence": {
+        "argmax_A_bin": 129,
+        "argmax_C_bin": 133,
+        "case_index": 15,
+        "margin_A": 0.0,
+        "margin_C": 0.03125,
+        "max_abs_logit_delta_window": 0.03125,
+        "mean_abs_logit_delta_window": 0.007815361022949219,
+        "prefix_tokens_A": [
+          31883
+        ],
+        "prefix_tokens_A_len": 1,
+        "token_A": 31873,
+        "token_C": 31877,
+        "token_index": 1,
+        "top1_A": 5.53125,
+        "top2_A": 5.53125
+      },
+      "label": "A_vs_C",
+      "requests": 20,
+      "token_agreement_rate": 0.9857142857142858,
+      "tokens_equal": 276,
+      "tokens_total": 280
+    }
+  },
+  "gpu": {
+    "free_gb": 47.68,
+    "min_free_gb": 24.0,
+    "name": "NVIDIA RTX A6000",
+    "total_gb": 50.897
+  },
+  "measurement_budget_s": 1800,
+  "model_load_s": 29.382440818939358,
+  "path_A_mem_gb": {
+    "allocated": 16.616149504,
+    "reserved": 17.412653056
+  },
+  "path_A_s": 111.21557926991954,
+  "path_B_mem_gb": {
+    "allocated": 16.620343808,
+    "reserved": 17.412653056
+  },
+  "path_B_s": 69.1331892251037,
+  "path_C_mem_gb": {
+    "allocated": 16.921433088,
+    "reserved": 17.496539136
+  },
+  "path_C_s": 32.49816974904388,
+  "performance": {
+    "A": {
+      "label": "A_full_recompute",
+      "request_ms": {
+        "max": 6039.6818509325385,
+        "mean": 5560.733997169882,
+        "min": 5406.369043979794,
+        "n": 20,
+        "p50": 5505.067463498563,
+        "p95": 5848.346083518118,
+        "p99": 6001.414697449654
+      },
+      "requests": 20,
+      "token_ms": {
+        "max": 776.3750813901424,
+        "mean": 364.64245370589197,
+        "min": 348.79436111077666,
+        "n": 280,
+        "p50": 359.0411494951695,
+        "p95": 374.24092437140644,
+        "p99": 488.666059039529
+      },
+      "vision_calls_per_request": {
+        "max": 14.0,
+        "mean": 14.0,
+        "min": 14.0,
+        "n": 20,
+        "p50": 14.0,
+        "p95": 14.0,
+        "p99": 14.0
+      }
+    },
+    "B": {
+      "label": "B_full_recompute_vision_cache",
+      "request_ms": {
+        "max": 3594.847247004509,
+        "mean": 3456.613941374235,
+        "min": 3294.2719478160143,
+        "n": 20,
+        "p50": 3481.753129977733,
+        "p95": 3563.327462854795,
+        "p99": 3588.543290174566
+      },
+      "requests": 20,
+      "token_ms": {
+        "max": 385.31302474439144,
+        "mean": 216.3632902948718,
+        "min": 201.24703086912632,
+        "n": 280,
+        "p50": 204.32548387907445,
+        "p95": 365.9162709955126,
+        "p99": 371.2529368372633
+      },
+      "vision_calls_per_request": {
+        "max": 1.0,
+        "mean": 1.0,
+        "min": 1.0,
+        "n": 20,
+        "p50": 1.0,
+        "p95": 1.0,
+        "p99": 1.0
+      }
+    },
+    "C": {
+      "decode_calls_per_request": {
+        "max": 13.0,
+        "mean": 13.0,
+        "min": 13.0,
+        "n": 20,
+        "p50": 13.0,
+        "p95": 13.0,
+        "p99": 13.0
+      },
+      "decode_ms": {
+        "max": 204.63865622878075,
+        "mean": 61.91805992454577,
+        "min": 57.13315913453698,
+        "n": 260,
+        "p50": 59.71385654993355,
+        "p95": 64.15396030060946,
+        "p99": 139.7153148939855
+      },
+      "label": "C_official_generate_kv",
+      "prefill_calls_per_request": {
+        "max": 1.0,
+        "mean": 1.0,
+        "min": 1.0,
+        "n": 20,
+        "p50": 1.0,
+        "p95": 1.0,
+        "p99": 1.0
+      },
+      "prefill_ms": {
+        "max": 298.5760420560837,
+        "mean": 283.09168671257794,
+        "min": 272.0722737722099,
+        "n": 20,
+        "p50": 283.5405629593879,
+        "p95": 291.40095128677785,
+        "p99": 297.1410239022225
+      },
+      "request_ms": {
+        "max": 1651.2685092166066,
+        "mean": 1195.3780411044136,
+        "min": 1130.360746756196,
+        "n": 20,
+        "p50": 1166.6204021312296,
+        "p95": 1266.0789398476484,
+        "p99": 1574.2305953428145
+      },
+      "requests": 20,
+      "token_ms": {
+        "max": 298.5760420560837,
+        "mean": 77.71617612369093,
+        "min": 57.13315913453698,
+        "n": 280,
+        "p50": 59.82166179455817,
+        "p95": 279.8560893628746,
+        "p99": 286.61114623304456
+      },
+      "vision_calls_per_request": {
+        "max": 1.0,
+        "mean": 1.0,
+        "min": 1.0,
+        "n": 20,
+        "p50": 1.0,
+        "p95": 1.0,
+        "p99": 1.0
+      }
+    },
+    "period_ms": 40.0,
+    "realtime_multiple_of_40ms": {
+      "A": 137.62668658746406,
+      "B": 87.04382824944332,
+      "C": 29.16551005328074
+    },
+    "speedup_vs_A": {
+      "B": 1.5811194125454178,
+      "C": 4.718816380582477
+    }
+  },
+  "prismatic_runtime_contract": {
+    "action_dim": 14,
+    "action_token_begin_idx": 31743,
+    "ignore_index": -100,
+    "num_actions_chunk_unused": 25,
+    "proprio_dim_unused": 14,
+    "r42_action_tokens": 14,
+    "r42_proprio_dim": 42,
+    "robot_platform": "ARX",
+    "stop_index": 2
+  },
+  "schema_version": "r43-official-generate-kv/v1",
+  "scope": {
+    "checkpoint_or_hdf5_mutation": false,
+    "paths": [
+      "A_full_recompute",
+      "B_full_recompute_vision_cache",
+      "C_official_generate_kv"
+    ],
+    "real_observations_used": false,
+    "requests_per_path": 20,
+    "robot_connected_or_commanded": false,
+    "simulator_started": false,
+    "synthetic_rgb_state_used": true,
+    "training_or_optimizer_steps": 0
+  },
+  "source": {
+    "git_branch": "research/r43-official-generate-kv-20261025",
+    "git_sha": "d99635c4cebff1a5b8ee459ad60aea7695408bc6",
+    "git_status": "?? code/xpolicylab/policy/OpenVLA_R42/r42_official_generate.py\n?? diagnostics/r43_official_generate_kv.py\n?? tests/test_r43_official_generate.py",
+    "repo_root": "/tmp/r43-wt-20261025T1855Z"
+  },
+  "started_at_utc": "2026-10-25T11:05:25.867141+00:00",
+  "status": "FAIL",
+  "weight_identity": {
+    "base_model_bytes": 15084602956,
+    "base_model_files": 12,
+    "base_model_sha256_of_manifest": "4f3a9b497a6f6c4800621894398284dff48ac99c2c1fb6187c9b2e5d772facad",
+    "checkpoint_bytes": 1125377222,
+    "checkpoint_files": 9,
+    "checkpoint_sha256_of_manifest": "1dd11065527bd36231e91932bcb8100acc02395a75054d5dd204d0d790bc0435"
+  }
+}

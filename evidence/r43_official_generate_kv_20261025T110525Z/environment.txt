@@ -1,0 +1,17 @@
+cuda_available: True
+executable: /home/dgut/pusht_runtime/venv_oft/bin/python
+gpu: NVIDIA RTX A6000
+peft: 0.11.1
+prismatic_constants: {'ACTION_DIM': 14, 'ACTION_TOKEN_BEGIN_IDX': 31743, 'STOP_INDEX': 2}
+prismatic_file: /home/dgut/pusht_runtime/openvla_oft_src/prismatic/__init__.py
+python: 3.10.12
+torch: 2.4.1+cu121
+torch_cuda: 12.1
+transformers: 4.40.2
+transformers_file: /home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/transformers/__init__.py
+file modeling_prismatic.py sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6 path=/tmp/r43-wt-20261025T1855Z/code/openvla_dynamic_modules/modeling_prismatic.py
+file pure_autoreg_mode.py sha256=bade1533c87a631127d7e1a8fa40296693e8bcad4348ddfe9f5ce30cdc8121ca path=/tmp/r43-wt-20261025T1855Z/code/xpolicylab/policy/OpenVLA_Pure/pure_autoreg_mode.py
+file r42_adapter.py sha256=fd6ace114378cab11fe760c38d771db7d7670b86212f77b5cf4d74a55307c619 path=/tmp/r43-wt-20261025T1855Z/code/xpolicylab/policy/OpenVLA_R42/r42_adapter.py
+file r42_deploy_server.py sha256=9e1c0bb207aad552a3ad019adaef9319f1b1f7d83871f48eb03cd10a1c6adac6 path=/tmp/r43-wt-20261025T1855Z/code/xpolicylab/policy/OpenVLA_R42/r42_deploy_server.py
+file r42_official_generate.py sha256=5e5abe317c56983e1a0701c42487b0eb5563366cbbef2e0363482300250d4800 path=/tmp/r43-wt-20261025T1855Z/code/xpolicylab/policy/OpenVLA_R42/r42_official_generate.py
+file transformers_generation_utils.py sha256=b0ee2fbd103de7436d31dc5c3d1034ff6c38acb76941889d57af8eaed3366d23 path=/home/dgut/pusht_runtime/venv_oft/lib/python3.10/site-packages/transformers/generation/utils.py

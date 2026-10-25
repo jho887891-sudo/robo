@@ -1,0 +1,53 @@
+{
+  "files": [
+    {
+      "path": "MANIFEST.json",
+      "sha256": "7c4bb685ed931c4bb390f27ad40de22c32e35ca0b7e62a8801e542b13c42fd17",
+      "size_bytes": 1003
+    },
+    {
+      "path": "optimizer_state.pt",
+      "sha256": "821da65f870fa4c25174f490fdfcabd2d2a92d8523840205dd96ade37c12aedd",
+      "size_bytes": 572904354
+    },
+    {
+      "path": "proprio_projector_42.pt",
+      "sha256": "b71ec79f5dad5670cc70d761e1e3bde122aa9feaad55b430ce3a0f47ef2bf830",
+      "size_bytes": 67831992
+    },
+    {
+      "path": "rng.pt",
+      "sha256": "af0a9acc7b9590205f4021075ac72ea8c47b23e5d6afc4b22bda7f496668b356",
+      "size_bytes": 14144
+    },
+    {
+      "path": "sampler.json",
+      "sha256": "c1fdcd211a819b136325eb96ccc7e3148661bc61b364ebd69a6721f481173605",
+      "size_bytes": 161286
+    },
+    {
+      "path": "scheduler_state.pt",
+      "sha256": "35807bf06ea1d97f3f4c4e7afea6f80900e7074b6c52366833548e56bb8524d2",
+      "size_bytes": 1088
+    },
+    {
+      "path": "trainer_state.json",
+      "sha256": "b2c9fda33882314e9ee8b0e28db61ecf2d50e9c44f41a59788ffccebbda7fca5",
+      "size_bytes": 3769
+    },
+    {
+      "path": "lora_adapter/adapter_config.json",
+      "sha256": "bc842ecc420a81cd11ec7df2e394de2fea7f5d04f87aeef72cf133ebc19c7d23",
+      "size_bytes": 986
+    },
+    {
+      "path": "lora_adapter/adapter_model.safetensors",
+      "sha256": "f0316a91a7e50d117c9665736c8c171c2450aa06bb650cacb158ed04d9014779",
+      "size_bytes": 484458600
+    }
+  ],
+  "lora_dir": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/lora_adapter",
+  "path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300",
+  "projector_path": "/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300/proprio_projector_42.pt",
+  "total_bytes": 1125377222
+}
