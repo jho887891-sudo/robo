@@ -419,7 +419,7 @@ def audit_trace(path):
         (r.get("server_response") or {}).get("decoder_info")
         for r in action_steps
     ]
-    rate_steps_active = bool(action_rate_info) and all(
+    rate_steps_active = bool(rate_config_valid and action_rate_info) and all(
         isinstance(info, dict)
         and _is_finite_number(info.get("dt"))
         and float(info["dt"]) > 0
