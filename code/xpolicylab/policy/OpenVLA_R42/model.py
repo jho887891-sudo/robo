@@ -202,6 +202,7 @@ class Model(ModelTemplate):
         self._audit_current_observation_index = None
         self._audit_observation_index = 0
         self._audit_current_camera_inputs = None
+        self._audit_current_observation_overhead_ms = None
         self._audit_backend_ready_logged = False
         self.metadata = self._resolve_metadata()
 
@@ -287,6 +288,7 @@ class Model(ModelTemplate):
         if self._audit_trace is None:
             return
 
+        audit_started = time.perf_counter()
         state = np.asarray(inputs["state"], np.float32).reshape(-1)
         camera_inputs = {}
         for camera in E.CAMERA_ORDER:
@@ -316,6 +318,8 @@ class Model(ModelTemplate):
         self._audit_current_observation_index = int(self._audit_observation_index)
         self._audit_observation_index += 1
         self._audit_current_camera_inputs = camera_inputs
+        self._audit_current_observation_overhead_ms = (
+            time.perf_counter() - audit_started) * 1e3
 
     def _audit_action_error(self, inputs, stage, exc):
         """Record a failed inference/contract stage against the received observation."""
@@ -329,6 +333,7 @@ class Model(ModelTemplate):
             "env_idx": int(inputs["env_idx"]),
             "observation_record_index": self._audit_current_observation_record_index,
             "observation_index": self._audit_current_observation_index,
+            "observation_audit_overhead_ms": self._audit_current_observation_overhead_ms,
             "stage": str(stage),
             "error_type": type(exc).__name__,
             "error_message": str(exc)[:2000],
@@ -358,8 +363,12 @@ class Model(ModelTemplate):
             "source_timestamp": inputs.get("timestamp"),
             "frequency_hz": inputs.get("frequency"),
             "observation_wall_utc": stamp["obs_iso"],
-            "response_wall_utc": stamp["reply_iso"],
-            "server_span_ms": float(stamp["server_span_ms"]),
+            "pre_audit_return_wall_utc": stamp["reply_iso"],
+            "server_span_pre_audit_ms": float(stamp["server_span_ms"]),
+            "timing_semantics": (
+                "sampled before action_step JSONL fsync; server span includes observation audit "
+                "overhead but excludes action_step fsync; not client receive time"),
+            "observation_audit_overhead_ms": self._audit_current_observation_overhead_ms,
             "state_dim_order": list(_STATE_DIM_ORDER),
             "state14": state.tolist(),
             "velocity14": np.asarray(out.get("velocity", []), np.float32).reshape(-1).tolist(),
@@ -595,6 +604,7 @@ class Model(ModelTemplate):
         self._audit_current_observation_index = None
         self._audit_observation_index = 0
         self._audit_current_camera_inputs = None
+        self._audit_current_observation_overhead_ms = None
         if self._audit_trace is not None:
             self._audit_trace.write({
                 "event": "episode_reset",
