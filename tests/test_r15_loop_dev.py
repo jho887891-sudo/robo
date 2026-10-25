@@ -135,3 +135,18 @@ def test_explicit_run_id_rejects_shell_unsafe_characters(tmp_path):
     assert r.returncode != 0
     assert "run-id" in (r.stdout + r.stderr).lower()
     assert not (tmp_path / "ledger.jsonl").exists()
+
+
+
+def test_pushT_launcher_persists_unique_trace_and_never_truncates_port_only_logs():
+    launcher = os.path.join(REPO, "scripts", "r15_loop_pushT.sh")
+    with open(launcher, encoding="utf-8") as fh:
+        source = fh.read()
+
+    assert 'RUN_STAMP=$(date -u +%Y%m%dT%H%M%SZ)' in source
+    assert 'SRVLOG="logs/r15_policyserver_${PORT}_${RUN_STAMP}.log"' in source
+    assert 'AUDIT_LOG="$PWD/runs/r15_loop_dev/runtime_audit_push_T_stage${STAGE}_${RUN_STAMP}.jsonl"' in source
+    assert 'R42_AUDIT_LOG_PATH="$AUDIT_LOG" R42_AUDIT_RUN_ID="$RUN_ID"' in source
+    assert '--docker-env "ROBODOJO_RUN_ID=$RUN_ID"' in source
+    assert 'for path in "$SRVLOG" "$AUDIT_LOG" "$OUT"; do' in source
+    assert 'SRVLOG=logs/r15_policyserver_${PORT}.log' not in source
