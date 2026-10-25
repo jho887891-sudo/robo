@@ -322,9 +322,14 @@ def audit_trace(path):
             if not _is_int(index) or index != position:
                 _err(errors, index if _is_int(index) else position,
                      "record_index must be contiguous from zero (expected %d)" % position)
-            if record.get("schema_version") not in SUPPORTED_TRACE_SCHEMAS:
+            schema_version = record.get("schema_version")
+            if (not isinstance(schema_version, str)
+                    or schema_version not in SUPPORTED_TRACE_SCHEMAS):
                 _err(errors, index if _is_int(index) else position,
                      "schema_version must be one of %s" % sorted(SUPPORTED_TRACE_SCHEMAS))
+        schema_versions = [record.get("schema_version") for record in records]
+        if schema_versions and any(value != schema_versions[0] for value in schema_versions[1:]):
+            errors.append("all records must share one schema_version")
         starts = [i for i, r in enumerate(records) if r.get("event") == "run_start"]
         if starts != [0]:
             errors.append("exactly one run_start must be the first record")
