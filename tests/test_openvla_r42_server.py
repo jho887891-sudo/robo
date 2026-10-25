@@ -206,6 +206,26 @@ def test_official_model_path_refuses_missing_rate_limit_metadata():
         _model(meta=meta)
 
 
+def test_official_model_path_refuses_response_without_rate_branch_evidence():
+    class _NoRateInfo(object):
+        metadata = _meta()
+        device = "cpu"
+
+        def act(self, images, state, env_idx=0, timestamp=None, prev_cmd=None, dt=None,
+                record=False):
+            return {"action": _inside(0.5), "ids": [R.CODEC_WINDOW[0]] * R.N_ACTIONS,
+                    "n_action_tokens": R.N_ACTIONS,
+                    "info": {"dt": None, "rate_limited": 0},
+                    "latency_ms": {"preprocess": 1.0, "forward_total": 2.0, "decode": 1.0,
+                                   "total": 4.0}}
+
+    model = _model()
+    model.update_obs(_obs())
+    model._server = _NoRateInfo()
+    with pytest.raises(M.R42ModelError, match="rate|dt"):
+        model.get_action()
+
+
 def test_runtime_audit_records_state_prediction_response_and_next_observation(tmp_path, monkeypatch):
     import r42_runtime_audit as Audit
 
