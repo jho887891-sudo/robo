@@ -75,7 +75,9 @@ def valid_rows():
             episode_index=1, episode_step_index=0, global_step_index=0, env_idx=0,
             source_timestamp=None, frequency_hz=25.0,
             observation_wall_utc="2026-10-25T00:00:01Z",
-            response_wall_utc="2026-10-25T00:00:01.1Z", server_span_ms=100.0,
+            pre_audit_return_wall_utc="2026-10-25T00:00:01.1Z", server_span_pre_audit_ms=100.0,
+            timing_semantics="sampled before action_step fsync; not client receive time",
+            observation_audit_overhead_ms=3.5,
             state_dim_order=DIM_NAMES, state14=STATE, velocity14=[0.0] * 14,
             features42=[0.0] * 42, camera_inputs=camera_inputs(),
             prediction={"token_ids14": list(range(14)), "bins14": list(range(14)),
@@ -115,6 +117,8 @@ def test_audit_report_accepts_complete_trace_but_keeps_execution_unknown(tmp_pat
     assert report["gates"]["client_acknowledgement"] == "UNKNOWN"
     assert report["gates"]["camera_state_sync"] == "UNKNOWN"
     assert report["gates"]["robot_actuation"] == "UNKNOWN"
+    assert "fsync" in report["latency_caveat"].lower()
+    assert "client" in report["latency_caveat"].lower()
     assert report["errors"] == []
 
 
