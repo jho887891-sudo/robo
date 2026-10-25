@@ -151,8 +151,15 @@ def test_pushT_launcher_persists_unique_trace_and_never_truncates_port_only_logs
     assert 'RUN_STAMP="$(date -u +%Y%m%dT%H%M%SZ)-pid' + chr(36) + '{BASHPID}"' in source
     assert 'SRVLOG="logs/r15_policyserver_${PORT}_${RUN_STAMP}.log"' in source
     assert 'AUDIT_LOG="$PWD/runs/r15_loop_dev/runtime_audit_push_T_stage${STAGE}_${RUN_STAMP}.jsonl"' in source
+    assert 'AUDIT_REPORT="$PWD/runs/r15_loop_dev/runtime_audit_report_push_T_stage${STAGE}_${RUN_STAMP}.json"' in source
     assert 'R42_AUDIT_LOG_PATH="$AUDIT_LOG" R42_AUDIT_RUN_ID="$RUN_ID"' in source
     assert '--run-id "$RUN_ID"' in source
     assert '--docker-env "ROBODOJO_RUN_ID=$RUN_ID"' not in source
-    assert 'for path in "$SRVLOG" "$AUDIT_LOG" "$OUT"; do' in source
+    assert 'for path in "$SRVLOG" "$AUDIT_LOG" "$AUDIT_REPORT" "$OUT"; do' in source
+    assert 'CLIENT_RC=$?' in source
+    assert 'trap - EXIT INT TERM' in source
+    assert '"$PY" tools/r42_runtime_audit_report.py --input "$AUDIT_LOG" --out "$AUDIT_REPORT"' in source
+    assert 'AUDIT_RC=$?' in source
+    assert 'if [ "$CLIENT_RC" -ne 0 ]; then' in source
+    assert 'elif [ "$AUDIT_RC" -ne 0 ]; then' in source
     assert 'SRVLOG=logs/r15_policyserver_${PORT}.log' not in source
