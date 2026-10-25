@@ -80,7 +80,7 @@ def valid_rows():
             features42=[0.0] * 42, camera_inputs=camera_inputs(),
             prediction={"token_ids14": list(range(14)), "bins14": list(range(14)),
                         "residual14": [0.0] * 14},
-            server_response={"action14": ACTION, "action_dict": {},
+            server_response={"action14": ACTION, "action_dict": action_dict_from14(ACTION),
                              "decoder_info": {"clipped_joint": 0},
                              "semantics": "server-generated response; execution is not observed"},
             previous_server_response_action14=None, previous_response_global_step_index=None,
