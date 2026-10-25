@@ -198,6 +198,8 @@ class Model(ModelTemplate):
         self._audit_episode_step = 0
         self._audit_prev_response_action14 = None
         self._audit_prev_response_global_step_index = None
+        self._audit_current_observation_record_index = None
+        self._audit_current_camera_inputs = None
         self._audit_backend_ready_logged = False
         self.metadata = self._resolve_metadata()
 
@@ -260,6 +262,54 @@ class Model(ModelTemplate):
         print("[%s] runtime audit enabled: %s (run_id=%s)"
               % (_CODE, self._audit_trace.path, run_id), flush=True)
 
+    def _audit_observation_received(self, inputs):
+        """Persist the validated observation before inference can fail."""
+        if self._audit_trace is None:
+            return
+
+        state = np.asarray(inputs["state"], np.float32).reshape(-1)
+        camera_inputs = {}
+        for camera in E.CAMERA_ORDER:
+            arr = np.ascontiguousarray(inputs["images"][camera])
+            camera_inputs[camera] = {
+                "sha256": hashlib.sha256(arr.tobytes()).hexdigest(),
+                "shape": [int(x) for x in arr.shape],
+                "dtype": str(arr.dtype),
+            }
+        record = self._audit_trace.write({
+            "event": "observation_received",
+            "episode_index": int(self._audit_episode_index),
+            "episode_step_index": int(self._audit_episode_step),
+            "global_step_index": int(self._n_steps),
+            "env_idx": int(inputs["env_idx"]),
+            "source_timestamp": inputs.get("timestamp"),
+            "frequency_hz": inputs.get("frequency"),
+            "observation_wall_utc": _iso(self._t_obs_wall),
+            "state_dim_order": list(_STATE_DIM_ORDER),
+            "state14": state.tolist(),
+            "camera_inputs": camera_inputs,
+            "camera_state_wallclock_sync": "UNKNOWN",
+            "raw_images_persisted": False,
+        })
+        self._audit_current_observation_record_index = int(record["record_index"])
+        self._audit_current_camera_inputs = camera_inputs
+
+    def _audit_action_error(self, inputs, stage, exc):
+        """Record a failed inference/contract stage against the received observation."""
+        if self._audit_trace is None:
+            return
+        self._audit_trace.write({
+            "event": "action_error",
+            "episode_index": int(self._audit_episode_index),
+            "episode_step_index": int(self._audit_episode_step),
+            "global_step_index": int(self._n_steps),
+            "env_idx": int(inputs["env_idx"]),
+            "observation_record_index": self._audit_current_observation_record_index,
+            "stage": str(stage),
+            "error_type": type(exc).__name__,
+            "error_message": str(exc)[:2000],
+        })
+
     def _audit_action_step(self, inputs, out, payload, stamp, phases):
         """Persist one server-boundary observation and the response generated from it."""
         if self._audit_trace is None:
@@ -272,17 +322,10 @@ class Model(ModelTemplate):
         if previous is not None:
             state_minus_previous = (state - previous).astype(np.float32).tolist()
 
-        camera_inputs = {}
-        for camera in E.CAMERA_ORDER:
-            arr = np.ascontiguousarray(inputs["images"][camera])
-            camera_inputs[camera] = {
-                "sha256": hashlib.sha256(arr.tobytes()).hexdigest(),
-                "shape": [int(x) for x in arr.shape],
-                "dtype": str(arr.dtype),
-            }
-
+        camera_inputs = self._audit_current_camera_inputs or {}
         self._audit_trace.write({
             "event": "action_step",
+            "observation_record_index": self._audit_current_observation_record_index,
             "episode_index": int(self._audit_episode_index),
             "episode_step_index": int(self._audit_episode_step),
             "global_step_index": int(self._n_steps),
@@ -433,6 +476,7 @@ class Model(ModelTemplate):
         if obs_instr and obs_instr.strip() != self.instruction.strip():
             self._warn("observation instruction %r is ignored: this checkpoint runs the fixed "
                        "training instruction %r" % (obs_instr.strip(), self.instruction.strip()))
+        self._audit_observation_received(self._inputs)
         return None
 
     def update_obs_batch(self, obs_list):
@@ -466,8 +510,12 @@ class Model(ModelTemplate):
             self._audit_backend_ready_logged = True
         inputs = self._inputs
         t0 = time.perf_counter()
-        out = server.act(inputs["images"], inputs["state"], env_idx=inputs["env_idx"],
-                         timestamp=inputs["timestamp"])
+        try:
+            out = server.act(inputs["images"], inputs["state"], env_idx=inputs["env_idx"],
+                             timestamp=inputs["timestamp"])
+        except Exception as exc:
+            self._audit_action_error(inputs, "server_act", exc)
+            raise
         phases = _check_phases(out.get("latency_ms"))
         action = E.cmd14_to_action_dict(out["action"])
         stamp = {"obs_iso": _iso(self._t_obs_wall),
@@ -510,6 +558,8 @@ class Model(ModelTemplate):
         self._audit_episode_step = 0
         self._audit_prev_response_action14 = None
         self._audit_prev_response_global_step_index = None
+        self._audit_current_observation_record_index = None
+        self._audit_current_camera_inputs = None
         if self._audit_trace is not None:
             self._audit_trace.write({
                 "event": "episode_reset",
