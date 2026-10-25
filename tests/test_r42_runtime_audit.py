@@ -37,7 +37,7 @@ def test_writer_persists_ordered_jsonl_records_and_shared_run_id(tmp_path):
     assert {row["run_id"] for row in rows} == {"r30-test-001"}
     assert rows[0]["metadata"]["checkpoint_dir"] == "/checkpoints/step1000"
     assert rows[2]["state14"] == [0.0] * 14
-    assert all(row["schema_version"] == "r42-runtime-audit/v1" for row in rows)
+    assert all(row["schema_version"] == "r42-runtime-audit/v2" for row in rows)
     assert all(row["monotonic_ns"] > 0 for row in rows)
 
 
