@@ -209,6 +209,19 @@ def main():
         }
         if str(config.get("device", "")).lower() != "cuda":
             raise SmokeBlocked("the frozen deployment config does not select CUDA")
+        runtime_env = {
+            "R42_POLICY": os.environ.get("R42_POLICY", ""),
+            "R42_KV_CACHE": os.environ.get("R42_KV_CACHE", "0"),
+            "R42_VISION_CACHE": os.environ.get("R42_VISION_CACHE", "0"),
+            "R42_AUDIT_LOG_PATH_present": "R42_AUDIT_LOG_PATH" in os.environ,
+        }
+        report["runtime_env"] = runtime_env
+        if runtime_env["R42_POLICY"].lower() == "cv":
+            raise SmokeBlocked("R42_POLICY=cv would bypass real model inference")
+        if runtime_env["R42_KV_CACHE"] == "1" or runtime_env["R42_VISION_CACHE"] == "1":
+            raise SmokeBlocked("non-default cache flags are enabled; this smoke requires the frozen full path")
+        if runtime_env["R42_AUDIT_LOG_PATH_present"]:
+            raise SmokeBlocked("R42_AUDIT_LOG_PATH is set; refusing an implicit extra trace destination")
         control_hz = float(config.get("control_hz", 0.0))
         if not math.isfinite(control_hz) or abs(control_hz - 25.0) > 1e-6:
             raise SmokeBlocked("expected frozen R15 control_hz=25, got %r" % control_hz)
@@ -265,11 +278,16 @@ def main():
         }
         missing = [name for name, path in required_paths.items()
                    if not path or not os.path.isfile(path)]
-        record(report, "required_local_artifacts_present", not missing,
-               {"missing": missing, "paths": required_paths})
         if missing:
+            report["checks"].append({
+                "name": "required_local_artifacts_present", "result": "BLOCKED",
+                "detail": {"missing": missing, "paths": required_paths}})
+            print("[BLOCKED] required_local_artifacts_present " +
+                  json.dumps({"missing": missing}, sort_keys=True), flush=True)
             raise SmokeBlocked("required local checkpoint/base/contract files are missing: %s"
                                % ", ".join(missing))
+        record(report, "required_local_artifacts_present", True,
+               {"missing": [], "paths": required_paths})
         report["artifacts_before"] = {
             name: artifact_record(path) for name, path in required_paths.items()
         }
@@ -525,7 +543,7 @@ def main():
                            for item in report["checks"]):
                     record(report, "checkpoint_and_config_artifacts_unchanged", unchanged,
                            {"before": report["artifacts_before"], "after": after})
-                if not unchanged and report.get("status") == "PASS":
+                if not unchanged:
                     report["status"] = "FAIL"
                     exit_code = 1
         except Exception as exc:
@@ -537,6 +555,10 @@ def main():
             if model is not None:
                 model._server = None
                 model._inputs = None
+            server = None
+            model = None
+            original_act = None
+            original_decode = None
             if torch is not None and torch.cuda.is_available():
                 import gc
                 gc.collect()
