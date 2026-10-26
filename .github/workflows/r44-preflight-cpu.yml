@@ -1,0 +1,37 @@
+name: R44 Preflight Contract CPU Tests
+
+on:
+  push:
+    branches:
+      - audit/r44-preflight-contract-20261026
+      - experiment/r44-trainer-implementation-20261026
+    paths:
+      - "diagnostics/r44_prepare_delta.py"
+      - "training/r44_preflight_contract.py"
+      - "tests/test_r44_preflight_contract.py"
+      - ".github/workflows/r44-preflight-cpu.yml"
+  pull_request:
+    paths:
+      - "diagnostics/r44_prepare_delta.py"
+      - "training/r44_preflight_contract.py"
+      - "tests/test_r44_preflight_contract.py"
+      - ".github/workflows/r44-preflight-cpu.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile preflight code
+        run: python -m py_compile diagnostics/r44_prepare_delta.py training/r44_preflight_contract.py
+      - name: Run preflight contract tests
+        run: python -m unittest discover -s tests -p "test_r44_preflight_contract.py" -v
