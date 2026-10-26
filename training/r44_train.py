@@ -1118,7 +1118,7 @@ def main(argv=None) -> int:
                         save_run_state(out_dir, {**run_state, "status": status,
                                                  "stop_reason": stop_controller.reason})
                         break
-                            if args.early_stopping_patience > 0 and epoch + 1 >= args.min_epochs and stale >= args.early_stopping_patience:
+                    if args.early_stopping_patience > 0 and epoch + 1 >= args.min_epochs and stale >= args.early_stopping_patience:
                         status = "EARLY_STOPPED"
                         break
                 epoch += 1
