@@ -31,9 +31,9 @@ class R44TrainerCoreTests(unittest.TestCase):
         )
         self.assertEqual(result["optimizer_steps_max"], 200)
         self.assertAlmostEqual(result["train_hours_estimate"], 600 / 3600)
-        self.assertAlmostEqual(result["dev_hours_estimate"], 10 / 3600)
-        self.assertAlmostEqual(result["base_total_hours_estimate"], 620 / 3600)
-        self.assertAlmostEqual(result["required_budget_hours"], 682 / 3600)
+        self.assertAlmostEqual(result["dev_hours_estimate"], 20 / 3600)
+        self.assertAlmostEqual(result["base_total_hours_estimate"], 630 / 3600)
+        self.assertAlmostEqual(result["required_budget_hours"], 693 / 3600)
         self.assertTrue(result["is_estimate_not_measurement"])
 
     def test_budget_rejects_invalid_counts(self):
