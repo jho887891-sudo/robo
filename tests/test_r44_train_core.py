@@ -17,6 +17,7 @@ from training.r44_train import (
     verify_delta_normalizer_matches_train, TASKS, should_early_stop,
     validate_preflight_report, validate_gpu_smoke_report,
     budget_remaining_seconds, load_budget_ledger, persist_budget_ledger,
+    run_artifact_manifest_path, write_run_artifact_manifest,
 )
 from training import r44_delta_v1 as D
 from diagnostics.r44_gpu_smoke import main as gpu_smoke_main
@@ -264,6 +265,30 @@ class R44TrainerCoreTests(unittest.TestCase):
         args.epochs = 4
         with self.assertRaisesRegex(ValueError, "epochs_max"):
             validate_resume_compatibility(meta, args, plan, base, model, scheduler, "commit")
+
+    def test_run_artifact_manifest_hashes_logs_and_preserves_prior_manifests(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            (out / "train_metrics.jsonl").write_text('{"global_step":1}\\n', encoding="utf-8")
+            (out / "checkpoints").mkdir()
+            (out / "checkpoints" / "state.pt").write_bytes(b"checkpoint-bytes")
+            first_path = run_artifact_manifest_path(out, "STOPPED_SAFE", 1)
+            write_run_artifact_manifest(out, first_path, source_sha="commit-sha",
+                                        status="STOPPED_SAFE", global_step=1)
+            first = json.loads(first_path.read_text(encoding="utf-8"))
+            self.assertTrue(first["manifest_excludes_itself"])
+            self.assertIn("train_metrics.jsonl", first["files"])
+            self.assertEqual(first["files"]["checkpoints/state.pt"]["sha256"],
+                             hashlib.sha256(b"checkpoint-bytes").hexdigest())
+            self.assertNotIn(first_path.name, first["files"])
+            (out / "train_metrics.jsonl").write_text('{"global_step":2}\\n', encoding="utf-8")
+            second_path = run_artifact_manifest_path(out, "COMPLETED", 2)
+            write_run_artifact_manifest(out, second_path, source_sha="commit-sha",
+                                        status="COMPLETED", global_step=2)
+            second = json.loads(second_path.read_text(encoding="utf-8"))
+            self.assertIn(first_path.name, second["files"])
+            self.assertIn("checkpoints/state.pt", second["files"])
+            self.assertNotIn(second_path.name, second["files"])
 
     def test_cumulative_budget_ledger_does_not_reset_on_resume(self):
         with tempfile.TemporaryDirectory() as tmp:
