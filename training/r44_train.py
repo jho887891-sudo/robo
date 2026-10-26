@@ -125,6 +125,7 @@ def validate_resume_compatibility(run_meta: dict, args, plan: dict, base_identit
         "base_model_identity": base_identity,
         "scheduler": scheduler_info,
         "early_stopping_patience": int(args.early_stopping_patience),
+        "checkpoint_every_steps": int(args.checkpoint_every_steps),
     }
     for key, value in expected.items():
         if run_meta.get(key) != value:
@@ -889,6 +890,8 @@ def parse_args(argv=None):
     ap.add_argument("--min-free-gpu-gb", type=float, default=12.0)
     ap.add_argument("--expected-peak-gpu-memory-gb", type=float, default=24.0)
     ap.add_argument("--resource-check-every", type=int, default=10)
+    ap.add_argument("--checkpoint-every-steps", type=int, default=5000,
+                    help="durable full-state checkpoint cadence; epoch boundaries are always saved")
     ap.add_argument("--expected-gpu-uuid", default=EXPECTED_GPU_UUID)
     return ap.parse_args(argv)
 
@@ -927,6 +930,8 @@ def main(argv=None) -> int:
         raise SystemExit("--base-model must point to the exact local OpenVLA-7B directory containing config.json")
     if args.resource_check_every < 1:
         raise SystemExit("resource-check-every must be >= 1")
+    if args.checkpoint_every_steps < 1:
+        raise SystemExit("checkpoint-every-steps must be >= 1")
     for name in ("hdf5_root", "feature_normalizer", "delta_normalizer", "dataset_manifest", "base_model"):
         if not getattr(args, name):
             raise SystemExit(f"--{name.replace('_', '-')} is required; do not guess the server path")
@@ -1116,6 +1121,7 @@ def main(argv=None) -> int:
             "utc_start": utcnow(), "source_sha": source_sha,
             "tasks": list(TASKS), "epochs_max": args.epochs, "min_epochs": args.min_epochs,
             "early_stopping_patience": args.early_stopping_patience,
+            "checkpoint_every_steps": args.checkpoint_every_steps,
             "target_representation": "joint_delta_v1", "train_samples_per_epoch": plan["n_train"],
             "dev_samples_per_epoch": plan["n_dev"], "train_samples_sha256": plan["train_samples_sha256"],
             "dev_samples_sha256": plan["dev_samples_sha256"], "split_sha256": plan["split_sha256"],
@@ -1173,10 +1179,6 @@ def main(argv=None) -> int:
         valid_epochs = {int(x.get("epoch_completed", -1)) for x in run_state.get("dev_history", [])}
         _rewrite_jsonl(dev_path, lambda row: int(row.get("epoch_completed", -1)) in valid_epochs
                        and int(row.get("global_step", -1)) <= global_step)
-    checkpoint_interval = plan["n_train"] // 4
-    if checkpoint_interval * 4 != plan["n_train"]:
-        raise RuntimeError("TRAIN sample count must divide evenly into four checkpoint intervals")
-
     # Save a recoverable step-0 checkpoint before the first optimizer update.
     if not resumed:
         state = checkpoint_state(torch, vla, projector, optimizer, scheduler,
@@ -1334,8 +1336,10 @@ def main(argv=None) -> int:
                 "task": task, "episode": episode, "t": int(t),
             })
 
-            due_checkpoint = cursor in {checkpoint_interval, 2 * checkpoint_interval,
-                                        3 * checkpoint_interval, plan["n_train"]}
+            due_checkpoint = (
+                global_step % args.checkpoint_every_steps == 0
+                or cursor == plan["n_train"]
+            )
             if due_checkpoint:
                 state = checkpoint_state(torch, vla, projector, optimizer, scheduler,
                                          epoch=epoch, cursor=cursor, order=order, global_step=global_step,
