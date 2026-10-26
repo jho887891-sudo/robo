@@ -1,9 +1,31 @@
 import unittest
 
-from training.r44_train import build_label_block, estimate_budget_hours
+from training.r44_train import build_label_block, estimate_budget_hours, parse_args, task_episode_names
 
 
 class R44TrainerCoreTests(unittest.TestCase):
+    def test_task_episode_names_preserves_task_qualification(self):
+        class FakeM2:
+            @staticmethod
+            def split_qualified(key):
+                if not isinstance(key, str) or key.count("/") != 1:
+                    raise ValueError("invalid qualified key")
+                return tuple(key.split("/"))
+
+        self.assertEqual(
+            task_episode_names("push_T", ["push_T/episode_0000000.hdf5"], FakeM2),
+            ["episode_0000000.hdf5"],
+        )
+        with self.assertRaisesRegex(ValueError, "belongs to"):
+            task_episode_names("push_T", ["stack_bowls/episode_0000000.hdf5"], FakeM2)
+
+    def test_formal_defaults_are_five_epochs_and_early_stopping_disabled(self):
+        args = parse_args(["--out", "/tmp/r44-test-output"])
+        self.assertEqual(args.epochs, 5)
+        self.assertEqual(args.early_stopping_patience, 0)
+        self.assertEqual(args.resource_mode, "time-window")
+        self.assertFalse(args.formal_training_authorized)
+
     def test_label_block_masks_prompt_and_supervises_14_tokens_plus_stop(self):
         prompt = [1, 29871, 42]
         actions = list(range(31744, 31758))
