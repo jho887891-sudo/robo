@@ -9,10 +9,54 @@ from training.r44_safe_stop import (
     R44StopController,
     atomic_save_checkpoint,
     stop_and_checkpoint_if_requested,
+    configure_torch_memory_fraction,
 )
 
 
 class SafeStopTests(unittest.TestCase):
+    def test_memory_fraction_disabled_by_default(self):
+        result = configure_torch_memory_fraction(None)
+        self.assertFalse(result["enabled"])
+        self.assertFalse(result["compute_isolation"])
+        self.assertFalse(result["hard_gpu_isolation"])
+
+    def test_memory_fraction_configures_only_allocator(self):
+        gib = 1024**3
+        calls = {}
+        fake_torch = SimpleNamespace(
+            cuda=SimpleNamespace(
+                is_available=lambda: True,
+                current_device=lambda: 0,
+                get_device_properties=lambda index: SimpleNamespace(total_memory=50 * gib),
+                set_per_process_memory_fraction=lambda fraction, device: calls.update(
+                    fraction=fraction, device=device
+                ),
+            )
+        )
+        with patch.dict("sys.modules", {"torch": fake_torch}):
+            result = configure_torch_memory_fraction(22, device=0)
+        self.assertAlmostEqual(calls["fraction"], 22 / 50)
+        self.assertEqual(calls["device"], 0)
+        self.assertEqual(result["scope"], "PyTorch CUDA caching allocator only")
+        self.assertFalse(result["compute_isolation"])
+        self.assertFalse(result["hard_gpu_isolation"])
+
+    def test_memory_fraction_rejects_over_device_capacity(self):
+        gib = 1024**3
+        fake_torch = SimpleNamespace(
+            cuda=SimpleNamespace(
+                is_available=lambda: True,
+                current_device=lambda: 0,
+                get_device_properties=lambda index: SimpleNamespace(total_memory=20 * gib),
+                set_per_process_memory_fraction=lambda fraction, device: self.fail(
+                    "must reject before configuring allocator"
+                ),
+            )
+        )
+        with patch.dict("sys.modules", {"torch": fake_torch}):
+            with self.assertRaisesRegex(ValueError, "exceeds visible device memory"):
+                configure_torch_memory_fraction(22, device=0)
+
     def test_stop_file_requests_stop(self):
         with tempfile.TemporaryDirectory() as tmp:
             stop_path = Path(tmp) / "STOP"
