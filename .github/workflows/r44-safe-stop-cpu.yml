@@ -6,6 +6,8 @@ on:
       - experiment/r44-trainer-implementation-20261026
     paths:
       - "training/r44_safe_stop.py"
+      - "training/r44_train.py"
+      - "tests/test_r44_train_core.py"
       - "tests/test_r44_safe_stop.py"
       - ".github/workflows/r44-safe-stop-cpu.yml"
   pull_request:
