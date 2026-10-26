@@ -85,6 +85,38 @@ def current_git_sha() -> str:
     return os.environ.get("GIT_COMMIT_SHA", "UNKNOWN_RUNTIME_SHA")
 
 
+def validate_resume_compatibility(run_meta: dict, args, plan: dict, base_identity: dict,
+                                  model_info: dict, scheduler_info: dict, source_sha: str) -> None:
+    """Reject resumes that would silently change data, base weights, schedule, or target semantics."""
+    if run_meta.get("schema") != "r44-run-meta/v1":
+        raise ValueError("run_meta.json has an unknown schema")
+    expected = {
+        "source_sha": source_sha,
+        "epochs_max": int(args.epochs),
+        "seed": int(args.seed),
+        "gradient_checkpointing": bool(args.gradient_checkpointing),
+        "target_representation": "joint_delta_v1",
+        "train_samples_sha256": plan["train_samples_sha256"],
+        "dev_samples_sha256": plan["dev_samples_sha256"],
+        "split_sha256": plan["split_sha256"],
+        "feature_normalizer_sha256": plan["feature_normalizer_sha256"],
+        "delta_normalizer_sha256": plan["delta_normalizer_sha256"],
+        "dataset_manifest_sha256": plan["dataset_manifest_sha256"],
+        "base_model_identity": base_identity,
+        "scheduler": scheduler_info,
+        "early_stopping_patience": int(args.early_stopping_patience),
+    }
+    for key, value in expected.items():
+        if run_meta.get(key) != value:
+            raise ValueError(f"resume contract mismatch for run_meta.{key}")
+    old_model = run_meta.get("model_info") or {}
+    for key in ("modeling_sha256", "lora_config", "target_module_count",
+                "trainable_lora_parameter_count", "projector_parameter_count",
+                "prompt_text_sha256", "prompt_token_ids_sha256"):
+        if old_model.get(key) != model_info.get(key):
+            raise ValueError(f"resume model contract mismatch for model_info.{key}")
+
+
 def atomic_json(path: os.PathLike[str] | str, obj: Any) -> None:
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -131,6 +163,9 @@ def estimate_budget_hours(
 ) -> dict:
     if n_train <= 0 or n_dev <= 0 or epochs <= 0:
         raise ValueError("sample counts and epochs must be positive")
+    time_values = (seconds_per_train_sample, seconds_per_dev_sample, model_load_seconds, margin_fraction)
+    if not all(math.isfinite(float(x)) for x in time_values):
+        raise ValueError("time estimates and margin must be finite numbers")
     if min(seconds_per_train_sample, seconds_per_dev_sample, model_load_seconds) < 0:
         raise ValueError("time estimates cannot be negative")
     if margin_fraction < 0:
@@ -837,6 +872,26 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     if args.epochs < 1 or args.epochs > 5 or args.min_epochs < 1 or args.min_epochs > args.epochs:
         raise SystemExit("epochs must be 1..5 and min-epochs must be within 1..epochs")
+    float_args = {
+        "gpu-budget-hours": args.gpu_budget_hours,
+        "runtime-stop-margin-seconds": args.runtime_stop_margin_seconds,
+        "min-free-gpu-gb": args.min_free_gpu_gb,
+        "expected-peak-gpu-memory-gb": args.expected_peak_gpu_memory_gb,
+        "budget-margin-fraction": args.budget_margin_fraction,
+        "seconds-per-train-sample": args.seconds_per_train_sample,
+        "seconds-per-dev-sample": args.seconds_per_dev_sample,
+        "model-load-seconds": args.model_load_seconds,
+    }
+    for name, value in float_args.items():
+        if not math.isfinite(float(value)):
+            raise SystemExit(f"--{name} must be finite")
+    if args.gpu_budget_hours < 0 or args.runtime_stop_margin_seconds < 0:
+        raise SystemExit("GPU budget and runtime stop margin must be >= 0")
+    if args.min_free_gpu_gb <= 0 or args.expected_peak_gpu_memory_gb <= 0:
+        raise SystemExit("GPU memory thresholds must be > 0")
+    if args.max_process_memory_gb is not None and (
+            not math.isfinite(args.max_process_memory_gb) or args.max_process_memory_gb <= 0):
+        raise SystemExit("--max-process-memory-gb must be finite and > 0")
     if args.early_stopping_patience < 0:
         raise SystemExit("early-stopping-patience must be >= 0; use 0 to disable early stopping")
     if args.cams != 3:
@@ -877,6 +932,10 @@ def main(argv=None) -> int:
     print(json.dumps(cpu_report, indent=2, sort_keys=True), flush=True)
     if args.preflight_only:
         return 0
+
+    if args.epochs != 5:
+        print("BLOCKED_EPOCH_COUNT: formal R44 requires exactly 5 epochs; smaller runs are not formal training", flush=True)
+        return 2
 
     # All explicit approvals and budget checks happen before any torch CUDA call/model load.
     if not args.formal_training_authorized:
@@ -972,6 +1031,13 @@ def main(argv=None) -> int:
     resumed = False
 
     if args.resume_from:
+        run_meta_path = out_dir / "run_meta.json"
+        if not run_meta_path.is_file():
+            raise RuntimeError("resume requires the original run_meta.json")
+        run_meta = json.loads(run_meta_path.read_text(encoding="utf-8"))
+        validate_resume_compatibility(
+            run_meta, args, plan, base_identity, model_info, scheduler_info, current_git_sha()
+        )
         ckpt_path = Path(args.resume_from).expanduser().resolve()
         state = load_checkpoint(ckpt_path, torch, plan)
         disk_run_state = run_state
@@ -1009,6 +1075,7 @@ def main(argv=None) -> int:
             "schema": "r44-run-meta/v1", "run_id": args.run_id or f"r44-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
             "utc_start": utcnow(), "source_sha": current_git_sha(),
             "tasks": list(TASKS), "epochs_max": args.epochs, "min_epochs": args.min_epochs,
+            "early_stopping_patience": args.early_stopping_patience,
             "target_representation": "joint_delta_v1", "train_samples_per_epoch": plan["n_train"],
             "dev_samples_per_epoch": plan["n_dev"], "train_samples_sha256": plan["train_samples_sha256"],
             "dev_samples_sha256": plan["dev_samples_sha256"], "split_sha256": plan["split_sha256"],
