@@ -1,6 +1,10 @@
 import unittest
 
-from training.r44_train import build_label_block, estimate_budget_hours, parse_args, task_episode_names
+from training.r44_train import (
+    LORA_ALPHA, LORA_R, LORA_SCALE, LORA_TARGET_MODULES,
+    build_label_block, estimate_budget_hours, parse_args, task_episode_names,
+    episode_images,
+)
 
 
 class R44TrainerCoreTests(unittest.TestCase):
@@ -18,6 +22,79 @@ class R44TrainerCoreTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "belongs to"):
             task_episode_names("push_T", ["stack_bowls/episode_0000000.hdf5"], FakeM2)
+
+    def test_frozen_lora_hyperparameters_match_project_contract(self):
+        self.assertEqual(LORA_R, 32)
+        self.assertEqual(LORA_ALPHA, 16)
+        self.assertEqual(LORA_SCALE, 0.5)
+        self.assertEqual(LORA_TARGET_MODULES, ("q_proj", "v_proj"))
+
+    def test_multitask_image_loader_uses_frozen_three_camera_order(self):
+        import sys
+        import types
+        import numpy as np
+        from unittest.mock import patch
+
+        accessed = []
+
+        class FakeDataset:
+            def __len__(self):
+                return 3
+            def __getitem__(self, index):
+                return b"jpeg-bytes"
+
+        class FakeFile:
+            def __enter__(self):
+                return self
+            def __exit__(self, *_args):
+                return False
+            def __getitem__(self, key):
+                accessed.append(key)
+                return FakeDataset()
+
+        class FakeTensor:
+            def __init__(self, shape):
+                self.shape = tuple(shape)
+            def unsqueeze(self, dim):
+                shape = list(self.shape)
+                shape.insert(dim, 1)
+                return FakeTensor(shape)
+            def to(self, *_args):
+                return self
+
+        fake_torch = types.SimpleNamespace(
+            bfloat16="bf16",
+            cat=lambda tensors, dim: FakeTensor(
+                (len(tensors),) + tuple(tensors[0].shape[1:])
+            ),
+        )
+        fake_cv2 = types.SimpleNamespace(
+            IMREAD_COLOR=1,
+            imdecode=lambda _buf, _flag: np.zeros((4, 4, 3), dtype=np.uint8),
+        )
+        fake_h5py = types.SimpleNamespace(File=lambda _path, _mode: FakeFile())
+        fake_pil = types.ModuleType("PIL")
+        fake_pil.Image = types.SimpleNamespace(fromarray=lambda image: image)
+
+        class FakeImageProcessor:
+            def apply_transform(self, _image):
+                return FakeTensor((1, 3, 224, 224))
+
+        proc = types.SimpleNamespace(image_processor=FakeImageProcessor())
+        fake_m2 = types.SimpleNamespace(
+            CAMERA_ORDER=("cam_head", "cam_left_wrist", "cam_right_wrist")
+        )
+        with patch.dict(sys.modules, {
+            "torch": fake_torch, "cv2": fake_cv2, "h5py": fake_h5py, "PIL": fake_pil,
+        }):
+            result = episode_images(proc, "/tmp/fake-task/episode.hdf5", 1, 3,
+                                    (None, None, None, fake_m2))
+        self.assertEqual(accessed, [
+            "vision/cam_head/colors",
+            "vision/cam_left_wrist/colors",
+            "vision/cam_right_wrist/colors",
+        ])
+        self.assertEqual(result.shape, (1, 3, 3, 224, 224))
 
     def test_formal_defaults_are_five_epochs_and_early_stopping_disabled(self):
         args = parse_args(["--out", "/tmp/r44-test-output"])
