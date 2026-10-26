@@ -341,7 +341,7 @@ class R44TrainerCoreTests(unittest.TestCase):
         names = ["report.json", "normalizer.json", "r44_dataset_manifest.json",
                  "sample_coverage.json", "training_config.json", "dataset_hashes.json", "budget.json"]
         (root / "SHA256SUMS").write_text(
-            "".join(f"{sha256_file(root / name)}  {name}\\n" for name in sorted(names)),
+            "".join(f"{sha256_file(root / name)}  {name}\n" for name in sorted(names)),
             encoding="utf-8",
         )
         return report_path, plan
