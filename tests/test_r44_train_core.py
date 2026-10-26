@@ -229,7 +229,10 @@ class R44TrainerCoreTests(unittest.TestCase):
             epochs=5, min_epochs=5, seed=0, gradient_checkpointing=False,
             early_stopping_patience=0, checkpoint_every_steps=5000,
             gpu_budget_hours=2.0, runtime_stop_margin_seconds=600.0,
-            budget_accounting_every_steps=50,
+            budget_accounting_every_steps=50, resource_check_every=10,
+            min_free_gpu_gb=12.0, expected_peak_gpu_memory_gb=24.0,
+            expected_gpu_uuid="GPU-test", resource_mode="time-window",
+            max_process_memory_gb=None,
         )
         plan = {
             "train_samples_sha256": "train", "dev_samples_sha256": "dev",
@@ -237,7 +240,10 @@ class R44TrainerCoreTests(unittest.TestCase):
             "delta_normalizer_sha256": "delta", "dataset_manifest_sha256": "manifest",
             "preflight_report_sha256": "preflight", "gpu_smoke_report_sha256": "smoke",
             "approved_gpu_budget_hours": 2.0, "runtime_stop_margin_seconds": 600.0,
-            "budget_accounting_every_steps": 50,
+            "budget_accounting_every_steps": 50, "resource_check_every": 10,
+            "min_free_gpu_gb": 12.0, "expected_peak_gpu_memory_gb": 24.0,
+            "expected_gpu_uuid": "GPU-test", "resource_mode": "time-window",
+            "max_process_memory_gb": None,
         }
         base = {"weights": "sha"}
         model = {
@@ -412,7 +418,8 @@ class R44TrainerCoreTests(unittest.TestCase):
                 "optimizer_steps_executed": 1, "resource_mode": "time-window",
                 "gradient_checkpointing": False, "include_task_token": False, "seed": 0,
                 "lr": 5e-4, "projector_lr_multiplier": 0.1, "warmup_fraction": 0.01,
-                "expected_peak_gpu_memory_gb": 24.0, "max_process_memory_gb": None,
+                "expected_peak_gpu_memory_gb": 24.0, "min_free_gpu_gb": 12.0,
+                "max_process_memory_gb": None,
                 "gpu_before": {"uuid": "GPU-test", "memory_free_gb": 40.0},
                 "cpu_contracts": {
                     "train_samples": 10, "dev_samples": 4,
