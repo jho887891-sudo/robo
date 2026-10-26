@@ -30,6 +30,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install NumPy for image-loader unit test
+        run: python -m pip install numpy
       - name: Compile R44 training modules
         run: python -m py_compile training/r44_train.py training/r44_safe_stop.py
       - name: Run R44 CPU contract tests
