@@ -1,0 +1,3 @@
+compute_mode, persistence_mode, mig.mode.current, ecc.mode.current, clocks.current.sm [MHz], clocks.max.sm [MHz], temperature.gpu
+Default, Enabled, [N/A], Disabled, 1800 MHz, 2100 MHz, 52
+[exit=0]

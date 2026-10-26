@@ -1,0 +1,2 @@
+GPU 0: NVIDIA RTX A6000 (UUID: GPU-73599ded-b934-3bb7-53fe-4fb3121db213)
+[exit=0]

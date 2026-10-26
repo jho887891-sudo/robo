@@ -1,0 +1,28 @@
+== peak_mem_gb in run stage_evidence.json
+/home/T7/ojh/robot_actual/runs/m2_two_2000_20261021T123314Z/stage_evidence.json -> "peak_mem_gb": 23.043
+/home/T7/ojh/robot_actual/runs/m2_two_latest/stage_evidence.json -> "peak_mem_gb": 23.043
+== peak_mem in m2 curve_v2 / evidence
+"peak_mem_gb": 23.043
+== r15 train log memory lines
+== m2 train_shared memory record context
+                 "dir": ck["dir"]})
+            log("saved full-state checkpoint step=%d (tasks=%s, ce=%s)"
+                % (global_step, tasks, ev.get("dev_ce_latest")))
+            _write_json(os.path.join(out, "stage_evidence.json"), ev)
+
+    ev["global_step_reached"] = global_step
+    ev["steps_executed"] = global_step - start_step
+    ev["utc_end"] = utcnow()
+    ev["wall_clock_s"] = round(time.time() - t0, 1)
+    ev["seconds_per_step"] = round(float(np.mean(step_times)), 3) if step_times else None
+    ev["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+    ev["caps"]["respected"] = bool(global_step <= caps["cap"])
+    ev["verdict"] = "REACHED_TARGET" if global_step == args.target_global_step else "PARTIAL"
+    ev["final_ce"] = {t: (ev["ce_curves"][t][-1]["ce"] if ev["ce_curves"][t] else None)
+                      for t in tasks}
+    refresh_loss_summary(ev)
+    with ledger:
+        # Book the WHOLE job wall, not just the step loop: 7B load, the DEV counterfactual CE
+        # (16 frames x 2 tasks x 2 prompts of real forward) and every full-state save are real GPU
+        # occupancy. Each step already booked its own seconds, so job_end books only the remainder -
+        # exactly the R15 fix, applied here because M2's first job_end booked 0.0 s against a 7742.6 s

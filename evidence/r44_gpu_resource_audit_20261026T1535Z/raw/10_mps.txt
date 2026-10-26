@@ -1,0 +1,12 @@
+$ nvidia-smi -q | grep -i -A3 -B1 mps
+[exit=1]
+$ ls -ld /tmp/nvidia-mps /var/run/nvidia-mps* 2>&1
+ls: cannot access '/tmp/nvidia-mps': No such file or directory
+ls: cannot access '/var/run/nvidia-mps*': No such file or directory
+[exit=2]
+$ pgrep -a nvidia-cuda-mps
+[exit=1]
+$ env | grep -i CUDA
+[exit=1]
+$ systemctl list-units --all | grep -i mps
+[exit=1]

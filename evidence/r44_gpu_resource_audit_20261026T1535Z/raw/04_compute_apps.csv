@@ -1,0 +1,4 @@
+pid, process_name, used_gpu_memory [MiB]
+3111650, /isaac-sim/kit/kit, 2314 MiB
+1608287, python3, 408 MiB
+[exit=0]

@@ -1,0 +1,3 @@
+name, uuid, memory.total [MiB], memory.used [MiB], memory.free [MiB], utilization.gpu [%], utilization.memory [%], power.draw [W], power.limit [W]
+NVIDIA RTX A6000, GPU-73599ded-b934-3bb7-53fe-4fb3121db213, 49140 MiB, 2803 MiB, 45737 MiB, 15 %, 5 %, 89.18 W, 300.00 W
+[exit=0]

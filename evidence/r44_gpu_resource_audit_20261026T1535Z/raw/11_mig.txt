@@ -1,0 +1,35 @@
+$ nvidia-smi mig -lgip
+No MIG-supported devices found.
+[exit=6]
+$ nvidia-smi mig -lgi
+No MIG-supported devices found.
+[exit=6]
+$ nvidia-smi -q | grep -i -A2 -B2 MIG
+    Persistence Mode                                   : Enabled
+    Addressing Mode                                    : None
+    MIG Mode
+        Current                                        : N/A
+        Pending                                        : N/A
+[exit=0]
+$ nvidia-smi -q -d CLOCK | head -20
+
+==============NVSMI LOG==============
+
+Timestamp                                              : Mon Oct 26 07:37:11 2026
+Driver Version                                         : 580.178.04
+CUDA Version                                           : 13.0
+
+Attached GPUs                                          : 1
+GPU 00000000:00:0C.0
+    Clocks
+        Graphics                                       : 1800 MHz
+        SM                                             : 1800 MHz
+        Memory                                         : 7601 MHz
+        Video                                          : 1590 MHz
+    Applications Clocks
+        Graphics                                       : 1800 MHz
+        Memory                                         : 8001 MHz
+    Default Applications Clocks
+        Graphics                                       : 1800 MHz
+        Memory                                         : 8001 MHz
+[exit=0]

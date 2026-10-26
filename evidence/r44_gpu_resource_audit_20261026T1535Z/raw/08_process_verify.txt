@@ -1,0 +1,22 @@
+---- PID 3111650
+    PID    PPID USER     STAT     ELAPSED   RSS COMMAND
+3111650 3111578 1234     Rl    8-03:38:46 1006564 /isaac-sim/kit/kit /isaac-sim/apps/isaacsim.exp.full.streaming.kit --no-window --/persistent/isaac/asset_root/default=https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1 --merge-config=/isaac-sim/config/open_endpoint.toml --allow-root sleep infinity
+cwd: 
+exe: 
+cmdline: /isaac-sim/kit/kit /isaac-sim/apps/isaacsim.exp.full.streaming.kit --no-window --/persistent/isaac/asset_root/default=https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1 --merge-config=/isaac-sim/config/open_endpoint.toml --allow-root sleep infinity 
+uid: 1234
+ppid_chain:
+  3111650 <- 3111578 : /bin/sh /isaac-sim/runheadless.sh sleep infinity 
+  3111578 <- 3111549 : /snap/docker/3618/bin/containerd-shim-runc-v2 -namespace moby -id 81be207a4a03bb59e9b29f95a9924a7f360ee6c9839b6c2b785983
+  3111549 <- 1 : /lib/systemd/systemd --system --deserialize 56 
+---- PID 1608287
+    PID    PPID USER     STAT     ELAPSED   RSS COMMAND
+1608287  413913 dgut     Rl+     17:23:17 2046880 python3 /home/dgut/yuwang/open_world_with_ptogressive_simulator/C4_proposed_ablation_network_loss_5seeds_resume.py
+cwd: /home/dgut/yuwang
+exe: /home/T7/public/miniconda3/bin/python3.13
+cmdline: python3 /home/dgut/yuwang/open_world_with_ptogressive_simulator/C4_proposed_ablation_network_loss_5seeds_resume.py 
+uid: 1000
+ppid_chain:
+  1608287 <- 413913 : -bash 
+  413913 <- 413912 : tmux new -s OW 
+  413912 <- 1 : /lib/systemd/systemd --system --deserialize 56 

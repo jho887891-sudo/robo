@@ -1,0 +1,62 @@
+$ git ls-tree -r --name-only fd0a7b8 | grep -i 'r44_train\|train'
+evidence/history_proprio_pilot_20261019T161033Z/train_duplicate.log
+evidence/history_proprio_pilot_20261019T161033Z/train_duplicate_rep2_FAILED_oom.log
+evidence/history_proprio_pilot_20261019T161033Z/train_duplicate_rep2b.log
+evidence/history_proprio_pilot_20261019T161033Z/train_duplicate_rep3.log
+evidence/history_proprio_pilot_20261019T161033Z/train_legacy14d.log
+evidence/history_proprio_pilot_20261019T161033Z/train_true.log
+evidence/history_proprio_pilot_20261019T161033Z/train_true_rep2.log
+evidence/history_proprio_pilot_20261019T161033Z/train_true_rep3.log
+evidence/r10/b_trace_recheck/r9_trainer_trace.json
+evidence/r10/test_r9_trainer_contract.log
+evidence/r15_stage300_20261021T034102Z/raw_train.log
+evidence/r15_stage300_20261021T034119Z/raw_train.log
+evidence/r3_pr1/overfit_keep_run1_train.log
+evidence/r3_pr1/overfit_zero_run1_train.log
+evidence/r4_ab_run_20261019T044749Z/absolute_keep_train.log
+evidence/r4_ab_run_20261019T044749Z/residual_keep_train.log
+evidence/r5_ab_run_20261019T103523Z/absolute_keep_train.log
+evidence/r5_ab_run_20261019T103523Z/residual_keep_train.log
+evidence/r8_pretraining_readiness_20261020/FAILURES.md
+evidence/r8_pretraining_readiness_20261020/ablation_verification.json
+[exit=0]
+$ test -e training/r44_train.py
+ABSENT
+[exit=0]
+$ grep -n gradient_checkpointing training/*.py
+training/overfit_pr1.py:189:            vla.gradient_checkpointing_enable()
+training/r6_history_pilot.py:172:            vla.gradient_checkpointing_enable()
+[exit=0]
+$ grep -n 'per_device_train_batch_size\|batch_size' training/m2_train_shared.py | head -20
+[exit=0]
+$ grep -n 'max_memory_allocated\|max_memory_reserved' training/*.py diagnostics/*.py | head
+training/m2_train_shared.py:1160:    ev["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+training/overfit_pr1.py:334:                       "mem_gb": float(torch.cuda.max_memory_allocated() / 1e9),
+training/r11_train_pushT_r42.py:410:    ev["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+training/r11_train_pushT_r42.py:506:                % (step, float(loss), gn, torch.cuda.max_memory_allocated() / 1e9,
+training/r11_train_pushT_r42.py:535:    run["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+training/r11_train_pushT_r42.py:729:                   torch.cuda.max_memory_allocated() / 1e9))
+training/r11_train_pushT_r42.py:747:    ev["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+training/r11_train_pushT_r42.py:939:                % (step, float(loss), gn, torch.cuda.max_memory_allocated() / 1e9,
+training/r11_train_pushT_r42.py:953:    ev["peak_mem_gb"] = round(float(torch.cuda.max_memory_allocated()) / 1e9, 3)
+training/r6_history_pilot.py:333:                       "mem_gb": float(torch.cuda.max_memory_allocated() / 1e9),
+[exit=0]
+$ grep -n 'lora_r\|lora_alpha\|target_modules\|r=32' training/r11_train_pushT_r42.py | head -12
+182:    cfg = LoraConfig(r=32, lora_alpha=16, lora_dropout=0.0, target_modules="all-linear",
+[exit=0]
+$ grep -n 'bf16\|bfloat16\|torch_dtype' training/r11_train_pushT_r42.py | head -10
+170:    vla = AutoModelForVision2Seq.from_pretrained(MODEL, torch_dtype=torch.bfloat16,
+214:    return torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to("cuda")
+229:            with torch.autocast("cuda", dtype=torch.bfloat16):
+246:        with torch.autocast("cuda", dtype=torch.bfloat16):
+251:        with torch.autocast("cuda", dtype=torch.bfloat16):
+323:    with torch.autocast("cuda", dtype=torch.bfloat16):
+490:        with torch.autocast("cuda", dtype=torch.bfloat16):
+697:        with torch.autocast("cuda", dtype=torch.bfloat16):
+792:        with torch.autocast("cuda", dtype=torch.bfloat16):
+805:        with torch.autocast("cuda", dtype=torch.bfloat16):
+[exit=0]
+$ python -c hardware info (no cuda)
+torch 2.4.1+cu121
+no cuda context created
+[exit=0]

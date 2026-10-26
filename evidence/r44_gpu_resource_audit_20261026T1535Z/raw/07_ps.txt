@@ -1,0 +1,596 @@
+    PID    PPID USER     STAT     ELAPSED %CPU %MEM CMD
+3111650 3111578 1234     Sl    8-03:38:46  214  1.6 /isaac-sim/kit/kit /isaac-sim/apps/isaacsim.exp.full.streaming.kit --no-window --/persistent/isaac/asset_root/default=https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1 --merge-config=/isaac-sim/config/open_endpoint.toml --allow-root sleep infinity
+1608287  413913 dgut     Rl+     17:23:17  142  3.3 python3 /home/dgut/yuwang/open_world_with_ptogressive_simulator/C4_proposed_ablation_network_loss_5seeds_resume.py
+   2055       1 root     Ss   35-00:40:19 15.3  1.9 /sbin/mount.ntfs /dev/vdb2 /home/T7 -o rw,uid=1000,gid=1000,umask=022
+    214       2 root     S    35-00:40:40  6.4  0.0 [kcompactd0]
+ 288755   13978 dgut     Sl   19-23:46:03  6.0  0.2 /tmp/.mount_neo4j-eYvKbQ/neo4j-desktop --type=zygote
+1417850 1417513 dgut     Sl      22:51:31  4.3  0.5 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/node --dns-result-order=ipv4first /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/out/bootstrap-fork --type=extensionHost --transformURIs --max-old-space-size=4096 --useHostProxy=false
+1347914 1347333 dgut     Sl    1-01:08:37  4.2  0.4 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/node --dns-result-order=ipv4first /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/out/bootstrap-fork --type=extensionHost --transformURIs --max-old-space-size=4096 --useHostProxy=false
+1347938 1347333 dgut     SLl   1-01:08:37  3.1  0.0 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/modules/ckg/binary/ckg_server --port=51000 --version_code=2 --storage_path=/home/dgut/.trae-cn-server/ckg_server --local_embedding=true --embedding_storage_type=sqlite_vec --app_id=6eefa01c-1036-4c7e-9ca5-d891f63bfcd8 --limit_cpu=1 --source_product=native_ide
+1417860 1417513 dgut     SLl     22:51:31  3.0  0.1 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/modules/ckg/binary/ckg_server --port=51001 --version_code=2 --storage_path=/home/dgut/.trae-server/ckg_server --local_embedding=true --embedding_storage_type=sqlite_vec --app_id=6eefa01c-1036-4c7e-9ca5-d891f63bfcd8 --limit_cpu=1 --source_product=native_ide
+  12284   12244 dgut     SLl  35-00:35:00  1.4  0.1 /usr/lib/x86_64-linux-gnu/webkit2gtk-4.1/WebKitWebProcess 4 25 27
+1417859 1417513 dgut     SLl     22:51:31  1.2  1.3 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/modules/ai-agent/ai-agent
+  14922       1 dgut     Sl   35-00:31:40  1.1  0.9 /home/dgut/.config/neo4j-desktop/Application/Cache/runtime/zulu21.44.17-ca-jdk21.0.8-linux_x64/bin/java -cp /home/dgut/.config/neo4j-desktop/Application/Data/dbmss/dbms-dd227401-994e-4766-9514-c45cc8046580/plugins/*:/home/dgut/.config/neo4j-desktop/Application/Data/dbmss/dbms-dd227401-994e-4766-9514-c45cc8046580/conf/*:/home/dgut/.config/neo4j-desktop/Application/Data/dbmss/dbms-dd227401-994e-4766-9514-c45cc8046580/lib/* -Dlog4j2.formatMsgNoLookups=true -XX:-OmitStackTraceInFastThrow -XX:+AlwaysPreTouch -XX:+UnlockExperimentalVMOptions -XX:+TrustFinalNonStaticFields -XX:+DisableExplicitGC -XX:-RestrictContended -Djdk.nio.maxCachedBufferSize=1024 -Dio.netty.tryReflectionSetAccessible=true -Dio.netty.leakDetection.level=DISABLED -Djdk.tls.ephemeralDHKeySize=2048 -Djdk.tls.rejectClientInitiatedRenegotiation=true -XX:FlightRecorderOptions=stackdepth=256 -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --enable-native-access=ALL-UNNAMED -Dlog4j2.disable.jmx=true -Dlog4j.layout.jsonTemplate.maxStringLength=32768 -Dfile.encoding=UTF-8 -Xms524288k -Xmx1048576k com.neo4j.server.enterprise.Neo4jEnterprise --home-dir=/home/dgut/.config/neo4j-desktop/Application/Data/dbmss/dbms-dd227401-994e-4766-9514-c45cc8046580 --config-dir=/home/dgut/.config/neo4j-desktop/Application/Data/dbmss/dbms-dd227401-994e-4766-9514-c45cc8046580/conf
+  14303   13975 dgut     Sl   35-00:32:25  1.0  0.0 /tmp/.mount_neo4j-eYvKbQ/neo4j-desktop --type=zygote --no-zygote-sandbox
+   2461    2446 root     Ssl+ 35-00:40:09  0.8  0.0 /usr/lib/xorg/Xorg -core :1 -seat seat0 -auth /var/run/lightdm/root/:1 -nolisten tcp vt7 -novtswitch
+ 931050    2451 dgut     Ssl  26-12:54:11  0.8  0.0 /home/dgut/.nvm/versions/node/v22.23.3/bin/node /home/dgut/.local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js web --no-open --host 127.0.0.1 --port 3080 --trusted-host 100.88.178.19:3080 --trusted-host jxxy.taildd42cc.ts.net:3080
+1347940 1347333 dgut     SLl   1-01:08:37  0.7  0.6 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/modules/ai-agent/ai-agent
+    588       2 root     S    35-00:40:34  0.6  0.0 [nvidia-modeset/]
+1996699 1523575 root     Ss         00:02  0.5  0.0 sshd: dgut [priv]
+   2171       1 root     Ssl  35-00:40:12  0.4  0.0 /usr/libexec/polkitd --no-debug
+   2248       1 root     Sl   35-00:40:11  0.4  0.0 /usr/local/zstack/zwatch-vm-agent/node_exporter --web.listen-address 0.0.0.0:9100
+   4212    3616 dgut     Sl   35-00:39:52  0.4  4.0 /usr/share/elasticsearch/jdk/bin/java -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -Djava.security.manager=allow -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -XX:-OmitStackTraceInFastThrow -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j2.formatMsgNoLookups=true -Djava.locale.providers=SPI,COMPAT --add-opens=java.base/java.io=org.elasticsearch.preallocate -Des.cgroups.hierarchy.override=/ -XX:+UseG1GC -Djava.io.tmpdir=/tmp/elasticsearch-3836296956485899893 --add-modules=jdk.incubator.vector -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -XX:HeapDumpPath=data -XX:ErrorFile=logs/hs_err_pid%p.log -Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,level,pid,tags:filecount=32,filesize=64m -Xms3849m -Xmx3849m -XX:MaxDirectMemorySize=2018508800 -XX:G1HeapRegionSize=4m -XX:InitiatingHeapOccupancyPercent=30 -XX:G1ReservePercent=15 -Des.distribution.type=docker --module-path /usr/share/elasticsearch/lib --add-modules=jdk.net --add-modules=ALL-MODULE-PATH -m org.elasticsearch.server/org.elasticsearch.bootstrap.Elasticsearch
+    216       2 root     SN   35-00:40:40  0.3  0.0 [khugepaged]
+1347333 1347297 dgut     Sl    1-01:09:03  0.3  0.2 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/node ./out/server-main.js --start-server --host=127.0.0.1 --connection-token-file /home/dgut/.trae-cn-server/.stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-96fb4041.token --telemetry-level all --enable-remote-auto-shutdown --accept-server-license-terms --default-folder /home/dgut --server-data-dir /home/dgut/.trae-cn-server --logsPath /home/dgut/.trae-cn-server/manager-logs/1792909592397_141251 --port 46439
+1417513 1417493 dgut     Sl      22:51:41  0.3  0.2 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/node ./out/server-main.js --start-server --host=127.0.0.1 --port=0 --connection-token-file /home/dgut/.trae-server/.stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-05d291cf.token --telemetry-level all --enable-remote-auto-shutdown --remote-auto-shutdown-without-delay --accept-server-license-terms --default-folder /home/dgut --server-data-dir /home/dgut/.trae-server --logsPath /home/dgut/.trae-server/manager-logs/1792917835152_812082 --port 41685
+3111549       1 root     Sl    8-03:38:50  0.3  0.0 /snap/docker/3618/bin/containerd-shim-runc-v2 -namespace moby -id 81be207a4a03bb59e9b29f95a9924a7f360ee6c9839b6c2b785983b9c6353c75 -address /run/snap.docker/containerd/containerd.sock
+   4533    4241 dgut     Sl   35-00:39:49  0.2  0.1 /usr/bin/gnome-shell
+  12244    4533 dgut     Sl   35-00:35:02  0.2  0.0 cc-switch
+  13963       1 dgut     SLl  35-00:32:34  0.2  0.0 /tmp/.mount_neo4j-eYvKbQ/neo4j-desktop
+1417858 1417513 dgut     Sl      22:51:31  0.2  0.1 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/trae-helper
+1523352       1 systemd+ Ss   10-01:02:04  0.2  0.0 /lib/systemd/systemd-oomd
+4008910       1 root     Ssl  20-20:03:21  0.2  0.0 dockerd --group docker --exec-root=/run/snap.docker --data-root=/var/snap/docker/common/var-lib-docker --pidfile=/run/snap.docker/docker.pid --config-file=/var/snap/docker/3618/config/daemon.json
+     14       2 root     I    35-00:40:40  0.1  0.0 [rcu_sched]
+    277       2 root     S    35-00:40:39  0.1  0.0 [kswapd0]
+   2196       1 root     Ssl  35-00:40:12  0.1  0.0 /usr/local/zstack/zwatch-vm-agent/zwatch-vm-agent -conf /usr/local/zstack/zwatch-vm-agent/conf.yaml
+   2269       1 root     Sl   35-00:40:11  0.1  0.0 /usr/local/zstack/zwatch-vm-agent/collectd_exporter -collectd.listen-address :25826 -web.listen-address 0.0.0.0:9103
+   2352       1 root     Ssl  35-00:40:10  0.1  0.0 /usr/bin/containerd
+   2478       1 root     Ssl  35-00:40:08  0.1  0.0 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+   3616    2947 dgut     Sl   35-00:40:02  0.1  0.0 /usr/share/elasticsearch/jdk/bin/java -Xms4m -Xmx64m -XX:+UseSerialGC -Dcli.name=server -Dcli.script=/usr/share/elasticsearch/bin/elasticsearch -Dcli.libs=lib/tools/server-cli -Des.path.home=/usr/share/elasticsearch -Des.path.conf=/usr/share/elasticsearch/config -Des.distribution.type=docker -cp /usr/share/elasticsearch/lib/*:/usr/share/elasticsearch/lib/cli-launcher/* org.elasticsearch.launcher.CliToolLauncher
+  14199   13963 dgut     Sl   35-00:32:26  0.1  0.0 /proc/self/exe --type=utility --utility-sub-type=network.mojom.NetworkService --lang=zh-CN --service-sandbox-type=none --enable-crash-reporter=2ba6551d-eab5-473b-b327-0f2da35779d8,no_channel --user-data-dir=/home/dgut/.config/neo4j-desktop --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,14812769264139132311,7679112623142559622,262144 --enable-features=PdfUseShowSaveFilePicker --disable-features=LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --trace-process-track-uuid=3190708989122997041
+ 922720       1 root     Ssl  26-13:08:17  0.1  0.0 /usr/sbin/tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/run/tailscale/tailscaled.sock --port=41641
+1057506       1 dgut     Sl    2-01:21:02  0.1  0.2 codex -c features.code_mode_host=true app-server --listen unix://
+1347929 1347333 dgut     Sl    1-01:08:37  0.1  0.1 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/trae-helper
+1347939 1347333 dgut     Sl    1-01:08:37  0.1  0.2 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/node /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/extensions/ai-completion/resource/aiserver/cue.js --use-electron-aha-ipc=false
+1348233 1347940 dgut     Sl    1-01:08:34  0.1  0.0 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/modules/ai-agent/bin/agent-tool-host
+1348534 1347333 dgut     Sl    1-01:08:26  0.1  0.1 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/node /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/out/bootstrap-fork --type=ptyHost --logsPath /home/dgut/.trae-cn-server/manager-logs/1792909592397_141251
+1417866 1417513 dgut     Sl      22:51:31  0.1  0.2 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/node /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/extensions/ai-completion/resource/aiserver/cue.js --use-electron-aha-ipc=false
+1418421 1417513 dgut     Sl      22:51:27  0.1  0.1 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/node /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/out/bootstrap-fork --type=ptyHost --logsPath /home/dgut/.trae-server/manager-logs/1792917835152_812082
+1994768       2 root     I          10:06  0.1  0.0 [kworker/u256:3-flush-253:0]
+      1       0 root     Ss   35-00:40:40  0.0  0.0 /lib/systemd/systemd --system --deserialize 56
+      2       0 root     S    35-00:40:40  0.0  0.0 [kthreadd]
+      3       2 root     I<   35-00:40:40  0.0  0.0 [rcu_gp]
+      4       2 root     I<   35-00:40:40  0.0  0.0 [rcu_par_gp]
+      5       2 root     I<   35-00:40:40  0.0  0.0 [slub_flushwq]
+      6       2 root     I<   35-00:40:40  0.0  0.0 [netns]
+      8       2 root     I<   35-00:40:40  0.0  0.0 [kworker/0:0H-events_highpri]
+     10       2 root     I<   35-00:40:40  0.0  0.0 [mm_percpu_wq]
+     11       2 root     S    35-00:40:40  0.0  0.0 [rcu_tasks_rude_]
+     12       2 root     S    35-00:40:40  0.0  0.0 [rcu_tasks_trace]
+     13       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/0]
+     15       2 root     S    35-00:40:40  0.0  0.0 [migration/0]
+     16       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/0]
+     18       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/0]
+     19       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/1]
+     20       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/1]
+     21       2 root     S    35-00:40:40  0.0  0.0 [migration/1]
+     22       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/1]
+     24       2 root     I<   35-00:40:40  0.0  0.0 [kworker/1:0H-events_highpri]
+     25       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/2]
+     26       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/2]
+     27       2 root     S    35-00:40:40  0.0  0.0 [migration/2]
+     28       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/2]
+     30       2 root     I<   35-00:40:40  0.0  0.0 [kworker/2:0H-events_highpri]
+     31       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/3]
+     32       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/3]
+     33       2 root     S    35-00:40:40  0.0  0.0 [migration/3]
+     34       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/3]
+     36       2 root     I<   35-00:40:40  0.0  0.0 [kworker/3:0H-events_highpri]
+     37       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/4]
+     38       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/4]
+     39       2 root     S    35-00:40:40  0.0  0.0 [migration/4]
+     40       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/4]
+     42       2 root     I<   35-00:40:40  0.0  0.0 [kworker/4:0H-kblockd]
+     43       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/5]
+     44       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/5]
+     45       2 root     S    35-00:40:40  0.0  0.0 [migration/5]
+     46       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/5]
+     48       2 root     I<   35-00:40:40  0.0  0.0 [kworker/5:0H-events_highpri]
+     49       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/6]
+     50       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/6]
+     51       2 root     S    35-00:40:40  0.0  0.0 [migration/6]
+     52       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/6]
+     54       2 root     I<   35-00:40:40  0.0  0.0 [kworker/6:0H-events_highpri]
+     55       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/7]
+     56       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/7]
+     57       2 root     S    35-00:40:40  0.0  0.0 [migration/7]
+     58       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/7]
+     60       2 root     I<   35-00:40:40  0.0  0.0 [kworker/7:0H-events_highpri]
+     61       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/8]
+     62       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/8]
+     63       2 root     S    35-00:40:40  0.0  0.0 [migration/8]
+     64       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/8]
+     66       2 root     I<   35-00:40:40  0.0  0.0 [kworker/8:0H-events_highpri]
+     67       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/9]
+     68       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/9]
+     69       2 root     S    35-00:40:40  0.0  0.0 [migration/9]
+     70       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/9]
+     72       2 root     I<   35-00:40:40  0.0  0.0 [kworker/9:0H-events_highpri]
+     73       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/10]
+     74       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/10]
+     75       2 root     S    35-00:40:40  0.0  0.0 [migration/10]
+     76       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/10]
+     78       2 root     I<   35-00:40:40  0.0  0.0 [kworker/10:0H-events_highpri]
+     79       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/11]
+     80       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/11]
+     81       2 root     S    35-00:40:40  0.0  0.0 [migration/11]
+     82       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/11]
+     84       2 root     I<   35-00:40:40  0.0  0.0 [kworker/11:0H-events_highpri]
+     85       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/12]
+     86       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/12]
+     87       2 root     S    35-00:40:40  0.0  0.0 [migration/12]
+     88       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/12]
+     90       2 root     I<   35-00:40:40  0.0  0.0 [kworker/12:0H-events_highpri]
+     91       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/13]
+     92       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/13]
+     93       2 root     S    35-00:40:40  0.0  0.0 [migration/13]
+     94       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/13]
+     96       2 root     I<   35-00:40:40  0.0  0.0 [kworker/13:0H-events_highpri]
+     97       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/14]
+     98       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/14]
+     99       2 root     S    35-00:40:40  0.0  0.0 [migration/14]
+    100       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/14]
+    102       2 root     I<   35-00:40:40  0.0  0.0 [kworker/14:0H-events_highpri]
+    103       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/15]
+    104       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/15]
+    105       2 root     S    35-00:40:40  0.0  0.0 [migration/15]
+    106       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/15]
+    108       2 root     I<   35-00:40:40  0.0  0.0 [kworker/15:0H-events_highpri]
+    109       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/16]
+    110       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/16]
+    111       2 root     S    35-00:40:40  0.0  0.0 [migration/16]
+    112       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/16]
+    114       2 root     I<   35-00:40:40  0.0  0.0 [kworker/16:0H-events_highpri]
+    115       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/17]
+    116       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/17]
+    117       2 root     S    35-00:40:40  0.0  0.0 [migration/17]
+    118       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/17]
+    120       2 root     I<   35-00:40:40  0.0  0.0 [kworker/17:0H-events_highpri]
+    121       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/18]
+    122       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/18]
+    123       2 root     S    35-00:40:40  0.0  0.0 [migration/18]
+    124       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/18]
+    126       2 root     I<   35-00:40:40  0.0  0.0 [kworker/18:0H-kblockd]
+    127       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/19]
+    128       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/19]
+    129       2 root     S    35-00:40:40  0.0  0.0 [migration/19]
+    130       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/19]
+    132       2 root     I<   35-00:40:40  0.0  0.0 [kworker/19:0H-events_highpri]
+    133       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/20]
+    134       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/20]
+    135       2 root     S    35-00:40:40  0.0  0.0 [migration/20]
+    136       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/20]
+    138       2 root     I<   35-00:40:40  0.0  0.0 [kworker/20:0H-events_highpri]
+    139       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/21]
+    140       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/21]
+    141       2 root     S    35-00:40:40  0.0  0.0 [migration/21]
+    142       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/21]
+    144       2 root     I<   35-00:40:40  0.0  0.0 [kworker/21:0H-events_highpri]
+    145       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/22]
+    146       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/22]
+    147       2 root     S    35-00:40:40  0.0  0.0 [migration/22]
+    148       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/22]
+    150       2 root     I<   35-00:40:40  0.0  0.0 [kworker/22:0H-events_highpri]
+    151       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/23]
+    152       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/23]
+    153       2 root     S    35-00:40:40  0.0  0.0 [migration/23]
+    154       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/23]
+    156       2 root     I<   35-00:40:40  0.0  0.0 [kworker/23:0H-events_highpri]
+    157       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/24]
+    158       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/24]
+    159       2 root     S    35-00:40:40  0.0  0.0 [migration/24]
+    160       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/24]
+    162       2 root     I<   35-00:40:40  0.0  0.0 [kworker/24:0H-events_highpri]
+    163       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/25]
+    164       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/25]
+    165       2 root     S    35-00:40:40  0.0  0.0 [migration/25]
+    166       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/25]
+    168       2 root     I<   35-00:40:40  0.0  0.0 [kworker/25:0H-events_highpri]
+    169       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/26]
+    170       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/26]
+    171       2 root     S    35-00:40:40  0.0  0.0 [migration/26]
+    172       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/26]
+    174       2 root     I<   35-00:40:40  0.0  0.0 [kworker/26:0H-events_highpri]
+    175       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/27]
+    176       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/27]
+    177       2 root     S    35-00:40:40  0.0  0.0 [migration/27]
+    178       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/27]
+    180       2 root     I<   35-00:40:40  0.0  0.0 [kworker/27:0H-events_highpri]
+    181       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/28]
+    182       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/28]
+    183       2 root     S    35-00:40:40  0.0  0.0 [migration/28]
+    184       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/28]
+    186       2 root     I<   35-00:40:40  0.0  0.0 [kworker/28:0H-events_highpri]
+    187       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/29]
+    188       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/29]
+    189       2 root     S    35-00:40:40  0.0  0.0 [migration/29]
+    190       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/29]
+    192       2 root     I<   35-00:40:40  0.0  0.0 [kworker/29:0H-events_highpri]
+    193       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/30]
+    194       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/30]
+    195       2 root     S    35-00:40:40  0.0  0.0 [migration/30]
+    196       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/30]
+    198       2 root     I<   35-00:40:40  0.0  0.0 [kworker/30:0H-events_highpri]
+    199       2 root     S    35-00:40:40  0.0  0.0 [cpuhp/31]
+    200       2 root     S    35-00:40:40  0.0  0.0 [idle_inject/31]
+    201       2 root     S    35-00:40:40  0.0  0.0 [migration/31]
+    202       2 root     S    35-00:40:40  0.0  0.0 [ksoftirqd/31]
+    204       2 root     I<   35-00:40:40  0.0  0.0 [kworker/31:0H-events_highpri]
+    205       2 root     S    35-00:40:40  0.0  0.0 [kdevtmpfs]
+    206       2 root     I<   35-00:40:40  0.0  0.0 [inet_frag_wq]
+    207       2 root     S    35-00:40:40  0.0  0.0 [kauditd]
+    211       2 root     S    35-00:40:40  0.0  0.0 [khungtaskd]
+    212       2 root     S    35-00:40:40  0.0  0.0 [oom_reaper]
+    213       2 root     I<   35-00:40:40  0.0  0.0 [writeback]
+    215       2 root     SN   35-00:40:40  0.0  0.0 [ksmd]
+    264       2 root     I<   35-00:40:40  0.0  0.0 [kintegrityd]
+    265       2 root     I<   35-00:40:40  0.0  0.0 [kblockd]
+    266       2 root     I<   35-00:40:40  0.0  0.0 [blkcg_punt_bio]
+    267       2 root     I<   35-00:40:40  0.0  0.0 [tpm_dev_wq]
+    268       2 root     I<   35-00:40:40  0.0  0.0 [ata_sff]
+    269       2 root     I<   35-00:40:40  0.0  0.0 [md]
+    270       2 root     I<   35-00:40:40  0.0  0.0 [edac-poller]
+    271       2 root     I<   35-00:40:40  0.0  0.0 [devfreq_wq]
+    272       2 root     S    35-00:40:40  0.0  0.0 [watchdogd]
+    275       2 root     I<   35-00:40:40  0.0  0.0 [kworker/0:1H-kblockd]
+    278       2 root     S    35-00:40:39  0.0  0.0 [ecryptfs-kthrea]
+    280       2 root     I<   35-00:40:39  0.0  0.0 [kthrotld]
+    281       2 root     I<   35-00:40:39  0.0  0.0 [acpi_thermal_pm]
+    300       2 root     S    35-00:40:39  0.0  0.0 [scsi_eh_0]
+    301       2 root     I<   35-00:40:39  0.0  0.0 [scsi_tmf_0]
+    302       2 root     S    35-00:40:39  0.0  0.0 [scsi_eh_1]
+    303       2 root     I<   35-00:40:39  0.0  0.0 [scsi_tmf_1]
+    305       2 root     I<   35-00:40:39  0.0  0.0 [vfio-irqfd-clea]
+    306       2 root     I<   35-00:40:39  0.0  0.0 [mld]
+    307       2 root     I<   35-00:40:39  0.0  0.0 [kworker/24:1H-kblockd]
+    308       2 root     I<   35-00:40:39  0.0  0.0 [ipv6_addrconf]
+    312       2 root     I<   35-00:40:39  0.0  0.0 [kworker/4:1H-kblockd]
+    330       2 root     I<   35-00:40:38  0.0  0.0 [kstrp]
+    333       2 root     I<   35-00:40:38  0.0  0.0 [zswap-shrink]
+    364       2 root     I<   35-00:40:38  0.0  0.0 [kworker/u257:0]
+    369       2 root     I<   35-00:40:38  0.0  0.0 [charger_manager]
+    393       2 root     I<   35-00:40:37  0.0  0.0 [kworker/16:1H-kblockd]
+    452       2 root     I<   35-00:40:37  0.0  0.0 [kworker/25:1H-xfs-log/dm-0]
+    472       2 root     I<   35-00:40:37  0.0  0.0 [kworker/19:1H-kblockd]
+    473       2 root     I<   35-00:40:37  0.0  0.0 [cryptd]
+    482       2 root     I<   35-00:40:37  0.0  0.0 [kworker/9:1H-xfs-log/dm-0]
+    483       2 root     I<   35-00:40:37  0.0  0.0 [kworker/11:1H-kblockd]
+    486       2 root     I<   35-00:40:37  0.0  0.0 [kworker/29:1H-kblockd]
+    489       2 root     I<   35-00:40:37  0.0  0.0 [kworker/10:1H-kblockd]
+    492       2 root     I<   35-00:40:37  0.0  0.0 [kworker/31:1H-kblockd]
+    493       2 root     I<   35-00:40:37  0.0  0.0 [kworker/15:1H-kblockd]
+    496       2 root     I<   35-00:40:37  0.0  0.0 [kworker/30:1H-xfs-log/dm-0]
+    499       2 root     I<   35-00:40:37  0.0  0.0 [kworker/23:1H-kblockd]
+    500       2 root     I<   35-00:40:37  0.0  0.0 [kworker/8:1H-xfs-log/dm-0]
+    501       2 root     I<   35-00:40:37  0.0  0.0 [kworker/6:1H-kblockd]
+    503       2 root     I<   35-00:40:37  0.0  0.0 [kworker/13:1H-kblockd]
+    505       2 root     S    35-00:40:37  0.0  0.0 [scsi_eh_2]
+    506       2 root     I<   35-00:40:37  0.0  0.0 [scsi_tmf_2]
+    507       2 root     I<   35-00:40:37  0.0  0.0 [kworker/26:1H-kblockd]
+    509       2 root     I<   35-00:40:37  0.0  0.0 [kworker/5:1H-kblockd]
+    512       2 root     I<   35-00:40:37  0.0  0.0 [kworker/18:1H-kblockd]
+    535       2 root     I<   35-00:40:36  0.0  0.0 [kworker/28:1H-kblockd]
+    537       2 root     I<   35-00:40:36  0.0  0.0 [kworker/17:1H-kblockd]
+    553       2 root     I<   35-00:40:36  0.0  0.0 [kdmflush]
+    554       2 root     I<   35-00:40:36  0.0  0.0 [kdmflush]
+    558       2 root     I<   35-00:40:36  0.0  0.0 [kworker/12:1H-kblockd]
+    565       2 root     I<   35-00:40:36  0.0  0.0 [kworker/1:1H-kblockd]
+    566       2 root     I<   35-00:40:36  0.0  0.0 [kworker/2:1H-kblockd]
+    576       2 root     S    35-00:40:34  0.0  0.0 [nv_queue]
+    577       2 root     S    35-00:40:34  0.0  0.0 [nv_queue]
+    578       2 root     S    35-00:40:34  0.0  0.0 [nv_open_q]
+    582       2 root     I<   35-00:40:34  0.0  0.0 [kworker/7:1H-kblockd]
+    589       2 root     S    35-00:40:34  0.0  0.0 [nvidia-modeset/]
+    590       2 root     S    35-00:40:34  0.0  0.0 [irq/94-nvidia]
+    591       2 root     S    35-00:40:34  0.0  0.0 [nvidia]
+    592       2 root     S    35-00:40:34  0.0  0.0 [nv_queue]
+    634       2 root     I<   35-00:40:30  0.0  0.0 [raid5wq]
+    693       2 root     I<   35-00:40:29  0.0  0.0 [xfsalloc]
+    694       2 root     I<   35-00:40:29  0.0  0.0 [xfs_mru_cache]
+    695       2 root     I<   35-00:40:29  0.0  0.0 [xfs-buf/dm-0]
+    696       2 root     I<   35-00:40:29  0.0  0.0 [xfs-conv/dm-0]
+    697       2 root     I<   35-00:40:29  0.0  0.0 [xfs-reclaim/dm-]
+    698       2 root     I<   35-00:40:29  0.0  0.0 [xfs-blockgc/dm-]
+    699       2 root     I<   35-00:40:29  0.0  0.0 [xfs-inodegc/dm-]
+    700       2 root     I<   35-00:40:29  0.0  0.0 [xfs-log/dm-0]
+    701       2 root     I<   35-00:40:29  0.0  0.0 [xfs-cil/dm-0]
+    702       2 root     S    35-00:40:29  0.0  0.0 [xfsaild/dm-0]
+    722       2 root     I<   35-00:40:29  0.0  0.0 [kworker/14:1H-kblockd]
+    723       2 root     I<   35-00:40:29  0.0  0.0 [kworker/21:1H-kblockd]
+    724       2 root     I<   35-00:40:29  0.0  0.0 [kworker/20:1H-kblockd]
+    725       2 root     I<   35-00:40:29  0.0  0.0 [kworker/22:1H-kblockd]
+    726       2 root     I<   35-00:40:29  0.0  0.0 [kworker/3:1H-kblockd]
+    727       2 root     I<   35-00:40:29  0.0  0.0 [kworker/27:1H-xfs-log/dm-0]
+    812       2 root     I<   35-00:40:23  0.0  0.0 [kaluad]
+    813       2 root     I<   35-00:40:23  0.0  0.0 [kmpath_rdacd]
+    814       2 root     I<   35-00:40:23  0.0  0.0 [kmpathd]
+    815       2 root     I<   35-00:40:23  0.0  0.0 [kmpath_handlerd]
+    817       1 root     SLsl 35-00:40:23  0.0  0.0 /sbin/multipathd -d -s
+    819       2 root     S    35-00:40:23  0.0  0.0 [UVM global queu]
+    820       2 root     S    35-00:40:23  0.0  0.0 [UVM deferred re]
+    821       2 root     S    35-00:40:23  0.0  0.0 [UVM Tools Event]
+   2010       2 root     S    35-00:40:21  0.0  0.0 [jbd2/vda2-8]
+   2011       2 root     I<   35-00:40:21  0.0  0.0 [ext4-rsv-conver]
+   2086       2 root     I<   35-00:40:18  0.0  0.0 [nfit]
+   2157       1 root     Ss   35-00:40:12  0.0  0.0 /usr/sbin/acpid
+   2159       1 avahi    Ss   35-00:40:12  0.0  0.0 avahi-daemon: running [jxxy.local]
+   2160       1 message+ Ss   35-00:40:12  0.0  0.0 @dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+   2161       1 root     Ssl  35-00:40:12  0.0  0.0 /usr/sbin/NetworkManager --no-daemon
+   2167       1 root     Ssl  35-00:40:12  0.0  0.0 /usr/sbin/irqbalance --foreground
+   2169       1 root     Ss   35-00:40:12  0.0  0.0 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+   2174       1 root     Ssl  35-00:40:12  0.0  0.0 /usr/libexec/power-profiles-daemon
+   2177       1 root     Ssl  35-00:40:12  0.0  0.0 /usr/sbin/qemu-ga
+   2190       1 root     Ssl  35-00:40:12  0.0  0.0 /usr/libexec/accounts-daemon
+   2191       1 root     Ssl  35-00:40:12  0.0  0.0 /usr/libexec/switcheroo-control
+   2192       1 root     Ss   35-00:40:12  0.0  0.0 /lib/systemd/systemd-logind
+   2193       1 root     Ssl  35-00:40:12  0.0  0.0 /usr/libexec/udisks2/udisksd
+   2194       1 root     Ss   35-00:40:12  0.0  0.0 /sbin/wpa_supplicant -u -s -O /run/wpa_supplicant
+   2199    2159 avahi    S    35-00:40:12  0.0  0.0 avahi-daemon: chroot helper
+   2224       1 nvidia-+ Ss   35-00:40:11  0.0  0.0 /usr/bin/nvidia-persistenced --user nvidia-persistenced
+   2273       1 root     Ss   35-00:40:11  0.0  0.0 /usr/local/zstack/zwatch-vm-agent/collectd/collectdmon -c /usr/local/zstack/zwatch-vm-agent/collectd/collectd -- -C /usr/local/zstack/zwatch-vm-agent/collectd/collectd.conf -P /usr/local/zstack/zwatch-vm-agent/collectd/collectd.pid -f
+   2296    2273 root     Sl   35-00:40:11  0.0  0.0 /usr/local/zstack/zwatch-vm-agent/collectd/collectd -C /usr/local/zstack/zwatch-vm-agent/collectd/collectd.conf -P /usr/local/zstack/zwatch-vm-agent/collectd/collectd.pid -f
+   2315       1 root     Ssl  35-00:40:10  0.0  0.0 /usr/sbin/ModemManager
+   2346       1 root     Ssl  35-00:40:10  0.0  0.0 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+   2348       1 root     Ss   35-00:40:10  0.0  0.0 /usr/bin/Xvfb :0 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset
+   2370       1 root     S    35-00:40:10  0.0  0.0 /usr/sbin/xrdp-sesman
+   2405       1 xrdp     S    35-00:40:09  0.0  0.0 /usr/sbin/xrdp
+   2420       1 root     Ss   35-00:40:09  0.0  0.0 /usr/sbin/cron -f -P
+   2446       1 root     Ssl  35-00:40:09  0.0  0.0 /usr/sbin/lightdm
+   2447       1 kernoops Ss   35-00:40:09  0.0  0.0 /usr/sbin/kerneloops --test
+   2449       1 kernoops Ss   35-00:40:09  0.0  0.0 /usr/sbin/kerneloops
+   2450       1 root     Ss+  35-00:40:09  0.0  0.0 /sbin/agetty -o -p -- \u --noclear tty1 linux
+   2451       1 dgut     Ss   35-00:40:09  0.0  0.0 /lib/systemd/systemd --user
+   2465    2451 dgut     S    35-00:40:09  0.0  0.0 (sd-pam)
+   2524    2451 dgut     Ssl  35-00:40:07  0.0  0.0 /usr/bin/pipewire
+   2525    2451 dgut     Ssl  35-00:40:07  0.0  0.0 /usr/bin/pipewire-media-session
+   2526    2451 dgut     Ssl  35-00:40:07  0.0  0.0 /usr/bin/pulseaudio --daemonize=no --log-target=journal
+   2529       2 root     S    35-00:40:07  0.0  0.0 [nvidia-drm/time]
+   2553       1 rtkit    SNsl 35-00:40:07  0.0  0.0 /usr/libexec/rtkit-daemon
+   2568    2451 dgut     Ss   35-00:40:06  0.0  0.0 /usr/bin/dbus-daemon --session --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+   2577    2446 root     Sl   35-00:40:06  0.0  0.0 lightdm --session-child 16 19
+   2581       1 lightdm  Ss   35-00:40:06  0.0  0.0 /lib/systemd/systemd --user
+   2582    2581 lightdm  S    35-00:40:05  0.0  0.0 (sd-pam)
+   2588    2581 lightdm  S<sl 35-00:40:05  0.0  0.0 /usr/bin/pipewire
+   2589    2581 lightdm  Ssl  35-00:40:05  0.0  0.0 /usr/bin/pipewire-media-session
+   2590    2581 lightdm  S<sl 35-00:40:05  0.0  0.0 /usr/bin/pulseaudio --daemonize=no --log-target=journal
+   2593    2581 lightdm  Ss   35-00:40:05  0.0  0.0 /usr/bin/dbus-daemon --session --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+   2599    2577 lightdm  Ss   35-00:40:05  0.0  0.0 /bin/sh /usr/lib/lightdm/lightdm-greeter-session /usr/sbin/lightdm-gtk-greeter
+   2600    2599 lightdm  Sl   35-00:40:05  0.0  0.0 /usr/sbin/lightdm-gtk-greeter
+   2739    2581 lightdm  Ssl  35-00:40:04  0.0  0.0 /usr/libexec/at-spi-bus-launcher
+   2763    2739 lightdm  S    35-00:40:04  0.0  0.0 /usr/bin/dbus-daemon --config-file=/usr/share/defaults/at-spi2/accessibility.conf --nofork --print-address 11 --address=unix:path=/run/user/125/at-spi/bus
+   2789    2581 lightdm  Ssl  35-00:40:04  0.0  0.0 /usr/libexec/gvfsd
+   2863    2581 lightdm  Sl   35-00:40:03  0.0  0.0 /usr/libexec/gvfsd-fuse /run/user/125/gvfs -f
+   2924       1 root     Sl   35-00:40:03  0.0  0.0 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 2646b1181799f95bfac63650851dfce5f3565a39b0352f8b981b9ec501e50787 -address /run/containerd/containerd.sock
+   2947    2924 dgut     Ss   35-00:40:03  0.0  0.0 /bin/tini -- /usr/local/bin/docker-entrypoint.sh eswrapper
+   3582    2478 root     Sl   35-00:40:02  0.0  0.0 /usr/bin/docker-proxy -proto tcp -host-ip 0.0.0.0 -host-port 1200 -container-ip 172.21.0.2 -container-port 9200 -use-listen-fd
+   3589    2478 root     Sl   35-00:40:02  0.0  0.0 /usr/bin/docker-proxy -proto tcp -host-ip :: -host-port 1200 -container-ip 172.21.0.2 -container-port 9200 -use-listen-fd
+   3764    2446 root     S    35-00:40:00  0.0  0.0 lightdm --session-child 12 19
+   3781    2581 lightdm  Sl   35-00:40:00  0.0  0.0 /usr/libexec/at-spi2-registryd --use-gnome-session
+   4143    2370 root     S    35-00:39:53  0.0  0.0 /usr/sbin/xrdp-sesman
+   4145    4143 dgut     S    35-00:39:53  0.0  0.0 dbus-run-session -- gnome-session
+   4146    4143 dgut     Sl   35-00:39:53  0.0  0.1 /usr/lib/xorg/Xorg :10 -auth .Xauthority -config xrdp/xorg.conf -noreset -nolisten tcp -logfile .xorgxrdp.%s.log
+   4185    4143 dgut     Sl   35-00:39:52  0.0  0.0 /usr/sbin/xrdp-chansrv
+   4240    4145 dgut     S    35-00:39:52  0.0  0.0 dbus-daemon --nofork --print-address 4 --session
+   4241    4145 dgut     Sl   35-00:39:52  0.0  0.0 /usr/libexec/gnome-session-binary
+   4378       1 dgut     Sl   35-00:39:51  0.0  0.0 /usr/libexec/at-spi-bus-launcher
+   4383    4378 dgut     S    35-00:39:51  0.0  0.0 /usr/bin/dbus-daemon --config-file=/usr/share/defaults/at-spi2/accessibility.conf --nofork --print-address 11 --address=unix:path=/run/user/1000/at-spi/bus_10.0
+   4526       1 dgut     SLl  35-00:39:49  0.0  0.0 /usr/bin/gnome-keyring-daemon --start --components=ssh
+   4624       1 dgut     Sl   35-00:39:48  0.0  0.0 /usr/libexec/gvfsd
+   4628    4212 dgut     Sl   35-00:39:48  0.0  0.0 /usr/share/elasticsearch/modules/x-pack-ml/platform/linux-x86_64/bin/controller
+   4630       1 dgut     Sl   35-00:39:48  0.0  0.0 /usr/libexec/gvfsd-fuse /run/user/1000/gvfs -f
+   4733       1 dgut     Sl   35-00:39:43  0.0  0.0 /usr/libexec/xdg-permission-store
+   4735       1 dgut     Sl   35-00:39:43  0.0  0.0 /usr/libexec/gnome-shell-calendar-server
+   4769       1 root     Ssl  35-00:39:43  0.0  0.0 /usr/libexec/upowerd
+   4798       1 dgut     Sl   35-00:39:43  0.0  0.0 /usr/libexec/evolution-source-registry
+   4805       1 geoclue  Ssl  35-00:39:43  0.0  0.0 /usr/libexec/geoclue
+   4810       1 dgut     Sl   35-00:39:43  0.0  0.0 /usr/libexec/dconf-service
+   4832       1 dgut     Sl   35-00:39:42  0.0  0.0 /usr/libexec/gvfs-udisks2-volume-monitor
+   4877       1 dgut     Sl   35-00:39:42  0.0  0.0 /usr/libexec/goa-daemon
+   4881       1 dgut     Sl   35-00:39:42  0.0  0.0 /usr/libexec/gvfs-mtp-volume-monitor
+   4892       1 dgut     Sl   35-00:39:42  0.0  0.0 /usr/libexec/gvfs-gphoto2-volume-monitor
+   4920       1 dgut     Sl   35-00:39:42  0.0  0.0 /usr/libexec/gvfs-goa-volume-monitor
+   4938       1 dgut     Sl   35-00:39:42  0.0  0.0 /usr/libexec/evolution-calendar-factory
+   5106       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/evolution-addressbook-factory
+   5131       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/goa-identity-service
+   5140       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gvfs-afc-volume-monitor
+   5211       1 root     Ssl  35-00:39:41  0.0  0.0 /usr/libexec/packagekitd
+   5216       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/bin/gjs /usr/share/gnome-shell/org.gnome.Shell.Notifications
+   5218       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/at-spi2-registryd --use-gnome-session
+   5261    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-wacom
+   5264    4533 dgut     Sl   35-00:39:41  0.0  0.0 ibus-daemon --panel disable --xim
+   5265    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-media-keys
+   5270    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-rfkill
+   5271    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-a11y-settings
+   5274    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-xsettings
+   5282    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-power
+   5294    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-usb-protection
+   5297    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-screensaver-proxy
+   5298    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-color
+   5299    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-print-notifications
+   5313    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-sharing
+   5319    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-datetime
+   5324    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-smartcard
+   5330    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-housekeeping
+   5333    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-wwan
+   5335    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-sound
+   5338    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-keyboard
+   5366       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/bin/gjs /usr/share/gnome-shell/org.gnome.ScreenSaver
+   5419    5264 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/ibus-dconf
+   5445       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-printer
+   5448    5264 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/ibus-extension-gtk3
+   5455       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/ibus-x11 --kill-daemon
+   5465       1 colord   Ssl  35-00:39:41  0.0  0.0 /usr/libexec/colord
+   5472       1 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/ibus-portal
+   5480    4241 dgut     Sl   35-00:39:41  0.0  0.3 /usr/bin/gnome-software --gapplication-service
+   5481    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/gsd-disk-utility-notify
+   5482    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/libexec/evolution-data-server/evolution-alarm-notify
+   5484    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/lib/x86_64-linux-gnu/indicator-messages/indicator-messages-service
+   5489    4241 dgut     Sl   35-00:39:41  0.0  0.0 /usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service
+   5501    4241 dgut     SNl  35-00:39:41  0.0  0.0 /usr/libexec/tracker-miner-fs-3
+   5645    5264 dgut     Sl   35-00:39:40  0.0  0.0 /usr/libexec/ibus-engine-libpinyin --ibus
+  10107       1 dgut     Sl   35-00:38:41  0.0  0.0 /usr/libexec/gvfsd-metadata
+  10117    4241 dgut     Sl   35-00:38:40  0.0  0.0 update-notifier
+  12273   12244 dgut     SLl  35-00:35:01  0.0  0.0 /usr/lib/x86_64-linux-gnu/webkit2gtk-4.1/WebKitNetworkProcess 1 18 21
+  13056       1 dgut     Sl   35-00:33:40  0.0  0.0 /usr/bin/nautilus --gapplication-service
+  13059    4624 dgut     Sl   35-00:33:40  0.0  0.0 /usr/libexec/gvfsd-trash --spawner :1.7 /org/gtk/gvfs/exec_spaw/0
+  13068       1 dgut     Sl   35-00:33:39  0.0  0.0 /usr/libexec/xdg-desktop-portal
+  13073       1 dgut     Sl   35-00:33:39  0.0  0.0 /usr/libexec/xdg-document-portal
+  13078   13073 root     Ss   35-00:33:39  0.0  0.0 fusermount3 -o rw,nosuid,nodev,fsname=portal,auto_unmount,subtype=portal -- /run/user/1000/doc
+  13084       1 dgut     Sl   35-00:33:39  0.0  0.0 /usr/libexec/xdg-desktop-portal-gnome
+  13178       1 dgut     Sl   35-00:33:35  0.0  0.0 /usr/libexec/xdg-desktop-portal-gtk
+  13969       1 dgut     Ssl  35-00:32:34  0.0  0.0 /home/dgut/public/yzt/neo4j-desktop-2.1.1-x86_64.AppImage
+  13975   13963 dgut     S    35-00:32:33  0.0  0.0 /tmp/.mount_neo4j-eYvKbQ/neo4j-desktop --type=zygote --no-zygote-sandbox
+  13976   13963 dgut     S    35-00:32:33  0.0  0.0 /tmp/.mount_neo4j-eYvKbQ/neo4j-desktop --type=zygote
+  13978   13976 dgut     S    35-00:32:33  0.0  0.0 /tmp/.mount_neo4j-eYvKbQ/neo4j-desktop --type=zygote
+  15693       1 dgut     Ssl  35-00:31:07  0.0  0.0 /home/dgut/.vscode-server/code-7debcd0e2acdea1c52de81bf9ee1620444407dda --cli-data-dir /home/dgut/.vscode-server/cli agent host
+ 289275    5264 dgut     Sl   19-23:45:16  0.0  0.0 /usr/libexec/ibus-engine-simple
+ 413912       1 dgut     Ss   19-18:13:57  0.0  0.0 tmux new -s OW
+ 413913  413912 dgut     Ss   19-18:13:57  0.0  0.0 -bash
+ 751955       1 syslog   Ssl  34-01:18:36  0.0  0.0 /usr/sbin/rsyslogd -n -iNONE
+ 909769  413912 dgut     Ss+  13-17:23:40  0.0  0.0 -bash
+1347297       1 dgut     Sl    1-01:09:04  0.0  0.0 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/node /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/index_trae.js --start-server --host=127.0.0.1 --port=0 --connection-token-file /home/dgut/.trae-cn-server/.stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-96fb4041.token --telemetry-level all --enable-remote-auto-shutdown --accept-server-license-terms --default-folder /home/dgut --server-data-dir /home/dgut/.trae-cn-server --logsPath /home/dgut/.trae-cn-server/manager-logs/1792909592397_141251
+1347494 1347333 dgut     Sl    1-01:09:02  0.0  0.0 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/node /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/out/vs/platform/observability/node/remoteProcessMonitor/remoteProcessMonitorWorker.js --type=process-monitor
+1347649 1347333 dgut     Sl    1-01:09:02  0.0  0.0 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/node /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/out/bootstrap-fork --type=fileWatcher
+1348413 1347914 dgut     Sl    1-01:08:28  0.0  0.0 /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/node /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/extensions/json-language-features/server/dist/node/jsonServerMain --node-ipc --clientProcessId=1347914
+1348557 1348534 dgut     Ss+   1-01:08:26  0.0  0.0 /bin/bash --init-file /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+1351883 1348534 dgut     Ss+   1-01:06:30  0.0  0.0 /bin/bash --init-file /home/dgut/.trae-cn-server/bin/stable-54444fce4b47dc54f509b370c7da0d9fe815fda3-debian10/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+1417493       1 dgut     Sl      22:51:41  0.0  0.0 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/node /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/index_trae.js --start-server --host=127.0.0.1 --port=0 --connection-token-file /home/dgut/.trae-server/.stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-05d291cf.token --telemetry-level all --enable-remote-auto-shutdown --remote-auto-shutdown-without-delay --accept-server-license-terms --default-folder /home/dgut --server-data-dir /home/dgut/.trae-server --logsPath /home/dgut/.trae-server/manager-logs/1792917835152_812082
+1417609 1417513 dgut     Sl      22:51:40  0.0  0.1 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/node /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/out/bootstrap-fork --type=fileWatcher
+1418432 1418421 dgut     Ss+     22:51:27  0.0  0.0 /bin/bash --init-file /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+1429835 1417850 dgut     Sl      22:34:41  0.0  0.1 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/node /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/extensions/markdown-language-features/dist/serverWorkerMain --node-ipc --clientProcessId=1417850
+1430127 1418421 dgut     Ss+     22:34:27  0.0  0.0 /bin/bash --init-file /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+1472460 1417850 dgut     Sl      22:04:59  0.0  0.1 /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/node /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/extensions/json-language-features/server/dist/node/jsonServerMain --node-ipc --clientProcessId=1417850
+1475490 1418421 dgut     Ss+     22:03:13  0.0  0.0 /bin/bash --init-file /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+1523015       1 systemd+ Ss   10-01:02:19  0.0  0.0 /lib/systemd/systemd-networkd
+1523057       1 systemd+ Ss   10-01:02:15  0.0  0.0 /lib/systemd/systemd-resolved
+1523071       1 root     S<s  10-01:02:14  0.0  0.1 /lib/systemd/systemd-journald
+1523177       1 systemd+ Ssl  10-01:02:11  0.0  0.0 /lib/systemd/systemd-timesyncd
+1523236       1 root     Ss   10-01:02:08  0.0  0.0 /lib/systemd/systemd-udevd
+1523575       1 root     Ss   10-01:01:59  0.0  0.0 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
+1553804  413912 dgut     Ss+     19:34:41  0.0  0.0 -bash
+1641401 1418421 dgut     Ss+     16:28:23  0.0  0.0 /bin/bash --init-file /home/dgut/.trae-server/bin/stable-2dfb209fb409fdfaaa41e5148db520c0e80516a1-debian10/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+1677246       1 dgut     SNl  17-14:29:21  0.0  0.0 /usr/bin/python3 /usr/bin/update-manager --no-update --no-focus-on-map
+1827393       1 root     Ssl   9-14:54:02  0.0  0.0 /snap/snapd/current/usr/lib/snapd/snapd
+1853722       1 root     Ss      07:35:40  0.0  0.0 /usr/sbin/cupsd -l
+1853724       1 root     Ssl     07:35:40  0.0  0.0 /usr/sbin/cups-browsed
+1976292       2 root     I       01:39:42  0.0  0.0 [kworker/15:1-mm_percpu_wq]
+1976323       2 root     I       01:39:32  0.0  0.0 [kworker/10:2-events]
+1979188       2 root     I       01:24:17  0.0  0.0 [kworker/21:1-rcu_par_gp]
+1979775       2 root     I       01:21:05  0.0  0.0 [kworker/17:0-rcu_gp]
+1984114       2 root     I          57:17  0.0  0.0 [kworker/1:2-rcu_par_gp]
+1985167       2 root     I          51:35  0.0  0.0 [kworker/19:2-mm_percpu_wq]
+1985341       2 root     I          50:35  0.0  0.0 [kworker/2:1-mm_percpu_wq]
+1986029 1523575 root     Ss         47:17  0.0  0.0 sshd: dgut [priv]
+1986079 1986029 dgut     S          47:16  0.0  0.0 sshd: dgut@notty
+1986080 1986079 dgut     Ssl        47:16  0.0  0.0 codex app-server proxy
+1988569       2 root     I          39:51  0.0  0.0 [kworker/27:0-mm_percpu_wq]
+1989054       2 root     I          38:51  0.0  0.0 [kworker/18:2-events]
+1989348       2 root     I          38:11  0.0  0.0 [kworker/28:1-events]
+1989693       2 root     I          36:50  0.0  0.0 [kworker/13:2-mm_percpu_wq]
+1989901       2 root     I          35:40  0.0  0.0 [kworker/25:1-rcu_par_gp]
+1990092       2 root     I          34:39  0.0  0.0 [kworker/19:1-rcu_par_gp]
+1990501       2 root     I          32:39  0.0  0.0 [kworker/4:2-events]
+1990584       2 root     I          32:09  0.0  0.0 [kworker/24:2-mm_percpu_wq]
+1990786       2 root     I          31:08  0.0  0.0 [kworker/11:1-rcu_par_gp]
+1991020       2 root     I          29:58  0.0  0.0 [kworker/0:1-rcu_par_gp]
+1991723       2 root     I          26:17  0.0  0.0 [kworker/23:2-rcu_par_gp]
+1991780       2 root     I          25:56  0.0  0.0 [kworker/20:1-mm_percpu_wq]
+1992166       2 root     I          23:56  0.0  0.0 [kworker/30:0-events]
+1992352       2 root     I          22:55  0.0  0.0 [kworker/6:0-rcu_gp]
+1992375       2 root     I          22:45  0.0  0.0 [kworker/29:1-rcu_par_gp]
+1992733       2 root     I          20:55  0.0  0.0 [kworker/5:2-rcu_par_gp]
+1992891       2 root     I          20:04  0.0  0.0 [kworker/16:2-rcu_gp]
+1993206       2 root     I          18:34  0.0  0.0 [kworker/12:0-mm_percpu_wq]
+1993243       2 root     I          18:24  0.0  0.0 [kworker/3:1-events]
+1993299       2 root     I          18:04  0.0  0.0 [kworker/9:2-mm_percpu_wq]
+1993358       2 root     I          17:44  0.0  0.0 [kworker/11:0-rcu_par_gp]
+1993431       2 root     I          17:16  0.0  0.0 [kworker/u256:0-flush-253:0]
+1993532       2 root     I          16:43  0.0  0.0 [kworker/31:1-rcu_par_gp]
+1993612       2 root     I          16:23  0.0  0.0 [kworker/7:0-rcu_par_gp]
+1993719       2 root     I          15:43  0.0  0.0 [kworker/14:2-mm_percpu_wq]
+1993787       2 root     I          15:23  0.0  0.0 [kworker/20:0-rcu_par_gp]
+1993892       2 root     I          14:53  0.0  0.0 [kworker/8:2-mm_percpu_wq]
+1993992       2 root     I          14:12  0.0  0.0 [kworker/26:2-rcu_gp]
+1994085       2 root     I          13:42  0.0  0.0 [kworker/30:1-rcu_par_gp]
+1994095       2 root     I          13:42  0.0  0.0 [kworker/16:1-rcu_par_gp]
+1994177       2 root     I          13:12  0.0  0.0 [kworker/13:0-rcu_par_gp]
+1994223       2 root     I          13:02  0.0  0.0 [kworker/21:0-rcu_par_gp]
+1994233       2 root     I          13:02  0.0  0.0 [kworker/22:2-rcu_par_gp]
+1994351       2 root     I          12:22  0.0  0.0 [kworker/29:2-rcu_par_gp]
+1994464       2 root     I          11:42  0.0  0.0 [kworker/12:2-rcu_par_gp]
+1994554       2 root     I          11:11  0.0  0.0 [kworker/3:2-rcu_par_gp]
+1994597       2 root     I          11:01  0.0  0.0 [kworker/23:1-rcu_par_gp]
+1994607       2 root     I          11:01  0.0  0.0 [kworker/9:1-rcu_par_gp]
+1994648       2 root     I          10:41  0.0  0.0 [kworker/31:0-rcu_par_gp]
+1994730       2 root     I          10:21  0.0  0.0 [kworker/14:0-rcu_par_gp]
+1994789       2 root     I          10:01  0.0  0.0 [kworker/17:2-rcu_par_gp]
+1994827       2 root     I          09:51  0.0  0.0 [kworker/6:1-rcu_par_gp]
+1994848       2 root     I          09:41  0.0  0.0 [kworker/4:0-rcu_par_gp]
+1994893       2 root     I          09:31  0.0  0.0 [kworker/7:1-mm_percpu_wq]
+1994931       2 root     I          09:21  0.0  0.0 [kworker/24:1-rcu_par_gp]
+1994943       2 root     I          09:11  0.0  0.0 [kworker/18:1-rcu_par_gp]
+1994986       2 root     I          09:01  0.0  0.0 [kworker/0:2-events]
+1995026       2 root     I          08:50  0.0  0.0 [kworker/27:1-rcu_par_gp]
+1995039       2 root     I          08:40  0.0  0.0 [kworker/8:1-rcu_par_gp]
+1995109       2 root     I          08:20  0.0  0.0 [kworker/26:1-rcu_par_gp]
+1995208       2 root     I          07:50  0.0  0.0 [kworker/2:2-rcu_par_gp]
+1995300       2 root     I          07:20  0.0  0.0 [kworker/5:0-mm_percpu_wq]
+1995363       2 root     I          07:00  0.0  0.0 [kworker/15:0-rcu_par_gp]
+1995401       2 root     I          06:50  0.0  0.0 [kworker/10:0-rcu_par_gp]
+1995411       2 root     I          06:50  0.0  0.0 [kworker/28:2]
+1995435       2 root     I          06:40  0.0  0.0 [kworker/1:0-rcu_gp]
+1995447       2 root     I          06:36  0.0  0.0 [kworker/u256:5-events_unbound]
+1995467       2 root     I          06:30  0.0  0.0 [kworker/22:0-mm_percpu_wq]
+1995518       2 root     I          06:10  0.0  0.0 [kworker/25:2-rcu_gp]
+1995756       2 root     I          04:59  0.0  0.0 [kworker/11:2-events]
+1995788       2 root     I          04:49  0.0  0.0 [kworker/21:2-mm_percpu_wq]
+1995854       2 root     I          04:29  0.0  0.0 [kworker/12:1-events]
+1995879       2 root     I          04:19  0.0  0.0 [kworker/4:1-rcu_par_gp]
+1995914       2 root     I          04:09  0.0  0.0 [kworker/23:0-events]
+1996015       2 root     I          03:39  0.0  0.0 [kworker/0:0]
+1996104       2 root     I          03:08  0.0  0.0 [kworker/7:2]
+1996137       2 root     I          02:58  0.0  0.0 [kworker/27:2-rcu_par_gp]
+1996167       2 root     I          02:48  0.0  0.0 [kworker/14:1-rcu_par_gp]
+1996232       2 root     I          02:28  0.0  0.0 [kworker/29:0-mm_percpu_wq]
+1996249       1 root     Ss         02:20  0.0  0.0 /usr/sbin/anacron -d -q -s
+1996258       2 root     I          02:18  0.0  0.0 [kworker/13:1]
+1996268       2 root     I          02:18  0.0  0.0 [kworker/8:0-rcu_par_gp]
+1996311       2 root     I          02:08  0.0  0.0 [kworker/5:1]
+1996343       2 root     I          01:58  0.0  0.0 [kworker/26:0-mm_percpu_wq]
+1996363       2 root     I          01:48  0.0  0.0 [kworker/20:2]
+1996397       2 root     I          01:38  0.0  0.0 [kworker/24:0]
+1996407       2 root     I          01:38  0.0  0.0 [kworker/6:2-mm_percpu_wq]
+1996429       2 root     I          01:28  0.0  0.0 [kworker/30:2-rcu_par_gp]
+1996457       2 root     I          01:18  0.0  0.0 [kworker/1:1-mm_percpu_wq]
+1996467       2 root     I          01:18  0.0  0.0 [kworker/16:0-mm_percpu_wq]
+1996469       2 root     I          01:13  0.0  0.0 [kworker/u256:1-flush-253:0]
+1996503       2 root     I          01:08  0.0  0.0 [kworker/31:2-mm_percpu_wq]
+1996560       2 root     I          00:48  0.0  0.0 [kworker/17:1-events]
+1996598       2 root     I          00:38  0.0  0.0 [kworker/10:1]
+1996620       2 root     I          00:28  0.0  0.0 [kworker/25:0-mm_percpu_wq]
+1996668 3472365 dgut     S          00:09  0.0  0.0 sleep 30
+1996677       2 root     I          00:07  0.0  0.0 [kworker/22:1-rcu_par_gp]
+1996709 3122249 dgut     S          00:02  0.0  0.0 sleep 30
+1996768 1996699 dgut     S          00:01  0.0  0.0 sshd: dgut@notty
+1996769 1996768 dgut     Ss         00:00  0.0  0.0 bash -c set -u S=/tmp/r44gpu-audit-20261026T1535Z mkdir -p "$S/raw" cd "$S/raw" run() { name=$1; shift; { echo "\$ $*"; "$@" ; echo "[exit=$?]"; } > "$name.txt" 2>&1; } {   echo "\$ date -u"; date -u; echo "[exit=$?]"   echo "\$ hostname"; hostname; echo "[exit=$?]"   echo "\$ uname -a"; uname -a; echo "[exit=$?]" } > 00_host.txt 2>&1 nvidia-smi > 01_nvidia-smi.txt 2>&1; echo "[exit=$?]" >> 01_nvidia-smi.txt nvidia-smi -L > 02_nvidia-smi-L.txt 2>&1; echo "[exit=$?]" >> 02_nvidia-smi-L.txt nvidia-smi --query-gpu=name,uuid,memory.total,memory.used,memory.free,utilization.gpu,utilization.memory,power.draw,power.limit --format=csv > 03_gpu_query.csv 2>&1; echo "[exit=$?]" >> 03_gpu_query.csv nvidia-smi --query-compute-apps=pid,process_name,used_gpu_memory --format=csv > 04_compute_apps.csv 2>&1; echo "[exit=$?]" >> 04_compute_apps.csv nvidia-smi --query-gpu=compute_mode,persistence_mode,mig.mode.current,ecc.mode.current,clocks.sm,clocks.max.sm,temperature.gpu --format=csv > 05_modes.csv 2>&1; echo "[exit=$?]" >> 05_modes.csv nvidia-smi -q -i 0 > 06_smi_q_gpu0.txt 2>&1; echo "[exit=$?]" >> 06_smi_q_gpu0.txt ps -eo pid,ppid,user,stat,etime,%cpu,%mem,cmd --sort=-%cpu > 07_ps.txt 2>&1; echo "[exit=$?]" >> 07_ps.txt echo "== process verification" for pid in $(nvidia-smi --query-compute-apps=pid --format=csv,noheader 2>/dev/null); do   pid=$(echo $pid | tr -d ' ')   echo "---- PID $pid"   ps -o pid,ppid,user,stat,etime,rss,args -p "$pid" 2>&1   echo "cwd: $(readlink /proc/$pid/cwd 2>&1)"   echo "exe: $(readlink /proc/$pid/exe 2>&1)"   echo "cmdline: $(tr '\0' ' ' < /proc/$pid/cmdline 2>&1)"   echo "uid: $(awk '/^Uid:/{print $2}' /proc/$pid/status 2>&1)"   echo "ppid_chain:"   p=$pid; for i in 1 2 3 4; do     pp=$(awk '/^PPid:/{print $2}' /proc/$p/status 2>/dev/null)     [ -z "$pp" ] && break     echo "  $p <- $pp : $(tr '\0' ' ' < /proc/$pp/cmdline 2>/dev/null | cut -c1-120)"     p=$pp; [ "$p" = "1" ] && break   done done > 08_process_verify.txt 2>&1 
+1996786 1996769 dgut     R          00:00  0.0  0.0 ps -eo pid,ppid,user,stat,etime,%cpu,%mem,cmd --sort=-%cpu
+2055341       1 dgut     Ssl  16-23:05:04  0.0  0.0 /home/dgut/.vscode-server/code-e4c7e7b1d6d060162f4aa7f8225271b67ce1df75 --cli-data-dir /home/dgut/.vscode-server/cli agent host
+2328164       1 uuidd    Ss   23-23:49:31  0.0  0.0 /usr/sbin/uuidd --socket-activation
+3111578 3111549 1234     Ss    8-03:38:49  0.0  0.0 /bin/sh /isaac-sim/runheadless.sh sleep infinity
+3111865       2 root     S     8-03:38:31  0.0  0.0 [nvidia-drm/time]
+3112040       2 root     S     8-03:38:30  0.0  0.0 [vidmem lazy fre]
+3112041       2 root     S     8-03:38:30  0.0  0.0 [UVM GPU1 BH]
+3112042       2 root     S     8-03:38:30  0.0  0.0 [UVM GPU1 KC]
+3112046       2 root     S     8-03:38:29  0.0  0.0 [nvidia-drm/time]
+3112049       2 root     S     8-03:38:29  0.0  0.0 [nvidia-drm/time]
+3112052       2 root     S     8-03:38:29  0.0  0.0 [nvidia-drm/time]
+3112053       2 root     S     8-03:38:29  0.0  0.0 [nvidia-drm/time]
+3112054       2 root     S     8-03:38:29  0.0  0.0 [nvidia-drm/time]
+3112055       2 root     S     8-03:38:29  0.0  0.0 [nvidia-drm/time]
+3112056       2 root     S     8-03:38:29  0.0  0.0 [nvidia-drm/time]
+3112057       2 root     S     8-03:38:29  0.0  0.0 [nvidia-drm/time]
+3113515 3111650 1234     Z     8-03:37:08  0.0  0.0 [carb.tasking5] <defunct>
+3122249       1 dgut     S     8-03:28:01  0.0  0.0 bash /tmp/d_pusht.sh
+3472365       1 dgut     S     7-19:24:25  0.0  0.0 bash /tmp/d_sb.sh
+4009197 4008910 root     Ssl  20-20:03:11  0.0  0.0 /snap/docker/3618/bin/containerd --config /run/snap.docker/containerd/containerd.toml
+[exit=0]

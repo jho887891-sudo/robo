@@ -1,0 +1,65 @@
+$ which slurm sinfo scontrol sbatch kubectl docker nvidia-docker gpu-burn dcgm 2>&1
+/usr/bin/docker
+/usr/bin/nvidia-docker
+[exit=1]
+$ systemctl list-units --type=service --state=running | grep -i -E 'slurm|kube|docker|dcgm|containerd'
+  containerd.service            loaded active running containerd container runtime
+  docker.service                loaded active running Docker Application Container Engine
+  snap.docker.dockerd.service   loaded active running Service for snap application docker.dockerd
+[exit=0]
+$ docker ps
+CONTAINER ID   IMAGE                            COMMAND                   CREATED       STATUS      PORTS     NAMES
+81be207a4a03   nvcr.io/nvidia/isaac-sim:5.1.0   "/isaac-sim/runheadl…"   5 weeks ago   Up 8 days             rd_setup
+[exit=0]
+$ crontab -l
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').
+# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
+#@reboot /home/T7/public/miniconda3/envs/yolov8/bin/python3 /home/T7/zyx/api_server/api.py
+[exit=0]
+$ id
+uid=1000(dgut) gid=1000(dgut) groups=1000(dgut),0(root),4(adm),24(cdrom),27(sudo),30(dip),44(video),46(plugdev),109(render),110(lxd),999(docker),1001(nvidia)
+[exit=0]
+$ sudo -n true
+sudo: a password is required
+[exit=1]
+$ nproc; free -g
+32
+               total        used        free      shared  buff/cache   available
+Mem:              58          12          13           0          32          45
+Swap:             17           7          10
+[exit=0]
+$ nvidia-smi topo -m
+	[4mGPU0	CPU Affinity	NUMA Affinity	GPU NUMA ID[0m
+GPU0	 X 	0-31	0		N/A
+
+Legend:
+
+  X    = Self
+  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)
+  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node
+  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)
+  PXB  = Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge)
+  PIX  = Connection traversing at most a single PCIe bridge
+  NV#  = Connection traversing a bonded set of # NVLinks
+[exit=0]
