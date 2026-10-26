@@ -169,7 +169,7 @@ def atomic_json(path: os.PathLike[str] | str, obj: Any) -> None:
 
 
 def verify_exact_action_next_state(state, action, *, task: str, episode: str) -> dict:
-    """Enforce the R44 data invariant A[t] == S[t+1] exactly after the frozen float32 read."""
+    """Enforce exact A[t] == S[t+1] on raw HDF5 values before model-path float32 casting."""
     import numpy as np
 
     # Preserve source dtype here: the frozen dataset contract is audited on the raw HDF5
