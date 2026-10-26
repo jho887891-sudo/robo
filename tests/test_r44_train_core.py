@@ -4,6 +4,7 @@ import io
 import json
 import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -15,6 +16,7 @@ from training.r44_train import (
     verify_files_unchanged, verify_exact_action_next_state,
     verify_delta_normalizer_matches_train, TASKS, should_early_stop,
     validate_preflight_report, validate_gpu_smoke_report,
+    budget_remaining_seconds, load_budget_ledger, persist_budget_ledger,
 )
 from training import r44_delta_v1 as D
 from diagnostics.r44_gpu_smoke import main as gpu_smoke_main
@@ -252,6 +254,26 @@ class R44TrainerCoreTests(unittest.TestCase):
         args.epochs = 4
         with self.assertRaisesRegex(ValueError, "epochs_max"):
             validate_resume_compatibility(meta, args, plan, base, model, scheduler, "commit")
+
+    def test_cumulative_budget_ledger_does_not_reset_on_resume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            initial = load_budget_ledger(out, "commit-sha", 2.0, resume=False)
+            self.assertEqual(initial["cumulative_gpu_wall_seconds"], 0.0)
+            start = time.monotonic() - 2.0
+            persisted = persist_budget_ledger(
+                out, source_sha="commit-sha", approved_gpu_budget_hours=2.0,
+                base_elapsed_seconds=3600.0, process_start_monotonic=start,
+                global_step=50, reason="test",
+            )
+            self.assertGreaterEqual(persisted, 3601.9)
+            resumed = load_budget_ledger(out, "commit-sha", 2.0, resume=True)
+            self.assertAlmostEqual(resumed["cumulative_gpu_wall_seconds"], persisted, places=3)
+            with self.assertRaisesRegex(ValueError, "budget changed across resume"):
+                load_budget_ledger(out, "commit-sha", 3.0, resume=True)
+            self.assertAlmostEqual(budget_remaining_seconds(2.0, 3600.0, 600.0), 3000.0)
+            with self.assertRaisesRegex(ValueError, "budget_ledger.json"):
+                load_budget_ledger(out / "missing", "commit-sha", 2.0, resume=True)
 
     def test_patience_zero_disables_early_stopping(self):
         self.assertFalse(should_early_stop(5, 0, 5, 100))
