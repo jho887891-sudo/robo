@@ -52,6 +52,19 @@ class TestNormalizer(unittest.TestCase):
         self.assertEqual(payload["sha256"], D.payload_sha256(payload))
         D.validate_normalizer(payload)
 
+    def test_wrong_schema_and_token_window_are_rejected_even_with_recomputed_hash(self):
+        bad_schema = D.fit_normalizer(fake_deltas())
+        bad_schema["schema"] = "unknown/v9"
+        bad_schema["sha256"] = D.payload_sha256(bad_schema)
+        with self.assertRaisesRegex(D.R44ContractError, "schema"):
+            D.validate_normalizer(bad_schema)
+
+        bad_window = D.fit_normalizer(fake_deltas())
+        bad_window["token_window"] = [31743, 31999]
+        bad_window["sha256"] = D.payload_sha256(bad_window)
+        with self.assertRaisesRegex(D.R44ContractError, "token window"):
+            D.validate_normalizer(bad_window)
+
     def test_legacy_residual_payload_is_refused(self):
         payload = D.fit_normalizer(fake_deltas())
         legacy = dict(payload)
