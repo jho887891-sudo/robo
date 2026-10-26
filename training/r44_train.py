@@ -58,6 +58,17 @@ def sha256_json(obj: Any) -> str:
     ).hexdigest()
 
 
+def task_episode_names(task: str, qualified_names: list[str], M2) -> list[str]:
+    """Preserve the task prefix: filenames alone are ambiguous across M2 task directories."""
+    out = []
+    for key in qualified_names:
+        key_task, episode = M2.split_qualified(key)
+        if key_task != task:
+            raise ValueError(f"{task}: split entry {key!r} belongs to {key_task!r}")
+        out.append(episode)
+    return out
+
+
 def current_git_sha() -> str:
     import subprocess
     try:
@@ -204,8 +215,8 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
     dev_episodes = {}
     for task in TASKS:
         sp = split_map[task]
-        tr = [M2.split_qualified(k)[1] for k in sp.get("train", [])]
-        dv = [M2.split_qualified(k)[1] for k in sp.get("dev", [])]
+        tr = task_episode_names(task, sp.get("train", []), M2)
+        dv = task_episode_names(task, sp.get("dev", []), M2)
         if not tr or not dv or len(set(tr)) != len(tr) or len(set(dv)) != len(dv):
             raise ValueError(f"{task}: empty or duplicate TRAIN/DEV episode list")
         if set(tr) & set(dv):
@@ -300,7 +311,7 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
         "delta_normalizer_path": str(delta_path), "delta_normalizer_sha256": delta_sha,
         "dataset_manifest_path": str(manifest_path), "dataset_manifest_sha256": manifest_sha,
         "hdf5_root": str(hdf5_root), "indexes": indexes, "episode_paths": episode_paths,
-        "file_stats_before": file_stats_before, "feature_payload": feature_payload,
+        "manifest_files": records, "file_stats_before": file_stats_before, "feature_payload": feature_payload,
         "delta_payload": delta_payload, "train_samples": train_samples, "dev_samples": dev_samples,
         "train_samples_sha256": train_hash, "dev_samples_sha256": dev_hash,
         "n_train": len(train_samples), "n_dev": len(dev_samples),
@@ -309,10 +320,15 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
     }
 
 
-def verify_files_unchanged(plan: dict) -> None:
+def verify_files_unchanged(plan: dict, *, verify_sha256: bool = True) -> None:
     for key, path in plan["episode_paths"].items():
         if stat_identity(path) != plan["file_stats_before"][key]:
             raise RuntimeError(f"{key}: HDF5 file identity changed during the run")
+        if verify_sha256:
+            expected = plan["manifest_files"][key]["sha256"]
+            actual = sha256_file(path)
+            if actual != expected:
+                raise RuntimeError(f"{key}: HDF5 content SHA256 changed during the run")
 
 
 def gpu_snapshot(args, *, enforce_headroom: bool = True) -> dict:
@@ -899,6 +915,19 @@ def main(argv=None) -> int:
     # Base-model identity is CPU/file based. Do it before creating a CUDA context.
     import r15_resume as RS
     base_identity = RS.attest_base_model(str(Path(args.base_model).expanduser().resolve()))
+    # The legacy identity helper records shard names but not shard bytes. R44 pins each weight
+    # shard's content so a changed local base cannot silently share a checkpoint identity.
+    base_path = Path(args.base_model).expanduser().resolve()
+    shard_hashes = {}
+    for shard in sorted(base_path.glob("*.safetensors")):
+        before = stat_identity(shard)
+        digest = sha256_file(shard)
+        if stat_identity(shard) != before:
+            raise RuntimeError(f"base-model shard changed while hashing: {shard}")
+        shard_hashes[shard.name] = digest
+    if not shard_hashes:
+        raise RuntimeError(f"no .safetensors base-model shards found under {base_path}")
+    base_identity = {**base_identity, "_weight_shard_sha256": shard_hashes}
     gpu_before = gpu_snapshot(args)
     job_start_monotonic = time.monotonic()
     runtime_deadline = job_start_monotonic + max(
@@ -941,6 +970,9 @@ def main(argv=None) -> int:
     if args.resume_from:
         ckpt_path = Path(args.resume_from).expanduser().resolve()
         state = load_checkpoint(ckpt_path, torch, plan)
+        disk_run_state = run_state
+        if int(disk_run_state.get("global_step", 0)) > int(state["global_step"]):
+            raise RuntimeError("run_state.json is newer than selected checkpoint; refusing inconsistent resume")
         if state.get("base_model_identity") != base_identity:
             raise RuntimeError("checkpoint base-model identity differs from the selected local model")
         if state.get("model_info", {}).get("modeling_sha256") != model_info.get("modeling_sha256"):
@@ -951,7 +983,7 @@ def main(argv=None) -> int:
         optimizer.load_state_dict(state["optimizer_state"])
         scheduler.load_state_dict(state["scheduler_state"])
         global_step, epoch, cursor = int(state["global_step"]), int(state["epoch"]), int(state["cursor"])
-        run_state = state.get("run_state", run_state)
+        run_state = state.get("run_state", disk_run_state)
         run_state = {**run_state, "global_step": global_step, "last_checkpoint": str(ckpt_path)}
         order = np.asarray(state["order"], dtype=np.int64)
         expected_order = D.EpochSampler(plan["n_train"], args.seed, epoch).order
@@ -964,8 +996,6 @@ def main(argv=None) -> int:
         np.random.set_state(rng["numpy"])
         torch.set_rng_state(rng["torch_cpu"])
         torch.cuda.set_rng_state_all(rng["torch_cuda"])
-        if int(run_state.get("global_step", 0)) > global_step:
-            raise RuntimeError("run_state.json is newer than selected checkpoint; refusing inconsistent resume")
         last_checkpoint = str(ckpt_path)
         resumed = True
     else:
@@ -1219,8 +1249,8 @@ def main(argv=None) -> int:
                                          "last_checkpoint": last_checkpoint, "global_step": global_step})
                 break
 
+        verify_files_unchanged(plan, verify_sha256=True)
         if status == "COMPLETED" or status == "EARLY_STOPPED":
-            verify_files_unchanged(plan)
             run_state = {**run_state, "status": status, "global_step": global_step,
                          "completed_epochs": int(run_state.get("completed_epochs", epoch)),
                          "utc_end": utcnow(), "last_checkpoint": last_checkpoint}
@@ -1231,7 +1261,6 @@ def main(argv=None) -> int:
         else:
             save_run_state(out_dir, {**run_state, "status": status, "global_step": global_step,
                                      "last_checkpoint": last_checkpoint, "utc_end": utcnow()})
-        verify_files_unchanged(plan)
         atomic_json(out_dir / "exit_report.json", {
             "status": status, "utc_end": utcnow(), "global_step": global_step,
             "epoch": epoch + 1, "cursor": cursor, "last_checkpoint": last_checkpoint,
