@@ -1927,6 +1927,7 @@ def main(argv=None) -> int:
         save_run_state(out_dir, {**run_state, "status": "RUNNING", "last_checkpoint": last_checkpoint})
         record_budget("initial_checkpoint")
     status = "RUNNING"
+    last_failure_path = None
     try:
         vla.train()
         projector.train()
@@ -2037,7 +2038,7 @@ def main(argv=None) -> int:
             except torch.cuda.OutOfMemoryError as exc:
                 optimizer.zero_grad(set_to_none=True)
                 torch.cuda.empty_cache()
-                atomic_json(out_dir / "FAILURES.json", {
+                last_failure_path = write_failure_evidence(out_dir, {
                     "status": "FAIL_RESOURCE_OOM", "utc": utcnow(), "global_step": global_step,
                     "epoch": epoch, "cursor": cursor, "detail": repr(exc),
                     "note": "Do not trust partially mutated in-memory state; resume from last valid checkpoint.",
@@ -2047,7 +2048,7 @@ def main(argv=None) -> int:
                 break
             except FloatingPointError as exc:
                 optimizer.zero_grad(set_to_none=True)
-                atomic_json(out_dir / "FAILURES.json", {
+                last_failure_path = write_failure_evidence(out_dir, {
                     "status": "FAIL_NUMERICS", "utc": utcnow(), "global_step": global_step,
                     "epoch": epoch, "cursor": cursor, "detail": str(exc),
                 })
@@ -2129,6 +2130,7 @@ def main(argv=None) -> int:
             "gpu_before": gpu_before, "gpu_after": gpu_snapshot(args, enforce_headroom=False),
             "peak_memory_gb": float(torch.cuda.max_memory_allocated()) / (1024**3),
             "training_started": True, "resource_mode": args.resource_mode,
+            "failure_evidence_path": str(last_failure_path) if last_failure_path else None,
             "gpu_lock_path": gpu_lock.path,
         })
         write_run_artifact_manifest(
@@ -2137,6 +2139,48 @@ def main(argv=None) -> int:
         )
         print(f"[R44] run artifact manifest: {artifact_manifest_path}", flush=True)
         return 0 if status in ("COMPLETED", "EARLY_STOPPED", "STOPPED_SAFE") else 3
+    except BaseException as exc:
+        # Preserve unexpected failures and budget accounting without overwriting earlier evidence.
+        try:
+            last_failure_path = write_failure_evidence(out_dir, {
+                "status": "FAIL_UNHANDLED_EXCEPTION",
+                "utc": utcnow(),
+                "global_step": int(global_step),
+                "epoch": int(epoch),
+                "cursor": int(cursor),
+                "exception_type": type(exc).__name__,
+                "detail": repr(exc),
+                "traceback": traceback.format_exc(),
+            })
+            cumulative_budget_seconds = record_budget("unhandled_exception")
+            save_run_state(out_dir, {
+                **run_state, "status": "FAIL_UNHANDLED_EXCEPTION",
+                "global_step": global_step, "last_checkpoint": last_checkpoint,
+                "failure_evidence_path": str(last_failure_path),
+            })
+            artifact_manifest_path = run_artifact_manifest_path(
+                out_dir, "FAIL_UNHANDLED_EXCEPTION", global_step
+            )
+            atomic_json(out_dir / "exit_report.json", {
+                "status": "FAIL_UNHANDLED_EXCEPTION", "utc_end": utcnow(),
+                "global_step": global_step, "epoch": epoch + 1, "cursor": cursor,
+                "last_checkpoint": last_checkpoint,
+                "approved_gpu_budget_hours": args.gpu_budget_hours,
+                "cumulative_gpu_wall_seconds": cumulative_budget_seconds,
+                "budget_ledger_path": str(out_dir / "budget_ledger.json"),
+                "artifact_manifest_path": str(artifact_manifest_path),
+                "failure_evidence_path": str(last_failure_path),
+                "training_started": global_step > 0, "resource_mode": args.resource_mode,
+                "gpu_lock_path": gpu_lock.path,
+            })
+            write_run_artifact_manifest(
+                out_dir, artifact_manifest_path, source_sha=source_sha,
+                status="FAIL_UNHANDLED_EXCEPTION", global_step=global_step,
+            )
+        except BaseException:
+            # Do not mask the original exception if evidence storage itself is failing.
+            pass
+        raise
     finally:
         stop_controller.restore_signal_handlers()
         gpu_lock.__exit__(None, None, None)
