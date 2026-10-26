@@ -8,6 +8,7 @@ on:
     paths:
       - "training/r44_safe_stop.py"
       - "training/r44_train.py"
+      - "diagnostics/r44_gpu_smoke.py"
       - "tests/test_r44_train_core.py"
       - "tests/test_r44_safe_stop.py"
       - ".github/workflows/r44-safe-stop-cpu.yml"
@@ -16,6 +17,7 @@ on:
       - "training/r44_safe_stop.py"
       - "training/r44_train.py"
       - "training/r44_delta_v1.py"
+      - "diagnostics/r44_gpu_smoke.py"
       - "tests/test_r44_train_core.py"
       - "tests/test_r44_safe_stop.py"
       - "tests/test_r44_delta_v1.py"
