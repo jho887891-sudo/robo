@@ -33,7 +33,7 @@ jobs:
       - name: Install NumPy for image-loader unit test
         run: python -m pip install numpy
       - name: Compile R44 training modules
-        run: python -m py_compile training/r44_train.py training/r44_safe_stop.py
+        run: python -m py_compile training/r44_train.py training/r44_safe_stop.py diagnostics/r44_gpu_smoke.py
       - name: Run R44 CPU contract tests
         run: |
           python -m unittest discover -s tests -p "test_r44_safe_stop.py" -v
