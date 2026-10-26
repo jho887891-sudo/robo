@@ -1,0 +1,7 @@
+[PASS] all_train_dev_episodes_14d_and_three_camera {"push_T": 0, "stack_bowls": 0, "sweep_blocks": 0}
+[PASS] action_equals_next_state_bit_exact {"max_abs_err": 0.0, "violations": 0}
+[PASS] normalizer_fitted_on_train_only {"sha256": "9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459", "tasks": {"push_T": 25313, "stack_bowls": 35858, "sweep_blocks": 47609}}
+[PASS] codec_roundtrip_within_half_codec_step_for_representable_values {"half_step_normalised_units": 0.00392156862745098, "note": "values outside [q01,q99] are clipped by the [-1,1] normalisation and are counted, not hidden", "per_task": {"push_T": {"elements_outside_q01_q99_fraction": 0.016785714285714286, "max_abs_delta_error_physical": 0.09853862971067429, "max_in_
+[PASS] epoch_complete_no_replacement_5_epochs {"epochs": 5, "max_visits": 1, "min_visits": 1, "unique_seen": 108780}
+[FAIL] gpu_budget_covers_the_approved_plan {"approved_gpu_hours": 0.0, "required_gpu_hours": 605.4}
+STATUS=BLOCKED_BUDGET steps/epoch=108780 max_steps=543900 required_gpu_hours=605.4 exit=2

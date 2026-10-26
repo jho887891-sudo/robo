@@ -1,0 +1,1512 @@
+{
+  "episode_files": {
+    "push_T": [
+      {
+        "episode": "episode_0000000.hdf5",
+        "mtime_ns": 1789532357775057900,
+        "size_bytes": 86643968
+      },
+      {
+        "episode": "episode_0000003.hdf5",
+        "mtime_ns": 1789532400543344000,
+        "size_bytes": 55107104
+      },
+      {
+        "episode": "episode_0000004.hdf5",
+        "mtime_ns": 1789532337521040700,
+        "size_bytes": 88954557
+      },
+      {
+        "episode": "episode_0000005.hdf5",
+        "mtime_ns": 1789532330177468200,
+        "size_bytes": 66298288
+      },
+      {
+        "episode": "episode_0000006.hdf5",
+        "mtime_ns": 1789532474563363600,
+        "size_bytes": 98578508
+      },
+      {
+        "episode": "episode_0000009.hdf5",
+        "mtime_ns": 1789532495728355100,
+        "size_bytes": 197090415
+      },
+      {
+        "episode": "episode_0000010.hdf5",
+        "mtime_ns": 1789532380981491600,
+        "size_bytes": 76835688
+      },
+      {
+        "episode": "episode_0000012.hdf5",
+        "mtime_ns": 1789532437770123300,
+        "size_bytes": 101344096
+      },
+      {
+        "episode": "episode_0000014.hdf5",
+        "mtime_ns": 1789532474795868000,
+        "size_bytes": 70476238
+      },
+      {
+        "episode": "episode_0000015.hdf5",
+        "mtime_ns": 1789532477671098600,
+        "size_bytes": 80732444
+      },
+      {
+        "episode": "episode_0000017.hdf5",
+        "mtime_ns": 1789532521215689400,
+        "size_bytes": 105796674
+      },
+      {
+        "episode": "episode_0000018.hdf5",
+        "mtime_ns": 1789532500862767000,
+        "size_bytes": 74584664
+      },
+      {
+        "episode": "episode_0000019.hdf5",
+        "mtime_ns": 1789532489649797300,
+        "size_bytes": 46794899
+      },
+      {
+        "episode": "episode_0000020.hdf5",
+        "mtime_ns": 1789532517813438700,
+        "size_bytes": 70114273
+      },
+      {
+        "episode": "episode_0000021.hdf5",
+        "mtime_ns": 1789532549244535400,
+        "size_bytes": 86152140
+      },
+      {
+        "episode": "episode_0000022.hdf5",
+        "mtime_ns": 1789532540498546100,
+        "size_bytes": 93799338
+      },
+      {
+        "episode": "episode_0000024.hdf5",
+        "mtime_ns": 1789532560873322700,
+        "size_bytes": 111227753
+      },
+      {
+        "episode": "episode_0000025.hdf5",
+        "mtime_ns": 1789532582105684500,
+        "size_bytes": 136660020
+      },
+      {
+        "episode": "episode_0000026.hdf5",
+        "mtime_ns": 1789532566326279500,
+        "size_bytes": 104418616
+      },
+      {
+        "episode": "episode_0000027.hdf5",
+        "mtime_ns": 1789532565278185000,
+        "size_bytes": 73439248
+      },
+      {
+        "episode": "episode_0000028.hdf5",
+        "mtime_ns": 1789532576106767000,
+        "size_bytes": 98084155
+      },
+      {
+        "episode": "episode_0000029.hdf5",
+        "mtime_ns": 1789532577051280600,
+        "size_bytes": 67713773
+      },
+      {
+        "episode": "episode_0000030.hdf5",
+        "mtime_ns": 1789532577658791700,
+        "size_bytes": 59573568
+      },
+      {
+        "episode": "episode_0000031.hdf5",
+        "mtime_ns": 1789532572581380700,
+        "size_bytes": 40808324
+      },
+      {
+        "episode": "episode_0000032.hdf5",
+        "mtime_ns": 1789532596422173300,
+        "size_bytes": 76585439
+      },
+      {
+        "episode": "episode_0000033.hdf5",
+        "mtime_ns": 1789532599841946600,
+        "size_bytes": 76573288
+      },
+      {
+        "episode": "episode_0000034.hdf5",
+        "mtime_ns": 1789532614132251400,
+        "size_bytes": 105879810
+      },
+      {
+        "episode": "episode_0000035.hdf5",
+        "mtime_ns": 1789532596029258900,
+        "size_bytes": 49277376
+      },
+      {
+        "episode": "episode_0000036.hdf5",
+        "mtime_ns": 1789532600477589600,
+        "size_bytes": 53314223
+      },
+      {
+        "episode": "episode_0000037.hdf5",
+        "mtime_ns": 1789532607712162400,
+        "size_bytes": 64678796
+      },
+      {
+        "episode": "episode_0000038.hdf5",
+        "mtime_ns": 1789532620253431600,
+        "size_bytes": 93117908
+      },
+      {
+        "episode": "episode_0000039.hdf5",
+        "mtime_ns": 1789532608835128300,
+        "size_bytes": 53179802
+      },
+      {
+        "episode": "episode_0000040.hdf5",
+        "mtime_ns": 1789532628128271900,
+        "size_bytes": 68713648
+      },
+      {
+        "episode": "episode_0000042.hdf5",
+        "mtime_ns": 1789532618434520200,
+        "size_bytes": 39441311
+      },
+      {
+        "episode": "episode_0000043.hdf5",
+        "mtime_ns": 1789532638225822800,
+        "size_bytes": 81713008
+      },
+      {
+        "episode": "episode_0000044.hdf5",
+        "mtime_ns": 1789532685783912000,
+        "size_bytes": 125768708
+      },
+      {
+        "episode": "episode_0000045.hdf5",
+        "mtime_ns": 1789532649185084000,
+        "size_bytes": 69635006
+      },
+      {
+        "episode": "episode_0000046.hdf5",
+        "mtime_ns": 1789532642860131800,
+        "size_bytes": 38747408
+      },
+      {
+        "episode": "episode_0000049.hdf5",
+        "mtime_ns": 1789532684696085000,
+        "size_bytes": 44043144
+      },
+      {
+        "episode": "episode_0000050.hdf5",
+        "mtime_ns": 1789532760250881400,
+        "size_bytes": 141476594
+      },
+      {
+        "episode": "episode_0000051.hdf5",
+        "mtime_ns": 1789532728890642200,
+        "size_bytes": 92822702
+      },
+      {
+        "episode": "episode_0000053.hdf5",
+        "mtime_ns": 1789532713921421800,
+        "size_bytes": 59753208
+      },
+      {
+        "episode": "episode_0000055.hdf5",
+        "mtime_ns": 1789532751824233200,
+        "size_bytes": 80562368
+      },
+      {
+        "episode": "episode_0000056.hdf5",
+        "mtime_ns": 1789532744454282400,
+        "size_bytes": 39354108
+      },
+      {
+        "episode": "episode_0000057.hdf5",
+        "mtime_ns": 1789532769333121000,
+        "size_bytes": 64600513
+      },
+      {
+        "episode": "episode_0000058.hdf5",
+        "mtime_ns": 1789532796443675700,
+        "size_bytes": 82107848
+      },
+      {
+        "episode": "episode_0000059.hdf5",
+        "mtime_ns": 1789532821743785700,
+        "size_bytes": 101744714
+      },
+      {
+        "episode": "episode_0000060.hdf5",
+        "mtime_ns": 1789532814079675600,
+        "size_bytes": 103961030
+      },
+      {
+        "episode": "episode_0000061.hdf5",
+        "mtime_ns": 1789532791659666800,
+        "size_bytes": 59971604
+      },
+      {
+        "episode": "episode_0000062.hdf5",
+        "mtime_ns": 1789532813946478600,
+        "size_bytes": 69770834
+      },
+      {
+        "episode": "episode_0000064.hdf5",
+        "mtime_ns": 1789532803648848400,
+        "size_bytes": 56370537
+      },
+      {
+        "episode": "episode_0000065.hdf5",
+        "mtime_ns": 1789532828034631700,
+        "size_bytes": 80218974
+      },
+      {
+        "episode": "episode_0000067.hdf5",
+        "mtime_ns": 1789532827790931500,
+        "size_bytes": 77237202
+      },
+      {
+        "episode": "episode_0000068.hdf5",
+        "mtime_ns": 1789532824722134600,
+        "size_bytes": 53503616
+      },
+      {
+        "episode": "episode_0000069.hdf5",
+        "mtime_ns": 1789532847476026400,
+        "size_bytes": 85223633
+      },
+      {
+        "episode": "episode_0000070.hdf5",
+        "mtime_ns": 1789532873896766700,
+        "size_bytes": 72064668
+      },
+      {
+        "episode": "episode_0000071.hdf5",
+        "mtime_ns": 1789532866961037200,
+        "size_bytes": 72946184
+      },
+      {
+        "episode": "episode_0000072.hdf5",
+        "mtime_ns": 1789532874717724300,
+        "size_bytes": 104457470
+      },
+      {
+        "episode": "episode_0000073.hdf5",
+        "mtime_ns": 1789532930001451400,
+        "size_bytes": 42707150
+      },
+      {
+        "episode": "episode_0000074.hdf5",
+        "mtime_ns": 1789532883659587800,
+        "size_bytes": 56371103
+      },
+      {
+        "episode": "episode_0000075.hdf5",
+        "mtime_ns": 1789532871164282400,
+        "size_bytes": 60607693
+      },
+      {
+        "episode": "episode_0000076.hdf5",
+        "mtime_ns": 1789532873512196200,
+        "size_bytes": 36977507
+      },
+      {
+        "episode": "episode_0000077.hdf5",
+        "mtime_ns": 1789532953246914800,
+        "size_bytes": 125984075
+      },
+      {
+        "episode": "episode_0000079.hdf5",
+        "mtime_ns": 1789532915007923400,
+        "size_bytes": 84141824
+      },
+      {
+        "episode": "episode_0000081.hdf5",
+        "mtime_ns": 1789532918659684000,
+        "size_bytes": 86646038
+      },
+      {
+        "episode": "episode_0000082.hdf5",
+        "mtime_ns": 1789532930920544900,
+        "size_bytes": 114495934
+      },
+      {
+        "episode": "episode_0000083.hdf5",
+        "mtime_ns": 1789532951603902700,
+        "size_bytes": 89534109
+      },
+      {
+        "episode": "episode_0000084.hdf5",
+        "mtime_ns": 1789532932484583500,
+        "size_bytes": 53331021
+      },
+      {
+        "episode": "episode_0000085.hdf5",
+        "mtime_ns": 1789532973459338800,
+        "size_bytes": 89268844
+      },
+      {
+        "episode": "episode_0000086.hdf5",
+        "mtime_ns": 1789532942124130700,
+        "size_bytes": 42540788
+      },
+      {
+        "episode": "episode_0000088.hdf5",
+        "mtime_ns": 1789533003183387400,
+        "size_bytes": 109144208
+      },
+      {
+        "episode": "episode_0000089.hdf5",
+        "mtime_ns": 1789533000093957000,
+        "size_bytes": 94132752
+      },
+      {
+        "episode": "episode_0000090.hdf5",
+        "mtime_ns": 1789532955014593400,
+        "size_bytes": 35847344
+      },
+      {
+        "episode": "episode_0000092.hdf5",
+        "mtime_ns": 1789532988469048200,
+        "size_bytes": 54451436
+      },
+      {
+        "episode": "episode_0000093.hdf5",
+        "mtime_ns": 1789532989465028000,
+        "size_bytes": 49021410
+      },
+      {
+        "episode": "episode_0000095.hdf5",
+        "mtime_ns": 1789532989178765000,
+        "size_bytes": 54113744
+      },
+      {
+        "episode": "episode_0000096.hdf5",
+        "mtime_ns": 1789533013759125600,
+        "size_bytes": 73419968
+      },
+      {
+        "episode": "episode_0000097.hdf5",
+        "mtime_ns": 1789533036093710400,
+        "size_bytes": 67939846
+      },
+      {
+        "episode": "episode_0000098.hdf5",
+        "mtime_ns": 1789533028800376500,
+        "size_bytes": 58829072
+      },
+      {
+        "episode": "episode_0000099.hdf5",
+        "mtime_ns": 1789533012474881500,
+        "size_bytes": 43806875
+      },
+      {
+        "episode": "episode_0000001.hdf5",
+        "mtime_ns": 1789532355436267500,
+        "size_bytes": 126864896
+      },
+      {
+        "episode": "episode_0000002.hdf5",
+        "mtime_ns": 1789532444245988500,
+        "size_bytes": 102558848
+      },
+      {
+        "episode": "episode_0000007.hdf5",
+        "mtime_ns": 1789532334257661500,
+        "size_bytes": 56294189
+      },
+      {
+        "episode": "episode_0000008.hdf5",
+        "mtime_ns": 1789532400929529400,
+        "size_bytes": 92896424
+      },
+      {
+        "episode": "episode_0000011.hdf5",
+        "mtime_ns": 1789532441320292500,
+        "size_bytes": 64825480
+      },
+      {
+        "episode": "episode_0000013.hdf5",
+        "mtime_ns": 1789532453073333500,
+        "size_bytes": 83310452
+      },
+      {
+        "episode": "episode_0000016.hdf5",
+        "mtime_ns": 1789532493688319400,
+        "size_bytes": 68320819
+      },
+      {
+        "episode": "episode_0000023.hdf5",
+        "mtime_ns": 1789532546173497400,
+        "size_bytes": 86132768
+      },
+      {
+        "episode": "episode_0000041.hdf5",
+        "mtime_ns": 1789532665664775400,
+        "size_bytes": 117612488
+      },
+      {
+        "episode": "episode_0000047.hdf5",
+        "mtime_ns": 1789532758345071900,
+        "size_bytes": 97582259
+      },
+      {
+        "episode": "episode_0000048.hdf5",
+        "mtime_ns": 1789532725612613300,
+        "size_bytes": 101766694
+      },
+      {
+        "episode": "episode_0000052.hdf5",
+        "mtime_ns": 1789532739682297600,
+        "size_bytes": 103989382
+      },
+      {
+        "episode": "episode_0000054.hdf5",
+        "mtime_ns": 1789532769139140800,
+        "size_bytes": 102131798
+      },
+      {
+        "episode": "episode_0000063.hdf5",
+        "mtime_ns": 1789532792727850400,
+        "size_bytes": 47613364
+      },
+      {
+        "episode": "episode_0000066.hdf5",
+        "mtime_ns": 1789532890113951900,
+        "size_bytes": 58993844
+      },
+      {
+        "episode": "episode_0000078.hdf5",
+        "mtime_ns": 1789532900238947400,
+        "size_bytes": 42082624
+      },
+      {
+        "episode": "episode_0000080.hdf5",
+        "mtime_ns": 1789532907287853000,
+        "size_bytes": 42287150
+      },
+      {
+        "episode": "episode_0000087.hdf5",
+        "mtime_ns": 1789532952959179600,
+        "size_bytes": 61591163
+      },
+      {
+        "episode": "episode_0000091.hdf5",
+        "mtime_ns": 1789532998977406100,
+        "size_bytes": 95135249
+      },
+      {
+        "episode": "episode_0000094.hdf5",
+        "mtime_ns": 1789533003133145600,
+        "size_bytes": 73979268
+      }
+    ],
+    "stack_bowls": [
+      {
+        "episode": "episode_0000000.hdf5",
+        "mtime_ns": 1789533028487264000,
+        "size_bytes": 57154028
+      },
+      {
+        "episode": "episode_0000001.hdf5",
+        "mtime_ns": 1789533042250635400,
+        "size_bytes": 89449825
+      },
+      {
+        "episode": "episode_0000002.hdf5",
+        "mtime_ns": 1789533089813109600,
+        "size_bytes": 117464684
+      },
+      {
+        "episode": "episode_0000003.hdf5",
+        "mtime_ns": 1789533070637641300,
+        "size_bytes": 87863284
+      },
+      {
+        "episode": "episode_0000005.hdf5",
+        "mtime_ns": 1789533063362657300,
+        "size_bytes": 69943502
+      },
+      {
+        "episode": "episode_0000006.hdf5",
+        "mtime_ns": 1789533089581366300,
+        "size_bytes": 114378568
+      },
+      {
+        "episode": "episode_0000007.hdf5",
+        "mtime_ns": 1789533100067583400,
+        "size_bytes": 101102568
+      },
+      {
+        "episode": "episode_0000008.hdf5",
+        "mtime_ns": 1789533086447738200,
+        "size_bytes": 73488728
+      },
+      {
+        "episode": "episode_0000011.hdf5",
+        "mtime_ns": 1789533111194476800,
+        "size_bytes": 72303824
+      },
+      {
+        "episode": "episode_0000012.hdf5",
+        "mtime_ns": 1789533102669912400,
+        "size_bytes": 48704924
+      },
+      {
+        "episode": "episode_0000013.hdf5",
+        "mtime_ns": 1789533112732537400,
+        "size_bytes": 66096485
+      },
+      {
+        "episode": "episode_0000014.hdf5",
+        "mtime_ns": 1789533163334279500,
+        "size_bytes": 57909128
+      },
+      {
+        "episode": "episode_0000015.hdf5",
+        "mtime_ns": 1789533112745725600,
+        "size_bytes": 50694468
+      },
+      {
+        "episode": "episode_0000017.hdf5",
+        "mtime_ns": 1789533166520947900,
+        "size_bytes": 82976936
+      },
+      {
+        "episode": "episode_0000018.hdf5",
+        "mtime_ns": 1789533174603361700,
+        "size_bytes": 56982721
+      },
+      {
+        "episode": "episode_0000019.hdf5",
+        "mtime_ns": 1789533128515743100,
+        "size_bytes": 59836828
+      },
+      {
+        "episode": "episode_0000021.hdf5",
+        "mtime_ns": 1789533169363299400,
+        "size_bytes": 89969938
+      },
+      {
+        "episode": "episode_0000022.hdf5",
+        "mtime_ns": 1789533144918413000,
+        "size_bytes": 84382887
+      },
+      {
+        "episode": "episode_0000023.hdf5",
+        "mtime_ns": 1789533166560421600,
+        "size_bytes": 111145743
+      },
+      {
+        "episode": "episode_0000024.hdf5",
+        "mtime_ns": 1789533218963581000,
+        "size_bytes": 142046096
+      },
+      {
+        "episode": "episode_0000025.hdf5",
+        "mtime_ns": 1789533202428126700,
+        "size_bytes": 96569096
+      },
+      {
+        "episode": "episode_0000026.hdf5",
+        "mtime_ns": 1789533187118742900,
+        "size_bytes": 107431848
+      },
+      {
+        "episode": "episode_0000027.hdf5",
+        "mtime_ns": 1789533201525952200,
+        "size_bytes": 104718968
+      },
+      {
+        "episode": "episode_0000028.hdf5",
+        "mtime_ns": 1789533203075807600,
+        "size_bytes": 78673205
+      },
+      {
+        "episode": "episode_0000029.hdf5",
+        "mtime_ns": 1789533215241596900,
+        "size_bytes": 112686928
+      },
+      {
+        "episode": "episode_0000030.hdf5",
+        "mtime_ns": 1789533229197416200,
+        "size_bytes": 104801676
+      },
+      {
+        "episode": "episode_0000031.hdf5",
+        "mtime_ns": 1789533211396827900,
+        "size_bytes": 104584193
+      },
+      {
+        "episode": "episode_0000032.hdf5",
+        "mtime_ns": 1789533284049575600,
+        "size_bytes": 170631364
+      },
+      {
+        "episode": "episode_0000034.hdf5",
+        "mtime_ns": 1789533222476654400,
+        "size_bytes": 166426764
+      },
+      {
+        "episode": "episode_0000035.hdf5",
+        "mtime_ns": 1789533218494891200,
+        "size_bytes": 109290968
+      },
+      {
+        "episode": "episode_0000039.hdf5",
+        "mtime_ns": 1789533229115238200,
+        "size_bytes": 110490524
+      },
+      {
+        "episode": "episode_0000040.hdf5",
+        "mtime_ns": 1789533230321651800,
+        "size_bytes": 117937148
+      },
+      {
+        "episode": "episode_0000041.hdf5",
+        "mtime_ns": 1789533246357444700,
+        "size_bytes": 193391656
+      },
+      {
+        "episode": "episode_0000042.hdf5",
+        "mtime_ns": 1789533255898161800,
+        "size_bytes": 210570080
+      },
+      {
+        "episode": "episode_0000043.hdf5",
+        "mtime_ns": 1789533251693758100,
+        "size_bytes": 164722928
+      },
+      {
+        "episode": "episode_0000045.hdf5",
+        "mtime_ns": 1789533246098081600,
+        "size_bytes": 106516027
+      },
+      {
+        "episode": "episode_0000046.hdf5",
+        "mtime_ns": 1789533246407217900,
+        "size_bytes": 108493029
+      },
+      {
+        "episode": "episode_0000047.hdf5",
+        "mtime_ns": 1789533252809228400,
+        "size_bytes": 151655378
+      },
+      {
+        "episode": "episode_0000048.hdf5",
+        "mtime_ns": 1789533264473565500,
+        "size_bytes": 114337630
+      },
+      {
+        "episode": "episode_0000049.hdf5",
+        "mtime_ns": 1789533264396949800,
+        "size_bytes": 111568574
+      },
+      {
+        "episode": "episode_0000052.hdf5",
+        "mtime_ns": 1789533276297187300,
+        "size_bytes": 181202432
+      },
+      {
+        "episode": "episode_0000054.hdf5",
+        "mtime_ns": 1789533281306480200,
+        "size_bytes": 209589068
+      },
+      {
+        "episode": "episode_0000055.hdf5",
+        "mtime_ns": 1789533279794951900,
+        "size_bytes": 156781853
+      },
+      {
+        "episode": "episode_0000056.hdf5",
+        "mtime_ns": 1789533283834265400,
+        "size_bytes": 182846368
+      },
+      {
+        "episode": "episode_0000057.hdf5",
+        "mtime_ns": 1789533281736566400,
+        "size_bytes": 157117473
+      },
+      {
+        "episode": "episode_0000058.hdf5",
+        "mtime_ns": 1789533291812913800,
+        "size_bytes": 233043136
+      },
+      {
+        "episode": "episode_0000059.hdf5",
+        "mtime_ns": 1789533292658089200,
+        "size_bytes": 161352784
+      },
+      {
+        "episode": "episode_0000060.hdf5",
+        "mtime_ns": 1789533304908544900,
+        "size_bytes": 179529212
+      },
+      {
+        "episode": "episode_0000061.hdf5",
+        "mtime_ns": 1789533310836171300,
+        "size_bytes": 182801922
+      },
+      {
+        "episode": "episode_0000062.hdf5",
+        "mtime_ns": 1789533304872149500,
+        "size_bytes": 124107293
+      },
+      {
+        "episode": "episode_0000063.hdf5",
+        "mtime_ns": 1789533302694731600,
+        "size_bytes": 116529672
+      },
+      {
+        "episode": "episode_0000064.hdf5",
+        "mtime_ns": 1789533314934330300,
+        "size_bytes": 197987007
+      },
+      {
+        "episode": "episode_0000067.hdf5",
+        "mtime_ns": 1789533318494599800,
+        "size_bytes": 169154828
+      },
+      {
+        "episode": "episode_0000068.hdf5",
+        "mtime_ns": 1789533318636291500,
+        "size_bytes": 128590258
+      },
+      {
+        "episode": "episode_0000069.hdf5",
+        "mtime_ns": 1789533323152142100,
+        "size_bytes": 170974466
+      },
+      {
+        "episode": "episode_0000070.hdf5",
+        "mtime_ns": 1789533326181800200,
+        "size_bytes": 242036330
+      },
+      {
+        "episode": "episode_0000071.hdf5",
+        "mtime_ns": 1789533322189041000,
+        "size_bytes": 126003928
+      },
+      {
+        "episode": "episode_0000072.hdf5",
+        "mtime_ns": 1789533322813433500,
+        "size_bytes": 111230391
+      },
+      {
+        "episode": "episode_0000073.hdf5",
+        "mtime_ns": 1789533325539047400,
+        "size_bytes": 180877410
+      },
+      {
+        "episode": "episode_0000074.hdf5",
+        "mtime_ns": 1789533341705492500,
+        "size_bytes": 152742408
+      },
+      {
+        "episode": "episode_0000075.hdf5",
+        "mtime_ns": 1789533349305394700,
+        "size_bytes": 153318188
+      },
+      {
+        "episode": "episode_0000076.hdf5",
+        "mtime_ns": 1789533350478939300,
+        "size_bytes": 234212216
+      },
+      {
+        "episode": "episode_0000077.hdf5",
+        "mtime_ns": 1789533346692371800,
+        "size_bytes": 187801192
+      },
+      {
+        "episode": "episode_0000078.hdf5",
+        "mtime_ns": 1789533349525831600,
+        "size_bytes": 134358104
+      },
+      {
+        "episode": "episode_0000079.hdf5",
+        "mtime_ns": 1789533346786969900,
+        "size_bytes": 162053855
+      },
+      {
+        "episode": "episode_0000082.hdf5",
+        "mtime_ns": 1789533454297765900,
+        "size_bytes": 211415384
+      },
+      {
+        "episode": "episode_0000083.hdf5",
+        "mtime_ns": 1789533397165010900,
+        "size_bytes": 133210283
+      },
+      {
+        "episode": "episode_0000085.hdf5",
+        "mtime_ns": 1789533428942307500,
+        "size_bytes": 164956808
+      },
+      {
+        "episode": "episode_0000086.hdf5",
+        "mtime_ns": 1789533471198273500,
+        "size_bytes": 210249464
+      },
+      {
+        "episode": "episode_0000087.hdf5",
+        "mtime_ns": 1789533397160539400,
+        "size_bytes": 116913338
+      },
+      {
+        "episode": "episode_0000088.hdf5",
+        "mtime_ns": 1789533411658212600,
+        "size_bytes": 97274333
+      },
+      {
+        "episode": "episode_0000089.hdf5",
+        "mtime_ns": 1789533457499314400,
+        "size_bytes": 188565544
+      },
+      {
+        "episode": "episode_0000091.hdf5",
+        "mtime_ns": 1789533443735474900,
+        "size_bytes": 134161409
+      },
+      {
+        "episode": "episode_0000092.hdf5",
+        "mtime_ns": 1789533474090022900,
+        "size_bytes": 119592662
+      },
+      {
+        "episode": "episode_0000093.hdf5",
+        "mtime_ns": 1789533467035060800,
+        "size_bytes": 92447852
+      },
+      {
+        "episode": "episode_0000094.hdf5",
+        "mtime_ns": 1789533459591839100,
+        "size_bytes": 77777154
+      },
+      {
+        "episode": "episode_0000095.hdf5",
+        "mtime_ns": 1789533472080039000,
+        "size_bytes": 78157818
+      },
+      {
+        "episode": "episode_0000097.hdf5",
+        "mtime_ns": 1789533481368671300,
+        "size_bytes": 58860320
+      },
+      {
+        "episode": "episode_0000098.hdf5",
+        "mtime_ns": 1789533490109102100,
+        "size_bytes": 68858014
+      },
+      {
+        "episode": "episode_0000099.hdf5",
+        "mtime_ns": 1789533483634590800,
+        "size_bytes": 64501234
+      },
+      {
+        "episode": "episode_0000004.hdf5",
+        "mtime_ns": 1789533097957683100,
+        "size_bytes": 68110168
+      },
+      {
+        "episode": "episode_0000009.hdf5",
+        "mtime_ns": 1789533079602782500,
+        "size_bytes": 63640990
+      },
+      {
+        "episode": "episode_0000010.hdf5",
+        "mtime_ns": 1789533092720120200,
+        "size_bytes": 58884063
+      },
+      {
+        "episode": "episode_0000016.hdf5",
+        "mtime_ns": 1789533130679409900,
+        "size_bytes": 59218432
+      },
+      {
+        "episode": "episode_0000020.hdf5",
+        "mtime_ns": 1789533140039684900,
+        "size_bytes": 71473841
+      },
+      {
+        "episode": "episode_0000033.hdf5",
+        "mtime_ns": 1789533215987431200,
+        "size_bytes": 107930768
+      },
+      {
+        "episode": "episode_0000036.hdf5",
+        "mtime_ns": 1789533228228357100,
+        "size_bytes": 165971323
+      },
+      {
+        "episode": "episode_0000037.hdf5",
+        "mtime_ns": 1789533226134573200,
+        "size_bytes": 107385728
+      },
+      {
+        "episode": "episode_0000038.hdf5",
+        "mtime_ns": 1789533228101830400,
+        "size_bytes": 126494888
+      },
+      {
+        "episode": "episode_0000044.hdf5",
+        "mtime_ns": 1789533248996991300,
+        "size_bytes": 145128038
+      },
+      {
+        "episode": "episode_0000050.hdf5",
+        "mtime_ns": 1789533263957851400,
+        "size_bytes": 111153211
+      },
+      {
+        "episode": "episode_0000051.hdf5",
+        "mtime_ns": 1789533262296212000,
+        "size_bytes": 85578633
+      },
+      {
+        "episode": "episode_0000053.hdf5",
+        "mtime_ns": 1789533272140935500,
+        "size_bytes": 141200448
+      },
+      {
+        "episode": "episode_0000065.hdf5",
+        "mtime_ns": 1789533312956203000,
+        "size_bytes": 173993820
+      },
+      {
+        "episode": "episode_0000066.hdf5",
+        "mtime_ns": 1789533317927724600,
+        "size_bytes": 172638956
+      },
+      {
+        "episode": "episode_0000080.hdf5",
+        "mtime_ns": 1789533360186611600,
+        "size_bytes": 162430217
+      },
+      {
+        "episode": "episode_0000081.hdf5",
+        "mtime_ns": 1789533357580577600,
+        "size_bytes": 148230704
+      },
+      {
+        "episode": "episode_0000084.hdf5",
+        "mtime_ns": 1789533419973017000,
+        "size_bytes": 198909656
+      },
+      {
+        "episode": "episode_0000090.hdf5",
+        "mtime_ns": 1789533442003169800,
+        "size_bytes": 143844398
+      },
+      {
+        "episode": "episode_0000096.hdf5",
+        "mtime_ns": 1789533466791314500,
+        "size_bytes": 54931076
+      }
+    ],
+    "sweep_blocks": [
+      {
+        "episode": "episode_0000003.hdf5",
+        "mtime_ns": 1789533557321463800,
+        "size_bytes": 222119260
+      },
+      {
+        "episode": "episode_0000004.hdf5",
+        "mtime_ns": 1789533574088061800,
+        "size_bytes": 187784198
+      },
+      {
+        "episode": "episode_0000007.hdf5",
+        "mtime_ns": 1789533576537285300,
+        "size_bytes": 122800137
+      },
+      {
+        "episode": "episode_0000008.hdf5",
+        "mtime_ns": 1789533634096008700,
+        "size_bytes": 162039920
+      },
+      {
+        "episode": "episode_0000010.hdf5",
+        "mtime_ns": 1789533838618832400,
+        "size_bytes": 136909328
+      },
+      {
+        "episode": "episode_0000011.hdf5",
+        "mtime_ns": 1789533650788347600,
+        "size_bytes": 203568596
+      },
+      {
+        "episode": "episode_0000014.hdf5",
+        "mtime_ns": 1789533709090183900,
+        "size_bytes": 136018547
+      },
+      {
+        "episode": "episode_0000015.hdf5",
+        "mtime_ns": 1789533867608343500,
+        "size_bytes": 124764098
+      },
+      {
+        "episode": "episode_0000017.hdf5",
+        "mtime_ns": 1789533872447778500,
+        "size_bytes": 114431633
+      },
+      {
+        "episode": "episode_0000018.hdf5",
+        "mtime_ns": 1789534043172265300,
+        "size_bytes": 228505305
+      },
+      {
+        "episode": "episode_0000020.hdf5",
+        "mtime_ns": 1789533995032910100,
+        "size_bytes": 218593400
+      },
+      {
+        "episode": "episode_0000021.hdf5",
+        "mtime_ns": 1789533777364118300,
+        "size_bytes": 204778494
+      },
+      {
+        "episode": "episode_0000022.hdf5",
+        "mtime_ns": 1789533788922788900,
+        "size_bytes": 175805276
+      },
+      {
+        "episode": "episode_0000023.hdf5",
+        "mtime_ns": 1789533918278798700,
+        "size_bytes": 127466626
+      },
+      {
+        "episode": "episode_0000025.hdf5",
+        "mtime_ns": 1789533903093392600,
+        "size_bytes": 92619626
+      },
+      {
+        "episode": "episode_0000026.hdf5",
+        "mtime_ns": 1789533901528474200,
+        "size_bytes": 143005484
+      },
+      {
+        "episode": "episode_0000027.hdf5",
+        "mtime_ns": 1789533949446142300,
+        "size_bytes": 111055878
+      },
+      {
+        "episode": "episode_0000028.hdf5",
+        "mtime_ns": 1789533943193481900,
+        "size_bytes": 111218072
+      },
+      {
+        "episode": "episode_0000029.hdf5",
+        "mtime_ns": 1789533938801521900,
+        "size_bytes": 115354074
+      },
+      {
+        "episode": "episode_0000030.hdf5",
+        "mtime_ns": 1789533946556847700,
+        "size_bytes": 107707397
+      },
+      {
+        "episode": "episode_0000031.hdf5",
+        "mtime_ns": 1789533986935319200,
+        "size_bytes": 104245388
+      },
+      {
+        "episode": "episode_0000032.hdf5",
+        "mtime_ns": 1789534096457378100,
+        "size_bytes": 100342167
+      },
+      {
+        "episode": "episode_0000033.hdf5",
+        "mtime_ns": 1789534030739232900,
+        "size_bytes": 98178074
+      },
+      {
+        "episode": "episode_0000034.hdf5",
+        "mtime_ns": 1789534034972604200,
+        "size_bytes": 164395493
+      },
+      {
+        "episode": "episode_0000035.hdf5",
+        "mtime_ns": 1789534024443938800,
+        "size_bytes": 206238422
+      },
+      {
+        "episode": "episode_0000036.hdf5",
+        "mtime_ns": 1789534030907675100,
+        "size_bytes": 146419457
+      },
+      {
+        "episode": "episode_0000037.hdf5",
+        "mtime_ns": 1789534041861324400,
+        "size_bytes": 163845392
+      },
+      {
+        "episode": "episode_0000038.hdf5",
+        "mtime_ns": 1789534082813429900,
+        "size_bytes": 224653072
+      },
+      {
+        "episode": "episode_0000039.hdf5",
+        "mtime_ns": 1789534070424773800,
+        "size_bytes": 140997941
+      },
+      {
+        "episode": "episode_0000040.hdf5",
+        "mtime_ns": 1789534100689676000,
+        "size_bytes": 183223080
+      },
+      {
+        "episode": "episode_0000042.hdf5",
+        "mtime_ns": 1789534212187419100,
+        "size_bytes": 206052140
+      },
+      {
+        "episode": "episode_0000043.hdf5",
+        "mtime_ns": 1789534107960923700,
+        "size_bytes": 182028105
+      },
+      {
+        "episode": "episode_0000044.hdf5",
+        "mtime_ns": 1789534206014792200,
+        "size_bytes": 194002864
+      },
+      {
+        "episode": "episode_0000045.hdf5",
+        "mtime_ns": 1789534148682209700,
+        "size_bytes": 203642148
+      },
+      {
+        "episode": "episode_0000046.hdf5",
+        "mtime_ns": 1789534135760053600,
+        "size_bytes": 152637953
+      },
+      {
+        "episode": "episode_0000047.hdf5",
+        "mtime_ns": 1789534134559024200,
+        "size_bytes": 179524379
+      },
+      {
+        "episode": "episode_0000048.hdf5",
+        "mtime_ns": 1789534165656510000,
+        "size_bytes": 214952738
+      },
+      {
+        "episode": "episode_0000050.hdf5",
+        "mtime_ns": 1789534224213035000,
+        "size_bytes": 215490888
+      },
+      {
+        "episode": "episode_0000051.hdf5",
+        "mtime_ns": 1789534277901371500,
+        "size_bytes": 179504168
+      },
+      {
+        "episode": "episode_0000052.hdf5",
+        "mtime_ns": 1789534253997408900,
+        "size_bytes": 145678008
+      },
+      {
+        "episode": "episode_0000053.hdf5",
+        "mtime_ns": 1789534220599291600,
+        "size_bytes": 197410928
+      },
+      {
+        "episode": "episode_0000054.hdf5",
+        "mtime_ns": 1789534217434681700,
+        "size_bytes": 136517149
+      },
+      {
+        "episode": "episode_0000055.hdf5",
+        "mtime_ns": 1789534285161661300,
+        "size_bytes": 226824408
+      },
+      {
+        "episode": "episode_0000056.hdf5",
+        "mtime_ns": 1789534258894130400,
+        "size_bytes": 158514792
+      },
+      {
+        "episode": "episode_0000057.hdf5",
+        "mtime_ns": 1789534285178103600,
+        "size_bytes": 154039844
+      },
+      {
+        "episode": "episode_0000058.hdf5",
+        "mtime_ns": 1789535193036504400,
+        "size_bytes": 255983814
+      },
+      {
+        "episode": "episode_0000059.hdf5",
+        "mtime_ns": 1789534290327332200,
+        "size_bytes": 145156943
+      },
+      {
+        "episode": "episode_0000060.hdf5",
+        "mtime_ns": 1789534390070763500,
+        "size_bytes": 170041343
+      },
+      {
+        "episode": "episode_0000062.hdf5",
+        "mtime_ns": 1789534527576036500,
+        "size_bytes": 193752536
+      },
+      {
+        "episode": "episode_0000064.hdf5",
+        "mtime_ns": 1789536019944310800,
+        "size_bytes": 185409931
+      },
+      {
+        "episode": "episode_0000065.hdf5",
+        "mtime_ns": 1789535621882653700,
+        "size_bytes": 201256026
+      },
+      {
+        "episode": "episode_0000066.hdf5",
+        "mtime_ns": 1789534988178912300,
+        "size_bytes": 127595560
+      },
+      {
+        "episode": "episode_0000067.hdf5",
+        "mtime_ns": 1789534465774323300,
+        "size_bytes": 175582668
+      },
+      {
+        "episode": "episode_0000068.hdf5",
+        "mtime_ns": 1789534707832614400,
+        "size_bytes": 154053674
+      },
+      {
+        "episode": "episode_0000069.hdf5",
+        "mtime_ns": 1789535763539081200,
+        "size_bytes": 141331190
+      },
+      {
+        "episode": "episode_0000070.hdf5",
+        "mtime_ns": 1789534834515675000,
+        "size_bytes": 139800348
+      },
+      {
+        "episode": "episode_0000073.hdf5",
+        "mtime_ns": 1789534945396002100,
+        "size_bytes": 235858623
+      },
+      {
+        "episode": "episode_0000074.hdf5",
+        "mtime_ns": 1789535073140354400,
+        "size_bytes": 182008344
+      },
+      {
+        "episode": "episode_0000077.hdf5",
+        "mtime_ns": 1789536386088761000,
+        "size_bytes": 182632252
+      },
+      {
+        "episode": "episode_0000078.hdf5",
+        "mtime_ns": 1789536345208080500,
+        "size_bytes": 164689906
+      },
+      {
+        "episode": "episode_0000079.hdf5",
+        "mtime_ns": 1789535156111966900,
+        "size_bytes": 130014068
+      },
+      {
+        "episode": "episode_0000080.hdf5",
+        "mtime_ns": 1789535416655268600,
+        "size_bytes": 156645599
+      },
+      {
+        "episode": "episode_0000081.hdf5",
+        "mtime_ns": 1789535294296367300,
+        "size_bytes": 160055413
+      },
+      {
+        "episode": "episode_0000082.hdf5",
+        "mtime_ns": 1789535366053758100,
+        "size_bytes": 140777582
+      },
+      {
+        "episode": "episode_0000084.hdf5",
+        "mtime_ns": 1789535818903343800,
+        "size_bytes": 87493168
+      },
+      {
+        "episode": "episode_0000085.hdf5",
+        "mtime_ns": 1789535492567482300,
+        "size_bytes": 95699052
+      },
+      {
+        "episode": "episode_0000086.hdf5",
+        "mtime_ns": 1789536292863909000,
+        "size_bytes": 96575284
+      },
+      {
+        "episode": "episode_0000087.hdf5",
+        "mtime_ns": 1789535538383651600,
+        "size_bytes": 85648671
+      },
+      {
+        "episode": "episode_0000088.hdf5",
+        "mtime_ns": 1789535581511485300,
+        "size_bytes": 98710712
+      },
+      {
+        "episode": "episode_0000089.hdf5",
+        "mtime_ns": 1789535747194893700,
+        "size_bytes": 123591453
+      },
+      {
+        "episode": "episode_0000090.hdf5",
+        "mtime_ns": 1789536354332528100,
+        "size_bytes": 110619656
+      },
+      {
+        "episode": "episode_0000091.hdf5",
+        "mtime_ns": 1789536348821794400,
+        "size_bytes": 101564639
+      },
+      {
+        "episode": "episode_0000092.hdf5",
+        "mtime_ns": 1789536389348037800,
+        "size_bytes": 124298538
+      },
+      {
+        "episode": "episode_0000093.hdf5",
+        "mtime_ns": 1789536336264180400,
+        "size_bytes": 120236552
+      },
+      {
+        "episode": "episode_0000094.hdf5",
+        "mtime_ns": 1789536101073389700,
+        "size_bytes": 118442404
+      },
+      {
+        "episode": "episode_0000095.hdf5",
+        "mtime_ns": 1789536304424937800,
+        "size_bytes": 118356648
+      },
+      {
+        "episode": "episode_0000096.hdf5",
+        "mtime_ns": 1789536384183200300,
+        "size_bytes": 135220653
+      },
+      {
+        "episode": "episode_0000097.hdf5",
+        "mtime_ns": 1789536379699631400,
+        "size_bytes": 128926520
+      },
+      {
+        "episode": "episode_0000098.hdf5",
+        "mtime_ns": 1789536422745246600,
+        "size_bytes": 126728114
+      },
+      {
+        "episode": "episode_0000099.hdf5",
+        "mtime_ns": 1789536450705943100,
+        "size_bytes": 138080312
+      },
+      {
+        "episode": "episode_0000000.hdf5",
+        "mtime_ns": 1789533590897407500,
+        "size_bytes": 186278903
+      },
+      {
+        "episode": "episode_0000001.hdf5",
+        "mtime_ns": 1789533608745879400,
+        "size_bytes": 258273716
+      },
+      {
+        "episode": "episode_0000002.hdf5",
+        "mtime_ns": 1789533604926037800,
+        "size_bytes": 266147056
+      },
+      {
+        "episode": "episode_0000005.hdf5",
+        "mtime_ns": 1789533547009218600,
+        "size_bytes": 184319126
+      },
+      {
+        "episode": "episode_0000006.hdf5",
+        "mtime_ns": 1789533538193168000,
+        "size_bytes": 138896905
+      },
+      {
+        "episode": "episode_0000009.hdf5",
+        "mtime_ns": 1789533591591998400,
+        "size_bytes": 135172643
+      },
+      {
+        "episode": "episode_0000012.hdf5",
+        "mtime_ns": 1789533621387351800,
+        "size_bytes": 121888637
+      },
+      {
+        "episode": "episode_0000013.hdf5",
+        "mtime_ns": 1789533670672806000,
+        "size_bytes": 174708706
+      },
+      {
+        "episode": "episode_0000016.hdf5",
+        "mtime_ns": 1789533666144446200,
+        "size_bytes": 132541338
+      },
+      {
+        "episode": "episode_0000019.hdf5",
+        "mtime_ns": 1789533807655712100,
+        "size_bytes": 183698203
+      },
+      {
+        "episode": "episode_0000024.hdf5",
+        "mtime_ns": 1789533895223109300,
+        "size_bytes": 110950718
+      },
+      {
+        "episode": "episode_0000041.hdf5",
+        "mtime_ns": 1789534082058744000,
+        "size_bytes": 158255168
+      },
+      {
+        "episode": "episode_0000049.hdf5",
+        "mtime_ns": 1789534229034123500,
+        "size_bytes": 196044485
+      },
+      {
+        "episode": "episode_0000061.hdf5",
+        "mtime_ns": 1789534375785972500,
+        "size_bytes": 145152728
+      },
+      {
+        "episode": "episode_0000063.hdf5",
+        "mtime_ns": 1789535011702083700,
+        "size_bytes": 166391508
+      },
+      {
+        "episode": "episode_0000071.hdf5",
+        "mtime_ns": 1789534790884131600,
+        "size_bytes": 153943628
+      },
+      {
+        "episode": "episode_0000072.hdf5",
+        "mtime_ns": 1789535481233622800,
+        "size_bytes": 192777014
+      },
+      {
+        "episode": "episode_0000075.hdf5",
+        "mtime_ns": 1789535066033562000,
+        "size_bytes": 173247407
+      },
+      {
+        "episode": "episode_0000076.hdf5",
+        "mtime_ns": 1789535069730411300,
+        "size_bytes": 151175207
+      },
+      {
+        "episode": "episode_0000083.hdf5",
+        "mtime_ns": 1789535426927824900,
+        "size_bytes": 104388687
+      }
+    ]
+  },
+  "normalizer_sha256": "9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459",
+  "splits_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218"
+}

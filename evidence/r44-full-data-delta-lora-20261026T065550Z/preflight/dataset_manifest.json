@@ -1,0 +1,38 @@
+{
+  "contract_violations": [],
+  "max_abs_action_vs_next_state": 0.0,
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "tasks": {
+    "push_T": {
+      "dev_episodes": 20,
+      "dev_samples": 6691,
+      "excluded": [],
+      "frames_max": 773,
+      "frames_min": 156,
+      "train_episodes": 80,
+      "train_samples": 25313
+    },
+    "stack_bowls": {
+      "dev_episodes": 20,
+      "dev_samples": 8716,
+      "excluded": [],
+      "frames_max": 780,
+      "frames_min": 204,
+      "train_episodes": 80,
+      "train_samples": 35858
+    },
+    "sweep_blocks": {
+      "dev_episodes": 20,
+      "dev_samples": 12861,
+      "excluded": [],
+      "frames_max": 1064,
+      "frames_min": 344,
+      "train_episodes": 80,
+      "train_samples": 47609
+    }
+  },
+  "totals": {
+    "dev_samples": 28268,
+    "train_samples": 108780
+  }
+}

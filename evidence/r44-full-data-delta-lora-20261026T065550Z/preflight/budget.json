@@ -1,0 +1,23 @@
+{
+  "checkpoints": {
+    "bytes_each": 2200000000,
+    "count": 20,
+    "total_gb": 44.0
+  },
+  "dev_eval_hours_per_epoch": 2.8268,
+  "dev_eval_hours_total": 14.134,
+  "gpu_hours_available": 0.0,
+  "max_epochs": 5,
+  "max_optimizer_steps": 543900,
+  "min_epochs": 2,
+  "min_optimizer_steps": 217560,
+  "n_dev_samples": 28268,
+  "n_train_samples": 108780,
+  "note": "sec_per_step is measured, not assumed: m2_two_2000_20261021T123314Z ran 2000 steps between 12:33:22Z and 14:43:49Z = 7827 s",
+  "sec_per_step": 3.9135,
+  "steps_per_epoch": 108780,
+  "sufficient": false,
+  "total_gpu_hours_max": 605.398625,
+  "train_gpu_hours_max": 591.264625,
+  "train_gpu_hours_min": 236.50584999999998
+}

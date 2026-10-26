@@ -1,0 +1,118 @@
+{
+  "budget": {
+    "checkpoints": {
+      "bytes_each": 2200000000,
+      "count": 20,
+      "total_gb": 44.0
+    },
+    "dev_eval_hours_per_epoch": 2.8268,
+    "dev_eval_hours_total": 14.134,
+    "gpu_hours_available": 0.0,
+    "max_epochs": 5,
+    "max_optimizer_steps": 543900,
+    "min_epochs": 2,
+    "min_optimizer_steps": 217560,
+    "n_dev_samples": 28268,
+    "n_train_samples": 108780,
+    "note": "sec_per_step is measured, not assumed: m2_two_2000_20261021T123314Z ran 2000 steps between 12:33:22Z and 14:43:49Z = 7827 s",
+    "sec_per_step": 3.9135,
+    "steps_per_epoch": 108780,
+    "sufficient": false,
+    "total_gpu_hours_max": 605.398625,
+    "train_gpu_hours_max": 591.264625,
+    "train_gpu_hours_min": 236.50584999999998
+  },
+  "checks": [
+    {
+      "detail": {
+        "push_T": 0,
+        "stack_bowls": 0,
+        "sweep_blocks": 0
+      },
+      "name": "all_train_dev_episodes_14d_and_three_camera",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "max_abs_err": 0.0,
+        "violations": 0
+      },
+      "name": "action_equals_next_state_bit_exact",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "sha256": "9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459",
+        "tasks": {
+          "push_T": 25313,
+          "stack_bowls": 35858,
+          "sweep_blocks": 47609
+        }
+      },
+      "name": "normalizer_fitted_on_train_only",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "half_step_normalised_units": 0.00392156862745098,
+        "note": "values outside [q01,q99] are clipped by the [-1,1] normalisation and are counted, not hidden",
+        "per_task": {
+          "push_T": {
+            "elements_outside_q01_q99_fraction": 0.016785714285714286,
+            "max_abs_delta_error_physical": 0.09853862971067429,
+            "max_in_range_error_normalised_units": 0.003921517379143156,
+            "mean_abs_delta_error_physical": 0.0025080592234951065,
+            "samples": 400
+          },
+          "stack_bowls": {
+            "elements_outside_q01_q99_fraction": 0.01982142857142857,
+            "max_abs_delta_error_physical": 0.10829584300518036,
+            "max_in_range_error_normalised_units": 0.0039214562843931135,
+            "mean_abs_delta_error_physical": 0.0036296625991450106,
+            "samples": 400
+          },
+          "sweep_blocks": {
+            "elements_outside_q01_q99_fraction": 0.01767857142857143,
+            "max_abs_delta_error_physical": 0.0810270681977272,
+            "max_in_range_error_normalised_units": 0.003921489066944215,
+            "mean_abs_delta_error_physical": 0.00359383936432662,
+            "samples": 400
+          }
+        }
+      },
+      "name": "codec_roundtrip_within_half_codec_step_for_representable_values",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "epochs": 5,
+        "max_visits": 1,
+        "min_visits": 1,
+        "unique_seen": 108780
+      },
+      "name": "epoch_complete_no_replacement_5_epochs",
+      "result": "PASS"
+    },
+    {
+      "detail": {
+        "approved_gpu_hours": 0.0,
+        "required_gpu_hours": 605.4
+      },
+      "name": "gpu_budget_covers_the_approved_plan",
+      "result": "FAIL"
+    }
+  ],
+  "contract": "joint_delta_v1",
+  "elapsed_s": 3.0431721210479736,
+  "schema": "r44-preflight/v1",
+  "scope": {
+    "checkpoints_written": false,
+    "gpu_used": false,
+    "simulator_or_robot": false,
+    "training_started": false
+  },
+  "splits_path": "/tmp/r44-wt-20261026T1455Z/data/m2_splits.json",
+  "splits_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "started_at_utc": "2026-10-26T06:57:25.386550+00:00",
+  "status": "BLOCKED_BUDGET"
+}
