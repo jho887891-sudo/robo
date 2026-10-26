@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import platform
 import subprocess
@@ -98,8 +99,9 @@ def main(argv=None) -> int:
     if args.cams != 3:
         print("BLOCKED_CONFIG: R44 smoke requires exactly three cameras", flush=True)
         return 2
-    if not (args.max_wall_seconds > 0 and args.gpu_lock_wait_seconds >= 0):
-        print("BLOCKED_CONFIG: wall limit must be positive and lock wait non-negative", flush=True)
+    if not (math.isfinite(args.max_wall_seconds) and args.max_wall_seconds > 0
+            and math.isfinite(args.gpu_lock_wait_seconds) and args.gpu_lock_wait_seconds >= 0):
+        print("BLOCKED_CONFIG: wall limit must be finite/positive and lock wait finite/non-negative", flush=True)
         return 2
     for name in ("hdf5_root", "feature_normalizer", "delta_normalizer", "dataset_manifest", "base_model"):
         if not getattr(args, name):
@@ -139,12 +141,15 @@ def main(argv=None) -> int:
         "max_process_memory_gb": args.max_process_memory_gb,
     }
     gpu_lock = None
+    smoke_start = time.monotonic()
     try:
         if report["source_sha"] == "UNKNOWN_RUNTIME_SHA":
             raise RuntimeError("cannot run GPU smoke without a verifiable Git commit SHA")
         gpu_lock = R44.acquire_gpu_lane_lock(args)
         modules = R44.load_runtime_modules(args)
         plan = R44.load_and_validate_cpu_plan(args, modules)
+        if time.monotonic() - smoke_start > args.max_wall_seconds:
+            raise TimeoutError("smoke wall limit exceeded during CPU contract preflight")
         report["cpu_contracts"] = {
             "train_samples": plan["n_train"],
             "dev_samples": plan["n_dev"],
@@ -163,16 +168,18 @@ def main(argv=None) -> int:
         import torch
         from training.r44_safe_stop import configure_torch_memory_fraction
 
-        report["cuda_context_created"] = True
         report["torch_version"] = str(torch.__version__)
         report["torch_cuda_version"] = str(torch.version.cuda)
         report["cuda_device_name"] = torch.cuda.get_device_name(0)
+        report["cuda_context_created"] = True
         report["memory_cap"] = configure_torch_memory_fraction(args.max_process_memory_gb, device=0)
 
         torch.manual_seed(args.seed)
         np.random.seed(args.seed)
         torch.cuda.manual_seed_all(args.seed)
         proc, vla, projector, model_info = R44.build_model(args, modules)
+        if time.monotonic() - smoke_start > args.max_wall_seconds:
+            raise TimeoutError("smoke wall limit exceeded while loading the model")
         prompts = {t: modules[3].TASK_PROMPTS[t] for t in R44.TASKS}
         prompt_ids = {
             t: R44.build_prompt_ids(proc, t, modules, args.include_task_token)
@@ -212,6 +219,8 @@ def main(argv=None) -> int:
         torch.cuda.synchronize()
         prepare_seconds = time.perf_counter() - prepare_start
 
+        if time.monotonic() - smoke_start > args.max_wall_seconds:
+            raise TimeoutError("smoke wall limit exceeded before the disposable optimizer step")
         trainable_lora = [p for p in vla.parameters() if p.requires_grad]
         optimizer = torch.optim.AdamW(
             [{"params": trainable_lora, "lr": args.lr},
@@ -248,10 +257,13 @@ def main(argv=None) -> int:
         peak_reserved_gb = float(torch.cuda.max_memory_reserved()) / (1024**3)
         free_bytes, total_bytes = torch.cuda.mem_get_info()
 
+        current_sha = R44.current_git_sha()
+        if current_sha != report["source_sha"]:
+            raise RuntimeError("repository HEAD changed during GPU smoke")
         report.update({
             "status": "PASS_SMOKE",
             "utc_end": R44.utcnow(),
-            "source_sha": R44.current_git_sha(),
+            "source_sha": current_sha,
             "sample": {"index": sample_index, "task": task, "episode": episode, "t": int(t)},
             "optimizer_steps_executed": 1,
             "loss": float(loss.detach().float().cpu()),
@@ -266,6 +278,10 @@ def main(argv=None) -> int:
             "global_free_memory_after_step_gb": float(free_bytes) / (1024**3),
             "global_total_memory_gb": float(total_bytes) / (1024**3),
             "peak_within_expected_peak": peak_allocated_gb <= args.expected_peak_gpu_memory_gb,
+            "peak_within_allocator_cap": (
+                None if args.max_process_memory_gb is None
+                else peak_allocated_gb <= args.max_process_memory_gb
+            ),
             "memory_budget_verdict": (
                 "PASS_WITHIN_EXPECTED_PEAK" if peak_allocated_gb <= args.expected_peak_gpu_memory_gb
                 else "PEAK_EXCEEDS_ESTIMATE"
