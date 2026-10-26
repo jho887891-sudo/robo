@@ -11,12 +11,52 @@ from training.r44_train import (
     LORA_ALPHA, LORA_R, LORA_SCALE, LORA_TARGET_MODULES,
     build_label_block, estimate_budget_hours, parse_args, task_episode_names,
     episode_images, sha256_file, stat_identity, validate_resume_compatibility,
-    verify_files_unchanged,
+    verify_files_unchanged, verify_exact_action_next_state,
+    verify_delta_normalizer_matches_train, TASKS,
 )
+from training import r44_delta_v1 as D
 from diagnostics.r44_gpu_smoke import main as gpu_smoke_main
 
 
 class R44TrainerCoreTests(unittest.TestCase):
+    def test_exact_transition_contract_accepts_exact_next_state(self):
+        import numpy as np
+        rng = np.random.default_rng(7)
+        state = rng.normal(size=(8, 14)).astype(np.float32)
+        action = rng.normal(size=(8, 14)).astype(np.float32)
+        action[:-1] = state[1:]
+        result = verify_exact_action_next_state(
+            state, action, task="push_T", episode="episode_0000000.hdf5"
+        )
+        self.assertTrue(result["exact"])
+        self.assertEqual(result["transitions"], 7)
+        self.assertEqual(result["max_abs_diff"], 0.0)
+
+    def test_exact_transition_contract_rejects_tiny_nonzero_difference(self):
+        import numpy as np
+        state = np.zeros((4, 14), dtype=np.float32)
+        action = np.zeros((4, 14), dtype=np.float32)
+        action[:-1] = state[1:]
+        action[0, 0] = np.nextafter(np.float32(0.0), np.float32(1.0))
+        with self.assertRaisesRegex(ValueError, "exact A\\[t\\] == S\\[t\\+1\\] contract failed"):
+            verify_exact_action_next_state(
+                state, action, task="push_T", episode="episode_0000000.hdf5"
+            )
+
+    def test_delta_normalizer_must_reproduce_from_exact_train_rows(self):
+        import numpy as np
+        rng = np.random.default_rng(44)
+        deltas = {
+            task: rng.normal(loc=i * 0.2, scale=0.5, size=(400, 14)).astype(np.float32)
+            for i, task in enumerate(TASKS)
+        }
+        payload = D.fit_normalizer(deltas, split_sha256="split-sha")
+        got = verify_delta_normalizer_matches_train(deltas, payload, "split-sha", D)
+        self.assertEqual(got["sha256"], payload["sha256"])
+        shifted = {task: values + np.float32(0.1) for task, values in deltas.items()}
+        with self.assertRaisesRegex(ValueError, "does not reproduce from the exact frozen TRAIN rows"):
+            verify_delta_normalizer_matches_train(shifted, payload, "split-sha", D)
+
     def test_task_episode_names_preserves_task_qualification(self):
         class FakeM2:
             @staticmethod
