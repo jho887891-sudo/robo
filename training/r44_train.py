@@ -217,6 +217,11 @@ def validate_preflight_report(
     source_sha: str,
     expected_epochs: int = 5,
     expected_budget: dict | None = None,
+    expected_lr: float = 5e-4,
+    expected_projector_lr_multiplier: float = 0.1,
+    expected_warmup_fraction: float = 0.01,
+    expected_seed: int = 0,
+    expected_checkpoint_every_steps: int = 5000,
 ) -> dict:
     """Require a same-SHA, integrity-checked CPU preflight with all non-budget gates passing."""
     path = Path(report_path).expanduser().resolve()
@@ -325,6 +330,34 @@ def validate_preflight_report(
         raise ValueError("preflight dataset manifest differs from the trainer's dataset-manifest file")
 
     config = json.loads((report_dir / "training_config.json").read_text(encoding="utf-8"))
+    coverage_doc = json.loads((report_dir / "sample_coverage.json").read_text(encoding="utf-8"))
+    if coverage_doc.get("n_train") != plan["n_train"] or coverage_doc.get("base_seed") != expected_seed:
+        raise ValueError("preflight sample_coverage TRAIN count or seed differs from formal training")
+    epoch_records = coverage_doc.get("epochs") or []
+    if len(epoch_records) != expected_epochs:
+        raise ValueError("preflight sample_coverage does not contain exactly five epochs")
+    for epoch_record in epoch_records:
+        if (epoch_record.get("complete") is not True
+                or epoch_record.get("total") != plan["n_train"]
+                or epoch_record.get("unique_seen") != plan["n_train"]
+                or epoch_record.get("min_visits") != 1
+                or epoch_record.get("max_visits") != 1):
+            raise ValueError("preflight sample_coverage contains an incomplete or repeated epoch")
+    dataset_hashes = json.loads((report_dir / "dataset_hashes.json").read_text(encoding="utf-8"))
+    if dataset_hashes.get("splits_sha256") != plan["split_sha256"]:
+        raise ValueError("preflight dataset_hashes split SHA differs from the trainer")
+    if dataset_hashes.get("normalizer_file_sha256") != plan["delta_normalizer_sha256"]:
+        raise ValueError("preflight dataset_hashes normalizer SHA differs from the trainer")
+    flattened = {}
+    for task, rows in (dataset_hashes.get("episode_files") or {}).items():
+        for row in rows:
+            key = f"{task}/{row.get('episode')}"
+            if key in flattened:
+                raise ValueError(f"preflight dataset_hashes duplicates episode {key}")
+            flattened[key] = row.get("sha256")
+    expected_files = {key: row.get("sha256") for key, row in plan["manifest_files"].items()}
+    if flattened != expected_files:
+        raise ValueError("preflight dataset_hashes episode SHA map differs from the training manifest")
     expected_lora = {
         "r": LORA_R, "lora_alpha": LORA_ALPHA, "scale": LORA_SCALE,
         "lora_dropout": 0.0, "target_modules": list(LORA_TARGET_MODULES),
@@ -338,8 +371,15 @@ def validate_preflight_report(
     if config.get("n_train_samples") != plan["n_train"] or config.get("normalizer_sha256") != plan["delta_payload"]["sha256"]:
         raise ValueError("preflight training_config TRAIN count/normalizer identity mismatch")
     opt = config.get("optimizer") or {}
-    if opt.get("lr") != 5e-4 or opt.get("projector_lr_scale") != 0.1:
-        raise ValueError("preflight optimizer contract differs from the frozen R44 configuration")
+    if opt.get("lr") != expected_lr or opt.get("projector_lr_scale") != expected_projector_lr_multiplier:
+        raise ValueError("preflight optimizer LR/projector multiplier differs from formal training")
+    if opt.get("warmup_fraction") != expected_warmup_fraction:
+        raise ValueError("preflight warmup fraction differs from formal training")
+    sampler = config.get("sampler") or {}
+    if sampler.get("base_seed") != expected_seed:
+        raise ValueError("preflight sampler seed differs from formal training")
+    if config.get("checkpoint_every_steps") != expected_checkpoint_every_steps:
+        raise ValueError("preflight checkpoint cadence differs from formal training")
 
     return {
         "path": str(path),
