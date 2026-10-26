@@ -210,6 +210,148 @@ def verify_delta_normalizer_matches_train(deltas_by_task: dict, expected_payload
     return computed
 
 
+def validate_preflight_report(
+    report_path: os.PathLike[str] | str,
+    plan: dict,
+    *,
+    source_sha: str,
+    expected_epochs: int = 5,
+    expected_budget: dict | None = None,
+) -> dict:
+    """Require a same-SHA, integrity-checked CPU preflight with all non-budget gates passing."""
+    path = Path(report_path).expanduser().resolve()
+    if not path.is_file():
+        raise ValueError(f"R44 preflight report does not exist: {path}")
+    report_dir = path.parent
+    report = json.loads(path.read_text(encoding="utf-8"))
+    if report.get("schema") != "r44-preflight/v1":
+        raise ValueError("preflight report schema must be r44-preflight/v1")
+    if report.get("source_sha") != source_sha or source_sha == "UNKNOWN_RUNTIME_SHA":
+        raise ValueError(
+            f"preflight source SHA {report.get('source_sha')} != current source SHA {source_sha}"
+        )
+    if report.get("status") not in ("READY", "BLOCKED_BUDGET"):
+        raise ValueError(f"preflight status is not usable for training: {report.get('status')}")
+    if report.get("splits_sha256") != plan["split_sha256"]:
+        raise ValueError("preflight report split SHA differs from the training plan")
+    if report.get("scope") != {
+        "training_started": False, "gpu_used": False,
+        "checkpoints_written": False, "simulator_or_robot": False,
+    }:
+        raise ValueError("preflight report scope is not the frozen CPU-only scope")
+
+    checks = report.get("checks")
+    if not isinstance(checks, list):
+        raise ValueError("preflight report checks must be a list")
+    check_map = {}
+    for item in checks:
+        name = item.get("name")
+        if not name or name in check_map:
+            raise ValueError(f"preflight check name is missing or duplicated: {name!r}")
+        check_map[name] = item
+    required_checks = (
+        "source_git_sha_available",
+        "all_train_dev_episodes_14d_and_three_camera",
+        "action_equals_next_state_bit_exact",
+        "all_hdf5_files_hashed_stably",
+        "instruction_text_matches_frozen_task_contract",
+        "normalizer_fitted_on_train_only",
+        "codec_roundtrip_within_half_codec_step_for_representable_values",
+        "epoch_complete_no_replacement_5_epochs",
+        "feature_normalizer_matches_frozen_split",
+    )
+    for name in required_checks:
+        item = check_map.get(name)
+        if item is None or item.get("result") != "PASS":
+            raise ValueError(f"required preflight gate did not PASS: {name}")
+    budget_check = check_map.get("gpu_budget_covers_the_approved_plan")
+    if budget_check is None or budget_check.get("result") not in ("PASS", "FAIL"):
+        raise ValueError("preflight report lacks a valid GPU budget check")
+    expected_status = "READY" if budget_check["result"] == "PASS" else "BLOCKED_BUDGET"
+    if report.get("status") != expected_status or report.get("failed_contract_checks") != []:
+        raise ValueError("preflight status contradicts its individual checks")
+
+    normalizer_detail = check_map["normalizer_fitted_on_train_only"].get("detail") or {}
+    if normalizer_detail.get("sha256") != plan["delta_payload"].get("sha256"):
+        raise ValueError("preflight delta-normalizer payload SHA differs from the training payload")
+    budget = report.get("budget") or {}
+    expected_budget_fields = {
+        "n_train_samples": plan["n_train"],
+        "n_dev_samples": plan["n_dev"],
+        "max_epochs": expected_epochs,
+        "max_optimizer_steps": plan["n_train"] * expected_epochs,
+    }
+    for key, value in expected_budget_fields.items():
+        if budget.get(key) != value:
+            raise ValueError(f"preflight budget.{key}={budget.get(key)!r} != expected {value!r}")
+    coverage = check_map["epoch_complete_no_replacement_5_epochs"].get("detail") or {}
+    if coverage.get("epochs") != expected_epochs or coverage.get("unique_seen") != plan["n_train"]:
+        raise ValueError("preflight's epoch-complete coverage proof does not match the full TRAIN set")
+    if expected_budget is not None and not math.isclose(
+        float(budget.get("required_gpu_hours", float("nan"))),
+        float(expected_budget["required_budget_hours"]),
+        rel_tol=0.0, abs_tol=1e-6,
+    ):
+        raise ValueError("preflight and trainer GPU-hour estimates differ; rerun preflight with the exact training budget assumptions")
+
+    # Verify the preflight output bundle, not just report.json. SHA256SUMS is deliberately
+    # self-excluding; every listed file must exist and match its recorded digest.
+    sums_path = report_dir / "SHA256SUMS"
+    if not sums_path.is_file():
+        raise ValueError("preflight SHA256SUMS is missing")
+    listed = {}
+    for line in sums_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        digest, name = line.split(None, 1)
+        name = name.strip()
+        if name.startswith("*"):
+            name = name[1:]
+        listed[name] = digest
+    required_artifacts = (
+        "report.json", "normalizer.json", "r44_dataset_manifest.json",
+        "sample_coverage.json", "training_config.json", "dataset_hashes.json",
+        "budget.json",
+    )
+    for name in required_artifacts:
+        artifact = report_dir / name
+        if name not in listed or not artifact.is_file():
+            raise ValueError(f"preflight artifact is missing from SHA256SUMS: {name}")
+        if sha256_file(artifact) != listed[name]:
+            raise ValueError(f"preflight artifact SHA256 mismatch: {name}")
+    if sha256_file(report_dir / "normalizer.json") != plan["delta_normalizer_sha256"]:
+        raise ValueError("preflight normalizer.json differs from the trainer's delta-normalizer file")
+    if sha256_file(report_dir / "r44_dataset_manifest.json") != plan["dataset_manifest_sha256"]:
+        raise ValueError("preflight dataset manifest differs from the trainer's dataset-manifest file")
+
+    config = json.loads((report_dir / "training_config.json").read_text(encoding="utf-8"))
+    expected_lora = {
+        "r": LORA_R, "lora_alpha": LORA_ALPHA, "scale": LORA_SCALE,
+        "lora_dropout": 0.0, "target_modules": list(LORA_TARGET_MODULES),
+    }
+    if config.get("target_representation") != "joint_delta_v1" or config.get("lora") != expected_lora:
+        raise ValueError("preflight training_config target/LoRA contract differs from R44")
+    if config.get("epochs_max") != expected_epochs or config.get("epochs_min") != expected_epochs:
+        raise ValueError("preflight training_config does not require five full epochs")
+    if config.get("early_stopping_patience") != 0:
+        raise ValueError("preflight training_config must disable early stopping")
+    if config.get("n_train_samples") != plan["n_train"] or config.get("normalizer_sha256") != plan["delta_payload"]["sha256"]:
+        raise ValueError("preflight training_config TRAIN count/normalizer identity mismatch")
+    opt = config.get("optimizer") or {}
+    if opt.get("lr") != 5e-4 or opt.get("projector_lr_scale") != 0.1:
+        raise ValueError("preflight optimizer contract differs from the frozen R44 configuration")
+
+    return {
+        "path": str(path),
+        "sha256": sha256_file(path),
+        "source_sha": source_sha,
+        "status": report["status"],
+        "required_gpu_hours": float(budget["required_gpu_hours"]),
+        "check_count": len(checks),
+        "training_config_path": str(report_dir / "training_config.json"),
+    }
+
+
 def build_label_block(prompt_ids, action_token_ids, stop_token_id: int = STOP_TOKEN_ID) -> dict:
     """Pure-Python label contract: ignored prompt, 14 legal action tokens, then STOP."""
     prompt = [int(x) for x in prompt_ids]
