@@ -128,6 +128,9 @@ def validate_resume_compatibility(run_meta: dict, args, plan: dict, base_identit
         "scheduler": scheduler_info,
         "early_stopping_patience": int(args.early_stopping_patience),
         "checkpoint_every_steps": int(args.checkpoint_every_steps),
+        "approved_gpu_budget_hours": float(args.gpu_budget_hours),
+        "runtime_stop_margin_seconds": float(args.runtime_stop_margin_seconds),
+        "budget_accounting_every_steps": int(args.budget_accounting_every_steps),
     }
     for key, value in expected.items():
         if run_meta.get(key) != value:
@@ -1389,6 +1392,7 @@ def parse_args(argv=None):
     ap.add_argument("--model-load-seconds", type=float, default=116.257)
     ap.add_argument("--budget-margin-fraction", type=float, default=0.05)
     ap.add_argument("--runtime-stop-margin-seconds", type=float, default=600.0)
+    ap.add_argument("--budget-accounting-every-steps", type=int, default=50)
     ap.add_argument("--gpu-budget-hours", type=float, default=0.0)
     ap.add_argument("--formal-training-authorized", action="store_true")
     ap.add_argument("--preflight-only", action="store_true")
@@ -1444,6 +1448,8 @@ def main(argv=None) -> int:
         raise SystemExit("resource-check-every must be >= 1")
     if args.checkpoint_every_steps < 1:
         raise SystemExit("checkpoint-every-steps must be >= 1")
+    if args.budget_accounting_every_steps < 1:
+        raise SystemExit("budget-accounting-every-steps must be >= 1")
     for name in ("hdf5_root", "feature_normalizer", "delta_normalizer", "dataset_manifest", "base_model"):
         if not getattr(args, name):
             raise SystemExit(f"--{name.replace('_', '-')} is required; do not guess the server path")
