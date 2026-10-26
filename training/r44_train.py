@@ -432,6 +432,17 @@ def validate_gpu_smoke_report(
         raise ValueError("GPU smoke resource mode differs from the formal training configuration")
     if bool(report.get("gradient_checkpointing")) != bool(args.gradient_checkpointing):
         raise ValueError("GPU smoke gradient-checkpointing setting differs from formal training")
+    if bool(report.get("include_task_token")) != bool(args.include_task_token):
+        raise ValueError("GPU smoke task-token prompt mode differs from formal training")
+    if int(report.get("seed", -1)) != int(args.seed):
+        raise ValueError("GPU smoke seed differs from formal training")
+    for key, expected in (
+        ("lr", float(args.lr)),
+        ("projector_lr_multiplier", float(args.projector_lr_multiplier)),
+        ("warmup_fraction", float(args.warmup_fraction)),
+    ):
+        if not math.isclose(float(report.get(key, float("nan"))), expected, rel_tol=0, abs_tol=1e-12):
+            raise ValueError(f"GPU smoke {key} differs from formal training")
     if float(report.get("expected_peak_gpu_memory_gb", -1)) != float(args.expected_peak_gpu_memory_gb):
         raise ValueError("GPU smoke expected-peak memory threshold differs from formal training")
     cap = report.get("max_process_memory_gb")
@@ -528,6 +539,7 @@ def validate_gpu_smoke_report(
         "peak_reserved_gb": float(report["measured_peak_reserved_gb"]),
         "global_free_memory_after_step_gb": free_after,
         "base_model_identity": report.get("base_model_identity"),
+        "model_info": model_info,
     }
 
 
@@ -1553,6 +1565,14 @@ def main(argv=None) -> int:
                     for t in TASKS}
     model_info["prompt_text_sha256"] = {t: hashlib.sha256(prompt_texts[t].encode()).hexdigest() for t in TASKS}
     model_info["prompt_token_ids_sha256"] = {t: sha256_json(prompt_ids[t]) for t in TASKS}
+    smoke_model_info = smoke_info["model_info"]
+    for key in (
+        "runtime_contract", "modeling_sha256", "lora_config", "target_module_count",
+        "trainable_lora_parameter_count", "projector_parameter_count",
+        "prompt_text_sha256", "prompt_token_ids_sha256",
+    ):
+        if smoke_model_info.get(key) != model_info.get(key):
+            raise RuntimeError(f"GPU smoke model contract mismatch for model_info.{key}")
     model_info["memory_cap"] = memory_cap_info
     total_steps = plan["n_train"] * args.epochs
     optimizer, scheduler, scheduler_info = make_optimizer_and_scheduler(vla, projector, args, total_steps)
