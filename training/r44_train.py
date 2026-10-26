@@ -1218,6 +1218,7 @@ def load_run_state(out_dir: Path) -> dict:
 def evaluate_dev(
     torch, proc, vla, projector, plan, state_cache, prompts, prompt_ids, args, modules, stop_controller,
     *, runtime_deadline: float | None = None,
+    budget_accounting_callback=None,
 ):
     import numpy as np
     _R11, _R, _TC, M2, TN, D = modules
@@ -1236,6 +1237,8 @@ def evaluate_dev(
     with torch.no_grad():
         for i, (task, episode, t) in enumerate(plan["dev_samples"]):
             if i % 100 == 0:
+                if budget_accounting_callback is not None:
+                    budget_accounting_callback()
                 if runtime_deadline is not None and time.monotonic() >= runtime_deadline:
                     stop_controller.request_stop("approved_gpu_budget_deadline")
                 stop_controller.observe_cuda_free_memory()
@@ -1847,7 +1850,8 @@ def main(argv=None) -> int:
                 if not already_evaluated:
                     eval_result = evaluate_dev(torch, proc, vla, projector, plan, state_cache,
                                                prompts, prompt_ids, args, modules, stop_controller,
-                                               runtime_deadline=runtime_deadline)
+                                               runtime_deadline=runtime_deadline,
+                                               budget_accounting_callback=lambda: record_budget("dev_evaluation"))
                     if not eval_result["complete"]:
                         status = "STOPPED_SAFE"
                         save_run_state(out_dir, {**run_state, "status": status,
