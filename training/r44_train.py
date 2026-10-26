@@ -352,6 +352,115 @@ def validate_preflight_report(
     }
 
 
+def validate_gpu_smoke_report(
+    report_path: os.PathLike[str] | str,
+    plan: dict,
+    preflight_info: dict,
+    args,
+    *,
+    source_sha: str,
+    expected_base_identity: dict | None = None,
+) -> dict:
+    """Require a same-source, same-data one-step GPU smoke and measured checkpoint serialization."""
+    path = Path(report_path).expanduser().resolve()
+    if not path.is_file():
+        raise ValueError(f"R44 GPU smoke report does not exist: {path}")
+    report = json.loads(path.read_text(encoding="utf-8"))
+    if report.get("schema") != "r44-gpu-smoke/v1" or report.get("status") != "PASS_SMOKE":
+        raise ValueError(f"GPU smoke is not a PASS_SMOKE artifact: {report.get('status')!r}")
+    if report.get("source_sha") != source_sha or source_sha == "UNKNOWN_RUNTIME_SHA":
+        raise ValueError(
+            f"GPU smoke source SHA {report.get('source_sha')} != current source SHA {source_sha}"
+        )
+    if report.get("formal_training") is not False or report.get("weights_exported") is not False:
+        raise ValueError("GPU smoke must be disposable, not formal training or a weight export")
+    if report.get("checkpoint_exported") is not False:
+        raise ValueError("GPU smoke must not leave a persistent checkpoint")
+    if int(report.get("optimizer_steps_executed", 0)) != 1:
+        raise ValueError("GPU smoke must execute exactly one disposable optimizer step")
+    if report.get("resource_mode") != args.resource_mode:
+        raise ValueError("GPU smoke resource mode differs from the formal training configuration")
+    if bool(report.get("gradient_checkpointing")) != bool(args.gradient_checkpointing):
+        raise ValueError("GPU smoke gradient-checkpointing setting differs from formal training")
+    if float(report.get("expected_peak_gpu_memory_gb", -1)) != float(args.expected_peak_gpu_memory_gb):
+        raise ValueError("GPU smoke expected-peak memory threshold differs from formal training")
+    cap = report.get("max_process_memory_gb")
+    if args.max_process_memory_gb is None:
+        if cap is not None:
+            raise ValueError("GPU smoke used a memory cap but formal training did not")
+    elif cap is None or not math.isclose(float(cap), float(args.max_process_memory_gb), rel_tol=0, abs_tol=1e-6):
+        raise ValueError("GPU smoke allocator cap differs from formal training")
+
+    gpu_before = report.get("gpu_before") or {}
+    if gpu_before.get("uuid") != args.expected_gpu_uuid:
+        raise ValueError("GPU smoke ran on a different GPU UUID")
+    cpu = report.get("cpu_contracts") or {}
+    expected_contracts = {
+        "train_samples": plan["n_train"],
+        "dev_samples": plan["n_dev"],
+        "train_samples_sha256": plan["train_samples_sha256"],
+        "dev_samples_sha256": plan["dev_samples_sha256"],
+        "split_sha256": plan["split_sha256"],
+        "feature_normalizer_sha256": plan["feature_normalizer_sha256"],
+        "delta_normalizer_sha256": plan["delta_normalizer_sha256"],
+        "dataset_manifest_sha256": plan["dataset_manifest_sha256"],
+        "preflight_report_sha256": preflight_info["sha256"],
+    }
+    for key, value in expected_contracts.items():
+        if cpu.get(key) != value:
+            raise ValueError(f"GPU smoke data contract mismatch for {key}")
+    model_info = report.get("model_info") or {}
+    expected_lora = {
+        "r": LORA_R, "lora_alpha": LORA_ALPHA, "scale": LORA_SCALE,
+        "target_modules": list(LORA_TARGET_MODULES), "dropout": 0.0,
+    }
+    if model_info.get("lora_config") != expected_lora:
+        raise ValueError("GPU smoke LoRA configuration differs from the frozen R44 contract")
+    if report.get("peak_within_expected_peak") is not True:
+        raise ValueError("GPU smoke peak allocated memory exceeds the configured expected peak")
+    if report.get("peak_within_allocator_cap") is False:
+        raise ValueError("GPU smoke peak memory exceeds the configured process allocator cap")
+    if report.get("memory_budget_verdict") != "PASS_WITHIN_EXPECTED_PEAK":
+        raise ValueError("GPU smoke memory-budget verdict is not PASS")
+    free_after = float(report.get("global_free_memory_after_step_gb", float("nan")))
+    if not math.isfinite(free_after) or free_after < float(args.min_free_gpu_gb):
+        raise ValueError(
+            f"GPU smoke post-step global free memory {free_after!r} GiB is below "
+            f"the required reserve {args.min_free_gpu_gb:.3f} GiB"
+        )
+    checkpoint_bytes = int(report.get("checkpoint_state_bytes", 0))
+    if report.get("checkpoint_size_status") != "MEASURED" or checkpoint_bytes <= 0:
+        raise ValueError("GPU smoke did not measure full-state checkpoint serialization size")
+    if int(report.get("checkpoint_every_steps", -1)) != int(args.checkpoint_every_steps):
+        raise ValueError("GPU smoke checkpoint cadence differs from formal training")
+    if int(report.get("epochs_max", -1)) != int(args.epochs):
+        raise ValueError("GPU smoke epoch budget differs from formal training")
+    expected_checkpoints = math.ceil(
+        plan["n_train"] * int(args.epochs) / int(args.checkpoint_every_steps)
+    ) + int(args.epochs) + 1
+    if int(report.get("checkpoint_count_estimate", -1)) != expected_checkpoints:
+        raise ValueError("GPU smoke checkpoint-count estimate differs from the formal training plan")
+    expected_storage_gb = checkpoint_bytes * expected_checkpoints / (1024**3)
+    measured_storage_gb = float(report.get("estimated_checkpoint_storage_gb", float("nan")))
+    if not math.isfinite(measured_storage_gb) or measured_storage_gb + 1e-6 < expected_storage_gb:
+        raise ValueError("GPU smoke checkpoint-storage estimate is missing or understated")
+    if expected_base_identity is not None and report.get("base_model_identity") != expected_base_identity:
+        raise ValueError("GPU smoke base-model identity differs from the selected OpenVLA-7B weights")
+
+    return {
+        "path": str(path),
+        "sha256": sha256_file(path),
+        "source_sha": source_sha,
+        "checkpoint_state_bytes": checkpoint_bytes,
+        "checkpoint_count_estimate": expected_checkpoints,
+        "estimated_checkpoint_storage_gb": expected_storage_gb,
+        "peak_allocated_gb": float(report["measured_peak_allocated_gb"]),
+        "peak_reserved_gb": float(report["measured_peak_reserved_gb"]),
+        "global_free_memory_after_step_gb": free_after,
+        "base_model_identity": report.get("base_model_identity"),
+    }
+
+
 def build_label_block(prompt_ids, action_token_ids, stop_token_id: int = STOP_TOKEN_ID) -> dict:
     """Pure-Python label contract: ignored prompt, 14 legal action tokens, then STOP."""
     prompt = [int(x) for x in prompt_ids]
