@@ -129,6 +129,29 @@ class R44StopController:
             self._low_memory_count = 0
         return self.stop_requested
 
+    def observe_cuda_free_memory(self) -> bool:
+        """Query the current CUDA device and apply the configured memory guard.
+
+        Call only from the actual training process, at a configurable safe
+        polling cadence. A failed probe fails closed by requesting a safe stop.
+        This guards memory availability, not GPU compute utilization.
+        """
+        if self.should_stop():
+            return True
+        if self.min_free_gpu_bytes is None:
+            return False
+        try:
+            import torch
+
+            if not torch.cuda.is_available():
+                self.request_stop("cuda_unavailable_for_resource_guard")
+                return True
+            free_bytes, _total_bytes = torch.cuda.mem_get_info()
+        except Exception as exc:
+            self.request_stop(f"gpu_memory_probe_failed:{type(exc).__name__}")
+            return True
+        return self.observe_gpu_free_memory(int(free_bytes))
+
     def should_stop(self) -> bool:
         self.poll_stop_file()
         return self.stop_requested
