@@ -9,6 +9,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import math
 import os
 import sys
 import time
@@ -167,15 +168,34 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--base-seed", type=int, default=0)
     ap.add_argument("--epochs", type=int, default=5)
-    ap.add_argument("--min-epochs", type=int, default=2)
+    ap.add_argument("--min-epochs", type=int, default=5,
+                    help="formal R44 has early stopping disabled; this must equal --epochs")
     ap.add_argument("--sec-per-step", type=float, default=3.9135,
                     help="measured wall clock per optimizer step (m2_two_2000: 7827 s / 2000)")
     ap.add_argument("--sec-per-dev-frame", type=float, default=0.36,
                     help="measured forward-only cost per DEV frame (R43 path A: 359 ms/token)")
+    ap.add_argument("--model-load-seconds", type=float, default=116.257)
+    ap.add_argument("--budget-margin-fraction", type=float, default=0.05)
+    ap.add_argument("--checkpoint-every-steps", type=int, default=5000)
     ap.add_argument("--gpu-hours-available", type=float, default=0.0,
                     help="approved GPU-hours for this run; 0 means no budget was approved")
     ap.add_argument("--roundtrip-samples", type=int, default=400)
     args = ap.parse_args()
+    if args.epochs != 5 or args.min_epochs != args.epochs:
+        print("BLOCKED: formal R44 requires exactly 5 epochs with early stopping disabled", file=sys.stderr)
+        return 2
+    if args.checkpoint_every_steps < 1:
+        print("BLOCKED: --checkpoint-every-steps must be >= 1", file=sys.stderr)
+        return 2
+    time_values = (args.sec_per_step, args.sec_per_dev_frame, args.model_load_seconds,
+                   args.budget_margin_fraction, args.gpu_hours_available)
+    if not all(math.isfinite(float(x)) for x in time_values):
+        print("BLOCKED: budget timing values must be finite", file=sys.stderr)
+        return 2
+    if min(args.sec_per_step, args.sec_per_dev_frame, args.model_load_seconds,
+           args.budget_margin_fraction, args.gpu_hours_available) < 0:
+        print("BLOCKED: budget timing values must be non-negative", file=sys.stderr)
+        return 2
 
     out = os.path.abspath(os.path.expanduser(args.out))
     if os.path.exists(out):
@@ -284,7 +304,7 @@ def main():
         if not cov["complete"]:
             raise D.R44ContractError("epoch %d is not a complete permutation" % ep)
     check("epoch_complete_no_replacement_5_epochs",
-          all(e["complete"] and e["unique_seen"] == n_train for e in epochs),
+          args.epochs == 5 and all(e["complete"] and e["unique_seen"] == n_train for e in epochs),
           {"epochs": len(epochs), "unique_seen": n_train, "min_visits": 1, "max_visits": 1})
     save_json(os.path.join(out, "sample_coverage.json"),
               {"n_train": n_train, "base_seed": args.base_seed, "epochs": epochs,
@@ -296,8 +316,10 @@ def main():
     min_h = steps_per_epoch * args.min_epochs * args.sec_per_step / 3600.0
     dev_h = n_dev * args.sec_per_dev_frame / 3600.0
     dev_total_h = dev_h * args.epochs
-    ckpt_bytes = 2_200_000_000
-    n_ckpt = args.epochs * 4
+    model_load_h = args.model_load_seconds / 3600.0
+    base_total_h = train_h + dev_total_h + model_load_h
+    required_h = base_total_h * (1.0 + args.budget_margin_fraction)
+    n_ckpt = math.ceil(total_steps / args.checkpoint_every_steps) + args.epochs + 1
     budget = {
         "n_train_samples": n_train, "n_dev_samples": n_dev,
         "steps_per_epoch": steps_per_epoch, "max_epochs": args.epochs,
@@ -305,28 +327,42 @@ def main():
         "min_epochs": args.min_epochs,
         "min_optimizer_steps": steps_per_epoch * args.min_epochs,
         "sec_per_step": args.sec_per_step,
+        "sec_per_dev_frame": args.sec_per_dev_frame,
+        "model_load_seconds": args.model_load_seconds,
+        "margin_fraction": args.budget_margin_fraction,
         "train_gpu_hours_max": train_h, "train_gpu_hours_min": min_h,
         "dev_eval_hours_per_epoch": dev_h, "dev_eval_hours_total": dev_total_h,
-        "checkpoints": {"count": n_ckpt, "bytes_each": ckpt_bytes,
-                        "total_gb": n_ckpt * ckpt_bytes / 1e9},
+        "model_load_hours_estimate": model_load_h,
+        "base_total_hours_estimate": base_total_h,
+        "required_gpu_hours": required_h,
+        "checkpoints": {
+            "count_estimate": n_ckpt,
+            "checkpoint_every_steps": args.checkpoint_every_steps,
+            "bytes_each_estimate": None,
+            "total_gb_estimate": None,
+            "status": "UNKNOWN_NOT_MEASURED",
+            "note": "R44 q_proj/v_proj full-state checkpoint size must be measured by the disposable GPU smoke before formal training",
+        },
         "total_gpu_hours_max": train_h + dev_total_h,
         "gpu_hours_available": args.gpu_hours_available,
-        "sufficient": args.gpu_hours_available >= train_h + dev_total_h,
-        "note": ("sec_per_step is measured, not assumed: m2_two_2000_20261021T123314Z ran "
-                 "2000 steps between 12:33:22Z and 14:43:49Z = 7827 s"),
+        "sufficient": args.gpu_hours_available >= required_h,
+        "note": ("sec_per_step is a historical measured reference, not an R44 measured rate: "
+                 "m2_two_2000_20261021T123314Z ran 2000 steps between 12:33:22Z and 14:43:49Z = 7827 s"),
     }
     save_json(os.path.join(out, "budget.json"), budget)
     save_json(os.path.join(out, "training_config.json"), {
         "target_representation": D.CONTRACT_ID,
         "target": D.TARGET_DESCRIPTION,
-        "lora": {"r": 32, "lora_alpha": 32, "lora_dropout": 0.0,
+        "lora": {"r": 32, "lora_alpha": 16, "scale": 0.5, "lora_dropout": 0.0,
                  "target_modules": ["q_proj", "v_proj"]},
-        "optimizer": {"name": "AdamW", "weight_decay": 0.0, "grad_clip": 1.0,
+        "optimizer": {"name": "AdamW", "lr": 5e-4, "weight_decay": 0.0, "grad_clip": 1.0,
                       "projector_lr_scale": 0.1},
         "sampler": {"type": "epoch_complete_no_replacement", "base_seed": args.base_seed},
-        "epochs_max": args.epochs, "epochs_min": args.min_epochs,
+        "epochs_max": args.epochs, "epochs_min": args.epochs,
+        "early_stopping_patience": 0,
         "dev_eval_every_epoch": True,
-        "checkpoint_every_fraction_of_epoch": 0.25,
+        "checkpoint_every_steps": args.checkpoint_every_steps,
+        "checkpoint_size_status": "UNKNOWN_NOT_MEASURED",
         "precision": "bf16",
         "normalizer_sha256": payload["sha256"],
         "n_train_samples": n_train,
@@ -371,7 +407,7 @@ def main():
 
     budget_ok = budget["sufficient"]
     check("gpu_budget_covers_the_approved_plan", budget_ok,
-          {"required_gpu_hours": round(budget["total_gpu_hours_max"], 1),
+          {"required_gpu_hours": round(budget["required_gpu_hours"], 1),
            "approved_gpu_hours": args.gpu_hours_available})
     report["budget"] = budget
     status, failed_checks = final_preflight_status(report["checks"], budget_ok)
