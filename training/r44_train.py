@@ -407,6 +407,12 @@ def validate_gpu_smoke_report(
     path = Path(report_path).expanduser().resolve()
     if not path.is_file():
         raise ValueError(f"R44 GPU smoke report does not exist: {path}")
+    sums_path = path.parent / "SHA256SUMS.json"
+    if not sums_path.is_file():
+        raise ValueError("GPU smoke SHA256SUMS.json is missing")
+    smoke_sums = json.loads(sums_path.read_text(encoding="utf-8"))
+    if smoke_sums.get(path.name) != sha256_file(path):
+        raise ValueError("GPU smoke report SHA256 does not match SHA256SUMS.json")
     report = json.loads(path.read_text(encoding="utf-8"))
     if report.get("schema") != "r44-gpu-smoke/v1" or report.get("status") != "PASS_SMOKE":
         raise ValueError(f"GPU smoke is not a PASS_SMOKE artifact: {report.get('status')!r}")
@@ -414,6 +420,8 @@ def validate_gpu_smoke_report(
         raise ValueError(
             f"GPU smoke source SHA {report.get('source_sha')} != current source SHA {source_sha}"
         )
+    if report.get("cuda_context_created") is not True:
+        raise ValueError("GPU smoke report does not prove that a CUDA context was created")
     if report.get("formal_training") is not False or report.get("weights_exported") is not False:
         raise ValueError("GPU smoke must be disposable, not formal training or a weight export")
     if report.get("checkpoint_exported") is not False:
@@ -436,6 +444,11 @@ def validate_gpu_smoke_report(
     gpu_before = report.get("gpu_before") or {}
     if gpu_before.get("uuid") != args.expected_gpu_uuid:
         raise ValueError("GPU smoke ran on a different GPU UUID")
+    free_before = float(gpu_before.get("memory_free_gb", float("nan")))
+    if not math.isfinite(free_before) or free_before < (
+        float(args.expected_peak_gpu_memory_gb) + float(args.min_free_gpu_gb)
+    ):
+        raise ValueError("GPU smoke did not start with the required global free-memory headroom")
     cpu = report.get("cpu_contracts") or {}
     expected_contracts = {
         "train_samples": plan["n_train"],
@@ -473,6 +486,21 @@ def validate_gpu_smoke_report(
     checkpoint_bytes = int(report.get("checkpoint_state_bytes", 0))
     if report.get("checkpoint_size_status") != "MEASURED" or checkpoint_bytes <= 0:
         raise ValueError("GPU smoke did not measure full-state checkpoint serialization size")
+    if report.get("checkpoint_serialization_mode") != "in-memory only; no checkpoint file written":
+        raise ValueError("GPU smoke checkpoint serialization must be in-memory and non-persistent")
+    if int(report.get("trainable_lora_parameter_count", 0)) <= 0 or int(report.get("projector_parameter_count", 0)) <= 0:
+        raise ValueError("GPU smoke did not verify non-empty LoRA and 42D projector trainables")
+    total_steps = plan["n_train"] * int(args.epochs)
+    expected_scheduler = {
+        "total_steps": total_steps,
+        "warmup_steps": max(1, int(total_steps * float(args.warmup_fraction))),
+        "decay": "linear_to_zero",
+        "warmup_fraction": float(args.warmup_fraction),
+        "lr_lora": float(args.lr),
+        "lr_projector": float(args.lr) * float(args.projector_lr_multiplier),
+    }
+    if report.get("scheduler_info") != expected_scheduler:
+        raise ValueError("GPU smoke scheduler differs from the formal training schedule")
     if int(report.get("checkpoint_every_steps", -1)) != int(args.checkpoint_every_steps):
         raise ValueError("GPU smoke checkpoint cadence differs from formal training")
     if int(report.get("epochs_max", -1)) != int(args.epochs):
