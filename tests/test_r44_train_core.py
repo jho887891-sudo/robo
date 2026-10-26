@@ -17,7 +17,7 @@ from training.r44_train import (
     verify_delta_normalizer_matches_train, TASKS, should_early_stop,
     validate_preflight_report, validate_gpu_smoke_report,
     budget_remaining_seconds, load_budget_ledger, persist_budget_ledger,
-    run_artifact_manifest_path, write_run_artifact_manifest,
+    run_artifact_manifest_path, write_run_artifact_manifest, write_failure_evidence,
 )
 from training import r44_delta_v1 as D
 from diagnostics.r44_gpu_smoke import main as gpu_smoke_main
@@ -265,6 +265,19 @@ class R44TrainerCoreTests(unittest.TestCase):
         args.epochs = 4
         with self.assertRaisesRegex(ValueError, "epochs_max"):
             validate_resume_compatibility(meta, args, plan, base, model, scheduler, "commit")
+
+    def test_failure_evidence_is_append_only_and_never_overwrites(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            first = write_failure_evidence(out, {
+                "status": "FAIL_RESOURCE_OOM", "global_step": 12, "detail": "first failure",
+            })
+            second = write_failure_evidence(out, {
+                "status": "FAIL_RESOURCE_OOM", "global_step": 12, "detail": "second failure",
+            })
+            self.assertNotEqual(first, second)
+            self.assertEqual(json.loads(first.read_text(encoding="utf-8"))["detail"], "first failure")
+            self.assertEqual(json.loads(second.read_text(encoding="utf-8"))["detail"], "second failure")
 
     def test_run_artifact_manifest_hashes_logs_and_preserves_prior_manifests(self):
         with tempfile.TemporaryDirectory() as tmp:
