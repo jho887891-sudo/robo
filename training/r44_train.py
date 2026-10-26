@@ -1596,6 +1596,22 @@ def main(argv=None) -> int:
         )
         return 2
 
+    try:
+        budget_ledger = load_budget_ledger(
+            out_dir, source_sha, args.gpu_budget_hours, resume=bool(args.resume_from)
+        )
+    except Exception as exc:
+        print(f"BLOCKED_BUDGET_LEDGER: {type(exc).__name__}: {exc}", flush=True)
+        return 2
+    base_elapsed_seconds = float(budget_ledger["cumulative_gpu_wall_seconds"])
+    available_seconds = budget_remaining_seconds(args.gpu_budget_hours, base_elapsed_seconds, 0.0)
+    if available_seconds <= args.runtime_stop_margin_seconds:
+        print(
+            "BLOCKED_BUDGET_EXHAUSTED: remaining %.1f seconds cannot cover the %.1f-second safe-stop margin"
+            % (available_seconds, args.runtime_stop_margin_seconds), flush=True
+        )
+        return 2
+
     # Serialize repo-managed heavy GPU jobs before hashing/loading the base model.
     gpu_lock = acquire_gpu_lane_lock(args)
     # Base-model identity is CPU/file based. Do it before creating a CUDA context.
@@ -1619,8 +1635,8 @@ def main(argv=None) -> int:
         return 2
     gpu_before = gpu_snapshot(args)
     job_start_monotonic = time.monotonic()
-    runtime_deadline = job_start_monotonic + max(
-        0.0, args.gpu_budget_hours * 3600.0 - args.runtime_stop_margin_seconds
+    runtime_deadline = job_start_monotonic + budget_remaining_seconds(
+        args.gpu_budget_hours, base_elapsed_seconds, args.runtime_stop_margin_seconds
     )
 
     import torch
@@ -1661,6 +1677,15 @@ def main(argv=None) -> int:
     run_state = load_run_state(out_dir)
     global_step, epoch, cursor = 0, 0, 0
     order = D.EpochSampler(plan["n_train"], args.seed, epoch).order
+
+    def record_budget(reason: str) -> float:
+        return persist_budget_ledger(
+            out_dir, source_sha=source_sha,
+            approved_gpu_budget_hours=args.gpu_budget_hours,
+            base_elapsed_seconds=base_elapsed_seconds,
+            process_start_monotonic=job_start_monotonic,
+            global_step=global_step, reason=reason,
+        )
     last_checkpoint = None
     resumed = False
 
@@ -1718,6 +1743,10 @@ def main(argv=None) -> int:
             "tasks": list(TASKS), "epochs_max": args.epochs, "min_epochs": args.min_epochs,
             "early_stopping_patience": args.early_stopping_patience,
             "checkpoint_every_steps": args.checkpoint_every_steps,
+            "approved_gpu_budget_hours": float(args.gpu_budget_hours),
+            "runtime_stop_margin_seconds": float(args.runtime_stop_margin_seconds),
+            "budget_accounting_every_steps": int(args.budget_accounting_every_steps),
+            "budget_ledger_path": str(out_dir / "budget_ledger.json"),
             "target_representation": "joint_delta_v1", "train_samples_per_epoch": plan["n_train"],
             "dev_samples_per_epoch": plan["n_dev"], "train_samples_sha256": plan["train_samples_sha256"],
             "dev_samples_sha256": plan["dev_samples_sha256"], "split_sha256": plan["split_sha256"],
@@ -1747,6 +1776,9 @@ def main(argv=None) -> int:
                      "stale_epochs": 0, "completed_epochs": 0, "global_step": 0}
         save_run_state(out_dir, run_state)
 
+    if resumed:
+        record_budget("resume_loaded")
+
     if stop_controller.should_stop():
         state = checkpoint_state(torch, vla, projector, optimizer, scheduler,
                                  epoch=epoch, cursor=cursor, order=order, global_step=global_step,
@@ -1754,6 +1786,7 @@ def main(argv=None) -> int:
                                  prompts=prompts, prompt_ids=prompt_ids, run_state=run_state,
                                  reason=stop_controller.reason)
         last_checkpoint = str(save_checkpoint(out_dir, state, suffix="stop"))
+        record_budget("safe_stop_before_next_step")
         save_run_state(out_dir, {**run_state, "status": "STOPPED_SAFE",
                                  "stop_reason": stop_controller.reason, "last_checkpoint": last_checkpoint,
                                  "global_step": global_step})
@@ -1796,6 +1829,7 @@ def main(argv=None) -> int:
                                  prompts=prompts, prompt_ids=prompt_ids, run_state=run_state)
         last_checkpoint = str(save_checkpoint(out_dir, state, suffix="initial"))
         save_run_state(out_dir, {**run_state, "status": "RUNNING", "last_checkpoint": last_checkpoint})
+        record_budget("initial_checkpoint")
     status = "RUNNING"
     try:
         vla.train()
