@@ -155,6 +155,7 @@ def main(argv=None) -> int:
         "projector_lr_multiplier": args.projector_lr_multiplier,
         "warmup_fraction": args.warmup_fraction,
         "expected_peak_gpu_memory_gb": args.expected_peak_gpu_memory_gb,
+        "min_free_gpu_gb": args.min_free_gpu_gb,
         "max_process_memory_gb": args.max_process_memory_gb,
     }
     gpu_lock = None
