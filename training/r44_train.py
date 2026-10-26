@@ -2101,17 +2101,24 @@ def main(argv=None) -> int:
             save_run_state(out_dir, {**run_state, "status": status, "global_step": global_step,
                                      "last_checkpoint": last_checkpoint, "utc_end": utcnow()})
         cumulative_budget_seconds = record_budget("process_exit")
+        artifact_manifest_path = run_artifact_manifest_path(out_dir, status, global_step)
         atomic_json(out_dir / "exit_report.json", {
             "status": status, "utc_end": utcnow(), "global_step": global_step,
             "approved_gpu_budget_hours": args.gpu_budget_hours,
             "cumulative_gpu_wall_seconds": cumulative_budget_seconds,
             "budget_ledger_path": str(out_dir / "budget_ledger.json"),
+            "artifact_manifest_path": str(artifact_manifest_path),
             "epoch": epoch + 1, "cursor": cursor, "last_checkpoint": last_checkpoint,
             "gpu_before": gpu_before, "gpu_after": gpu_snapshot(args, enforce_headroom=False),
             "peak_memory_gb": float(torch.cuda.max_memory_allocated()) / (1024**3),
             "training_started": True, "resource_mode": args.resource_mode,
             "gpu_lock_path": gpu_lock.path,
         })
+        write_run_artifact_manifest(
+            out_dir, artifact_manifest_path, source_sha=source_sha,
+            status=status, global_step=global_step,
+        )
+        print(f"[R44] run artifact manifest: {artifact_manifest_path}", flush=True)
         return 0 if status in ("COMPLETED", "EARLY_STOPPED", "STOPPED_SAFE") else 3
     finally:
         stop_controller.restore_signal_handlers()
