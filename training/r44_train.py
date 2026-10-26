@@ -272,6 +272,11 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
             raise ValueError(f"{key}: HDF5 content SHA256/size mismatch against manifest")
         file_stats_before[key] = before
 
+    train_rows_by_task = {t: sum(1 for sample in train_samples if sample[0] == t) for t in TASKS}
+    for task in TASKS:
+        got = int(delta_payload["tasks"][task]["n_rows"])
+        if got != train_rows_by_task[task]:
+            raise ValueError(f"{task}: delta normalizer TRAIN row count {got} != full sample index {train_rows_by_task[task]}")
     train_hash = sha256_json([[t, ep, int(i)] for t, ep, i in train_samples])
     dev_hash = sha256_json([[t, ep, int(i)] for t, ep, i in dev_samples])
     return {
@@ -295,7 +300,7 @@ def verify_files_unchanged(plan: dict) -> None:
             raise RuntimeError(f"{key}: HDF5 file identity changed during the run")
 
 
-def gpu_snapshot(args) -> dict:
+def gpu_snapshot(args, *, enforce_headroom: bool = True) -> dict:
     import subprocess
     cmd = [
         "nvidia-smi",
@@ -321,7 +326,7 @@ def gpu_snapshot(args) -> dict:
     row = matches[0]
     row["memory_free_gb"] = row["memory_free_mib"] / 1024.0
     row["memory_total_gb"] = row["memory_total_mib"] / 1024.0
-    if row["memory_free_gb"] < args.expected_peak_gpu_memory_gb + args.min_free_gpu_gb:
+    if enforce_headroom and row["memory_free_gb"] < args.expected_peak_gpu_memory_gb + args.min_free_gpu_gb:
         raise RuntimeError(
             f"insufficient headroom: free={row['memory_free_gb']:.2f} GiB, "
             f"need peak {args.expected_peak_gpu_memory_gb:.2f} + reserve {args.min_free_gpu_gb:.2f} GiB"
@@ -428,7 +433,6 @@ def build_runtime_labels(prompt_ids, state, action, task, delta_payload, modules
     _R11, _R, _TC, _M2, _TN, D = modules
     delta = D.delta_target(state, action)
     _bins, token_ids = D.encode_delta(delta, task, delta_payload)
-    from training.r44_train import build_label_block
     lab = build_label_block(prompt_ids, [int(x) for x in token_ids], STOP_TOKEN_ID)
     return lab, delta
 
@@ -479,8 +483,7 @@ def checkpoint_state(
         "created_utc": utcnow(),
         "global_step": int(global_step), "epoch": int(epoch), "cursor": int(cursor),
         "order": [int(x) for x in order],
-        "order_sha256": hashlib.sha256(bytes()).hexdigest() if not order else
-            hashlib.sha256(__import__("numpy").asarray(order, dtype="int64").tobytes()).hexdigest(),
+        "order_sha256": hashlib.sha256(__import__("numpy").asarray(order, dtype="int64").tobytes()).hexdigest(),
         "adapter_state": get_peft_model_state_dict(vla),
         "projector_state": projector.state_dict(),
         "optimizer_state": optimizer.state_dict(),
@@ -579,6 +582,7 @@ def load_run_state(out_dir: Path) -> dict:
 
 def evaluate_dev(
     torch, proc, vla, projector, plan, state_cache, prompts, prompt_ids, args, modules, stop_controller,
+    *, runtime_deadline: float | None = None,
 ):
     import numpy as np
     _R11, _R, _TC, M2, TN, D = modules
@@ -596,9 +600,13 @@ def evaluate_dev(
     } for t in TASKS}
     with torch.no_grad():
         for i, (task, episode, t) in enumerate(plan["dev_samples"]):
-            if i % 100 == 0 and stop_controller.should_stop():
-                stop_early = True
-                break
+            if i % 100 == 0:
+                if runtime_deadline is not None and time.monotonic() >= runtime_deadline:
+                    stop_controller.request_stop("approved_gpu_budget_deadline")
+                stop_controller.observe_cuda_free_memory()
+                if stop_controller.should_stop():
+                    stop_early = True
+                    break
             states, actions = state_cache[(task, episode)]
             row = M2.build_row(states, actions, int(t), TN.contract_for(plan["feature_payload"], task),
                                task, episode=episode)
@@ -747,6 +755,7 @@ def parse_args(argv=None):
     ap.add_argument("--seconds-per-dev-sample", type=float, default=0.36)
     ap.add_argument("--model-load-seconds", type=float, default=116.257)
     ap.add_argument("--budget-margin-fraction", type=float, default=0.05)
+    ap.add_argument("--runtime-stop-margin-seconds", type=float, default=600.0)
     ap.add_argument("--gpu-budget-hours", type=float, default=0.0)
     ap.add_argument("--formal-training-authorized", action="store_true")
     ap.add_argument("--preflight-only", action="store_true")
@@ -767,6 +776,9 @@ def main(argv=None) -> int:
         raise SystemExit("epochs must be 1..5 and min-epochs must be within 1..epochs")
     if args.cams != 3:
         raise SystemExit("R44 frozen contract requires exactly 3 cameras")
+    base_model_path = Path(args.base_model).expanduser().resolve() if args.base_model else None
+    if base_model_path is None or not base_model_path.is_dir() or not (base_model_path / "config.json").is_file():
+        raise SystemExit("--base-model must point to the exact local OpenVLA-7B directory containing config.json")
     if args.resource_check_every < 1:
         raise SystemExit("resource-check-every must be >= 1")
     for name in ("hdf5_root", "feature_normalizer", "delta_normalizer", "dataset_manifest", "base_model"):
@@ -873,6 +885,10 @@ def main(argv=None) -> int:
     if args.resume_from:
         ckpt_path = Path(args.resume_from).expanduser().resolve()
         state = load_checkpoint(ckpt_path, torch, plan)
+        if state.get("base_model_identity") != base_identity:
+            raise RuntimeError("checkpoint base-model identity differs from the selected local model")
+        if state.get("model_info", {}).get("modeling_sha256") != model_info.get("modeling_sha256"):
+            raise RuntimeError("checkpoint active modeling_prismatic.py identity differs from this runtime")
         from peft.utils.save_and_load import set_peft_model_state_dict
         set_peft_model_state_dict(vla, state["adapter_state"])
         projector.load_state_dict(state["projector_state"])
@@ -932,10 +948,46 @@ def main(argv=None) -> int:
     train_path = out_dir / "train_metrics.jsonl"
     coverage_path = out_dir / "coverage.jsonl"
     dev_path = out_dir / "dev_metrics.jsonl"
+    if resumed:
+        # A crash may leave append-only logs newer than the last durable checkpoint.
+        def _rewrite_jsonl(path: Path, keep_row) -> None:
+            if not path.is_file():
+                return
+            kept = []
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                if keep_row(row):
+                    kept.append(json.dumps(row, sort_keys=True, allow_nan=False, default=str))
+            tmp = path.with_suffix(path.suffix + ".tmp")
+            with tmp.open("w", encoding="utf-8") as fh:
+                for line in kept:
+                    fh.write(line + "\n")
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(tmp, path)
+        _rewrite_jsonl(train_path, lambda row: int(row.get("global_step", -1)) <= global_step)
+        _rewrite_jsonl(coverage_path, lambda row: int(row.get("global_step", -1)) <= global_step)
+        valid_epochs = {int(x.get("epoch_completed", -1)) for x in run_state.get("dev_history", [])}
+        _rewrite_jsonl(dev_path, lambda row: int(row.get("epoch_completed", -1)) in valid_epochs
+                       and int(row.get("global_step", -1)) <= global_step)
     checkpoint_interval = plan["n_train"] // 4
     if checkpoint_interval * 4 != plan["n_train"]:
         raise RuntimeError("TRAIN sample count must divide evenly into four checkpoint intervals")
 
+    # Save a recoverable step-0 checkpoint before the first optimizer update.
+    if not resumed:
+        state = checkpoint_state(torch, vla, projector, optimizer, scheduler,
+                                 epoch=epoch, cursor=cursor, order=order, global_step=global_step,
+                                 plan=plan, base_identity=base_identity, model_info=model_info,
+                                 prompts=prompts, prompt_ids=prompt_ids, run_state=run_state)
+        last_checkpoint = str(save_checkpoint(out_dir, state, suffix="initial"))
+        save_run_state(out_dir, {**run_state, "status": "RUNNING", "last_checkpoint": last_checkpoint})
+    job_start_monotonic = time.monotonic()
+    runtime_deadline = job_start_monotonic + max(
+        0.0, args.gpu_budget_hours * 3600.0 - args.runtime_stop_margin_seconds
+    )
     status = "RUNNING"
     try:
         vla.train()
@@ -944,9 +996,13 @@ def main(argv=None) -> int:
             if cursor >= plan["n_train"]:
                 # A checkpoint exists at the completed-epoch boundary. Evaluate if not already recorded.
                 already_evaluated = int(run_state.get("completed_epochs", 0)) >= epoch + 1
+                if already_evaluated and epoch + 1 >= args.min_epochs and int(run_state.get("stale_epochs", 0)) >= args.early_stopping_patience:
+                    status = "EARLY_STOPPED"
+                    break
                 if not already_evaluated:
                     eval_result = evaluate_dev(torch, proc, vla, projector, plan, state_cache,
-                                               prompts, prompt_ids, args, modules, stop_controller)
+                                               prompts, prompt_ids, args, modules, stop_controller,
+                                               runtime_deadline=runtime_deadline)
                     if not eval_result["complete"]:
                         status = "STOPPED_SAFE"
                         save_run_state(out_dir, {**run_state, "status": status,
@@ -989,6 +1045,8 @@ def main(argv=None) -> int:
                 projector.train()
                 continue
 
+            if time.monotonic() >= runtime_deadline:
+                stop_controller.request_stop("approved_gpu_budget_deadline")
             if stop_controller.should_stop():
                 state = checkpoint_state(torch, vla, projector, optimizer, scheduler,
                                          epoch=epoch, cursor=cursor, order=order, global_step=global_step,
@@ -1001,6 +1059,18 @@ def main(argv=None) -> int:
                                          "last_checkpoint": last_checkpoint, "global_step": global_step})
                 break
 
+            if time.monotonic() >= runtime_deadline:
+                stop_controller.request_stop("approved_gpu_budget_deadline")
+                state = checkpoint_state(torch, vla, projector, optimizer, scheduler,
+                                         epoch=epoch, cursor=cursor, order=order, global_step=global_step,
+                                         plan=plan, base_identity=base_identity, model_info=model_info,
+                                         prompts=prompts, prompt_ids=prompt_ids, run_state=run_state,
+                                         reason=stop_controller.reason)
+                last_checkpoint = str(save_checkpoint(out_dir, state, suffix="budget-stop"))
+                status = "STOPPED_SAFE"
+                save_run_state(out_dir, {**run_state, "status": status, "stop_reason": stop_controller.reason,
+                                         "last_checkpoint": last_checkpoint, "global_step": global_step})
+                break
             sample_idx = int(order[cursor])
             task, episode, t = plan["train_samples"][sample_idx]
             states, actions = state_cache[(task, episode)]
@@ -1061,7 +1131,7 @@ def main(argv=None) -> int:
                 "step_wall_seconds": step_seconds, "utc": utcnow(),
             })
             append_jsonl(coverage_path, {
-                "epoch": epoch + 1, "cursor": cursor, "sample_index": sample_idx,
+                "global_step": global_step, "epoch": epoch + 1, "cursor": cursor, "sample_index": sample_idx,
                 "task": task, "episode": episode, "t": int(t),
             })
 
@@ -1106,7 +1176,7 @@ def main(argv=None) -> int:
         atomic_json(out_dir / "exit_report.json", {
             "status": status, "utc_end": utcnow(), "global_step": global_step,
             "epoch": epoch + 1, "cursor": cursor, "last_checkpoint": last_checkpoint,
-            "gpu_before": gpu_before, "gpu_after": gpu_snapshot(args),
+            "gpu_before": gpu_before, "gpu_after": gpu_snapshot(args, enforce_headroom=False),
             "peak_memory_gb": float(torch.cuda.max_memory_allocated()) / (1024**3),
             "training_started": True, "resource_mode": args.resource_mode,
         })
