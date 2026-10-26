@@ -616,6 +616,67 @@ def stat_identity(path: Path) -> tuple:
     return (int(st.st_size), int(st.st_mtime_ns), int(st.st_ino), int(st.st_dev))
 
 
+def budget_remaining_seconds(approved_gpu_budget_hours: float, elapsed_seconds: float,
+                            stop_margin_seconds: float) -> float:
+    values = (approved_gpu_budget_hours, elapsed_seconds, stop_margin_seconds)
+    if not all(math.isfinite(float(x)) for x in values):
+        raise ValueError("budget ledger values must be finite")
+    if approved_gpu_budget_hours < 0 or elapsed_seconds < 0 or stop_margin_seconds < 0:
+        raise ValueError("budget ledger values must be non-negative")
+    return max(0.0, float(approved_gpu_budget_hours) * 3600.0
+               - float(elapsed_seconds) - float(stop_margin_seconds))
+
+
+def load_budget_ledger(out_dir: Path, source_sha: str, approved_gpu_budget_hours: float,
+                       *, resume: bool) -> dict:
+    path = out_dir / "budget_ledger.json"
+    if not path.is_file():
+        if resume:
+            raise ValueError("resume requires budget_ledger.json; refusing to reset consumed GPU time")
+        return {
+            "schema": "r44-budget-ledger/v1",
+            "source_sha": source_sha,
+            "approved_gpu_budget_hours": float(approved_gpu_budget_hours),
+            "cumulative_gpu_wall_seconds": 0.0,
+            "last_global_step": 0,
+            "last_reason": "initialized-in-memory",
+        }
+    if not resume:
+        raise ValueError("fresh run refuses an existing budget_ledger.json")
+    ledger = json.loads(path.read_text(encoding="utf-8"))
+    if ledger.get("schema") != "r44-budget-ledger/v1":
+        raise ValueError("budget ledger schema mismatch")
+    if ledger.get("source_sha") != source_sha:
+        raise ValueError("budget ledger source SHA differs from this runtime")
+    if not math.isclose(
+        float(ledger.get("approved_gpu_budget_hours", float("nan"))),
+        float(approved_gpu_budget_hours), rel_tol=0.0, abs_tol=1e-9,
+    ):
+        raise ValueError("approved GPU-hour budget changed across resume; fixed budget is enforced")
+    elapsed = float(ledger.get("cumulative_gpu_wall_seconds", float("nan")))
+    if not math.isfinite(elapsed) or elapsed < 0:
+        raise ValueError("budget ledger cumulative time is invalid")
+    return ledger
+
+
+def persist_budget_ledger(
+    out_dir: Path, *, source_sha: str, approved_gpu_budget_hours: float,
+    base_elapsed_seconds: float, process_start_monotonic: float,
+    global_step: int, reason: str,
+) -> float:
+    elapsed = float(base_elapsed_seconds) + max(0.0, time.monotonic() - process_start_monotonic)
+    atomic_json(out_dir / "budget_ledger.json", {
+        "schema": "r44-budget-ledger/v1",
+        "source_sha": source_sha,
+        "approved_gpu_budget_hours": float(approved_gpu_budget_hours),
+        "cumulative_gpu_wall_seconds": elapsed,
+        "last_global_step": int(global_step),
+        "last_reason": str(reason),
+        "last_update_utc": utcnow(),
+    })
+    return elapsed
+
+
 def load_runtime_modules(args):
     """Import repository/runtime modules only after CLI parsing; no CUDA context is created here."""
     # Keep the ARX marker present for the entire process lifetime before any Prismatic import.
