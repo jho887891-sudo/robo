@@ -93,6 +93,7 @@ def validate_resume_compatibility(run_meta: dict, args, plan: dict, base_identit
     expected = {
         "source_sha": source_sha,
         "epochs_max": int(args.epochs),
+        "min_epochs": int(args.min_epochs),
         "seed": int(args.seed),
         "gradient_checkpointing": bool(args.gradient_checkpointing),
         "target_representation": "joint_delta_v1",
@@ -644,6 +645,8 @@ def load_checkpoint(path: Path, torch, plan: dict) -> dict:
     if not manifest_path.is_file() or not state_path.is_file():
         raise ValueError(f"checkpoint is incomplete: {path}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("schema") != "r44-checkpoint-manifest/v1":
+        raise ValueError("checkpoint manifest has an unknown schema")
     if sha256_file(state_path) != manifest.get("state_sha256"):
         raise ValueError("checkpoint state SHA256 mismatch")
     state = torch.load(state_path, map_location="cpu", weights_only=False)
@@ -950,6 +953,11 @@ def main(argv=None) -> int:
     if args.resource_mode == "time-window" and not args.gpu_window_confirmed:
         print("BLOCKED_GPU_WINDOW: require an explicitly agreed GPU time window", flush=True)
         return 2
+    source_sha = current_git_sha()
+    if source_sha == "UNKNOWN_RUNTIME_SHA":
+        print("BLOCKED_SOURCE_SHA: formal training requires a verifiable Git commit SHA", flush=True)
+        return 2
+
     if args.resource_mode == "shared-memory":
         if not args.accept_shared_gpu_risk or args.max_process_memory_gb is None:
             print("BLOCKED_SHARED_MODE: require --accept-shared-gpu-risk and --max-process-memory-gb", flush=True)
@@ -1036,7 +1044,7 @@ def main(argv=None) -> int:
             raise RuntimeError("resume requires the original run_meta.json")
         run_meta = json.loads(run_meta_path.read_text(encoding="utf-8"))
         validate_resume_compatibility(
-            run_meta, args, plan, base_identity, model_info, scheduler_info, current_git_sha()
+            run_meta, args, plan, base_identity, model_info, scheduler_info, source_sha
         )
         ckpt_path = Path(args.resume_from).expanduser().resolve()
         state = load_checkpoint(ckpt_path, torch, plan)
@@ -1047,6 +1055,13 @@ def main(argv=None) -> int:
             raise RuntimeError("checkpoint base-model identity differs from the selected local model")
         if state.get("model_info", {}).get("modeling_sha256") != model_info.get("modeling_sha256"):
             raise RuntimeError("checkpoint active modeling_prismatic.py identity differs from this runtime")
+        if state.get("model_info", {}).get("lora_config") != model_info.get("lora_config"):
+            raise RuntimeError("checkpoint LoRA configuration differs from this runtime")
+        if state.get("prompts") != prompts or state.get("prompt_token_ids") != prompt_ids:
+            raise RuntimeError("checkpoint task prompts/token IDs differ from this runtime")
+        for key in ("prompt_text_sha256", "prompt_token_ids_sha256"):
+            if state.get("model_info", {}).get(key) != model_info.get(key):
+                raise RuntimeError(f"checkpoint {key} differs from this runtime")
         from peft.utils.save_and_load import set_peft_model_state_dict
         set_peft_model_state_dict(vla, state["adapter_state"])
         projector.load_state_dict(state["projector_state"])
@@ -1073,7 +1088,7 @@ def main(argv=None) -> int:
             raise SystemExit("run_meta.json already exists; refusing to reuse an old output directory")
         atomic_json(out_dir / "run_meta.json", {
             "schema": "r44-run-meta/v1", "run_id": args.run_id or f"r44-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
-            "utc_start": utcnow(), "source_sha": current_git_sha(),
+            "utc_start": utcnow(), "source_sha": source_sha,
             "tasks": list(TASKS), "epochs_max": args.epochs, "min_epochs": args.min_epochs,
             "early_stopping_patience": args.early_stopping_patience,
             "target_representation": "joint_delta_v1", "train_samples_per_epoch": plan["n_train"],
