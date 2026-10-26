@@ -58,6 +58,18 @@ def sha256_json(obj: Any) -> str:
     ).hexdigest()
 
 
+def current_git_sha() -> str:
+    import subprocess
+    try:
+        p = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(REPO),
+                           capture_output=True, text=True, timeout=5)
+        if p.returncode == 0:
+            return p.stdout.strip()
+    except Exception:
+        pass
+    return os.environ.get("GIT_COMMIT_SHA", "UNKNOWN_RUNTIME_SHA")
+
+
 def atomic_json(path: os.PathLike[str] | str, obj: Any) -> None:
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -345,14 +357,9 @@ def build_model(args, modules):
 
     R11.force_arx_platform()
     runtime_contract = R.assert_runtime_contract()
-    try:
-        AutoConfig.register("openvla", OpenVLAConfig, exist_ok=True)
-        AutoImageProcessor.register("openvla", PrismaticImageProcessor, exist_ok=True)
-        AutoProcessor.register(OpenVLAConfig, PrismaticProcessor, exist_ok=True)
-    except TypeError:
-        AutoConfig.register("openvla", OpenVLAConfig)
-        AutoImageProcessor.register(OpenVLAConfig, PrismaticImageProcessor)
-        AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
+    AutoConfig.register("openvla", OpenVLAConfig)
+    AutoImageProcessor.register(OpenVLAConfig, PrismaticImageProcessor)
+    AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
 
     base = Path(args.base_model).expanduser().resolve()
     proc = AutoProcessor.from_pretrained(str(base), trust_remote_code=True)
@@ -555,6 +562,9 @@ def load_checkpoint(path: Path, torch, plan: dict) -> dict:
     state = torch.load(state_path, map_location="cpu", weights_only=False)
     if state.get("schema") != "r44-full-trainer-checkpoint/v1":
         raise ValueError("unknown checkpoint schema")
+    for key in ("global_step", "epoch", "cursor", "contracts"):
+        if manifest.get(key) != state.get(key):
+            raise ValueError(f"checkpoint manifest/state mismatch for {key}")
     expected = {
         "split_sha256": plan["split_sha256"],
         "feature_normalizer_sha256": plan["feature_normalizer_sha256"],
@@ -848,6 +858,10 @@ def main(argv=None) -> int:
     import r15_resume as RS
     base_identity = RS.attest_base_model(str(Path(args.base_model).expanduser().resolve()))
     gpu_before = gpu_snapshot(args)
+    job_start_monotonic = time.monotonic()
+    runtime_deadline = job_start_monotonic + max(
+        0.0, args.gpu_budget_hours * 3600.0 - args.runtime_stop_margin_seconds
+    )
 
     import torch
     from training.r44_safe_stop import (
@@ -915,7 +929,7 @@ def main(argv=None) -> int:
             raise SystemExit("run_meta.json already exists; refusing to reuse an old output directory")
         atomic_json(out_dir / "run_meta.json", {
             "schema": "r44-run-meta/v1", "run_id": args.run_id or f"r44-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
-            "utc_start": utcnow(), "source_sha": os.environ.get("GIT_COMMIT_SHA", "UNKNOWN_RUNTIME_SHA"),
+            "utc_start": utcnow(), "source_sha": current_git_sha(),
             "tasks": list(TASKS), "epochs_max": args.epochs, "min_epochs": args.min_epochs,
             "target_representation": "joint_delta_v1", "train_samples_per_epoch": plan["n_train"],
             "dev_samples_per_epoch": plan["n_dev"], "train_samples_sha256": plan["train_samples_sha256"],
@@ -984,10 +998,6 @@ def main(argv=None) -> int:
                                  prompts=prompts, prompt_ids=prompt_ids, run_state=run_state)
         last_checkpoint = str(save_checkpoint(out_dir, state, suffix="initial"))
         save_run_state(out_dir, {**run_state, "status": "RUNNING", "last_checkpoint": last_checkpoint})
-    job_start_monotonic = time.monotonic()
-    runtime_deadline = job_start_monotonic + max(
-        0.0, args.gpu_budget_hours * 3600.0 - args.runtime_stop_margin_seconds
-    )
     status = "RUNNING"
     try:
         vla.train()
