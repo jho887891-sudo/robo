@@ -32,6 +32,10 @@ REPO = Path(__file__).resolve().parents[1]
 EXPECTED_GPU_UUID = "GPU-73599ded-b934-3bb7-53fe-4fb3121db213"
 TASKS = ("push_T", "stack_bowls", "sweep_blocks")
 N_ACTIONS = 14
+LORA_R = 32
+LORA_ALPHA = 16
+LORA_SCALE = LORA_ALPHA / LORA_R
+LORA_TARGET_MODULES = ("q_proj", "v_proj")
 STOP_TOKEN_ID = 2
 IGNORE_INDEX = -100
 LEGAL_TOKEN_MIN = 31744
@@ -399,7 +403,7 @@ def build_model(args, modules):
 
     target_modules = [
         name for name, _module in vla.named_modules()
-        if name.rsplit(".", 1)[-1] in ("q_proj", "v_proj")
+        if name.rsplit(".", 1)[-1] in LORA_TARGET_MODULES
     ]
     if not target_modules or not any(n.rsplit(".", 1)[-1] == "q_proj" for n in target_modules) \
             or not any(n.rsplit(".", 1)[-1] == "v_proj" for n in target_modules):
@@ -413,8 +417,8 @@ def build_model(args, modules):
             vla.enable_input_require_grads()
 
     cfg = LoraConfig(
-        r=32, lora_alpha=16, lora_dropout=0.0,
-        target_modules=["q_proj", "v_proj"], init_lora_weights="gaussian",
+        r=LORA_R, lora_alpha=LORA_ALPHA, lora_dropout=0.0,
+        target_modules=list(LORA_TARGET_MODULES), init_lora_weights="gaussian",
     )
     vla = get_peft_model(vla, cfg)
     from r8_vla_adapter import build_projector
@@ -439,8 +443,8 @@ def build_model(args, modules):
         "target_module_count": len(target_modules),
         "trainable_lora_parameter_count": sum(p.numel() for p in lora_params),
         "projector_parameter_count": sum(p.numel() for p in projector.parameters()),
-        "lora_config": {"r": 32, "lora_alpha": 16, "scale": 0.5,
-                        "target_modules": ["q_proj", "v_proj"], "dropout": 0.0},
+        "lora_config": {"r": LORA_R, "lora_alpha": LORA_ALPHA, "scale": LORA_SCALE,
+                        "target_modules": list(LORA_TARGET_MODULES), "dropout": 0.0},
     }
 
 
