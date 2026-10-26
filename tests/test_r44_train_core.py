@@ -1,9 +1,15 @@
+import hashlib
+import os
+import tempfile
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 
 from training.r44_train import (
     LORA_ALPHA, LORA_R, LORA_SCALE, LORA_TARGET_MODULES,
     build_label_block, estimate_budget_hours, parse_args, task_episode_names,
-    episode_images,
+    episode_images, sha256_file, stat_identity, validate_resume_compatibility,
+    verify_files_unchanged,
 )
 
 
@@ -138,6 +144,57 @@ class R44TrainerCoreTests(unittest.TestCase):
     def test_budget_rejects_invalid_counts(self):
         with self.assertRaisesRegex(ValueError, "positive"):
             estimate_budget_hours(0, 20, 2, 1.0, 1.0, 1.0, 0.0)
+
+    def test_budget_rejects_nonfinite_timing_values(self):
+        with self.assertRaisesRegex(ValueError, "finite"):
+            estimate_budget_hours(10, 10, 1, float("nan"), 1.0, 1.0, 0.0)
+
+    def test_verify_files_unchanged_detects_content_change_with_same_size_and_mtime(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "episode.hdf5"
+            path.write_bytes(b"AAAA")
+            original_stat = path.stat()
+            key = "push_T/episode_0000000.hdf5"
+            plan = {
+                "episode_paths": {key: path},
+                "file_stats_before": {key: stat_identity(path)},
+                "manifest_files": {key: {"sha256": sha256_file(path)}},
+            }
+            path.write_bytes(b"BBBB")
+            os.utime(path, ns=(original_stat.st_atime_ns, original_stat.st_mtime_ns))
+            self.assertEqual(stat_identity(path), plan["file_stats_before"][key])
+            with self.assertRaisesRegex(RuntimeError, "content SHA256 changed"):
+                verify_files_unchanged(plan)
+
+    def test_resume_contract_pins_source_data_and_schedule(self):
+        args = SimpleNamespace(
+            epochs=5, min_epochs=2, seed=0, gradient_checkpointing=False,
+            early_stopping_patience=0,
+        )
+        plan = {
+            "train_samples_sha256": "train", "dev_samples_sha256": "dev",
+            "split_sha256": "split", "feature_normalizer_sha256": "feature",
+            "delta_normalizer_sha256": "delta", "dataset_manifest_sha256": "manifest",
+        }
+        base = {"weights": "sha"}
+        model = {
+            "modeling_sha256": "model", "lora_config": {"r": 32, "lora_alpha": 16},
+            "target_module_count": 2, "trainable_lora_parameter_count": 100,
+            "projector_parameter_count": 200, "prompt_text_sha256": {"push_T": "prompt"},
+            "prompt_token_ids_sha256": {"push_T": "tokens"},
+        }
+        scheduler = {"total_steps": 500, "warmup_steps": 5}
+        meta = {
+            "schema": "r44-run-meta/v1", "source_sha": "commit", "epochs_max": 5,
+            "min_epochs": 2, "seed": 0, "gradient_checkpointing": False,
+            "target_representation": "joint_delta_v1", **plan,
+            "base_model_identity": base, "scheduler": scheduler,
+            "early_stopping_patience": 0, "model_info": model,
+        }
+        validate_resume_compatibility(meta, args, plan, base, model, scheduler, "commit")
+        args.epochs = 4
+        with self.assertRaisesRegex(ValueError, "epochs_max"):
+            validate_resume_compatibility(meta, args, plan, base, model, scheduler, "commit")
 
     def test_budget_rejects_negative_margin(self):
         with self.assertRaisesRegex(ValueError, "cannot be negative"):
