@@ -24,6 +24,7 @@ import signal
 import sys
 import tempfile
 import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -728,6 +729,22 @@ def write_run_artifact_manifest(
         "file_count": len(files),
         "files": files,
     })
+    return target
+
+
+def write_failure_evidence(out_dir: Path, record: dict) -> Path:
+    failure_dir = out_dir / "failures"
+    failure_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    status = str(record.get("status", "FAIL_UNKNOWN")).replace("/", "_").replace(" ", "_")
+    step = int(record.get("global_step", 0))
+    stem = f"failure_{stamp}_step{step:06d}_{status}"
+    target = failure_dir / f"{stem}.json"
+    suffix = 1
+    while target.exists():
+        target = failure_dir / f"{stem}_{suffix:02d}.json"
+        suffix += 1
+    atomic_json(target, record)
     return target
 
 
