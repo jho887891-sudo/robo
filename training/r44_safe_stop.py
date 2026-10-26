@@ -17,6 +17,52 @@ from typing import BinaryIO, Callable, Iterable, Optional
 CheckpointWriter = Callable[[BinaryIO], None]
 
 
+def configure_torch_memory_fraction(
+    max_process_memory_gb: Optional[float],
+    *,
+    device: Optional[int] = None,
+) -> dict:
+    """Optionally cap this process's PyTorch CUDA caching allocator.
+
+    This is NOT GPU compute isolation and NOT a hard cap on allocations made
+    outside the PyTorch caching allocator. It must be called before model/CUDA
+    allocations. No limit is applied when max_process_memory_gb is None.
+    """
+    if max_process_memory_gb is None:
+        return {
+            "enabled": False,
+            "scope": "none",
+            "compute_isolation": False,
+            "hard_gpu_isolation": False,
+        }
+    if max_process_memory_gb <= 0:
+        raise ValueError("max_process_memory_gb must be positive")
+    import torch
+
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is unavailable; cannot configure a process memory fraction")
+    index = torch.cuda.current_device() if device is None else int(device)
+    total_bytes = int(torch.cuda.get_device_properties(index).total_memory)
+    requested_bytes = int(max_process_memory_gb * (1024**3))
+    fraction = requested_bytes / total_bytes
+    if not (0.0 < fraction <= 1.0):
+        raise ValueError(
+            "max_process_memory_gb %.3f exceeds visible device memory %.3f GiB"
+            % (max_process_memory_gb, total_bytes / (1024**3))
+        )
+    torch.cuda.set_per_process_memory_fraction(fraction, device=index)
+    return {
+        "enabled": True,
+        "requested_gb": float(max_process_memory_gb),
+        "visible_device_total_gb": total_bytes / (1024**3),
+        "fraction_of_visible_device": fraction,
+        "device_index": index,
+        "scope": "PyTorch CUDA caching allocator only",
+        "compute_isolation": False,
+        "hard_gpu_isolation": False,
+    }
+
+
 class R44StopController:
     """Observe manual stop requests and optional GPU free-memory guardrails.
 
