@@ -1,4 +1,6 @@
+import contextlib
 import hashlib
+import io
 import os
 import tempfile
 import unittest
@@ -11,6 +13,7 @@ from training.r44_train import (
     episode_images, sha256_file, stat_identity, validate_resume_compatibility,
     verify_files_unchanged,
 )
+from diagnostics.r44_gpu_smoke import main as gpu_smoke_main
 
 
 class R44TrainerCoreTests(unittest.TestCase):
@@ -28,6 +31,16 @@ class R44TrainerCoreTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "belongs to"):
             task_episode_names("push_T", ["stack_bowls/episode_0000000.hdf5"], FakeM2)
+
+    def test_gpu_smoke_requires_explicit_authorization_before_any_runtime_setup(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "smoke-output"
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                rc = gpu_smoke_main(["--out", str(out)])
+            self.assertEqual(rc, 2)
+            self.assertIn("BLOCKED_AUTHORIZATION", stream.getvalue())
+            self.assertFalse(out.exists())
 
     def test_frozen_lora_hyperparameters_match_project_contract(self):
         self.assertEqual(LORA_R, 32)
