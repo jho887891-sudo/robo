@@ -1850,6 +1850,25 @@ def main(argv=None) -> int:
         save_run_state(out_dir, {**run_state, "status": "STOPPED_SAFE",
                                  "stop_reason": stop_controller.reason, "last_checkpoint": last_checkpoint,
                                  "global_step": global_step})
+        cumulative_budget_seconds = record_budget("safe_stop_before_first_optimizer_step")
+        artifact_manifest_path = run_artifact_manifest_path(out_dir, "STOPPED_SAFE", global_step)
+        atomic_json(out_dir / "exit_report.json", {
+            "status": "STOPPED_SAFE", "utc_end": utcnow(), "global_step": global_step,
+            "epoch": epoch + 1, "cursor": cursor, "last_checkpoint": last_checkpoint,
+            "approved_gpu_budget_hours": args.gpu_budget_hours,
+            "cumulative_gpu_wall_seconds": cumulative_budget_seconds,
+            "budget_ledger_path": str(out_dir / "budget_ledger.json"),
+            "artifact_manifest_path": str(artifact_manifest_path),
+            "gpu_before": gpu_before, "gpu_after": gpu_snapshot(args, enforce_headroom=False),
+            "peak_memory_gb": float(torch.cuda.max_memory_allocated()) / (1024**3),
+            "training_started": False, "optimizer_steps_executed": 0,
+            "resource_mode": args.resource_mode, "gpu_lock_path": gpu_lock.path,
+        })
+        write_run_artifact_manifest(
+            out_dir, artifact_manifest_path, source_sha=source_sha,
+            status="STOPPED_SAFE", global_step=global_step,
+        )
+        print(f"[R44] run artifact manifest: {artifact_manifest_path}", flush=True)
         stop_controller.restore_signal_handlers()
         gpu_lock.__exit__(None, None, None)
         return 0
