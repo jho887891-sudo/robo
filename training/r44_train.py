@@ -1123,6 +1123,9 @@ def checkpoint_state(
             "dev_samples_sha256": plan["dev_samples_sha256"],
             "preflight_report_sha256": plan.get("preflight_report_sha256"),
             "gpu_smoke_report_sha256": plan.get("gpu_smoke_report_sha256"),
+            "approved_gpu_budget_hours": plan.get("approved_gpu_budget_hours"),
+            "runtime_stop_margin_seconds": plan.get("runtime_stop_margin_seconds"),
+            "budget_accounting_every_steps": plan.get("budget_accounting_every_steps"),
         },
         "base_model_identity": base_identity,
         "model_info": model_info,
@@ -1191,6 +1194,9 @@ def load_checkpoint(path: Path, torch, plan: dict) -> dict:
         "dev_samples_sha256": plan["dev_samples_sha256"],
         "preflight_report_sha256": plan["preflight_report_sha256"],
         "gpu_smoke_report_sha256": plan["gpu_smoke_report_sha256"],
+        "approved_gpu_budget_hours": plan["approved_gpu_budget_hours"],
+        "runtime_stop_margin_seconds": plan["runtime_stop_margin_seconds"],
+        "budget_accounting_every_steps": plan["budget_accounting_every_steps"],
     }
     if state.get("contracts") != expected:
         raise ValueError("checkpoint data/normalizer contract differs from this run")
@@ -1544,6 +1550,9 @@ def main(argv=None) -> int:
     plan["checkpoint_state_bytes"] = smoke_info["checkpoint_state_bytes"]
     plan["checkpoint_count_estimate"] = smoke_info["checkpoint_count_estimate"]
     plan["estimated_checkpoint_storage_gb"] = smoke_info["estimated_checkpoint_storage_gb"]
+    plan["approved_gpu_budget_hours"] = float(args.gpu_budget_hours)
+    plan["runtime_stop_margin_seconds"] = float(args.runtime_stop_margin_seconds)
+    plan["budget_accounting_every_steps"] = int(args.budget_accounting_every_steps)
 
     if args.resource_mode == "shared-memory":
         if not args.accept_shared_gpu_risk or args.max_process_memory_gb is None:
@@ -1719,6 +1728,9 @@ def main(argv=None) -> int:
             "preflight_report_sha256": preflight_info["sha256"],
             "gpu_smoke_report_path": smoke_info["path"],
             "gpu_smoke_report_sha256": smoke_info["sha256"],
+            "approved_gpu_budget_hours": float(args.gpu_budget_hours),
+            "runtime_stop_margin_seconds": float(args.runtime_stop_margin_seconds),
+            "budget_accounting_every_steps": int(args.budget_accounting_every_steps),
             "gpu_smoke_peak_allocated_gb": smoke_info["peak_allocated_gb"],
             "gpu_smoke_peak_reserved_gb": smoke_info["peak_reserved_gb"],
             "checkpoint_state_bytes": smoke_info["checkpoint_state_bytes"],
