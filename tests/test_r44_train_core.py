@@ -228,12 +228,16 @@ class R44TrainerCoreTests(unittest.TestCase):
         args = SimpleNamespace(
             epochs=5, min_epochs=5, seed=0, gradient_checkpointing=False,
             early_stopping_patience=0, checkpoint_every_steps=5000,
+            gpu_budget_hours=2.0, runtime_stop_margin_seconds=600.0,
+            budget_accounting_every_steps=50,
         )
         plan = {
             "train_samples_sha256": "train", "dev_samples_sha256": "dev",
             "split_sha256": "split", "feature_normalizer_sha256": "feature",
             "delta_normalizer_sha256": "delta", "dataset_manifest_sha256": "manifest",
             "preflight_report_sha256": "preflight", "gpu_smoke_report_sha256": "smoke",
+            "approved_gpu_budget_hours": 2.0, "runtime_stop_margin_seconds": 600.0,
+            "budget_accounting_every_steps": 50,
         }
         base = {"weights": "sha"}
         model = {
