@@ -182,7 +182,7 @@ class R44TrainerCoreTests(unittest.TestCase):
     def test_resume_contract_pins_source_data_and_schedule(self):
         args = SimpleNamespace(
             epochs=5, min_epochs=2, seed=0, gradient_checkpointing=False,
-            early_stopping_patience=0,
+            early_stopping_patience=0, checkpoint_every_steps=5000,
         )
         plan = {
             "train_samples_sha256": "train", "dev_samples_sha256": "dev",
@@ -202,7 +202,7 @@ class R44TrainerCoreTests(unittest.TestCase):
             "min_epochs": 2, "seed": 0, "gradient_checkpointing": False,
             "target_representation": "joint_delta_v1", **plan,
             "base_model_identity": base, "scheduler": scheduler,
-            "early_stopping_patience": 0, "model_info": model,
+            "early_stopping_patience": 0, "checkpoint_every_steps": 5000, "model_info": model,
         }
         validate_resume_compatibility(meta, args, plan, base, model, scheduler, "commit")
         args.epochs = 4
