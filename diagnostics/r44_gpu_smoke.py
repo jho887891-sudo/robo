@@ -223,10 +223,15 @@ def main(argv=None) -> int:
         model_info["prompt_token_ids_sha256"] = {
             t: R44.sha256_json(prompt_ids[t]) for t in R44.TASKS
         }
+        prompt_lengths = {t: len(prompt_ids[t]) for t in R44.TASKS}
+        longest_prompt_task = max(R44.TASKS, key=lambda task_name: prompt_lengths[task_name])
 
         D = modules[5]
         order = D.EpochSampler(plan["n_train"], args.seed, 0).order
-        sample_index = int(order[0])
+        sample_index = next(
+            int(idx) for idx in order
+            if plan["train_samples"][int(idx)][0] == longest_prompt_task
+        )
         task, episode, t = plan["train_samples"][sample_index]
         episode_path = plan["episode_paths"][f"{task}/{episode}"]
         TC, M2, TN = modules[2], modules[3], modules[4]
@@ -332,6 +337,9 @@ def main(argv=None) -> int:
             "utc_end": R44.utcnow(),
             "source_sha": current_sha,
             "sample": {"index": sample_index, "task": task, "episode": episode, "t": int(t)},
+            "longest_prompt_task": longest_prompt_task,
+            "prompt_lengths_tokens": prompt_lengths,
+            "prompt_length_tokens": prompt_lengths[task],
             "optimizer_steps_executed": 1,
             "loss": float(loss.detach().float().cpu()),
             "grad_norm": grad_norm,
