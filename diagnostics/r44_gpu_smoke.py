@@ -8,6 +8,7 @@ window. The process exits after writing an evidence report.
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import math
 import os
@@ -33,6 +34,8 @@ def parse_args(argv=None):
     ap.add_argument("--feature-normalizer", default=os.environ.get("M2_NORMALIZER_JSON", ""))
     ap.add_argument("--delta-normalizer", default="")
     ap.add_argument("--dataset-manifest", default="")
+    ap.add_argument("--preflight-report", default="",
+                    help="same-commit R44 CPU preflight report.json; required for GPU smoke")
     ap.add_argument("--base-model", default="")
     ap.add_argument("--oft-root", default=os.environ.get(
         "PUSHT_OFT", os.path.join(os.environ.get("PUSHT_RUNTIME", "/home/dgut/pusht_runtime"),
@@ -43,6 +46,9 @@ def parse_args(argv=None):
     ap.add_argument("--gradient-checkpointing", action="store_true")
     ap.add_argument("--include-task-token", action="store_true")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--epochs", type=int, default=5)
+    ap.add_argument("--checkpoint-every-steps", type=int, default=5000)
+    ap.add_argument("--warmup-fraction", type=float, default=0.01)
     ap.add_argument("--cams", type=int, default=3)
     ap.add_argument("--expected-train-samples", type=int, default=R44.DEFAULT_TRAIN_SAMPLES)
     ap.add_argument("--expected-dev-samples", type=int, default=R44.DEFAULT_DEV_SAMPLES)
@@ -103,7 +109,13 @@ def main(argv=None) -> int:
             and math.isfinite(args.gpu_lock_wait_seconds) and args.gpu_lock_wait_seconds >= 0):
         print("BLOCKED_CONFIG: wall limit must be finite/positive and lock wait finite/non-negative", flush=True)
         return 2
-    for name in ("hdf5_root", "feature_normalizer", "delta_normalizer", "dataset_manifest", "base_model"):
+    if args.epochs != 5 or args.checkpoint_every_steps < 1:
+        print("BLOCKED_CONFIG: R44 smoke contract requires 5 epochs and positive checkpoint cadence", flush=True)
+        return 2
+    if not (math.isfinite(args.warmup_fraction) and 0.0 < args.warmup_fraction < 1.0):
+        print("BLOCKED_CONFIG: warmup fraction must be finite and in (0,1)", flush=True)
+        return 2
+    for name in ("hdf5_root", "feature_normalizer", "delta_normalizer", "dataset_manifest", "preflight_report", "base_model"):
         if not getattr(args, name):
             print(f"BLOCKED_CONFIG: --{name.replace('_', '-')} is required", flush=True)
             return 2
@@ -148,6 +160,17 @@ def main(argv=None) -> int:
         gpu_lock = R44.acquire_gpu_lane_lock(args)
         modules = R44.load_runtime_modules(args)
         plan = R44.load_and_validate_cpu_plan(args, modules)
+        preflight_info = R44.validate_preflight_report(
+            args.preflight_report, plan, source_sha=report["source_sha"],
+            expected_epochs=args.epochs, expected_budget=None,
+            expected_lr=args.lr,
+            expected_projector_lr_multiplier=args.projector_lr_multiplier,
+            expected_warmup_fraction=args.warmup_fraction,
+            expected_seed=args.seed,
+            expected_checkpoint_every_steps=args.checkpoint_every_steps,
+        )
+        plan["preflight_report_path"] = preflight_info["path"]
+        plan["preflight_report_sha256"] = preflight_info["sha256"]
         if time.monotonic() - smoke_start > args.max_wall_seconds:
             raise TimeoutError("smoke wall limit exceeded during CPU contract preflight")
         report["cpu_contracts"] = {
@@ -159,6 +182,7 @@ def main(argv=None) -> int:
             "feature_normalizer_sha256": plan["feature_normalizer_sha256"],
             "delta_normalizer_sha256": plan["delta_normalizer_sha256"],
             "dataset_manifest_sha256": plan["dataset_manifest_sha256"],
+            "preflight_report_sha256": preflight_info["sha256"],
         }
         report["base_model_identity"] = _attest_base_model(args.base_model)
         report["gpu_before"] = R44.gpu_snapshot(args)
