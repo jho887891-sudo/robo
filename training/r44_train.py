@@ -487,6 +487,15 @@ def validate_gpu_smoke_report(
     for key, value in expected_contracts.items():
         if cpu.get(key) != value:
             raise ValueError(f"GPU smoke data contract mismatch for {key}")
+    prompt_lengths = report.get("prompt_lengths_tokens") or {}
+    if set(prompt_lengths) != set(TASKS) or any(int(v) <= 0 for v in prompt_lengths.values()):
+        raise ValueError("GPU smoke must report tokenized prompt lengths for all three tasks")
+    longest_prompt_task = max(TASKS, key=lambda task_name: int(prompt_lengths[task_name]))
+    sample = report.get("sample") or {}
+    if (report.get("longest_prompt_task") != longest_prompt_task
+            or sample.get("task") != longest_prompt_task
+            or int(report.get("prompt_length_tokens", -1)) != int(prompt_lengths[longest_prompt_task])):
+        raise ValueError("GPU smoke did not execute the longest tokenized task prompt")
     model_info = report.get("model_info") or {}
     expected_lora = {
         "r": LORA_R, "lora_alpha": LORA_ALPHA, "scale": LORA_SCALE,
