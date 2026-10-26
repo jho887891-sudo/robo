@@ -1872,7 +1872,6 @@ def main(argv=None) -> int:
                                  prompts=prompts, prompt_ids=prompt_ids, run_state=run_state,
                                  reason=stop_controller.reason)
         last_checkpoint = str(save_checkpoint(out_dir, state, suffix="stop"))
-        record_budget("safe_stop_before_next_step")
         save_run_state(out_dir, {**run_state, "status": "STOPPED_SAFE",
                                  "stop_reason": stop_controller.reason, "last_checkpoint": last_checkpoint,
                                  "global_step": global_step})
