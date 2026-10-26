@@ -48,6 +48,17 @@ class R44TrainerCoreTests(unittest.TestCase):
                 state, action, task="push_T", episode="episode_0000000.hdf5"
             )
 
+    def test_raw_float64_transition_difference_is_not_hidden_by_float32_rounding(self):
+        import numpy as np
+        state = np.zeros((4, 14), dtype=np.float64)
+        action = np.zeros((4, 14), dtype=np.float64)
+        action[:-1] = state[1:]
+        action[0, 0] = 1e-12
+        with self.assertRaisesRegex(ValueError, "max_abs_diff=1e-12"):
+            verify_exact_action_next_state(
+                state, action, task="push_T", episode="episode_0000000.hdf5"
+            )
+
     def test_delta_normalizer_must_reproduce_from_exact_train_rows(self):
         import numpy as np
         rng = np.random.default_rng(44)
