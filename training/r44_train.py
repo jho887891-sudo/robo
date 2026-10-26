@@ -156,6 +156,58 @@ def atomic_json(path: os.PathLike[str] | str, obj: Any) -> None:
         raise
 
 
+def verify_exact_action_next_state(state, action, *, task: str, episode: str) -> dict:
+    """Enforce the R44 data invariant A[t] == S[t+1] exactly after the frozen float32 read."""
+    import numpy as np
+
+    s = np.asarray(state, dtype=np.float32)
+    a = np.asarray(action, dtype=np.float32)
+    if s.ndim != 2 or a.ndim != 2 or s.shape != a.shape or s.shape[1] != 14:
+        raise ValueError(
+            f"{task}/{episode}: state/action must share shape [T,14], got {s.shape}/{a.shape}"
+        )
+    if s.shape[0] < 2:
+        raise ValueError(f"{task}/{episode}: need at least two frames for the transition contract")
+    if not np.isfinite(s).all() or not np.isfinite(a).all():
+        raise ValueError(f"{task}/{episode}: state/action contains non-finite values")
+    diff = a[:-1] - s[1:]
+    max_abs = float(np.max(np.abs(diff)))
+    if not np.array_equal(a[:-1], s[1:]):
+        raise ValueError(
+            f"{task}/{episode}: exact A[t] == S[t+1] contract failed "
+            f"(max_abs_diff={max_abs:.9g})"
+        )
+    return {"task": task, "episode": episode, "transitions": int(s.shape[0] - 1),
+            "max_abs_diff": max_abs, "exact": True}
+
+
+def verify_delta_normalizer_matches_train(deltas_by_task: dict, expected_payload: dict,
+                                          split_sha256: str, D) -> dict:
+    """Independently refit joint_delta_v1 from the exact TRAIN rows and compare payload identity."""
+    computed = D.fit_normalizer(deltas_by_task, split_sha256=split_sha256)
+    D.validate_normalizer(computed)
+    D.validate_normalizer(expected_payload)
+    if computed.get("sha256") != expected_payload.get("sha256"):
+        per_task = {}
+        for task in sorted(set(computed.get("tasks", {})) | set(expected_payload.get("tasks", {}))):
+            got = computed.get("tasks", {}).get(task, {})
+            want = expected_payload.get("tasks", {}).get(task, {})
+            per_task[task] = {
+                "computed_n_rows": got.get("n_rows"),
+                "expected_n_rows": want.get("n_rows"),
+                "computed_q01": got.get("q01"),
+                "expected_q01": want.get("q01"),
+                "computed_q99": got.get("q99"),
+                "expected_q99": want.get("q99"),
+            }
+        raise ValueError(
+            "joint_delta_v1 normalizer does not reproduce from the exact frozen TRAIN rows; "
+            f"computed_sha256={computed.get('sha256')} expected_sha256={expected_payload.get('sha256')} "
+            f"per_task={per_task}"
+        )
+    return computed
+
+
 def build_label_block(prompt_ids, action_token_ids, stop_token_id: int = STOP_TOKEN_ID) -> dict:
     """Pure-Python label contract: ignored prompt, 14 legal action tokens, then STOP."""
     prompt = [int(x) for x in prompt_ids]
@@ -345,11 +397,28 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
             raise ValueError(f"{task}: instruction text/hash missing or inconsistent in dataset manifest")
 
     file_stats_before = {}
+    train_episode_keys = {f"{task}/{ep}" for task in TASKS for ep in train_episodes[task]}
+    train_delta_by_episode = {}
+    transition_checks = []
     for key, path in sorted(episode_paths.items()):
         rec = records[key]
         if Path(str(rec.get("path", ""))).expanduser().resolve() != path:
             raise ValueError(f"{key}: dataset manifest path differs from the indexed file")
         before = stat_identity(path)
+        task, episode = key.split("/", 1)
+        states, actions = read_state_action(path, TC)
+        after_read = stat_identity(path)
+        if before != after_read:
+            raise RuntimeError(f"{key}: HDF5 file changed while reading state/action for contract verification")
+        transition_checks.append(
+            verify_exact_action_next_state(states, actions, task=task, episode=episode)
+        )
+        if key in train_episode_keys:
+            lo = int(M2.MIN_HISTORY_FRAMES)
+            hi = int(states.shape[0]) - 1
+            if hi <= lo:
+                raise ValueError(f"{key}: no eligible TRAIN rows after the frozen history boundary")
+            train_delta_by_episode[key] = (actions[lo:hi] - states[lo:hi]).astype("float32")
         actual_sha = sha256_file(path)
         after = stat_identity(path)
         if before != after:
@@ -358,6 +427,13 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
             raise ValueError(f"{key}: HDF5 content SHA256/size mismatch against manifest")
         file_stats_before[key] = before
 
+    train_deltas_by_task = {}
+    for task in TASKS:
+        ordered = [train_delta_by_episode[f"{task}/{ep}"] for ep in train_episodes[task]]
+        train_deltas_by_task[task] = __import__("numpy").concatenate(ordered, axis=0)
+    recomputed_delta_payload = verify_delta_normalizer_matches_train(
+        train_deltas_by_task, delta_payload, split_sha, D
+    )
     train_rows_by_task = {t: sum(1 for sample in train_samples if sample[0] == t) for t in TASKS}
     for task in TASKS:
         got = int(delta_payload["tasks"][task]["n_rows"])
@@ -375,6 +451,13 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
         "delta_payload": delta_payload, "train_samples": train_samples, "dev_samples": dev_samples,
         "train_samples_sha256": train_hash, "dev_samples_sha256": dev_hash,
         "n_train": len(train_samples), "n_dev": len(dev_samples),
+        "transition_contract": {
+            "episodes_checked": len(transition_checks),
+            "transitions_checked": sum(x["transitions"] for x in transition_checks),
+            "max_abs_diff": max((x["max_abs_diff"] for x in transition_checks), default=0.0),
+            "all_exact": all(x["exact"] for x in transition_checks),
+        },
+        "delta_normalizer_recomputed_sha256": recomputed_delta_payload["sha256"],
         "instruction_sha256": {t: hashlib.sha256(indexes[t]["instruction"].encode("utf-8")).hexdigest()
                                for t in TASKS},
     }
@@ -955,6 +1038,8 @@ def main(argv=None) -> int:
         "delta_normalizer_sha256": plan["delta_normalizer_sha256"],
         "dataset_manifest_sha256": plan["dataset_manifest_sha256"],
         "instruction_sha256": plan["instruction_sha256"],
+        "transition_contract": plan["transition_contract"],
+        "delta_normalizer_recomputed_sha256": plan["delta_normalizer_recomputed_sha256"],
         "budget": budget,
         "epochs_max": args.epochs, "min_epochs": args.min_epochs,
         "resource_mode": args.resource_mode,
