@@ -28,5 +28,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run safe-stop CPU tests
-        run: python -m unittest discover -s tests -p "test_r44_safe_stop.py" -v
+      - name: Compile R44 training modules
+        run: python -m py_compile training/r44_train.py training/r44_safe_stop.py
+      - name: Run R44 CPU contract tests
+        run: |
+          python -m unittest discover -s tests -p "test_r44_safe_stop.py" -v
+          python -m unittest discover -s tests -p "test_r44_train_core.py" -v
