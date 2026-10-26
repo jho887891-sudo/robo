@@ -1,6 +1,7 @@
 import contextlib
 import hashlib
 import io
+import json
 import os
 import tempfile
 import unittest
@@ -12,7 +13,8 @@ from training.r44_train import (
     build_label_block, estimate_budget_hours, parse_args, task_episode_names,
     episode_images, sha256_file, stat_identity, validate_resume_compatibility,
     verify_files_unchanged, verify_exact_action_next_state,
-    verify_delta_normalizer_matches_train, TASKS,
+    verify_delta_normalizer_matches_train, TASKS, should_early_stop,
+    validate_preflight_report, validate_gpu_smoke_report,
 )
 from training import r44_delta_v1 as D
 from diagnostics.r44_gpu_smoke import main as gpu_smoke_main
@@ -158,6 +160,7 @@ class R44TrainerCoreTests(unittest.TestCase):
     def test_formal_defaults_are_five_epochs_and_early_stopping_disabled(self):
         args = parse_args(["--out", "/tmp/r44-test-output"])
         self.assertEqual(args.epochs, 5)
+        self.assertEqual(args.min_epochs, 5)
         self.assertEqual(args.early_stopping_patience, 0)
         self.assertEqual(args.resource_mode, "time-window")
         self.assertFalse(args.formal_training_authorized)
@@ -248,6 +251,189 @@ class R44TrainerCoreTests(unittest.TestCase):
         args.epochs = 4
         with self.assertRaisesRegex(ValueError, "epochs_max"):
             validate_resume_compatibility(meta, args, plan, base, model, scheduler, "commit")
+
+    def test_patience_zero_disables_early_stopping(self):
+        self.assertFalse(should_early_stop(5, 0, 5, 100))
+        self.assertFalse(should_early_stop(3, 2, 2, 2))
+        self.assertTrue(should_early_stop(3, 2, 3, 2))
+        self.assertFalse(should_early_stop(3, 2, 3, 1))
+
+    def _make_preflight_bundle(self, root):
+        root = Path(root)
+        root.mkdir(parents=True, exist_ok=True)
+        normalizer = root / "normalizer.json"
+        normalizer.write_text(json.dumps({"test": "normalizer"}), encoding="utf-8")
+        dataset_manifest = root / "r44_dataset_manifest.json"
+        dataset_manifest.write_text(json.dumps({"schema": "r44-dataset-manifest/v1"}), encoding="utf-8")
+        plan = {
+            "split_sha256": "split-sha",
+            "feature_normalizer_sha256": "feature-sha",
+            "delta_normalizer_sha256": sha256_file(normalizer),
+            "dataset_manifest_sha256": sha256_file(dataset_manifest),
+            "delta_payload": {"sha256": "payload-sha"},
+            "train_samples_sha256": "train-sha",
+            "dev_samples_sha256": "dev-sha",
+            "n_train": 10,
+            "n_dev": 4,
+            "manifest_files": {"push_T/episode_0000000.hdf5": {"sha256": "file-sha"}},
+        }
+        coverage = {
+            "n_train": 10, "base_seed": 0,
+            "epochs": [
+                {"epoch": epoch, "complete": True, "total": 10, "unique_seen": 10,
+                 "min_visits": 1, "max_visits": 1}
+                for epoch in range(5)
+            ],
+        }
+        (root / "sample_coverage.json").write_text(json.dumps(coverage), encoding="utf-8")
+        config = {
+            "target_representation": "joint_delta_v1",
+            "lora": {"r": 32, "lora_alpha": 16, "scale": 0.5, "lora_dropout": 0.0,
+                     "target_modules": ["q_proj", "v_proj"]},
+            "epochs_max": 5, "epochs_min": 5, "early_stopping_patience": 0,
+            "n_train_samples": 10, "normalizer_sha256": "payload-sha",
+            "optimizer": {"lr": 5e-4, "projector_lr_scale": 0.1, "warmup_fraction": 0.01},
+            "sampler": {"base_seed": 0}, "checkpoint_every_steps": 5000,
+        }
+        (root / "training_config.json").write_text(json.dumps(config), encoding="utf-8")
+        dataset_hashes = {
+            "splits_sha256": "split-sha",
+            "normalizer_file_sha256": sha256_file(normalizer),
+            "episode_files": {"push_T": [{"episode": "episode_0000000.hdf5", "sha256": "file-sha"}]},
+        }
+        (root / "dataset_hashes.json").write_text(json.dumps(dataset_hashes), encoding="utf-8")
+        budget = {
+            "n_train_samples": 10, "n_dev_samples": 4, "max_epochs": 5,
+            "max_optimizer_steps": 50, "required_gpu_hours": 1.0,
+        }
+        (root / "budget.json").write_text(json.dumps(budget), encoding="utf-8")
+        required_passes = [
+            "source_git_sha_available",
+            "all_train_dev_episodes_14d_and_three_camera",
+            "action_equals_next_state_bit_exact",
+            "all_hdf5_files_hashed_stably",
+            "instruction_text_matches_frozen_task_contract",
+            "normalizer_fitted_on_train_only",
+            "codec_roundtrip_within_half_codec_step_for_representable_values",
+            "epoch_complete_no_replacement_5_epochs",
+            "feature_normalizer_matches_frozen_split",
+        ]
+        checks = []
+        for name in required_passes:
+            detail = {}
+            if name == "normalizer_fitted_on_train_only":
+                detail = {"sha256": "payload-sha"}
+            elif name == "epoch_complete_no_replacement_5_epochs":
+                detail = {"epochs": 5, "unique_seen": 10}
+            checks.append({"name": name, "result": "PASS", "detail": detail})
+        checks.append({"name": "gpu_budget_covers_the_approved_plan", "result": "FAIL",
+                       "detail": {"required_gpu_hours": 1.0}})
+        report = {
+            "schema": "r44-preflight/v1", "source_sha": "commit-sha",
+            "status": "BLOCKED_BUDGET", "splits_sha256": "split-sha",
+            "scope": {"training_started": False, "gpu_used": False,
+                      "checkpoints_written": False, "simulator_or_robot": False},
+            "checks": checks, "failed_contract_checks": [], "budget": budget,
+        }
+        report_path = root / "report.json"
+        report_path.write_text(json.dumps(report), encoding="utf-8")
+        names = ["report.json", "normalizer.json", "r44_dataset_manifest.json",
+                 "sample_coverage.json", "training_config.json", "dataset_hashes.json", "budget.json"]
+        (root / "SHA256SUMS").write_text(
+            "".join(f"{sha256_file(root / name)}  {name}\\n" for name in sorted(names)),
+            encoding="utf-8",
+        )
+        return report_path, plan
+
+    def test_preflight_report_requires_same_sha_and_integrity_checked_bundle(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            report_path, plan = self._make_preflight_bundle(Path(tmp) / "preflight")
+            info = validate_preflight_report(
+                report_path, plan, source_sha="commit-sha", expected_epochs=5,
+                expected_budget={"required_budget_hours": 1.0},
+            )
+            self.assertEqual(info["status"], "BLOCKED_BUDGET")
+            self.assertEqual(info["sha256"], sha256_file(report_path))
+            with self.assertRaisesRegex(ValueError, "source SHA"):
+                validate_preflight_report(report_path, plan, source_sha="other-commit")
+            with (report_path.parent / "training_config.json").open("a", encoding="utf-8") as fh:
+                fh.write(" ")
+            with self.assertRaisesRegex(ValueError, "SHA256 mismatch"):
+                validate_preflight_report(report_path, plan, source_sha="commit-sha")
+
+    def test_gpu_smoke_report_requires_memory_and_checkpoint_gates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            report_path, plan = self._make_preflight_bundle(Path(tmp) / "preflight")
+            preflight_info = validate_preflight_report(
+                report_path, plan, source_sha="commit-sha", expected_budget=None,
+            )
+            args = SimpleNamespace(
+                resource_mode="time-window", gradient_checkpointing=False,
+                include_task_token=False, seed=0, lr=5e-4, projector_lr_multiplier=0.1,
+                warmup_fraction=0.01, expected_peak_gpu_memory_gb=24.0,
+                max_process_memory_gb=None, expected_gpu_uuid="GPU-test",
+                min_free_gpu_gb=12.0, checkpoint_every_steps=5000, epochs=5,
+            )
+            expected_lora = {"r": 32, "lora_alpha": 16, "scale": 0.5,
+                             "target_modules": ["q_proj", "v_proj"], "dropout": 0.0}
+            checkpoint_bytes = 1024
+            checkpoint_count = 7
+            smoke = {
+                "schema": "r44-gpu-smoke/v1", "status": "PASS_SMOKE",
+                "source_sha": "commit-sha", "cuda_context_created": True,
+                "formal_training": False, "weights_exported": False, "checkpoint_exported": False,
+                "optimizer_steps_executed": 1, "resource_mode": "time-window",
+                "gradient_checkpointing": False, "include_task_token": False, "seed": 0,
+                "lr": 5e-4, "projector_lr_multiplier": 0.1, "warmup_fraction": 0.01,
+                "expected_peak_gpu_memory_gb": 24.0, "max_process_memory_gb": None,
+                "gpu_before": {"uuid": "GPU-test", "memory_free_gb": 40.0},
+                "cpu_contracts": {
+                    "train_samples": 10, "dev_samples": 4,
+                    "train_samples_sha256": "train-sha", "dev_samples_sha256": "dev-sha",
+                    "split_sha256": "split-sha", "feature_normalizer_sha256": "feature-sha",
+                    "delta_normalizer_sha256": plan["delta_normalizer_sha256"],
+                    "dataset_manifest_sha256": plan["dataset_manifest_sha256"],
+                    "preflight_report_sha256": preflight_info["sha256"],
+                },
+                "model_info": {"lora_config": expected_lora, "runtime_contract": {"ok": True}},
+                "peak_within_expected_peak": True, "peak_within_allocator_cap": None,
+                "memory_budget_verdict": "PASS_WITHIN_EXPECTED_PEAK",
+                "global_free_memory_after_step_gb": 20.0,
+                "checkpoint_size_status": "MEASURED", "checkpoint_state_bytes": checkpoint_bytes,
+                "checkpoint_serialization_mode": "in-memory only; no checkpoint file written",
+                "checkpoint_every_steps": 5000, "epochs_max": 5,
+                "checkpoint_count_estimate": checkpoint_count,
+                "estimated_checkpoint_storage_gb": checkpoint_bytes * checkpoint_count / (1024**3),
+                "measured_peak_allocated_gb": 23.0, "measured_peak_reserved_gb": 23.5,
+                "trainable_lora_parameter_count": 100, "projector_parameter_count": 200,
+                "scheduler_info": {
+                    "total_steps": 50, "warmup_steps": 1, "decay": "linear_to_zero",
+                    "warmup_fraction": 0.01, "lr_lora": 5e-4, "lr_projector": 5e-5,
+                },
+                "base_model_identity": {"weights": "sha"},
+            }
+            smoke_path = Path(tmp) / "smoke" / "report.json"
+            smoke_path.parent.mkdir(parents=True)
+            smoke_path.write_text(json.dumps(smoke), encoding="utf-8")
+            (smoke_path.parent / "SHA256SUMS.json").write_text(
+                json.dumps({"report.json": sha256_file(smoke_path)}), encoding="utf-8"
+            )
+            result = validate_gpu_smoke_report(
+                smoke_path, plan, preflight_info, args, source_sha="commit-sha",
+                expected_base_identity={"weights": "sha"},
+            )
+            self.assertEqual(result["checkpoint_state_bytes"], checkpoint_bytes)
+            self.assertEqual(result["checkpoint_count_estimate"], checkpoint_count)
+            smoke["peak_within_expected_peak"] = False
+            smoke_path.write_text(json.dumps(smoke), encoding="utf-8")
+            (smoke_path.parent / "SHA256SUMS.json").write_text(
+                json.dumps({"report.json": sha256_file(smoke_path)}), encoding="utf-8"
+            )
+            with self.assertRaisesRegex(ValueError, "peak allocated memory"):
+                validate_gpu_smoke_report(
+                    smoke_path, plan, preflight_info, args, source_sha="commit-sha",
+                    expected_base_identity={"weights": "sha"},
+                )
 
     def test_budget_rejects_negative_margin(self):
         with self.assertRaisesRegex(ValueError, "cannot be negative"):
