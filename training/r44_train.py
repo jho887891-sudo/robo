@@ -131,6 +131,12 @@ def validate_resume_compatibility(run_meta: dict, args, plan: dict, base_identit
         "approved_gpu_budget_hours": float(args.gpu_budget_hours),
         "runtime_stop_margin_seconds": float(args.runtime_stop_margin_seconds),
         "budget_accounting_every_steps": int(args.budget_accounting_every_steps),
+        "resource_check_every": int(args.resource_check_every),
+        "min_free_gpu_gb": float(args.min_free_gpu_gb),
+        "expected_peak_gpu_memory_gb": float(args.expected_peak_gpu_memory_gb),
+        "expected_gpu_uuid": args.expected_gpu_uuid,
+        "resource_mode": args.resource_mode,
+        "max_process_memory_gb": args.max_process_memory_gb,
     }
     for key, value in expected.items():
         if run_meta.get(key) != value:
@@ -448,6 +454,8 @@ def validate_gpu_smoke_report(
             raise ValueError(f"GPU smoke {key} differs from formal training")
     if float(report.get("expected_peak_gpu_memory_gb", -1)) != float(args.expected_peak_gpu_memory_gb):
         raise ValueError("GPU smoke expected-peak memory threshold differs from formal training")
+    if float(report.get("min_free_gpu_gb", -1)) != float(args.min_free_gpu_gb):
+        raise ValueError("GPU smoke minimum global-free-memory reserve differs from formal training")
     cap = report.get("max_process_memory_gb")
     if args.max_process_memory_gb is None:
         if cap is not None:
@@ -1439,10 +1447,14 @@ def main(argv=None) -> int:
     for name, value in float_args.items():
         if not math.isfinite(float(value)):
             raise SystemExit(f"--{name} must be finite")
-    if args.gpu_budget_hours < 0 or args.runtime_stop_margin_seconds < 0 or args.gpu_lock_wait_seconds < 0:
-        raise SystemExit("GPU budget, runtime stop margin, and lock wait must be >= 0")
-    if args.min_free_gpu_gb <= 0 or args.expected_peak_gpu_memory_gb <= 0:
-        raise SystemExit("GPU memory thresholds must be > 0")
+    if args.gpu_budget_hours < 0 or args.gpu_lock_wait_seconds < 0:
+        raise SystemExit("GPU budget and lock wait must be >= 0")
+    if args.runtime_stop_margin_seconds < 600:
+        raise SystemExit("runtime stop margin must be >= 600 seconds to cover safe checkpointing and ledger lag")
+    if args.min_free_gpu_gb < 12:
+        raise SystemExit("minimum global free GPU memory reserve must be >= 12 GiB")
+    if args.expected_peak_gpu_memory_gb != 24.0:
+        raise SystemExit("R44 formal training freezes the expected peak-memory gate at exactly 24 GiB")
     if args.max_process_memory_gb is not None and (
             not math.isfinite(args.max_process_memory_gb) or args.max_process_memory_gb <= 0):
         raise SystemExit("--max-process-memory-gb must be finite and > 0")
@@ -1453,12 +1465,12 @@ def main(argv=None) -> int:
     base_model_path = Path(args.base_model).expanduser().resolve() if args.base_model else None
     if base_model_path is None or not base_model_path.is_dir() or not (base_model_path / "config.json").is_file():
         raise SystemExit("--base-model must point to the exact local OpenVLA-7B directory containing config.json")
-    if args.resource_check_every < 1:
-        raise SystemExit("resource-check-every must be >= 1")
+    if args.resource_check_every < 1 or args.resource_check_every > 10:
+        raise SystemExit("resource-check-every must be in 1..10 for safe low-memory detection")
     if args.checkpoint_every_steps < 1:
         raise SystemExit("checkpoint-every-steps must be >= 1")
-    if args.budget_accounting_every_steps < 1:
-        raise SystemExit("budget-accounting-every-steps must be >= 1")
+    if args.budget_accounting_every_steps < 1 or args.budget_accounting_every_steps > 50:
+        raise SystemExit("budget-accounting-every-steps must be in 1..50 to bound unrecorded time")
     for name in ("hdf5_root", "feature_normalizer", "delta_normalizer", "dataset_manifest", "base_model"):
         if not getattr(args, name):
             raise SystemExit(f"--{name.replace('_', '-')} is required; do not guess the server path")
@@ -1749,6 +1761,11 @@ def main(argv=None) -> int:
             "approved_gpu_budget_hours": float(args.gpu_budget_hours),
             "runtime_stop_margin_seconds": float(args.runtime_stop_margin_seconds),
             "budget_accounting_every_steps": int(args.budget_accounting_every_steps),
+            "resource_check_every": int(args.resource_check_every),
+            "min_free_gpu_gb": float(args.min_free_gpu_gb),
+            "expected_peak_gpu_memory_gb": float(args.expected_peak_gpu_memory_gb),
+            "expected_gpu_uuid": args.expected_gpu_uuid,
+            "max_process_memory_gb": args.max_process_memory_gb,
             "budget_ledger_path": str(out_dir / "budget_ledger.json"),
             "target_representation": "joint_delta_v1", "train_samples_per_epoch": plan["n_train"],
             "dev_samples_per_epoch": plan["n_dev"], "train_samples_sha256": plan["train_samples_sha256"],
@@ -1904,7 +1921,7 @@ def main(argv=None) -> int:
                                          prompts=prompts, prompt_ids=prompt_ids, run_state=run_state,
                                          reason=stop_controller.reason)
                 last_checkpoint = str(save_checkpoint(out_dir, state, suffix="stop"))
-                record_budget("safe_stop_at_budget_deadline")
+                record_budget("safe_stop")
                 status = "STOPPED_SAFE"
                 save_run_state(out_dir, {**run_state, "status": status, "stop_reason": stop_controller.reason,
                                          "last_checkpoint": last_checkpoint, "global_step": global_step})
