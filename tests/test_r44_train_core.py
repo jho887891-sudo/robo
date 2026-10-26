@@ -224,13 +224,14 @@ class R44TrainerCoreTests(unittest.TestCase):
 
     def test_resume_contract_pins_source_data_and_schedule(self):
         args = SimpleNamespace(
-            epochs=5, min_epochs=2, seed=0, gradient_checkpointing=False,
+            epochs=5, min_epochs=5, seed=0, gradient_checkpointing=False,
             early_stopping_patience=0, checkpoint_every_steps=5000,
         )
         plan = {
             "train_samples_sha256": "train", "dev_samples_sha256": "dev",
             "split_sha256": "split", "feature_normalizer_sha256": "feature",
             "delta_normalizer_sha256": "delta", "dataset_manifest_sha256": "manifest",
+            "preflight_report_sha256": "preflight", "gpu_smoke_report_sha256": "smoke",
         }
         base = {"weights": "sha"}
         model = {
@@ -242,7 +243,7 @@ class R44TrainerCoreTests(unittest.TestCase):
         scheduler = {"total_steps": 500, "warmup_steps": 5}
         meta = {
             "schema": "r44-run-meta/v1", "source_sha": "commit", "epochs_max": 5,
-            "min_epochs": 2, "seed": 0, "gradient_checkpointing": False,
+            "min_epochs": 5, "seed": 0, "gradient_checkpointing": False,
             "target_representation": "joint_delta_v1", **plan,
             "base_model_identity": base, "scheduler": scheduler,
             "early_stopping_patience": 0, "checkpoint_every_steps": 5000, "model_info": model,
