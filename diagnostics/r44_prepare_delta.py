@@ -375,7 +375,7 @@ def main():
         "lora": {"r": 32, "lora_alpha": 16, "scale": 0.5, "lora_dropout": 0.0,
                  "target_modules": ["q_proj", "v_proj"]},
         "optimizer": {"name": "AdamW", "lr": 5e-4, "weight_decay": 0.0, "grad_clip": 1.0,
-                      "projector_lr_scale": 0.1},
+                      "projector_lr_scale": 0.1, "warmup_fraction": 0.01},
         "sampler": {"type": "epoch_complete_no_replacement", "base_seed": args.base_seed},
         "epochs_max": args.epochs, "epochs_min": args.epochs,
         "early_stopping_patience": 0,
