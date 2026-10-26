@@ -116,9 +116,11 @@ def fit_normalizer(deltas_by_task, quantiles=(0.01, 0.99), split_sha256=None,
 
 
 def validate_normalizer(payload, expect_contract=CONTRACT_ID):
-    """Fail closed unless this payload really is the displacement contract."""
+    """Fail closed unless this payload matches the complete frozen displacement/codec contract."""
     if not isinstance(payload, dict):
         raise R44ContractError("normalizer payload must be a dict")
+    if payload.get("schema") != "r44-delta-normalizer/v1":
+        raise R44ContractError("normalizer schema is not r44-delta-normalizer/v1")
     got = payload.get("target")
     if got != expect_contract:
         raise R44ContractError(
@@ -126,9 +128,25 @@ def validate_normalizer(payload, expect_contract=CONTRACT_ID):
             "for the displacement target" % (got, expect_contract))
     if payload.get("codec") != CODEC_MODE:
         raise R44ContractError("codec %r != %r" % (payload.get("codec"), CODEC_MODE))
+    if int(payload.get("n_bins", -1)) != N_BINS:
+        raise R44ContractError("normalizer n_bins %r != frozen %d" % (payload.get("n_bins"), N_BINS))
+    if payload.get("token_window") != [LEGAL_TOKEN_MIN, LEGAL_TOKEN_MAX]:
+        raise R44ContractError("normalizer token window differs from the frozen legal action-token window")
+    fit = payload.get("fit")
+    if not isinstance(fit, dict):
+        raise R44ContractError("normalizer fit metadata is missing")
+    if fit.get("source") != "TRAIN only":
+        raise R44ContractError("normalizer was not explicitly fitted on TRAIN only")
+    if int(fit.get("n_dims", -1)) != BASE_DIM or fit.get("target") != TARGET_DESCRIPTION:
+        raise R44ContractError("normalizer fit target/dimension metadata differs from joint_delta_v1")
     if payload.get("sha256") != payload_sha256(payload):
         raise R44ContractError("normalizer sha256 mismatch: payload was modified after fitting")
-    for task, block in payload.get("tasks", {}).items():
+    tasks = payload.get("tasks")
+    if not isinstance(tasks, dict) or not tasks:
+        raise R44ContractError("normalizer task table is empty or malformed")
+    for task, block in tasks.items():
+        if not isinstance(block, dict):
+            raise R44ContractError("%s normalizer block is malformed" % task)
         q01 = _a14(block["q01"], "%s.q01" % task)
         q99 = _a14(block["q99"], "%s.q99" % task)
         if (q99 <= q01).any():
