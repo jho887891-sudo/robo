@@ -160,8 +160,10 @@ def verify_exact_action_next_state(state, action, *, task: str, episode: str) ->
     """Enforce the R44 data invariant A[t] == S[t+1] exactly after the frozen float32 read."""
     import numpy as np
 
-    s = np.asarray(state, dtype=np.float32)
-    a = np.asarray(action, dtype=np.float32)
+    # Preserve source dtype here: the frozen dataset contract is audited on the raw HDF5
+    # values (currently float64), not on values rounded down to the model's float32 path.
+    s = np.asarray(state)
+    a = np.asarray(action)
     if s.ndim != 2 or a.ndim != 2 or s.shape != a.shape or s.shape[1] != 14:
         raise ValueError(
             f"{task}/{episode}: state/action must share shape [T,14], got {s.shape}/{a.shape}"
@@ -406,19 +408,23 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
             raise ValueError(f"{key}: dataset manifest path differs from the indexed file")
         before = stat_identity(path)
         task, episode = key.split("/", 1)
-        states, actions = read_state_action(path, TC)
+        states_raw, actions_raw = read_state_action_raw(path)
         after_read = stat_identity(path)
         if before != after_read:
-            raise RuntimeError(f"{key}: HDF5 file changed while reading state/action for contract verification")
+            raise RuntimeError(f"{key}: HDF5 file changed while reading raw state/action for contract verification")
         transition_checks.append(
-            verify_exact_action_next_state(states, actions, task=task, episode=episode)
+            verify_exact_action_next_state(states_raw, actions_raw, task=task, episode=episode)
         )
         if key in train_episode_keys:
+            # Training's TC.read14 casts each source block to float32 before Delta=A-S.
+            # Mirror that arithmetic so the fitted quantiles match the actual online targets.
+            states32 = states_raw.astype("float32")
+            actions32 = actions_raw.astype("float32")
             lo = int(M2.MIN_HISTORY_FRAMES)
-            hi = int(states.shape[0]) - 1
+            hi = int(states32.shape[0]) - 1
             if hi <= lo:
                 raise ValueError(f"{key}: no eligible TRAIN rows after the frozen history boundary")
-            train_delta_by_episode[key] = (actions[lo:hi] - states[lo:hi]).astype("float32")
+            train_delta_by_episode[key] = actions32[lo:hi] - states32[lo:hi]
         actual_sha = sha256_file(path)
         after = stat_identity(path)
         if before != after:
@@ -633,6 +639,18 @@ def episode_images(proc, episode_path: Path, t: int, cams: int, modules):
     if pixel_values.shape[1] != cams:
         raise RuntimeError(f"camera transform produced {tuple(pixel_values.shape)} for cams={cams}")
     return pixel_values
+
+
+def read_state_action_raw(path: Path):
+    """Read the 14D HDF5 blocks without casting, for the strict source-data transition audit."""
+    import h5py
+    import numpy as np
+    blocks = ("left_arm_joint_states", "left_ee_joint_states",
+              "right_arm_joint_states", "right_ee_joint_states")
+    with h5py.File(path, "r") as h:
+        state = np.concatenate([np.asarray(h[f"state/{key}"][:]) for key in blocks], axis=1)
+        action = np.concatenate([np.asarray(h[f"action/{key}"][:]) for key in blocks], axis=1)
+    return state, action
 
 
 def read_state_action(path: Path, TC):
