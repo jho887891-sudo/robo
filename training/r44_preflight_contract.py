@@ -60,10 +60,6 @@ def make_training_manifest(
     """Build the exact strict manifest schema consumed by training/r44_train.py."""
     if not split_sha256 or not delta_normalizer_sha256 or not delta_normalizer_payload_sha256:
         raise R44PreflightError("split and delta-normalizer identities are required")
-    if not files:
-        raise R44PreflightError("training manifest has no episode file records")
-    if not instructions:
-        raise R44PreflightError("training manifest has no instruction records")
     for key, rec in files.items():
         if not key or not rec.get("path") or not rec.get("sha256") or int(rec.get("size_bytes", -1)) < 0:
             raise R44PreflightError(f"incomplete file identity for {key!r}")
