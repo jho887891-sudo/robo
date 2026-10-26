@@ -36,6 +36,18 @@ def utc_now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
+def current_git_sha():
+    import subprocess
+    try:
+        p = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
+                           capture_output=True, text=True, timeout=5)
+        if p.returncode == 0:
+            return p.stdout.strip()
+    except Exception:
+        pass
+    return "UNKNOWN_RUNTIME_SHA"
+
+
 def sha256_file(path, chunk=1 << 20):
     h = hashlib.sha256()
     with open(path, "rb") as fh:
@@ -137,7 +149,11 @@ def scan(splits, root):
                 if which == "train":
                     block["train_episodes"] += 1
                     block["train_samples"] += n
-                    deltas[task].append(ep["action"][idx] - ep["state"][idx])
+                    # Match the trainer's float32 target arithmetic exactly: cast S/A first,
+                    # then subtract. The raw float64 arrays remain in use for the exact A[t]==S[t+1] audit.
+                    deltas[task].append(
+                        ep["action"][idx].astype(np.float32) - ep["state"][idx].astype(np.float32)
+                    )
                 else:
                     block["dev_episodes"] += 1
                     block["dev_samples"] += n
@@ -205,6 +221,7 @@ def main():
     t0 = time.time()
 
     report = {"schema": "r44-preflight/v1", "started_at_utc": utc_now(),
+              "source_sha": current_git_sha(),
               "contract": D.CONTRACT_ID, "status": "RUNNING",
               "scope": {"training_started": False, "gpu_used": False,
                         "checkpoints_written": False, "simulator_or_robot": False},
@@ -217,6 +234,8 @@ def main():
                               json.dumps(detail, sort_keys=True, default=str)[:300]), flush=True)
         return ok
 
+    check("source_git_sha_available", report["source_sha"] != "UNKNOWN_RUNTIME_SHA",
+          {"source_sha": report["source_sha"]})
     splits_path = os.path.abspath(os.path.expanduser(args.splits))
     with open(splits_path, encoding="utf-8") as fh:
         splits_doc = json.load(fh)
