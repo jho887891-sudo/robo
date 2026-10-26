@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - audit/r44-preflight-contract-20261026
+      - audit/r44-strict-transition-contract-20261027
       - experiment/r44-trainer-implementation-20261026
     paths:
       - "diagnostics/r44_prepare_delta.py"
