@@ -1854,6 +1854,7 @@ def main(argv=None) -> int:
                                                budget_accounting_callback=lambda: record_budget("dev_evaluation"))
                     if not eval_result["complete"]:
                         status = "STOPPED_SAFE"
+                        record_budget("stop_during_dev_evaluation")
                         save_run_state(out_dir, {**run_state, "status": status,
                                                  "stop_reason": stop_controller.reason,
                                                  "last_checkpoint": last_checkpoint,
@@ -1875,9 +1876,11 @@ def main(argv=None) -> int:
                                  "completed_epochs": epoch + 1, "global_step": global_step,
                                  "last_evaluated_epoch": epoch + 1, "last_checkpoint": last_checkpoint}
                     save_run_state(out_dir, run_state)
+                    record_budget("dev_epoch_complete")
                     print(f"[R44] epoch={epoch + 1} dev_action_mae={dev_mae:.6f} best={best:.6f} stale={stale}", flush=True)
                     if stop_controller.should_stop():
                         status = "STOPPED_SAFE"
+                        record_budget("safe_stop_after_dev_evaluation")
                         save_run_state(out_dir, {**run_state, "status": status,
                                                  "stop_reason": stop_controller.reason})
                         break
@@ -1904,19 +1907,7 @@ def main(argv=None) -> int:
                                          prompts=prompts, prompt_ids=prompt_ids, run_state=run_state,
                                          reason=stop_controller.reason)
                 last_checkpoint = str(save_checkpoint(out_dir, state, suffix="stop"))
-                status = "STOPPED_SAFE"
-                save_run_state(out_dir, {**run_state, "status": status, "stop_reason": stop_controller.reason,
-                                         "last_checkpoint": last_checkpoint, "global_step": global_step})
-                break
-
-            if time.monotonic() >= runtime_deadline:
-                stop_controller.request_stop("approved_gpu_budget_deadline")
-                state = checkpoint_state(torch, vla, projector, optimizer, scheduler,
-                                         epoch=epoch, cursor=cursor, order=order, global_step=global_step,
-                                         plan=plan, base_identity=base_identity, model_info=model_info,
-                                         prompts=prompts, prompt_ids=prompt_ids, run_state=run_state,
-                                         reason=stop_controller.reason)
-                last_checkpoint = str(save_checkpoint(out_dir, state, suffix="budget-stop"))
+                record_budget("safe_stop_at_budget_deadline")
                 status = "STOPPED_SAFE"
                 save_run_state(out_dir, {**run_state, "status": status, "stop_reason": stop_controller.reason,
                                          "last_checkpoint": last_checkpoint, "global_step": global_step})
@@ -1958,6 +1949,7 @@ def main(argv=None) -> int:
                     "epoch": epoch, "cursor": cursor, "detail": repr(exc),
                     "note": "Do not trust partially mutated in-memory state; resume from last valid checkpoint.",
                 })
+                record_budget("optimizer_oom")
                 status = "FAIL_RESOURCE_OOM"
                 break
             except FloatingPointError as exc:
@@ -1966,6 +1958,7 @@ def main(argv=None) -> int:
                     "status": "FAIL_NUMERICS", "utc": utcnow(), "global_step": global_step,
                     "epoch": epoch, "cursor": cursor, "detail": str(exc),
                 })
+                record_budget("numeric_failure")
                 status = "FAIL_NUMERICS"
                 break
 
@@ -1998,8 +1991,11 @@ def main(argv=None) -> int:
                 save_run_state(out_dir, {**run_state, "status": "RUNNING",
                                          "last_checkpoint": last_checkpoint, "global_step": global_step,
                                          "epoch": epoch, "cursor": cursor})
+                record_budget("optimizer_checkpoint")
                 print(f"[R44] checkpoint saved: {last_checkpoint}", flush=True)
 
+            if global_step % args.budget_accounting_every_steps == 0:
+                record_budget("periodic_optimizer_step")
             if global_step % args.resource_check_every == 0:
                 stop_controller.observe_cuda_free_memory()
             if stop_controller.should_stop():
@@ -2010,6 +2006,7 @@ def main(argv=None) -> int:
                                              prompts=prompts, prompt_ids=prompt_ids, run_state=run_state,
                                              reason=stop_controller.reason)
                     last_checkpoint = str(save_checkpoint(out_dir, state, suffix="stop"))
+                record_budget("safe_stop_after_optimizer_step")
                 status = "STOPPED_SAFE"
                 save_run_state(out_dir, {**run_state, "status": status, "stop_reason": stop_controller.reason,
                                          "last_checkpoint": last_checkpoint, "global_step": global_step})
@@ -2027,8 +2024,12 @@ def main(argv=None) -> int:
         else:
             save_run_state(out_dir, {**run_state, "status": status, "global_step": global_step,
                                      "last_checkpoint": last_checkpoint, "utc_end": utcnow()})
+        cumulative_budget_seconds = record_budget("process_exit")
         atomic_json(out_dir / "exit_report.json", {
             "status": status, "utc_end": utcnow(), "global_step": global_step,
+            "approved_gpu_budget_hours": args.gpu_budget_hours,
+            "cumulative_gpu_wall_seconds": cumulative_budget_seconds,
+            "budget_ledger_path": str(out_dir / "budget_ledger.json"),
             "epoch": epoch + 1, "cursor": cursor, "last_checkpoint": last_checkpoint,
             "gpu_before": gpu_before, "gpu_after": gpu_snapshot(args, enforce_headroom=False),
             "peak_memory_gb": float(torch.cuda.max_memory_allocated()) / (1024**3),
