@@ -1443,6 +1443,23 @@ def main(argv=None) -> int:
     elif out_dir.exists() and any(out_dir.iterdir()):
         raise SystemExit(f"output directory must be new or empty: {out_dir}")
     out_dir.mkdir(parents=True, exist_ok=True)
+    disk_free_bytes = int(shutil.disk_usage(out_dir).free)
+    estimated_checkpoint_bytes = int(plan["checkpoint_state_bytes"] * plan["checkpoint_count_estimate"])
+    required_output_bytes = int(estimated_checkpoint_bytes * 1.25 + plan["checkpoint_state_bytes"] * 2)
+    storage_budget = {
+        "free_bytes_before_training": disk_free_bytes,
+        "checkpoint_state_bytes_measured": int(plan["checkpoint_state_bytes"]),
+        "checkpoint_count_estimate": int(plan["checkpoint_count_estimate"]),
+        "checkpoint_storage_bytes_estimate": estimated_checkpoint_bytes,
+        "required_free_bytes_with_25pct_margin_and_final_export": required_output_bytes,
+        "status": "PASS" if disk_free_bytes >= required_output_bytes else "BLOCKED_INSUFFICIENT_DISK",
+    }
+    if disk_free_bytes < required_output_bytes:
+        print(
+            "BLOCKED_OUTPUT_DISK: free %.2f GiB < estimated requirement %.2f GiB"
+            % (disk_free_bytes / (1024**3), required_output_bytes / (1024**3)), flush=True
+        )
+        return 2
 
     # Serialize repo-managed heavy GPU jobs before hashing/loading the base model.
     gpu_lock = acquire_gpu_lane_lock(args)
@@ -1462,6 +1479,9 @@ def main(argv=None) -> int:
     if not shard_hashes:
         raise RuntimeError(f"no .safetensors base-model shards found under {base_path}")
     base_identity = {**base_identity, "_weight_shard_sha256": shard_hashes}
+    if smoke_info["base_model_identity"] != base_identity:
+        print("BLOCKED_GPU_SMOKE_BASE_MODEL: smoke and training base-model SHA256 identities differ", flush=True)
+        return 2
     gpu_before = gpu_snapshot(args)
     job_start_monotonic = time.monotonic()
     runtime_deadline = job_start_monotonic + max(
