@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - experiment/r44-trainer-implementation-20261026
+      - audit/r44-strict-transition-contract-20261027
     paths:
       - "training/r44_safe_stop.py"
       - "training/r44_train.py"
@@ -13,7 +14,11 @@ on:
   pull_request:
     paths:
       - "training/r44_safe_stop.py"
+      - "training/r44_train.py"
+      - "training/r44_delta_v1.py"
+      - "tests/test_r44_train_core.py"
       - "tests/test_r44_safe_stop.py"
+      - "tests/test_r44_delta_v1.py"
       - ".github/workflows/r44-safe-stop-cpu.yml"
 
 permissions:
