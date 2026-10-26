@@ -1249,6 +1249,10 @@ def parse_args(argv=None):
         "PUSHT_OFT", os.path.join(os.environ.get("PUSHT_RUNTIME", "/home/dgut/pusht_runtime"),
                                   "openvla_oft_src")))
     ap.add_argument("--out", required=True)
+    ap.add_argument("--preflight-report", default="",
+                    help="same-commit CPU preflight report.json; required for formal training")
+    ap.add_argument("--gpu-smoke-report", default="",
+                    help="same-commit one-step GPU smoke report.json; required for formal training")
     ap.add_argument("--resume-from", default="")
     ap.add_argument("--run-id", default="")
     ap.add_argument("--epochs", type=int, default=5)
@@ -1379,6 +1383,41 @@ def main(argv=None) -> int:
     if source_sha == "UNKNOWN_RUNTIME_SHA":
         print("BLOCKED_SOURCE_SHA: formal training requires a verifiable Git commit SHA", flush=True)
         return 2
+    if not args.preflight_report:
+        print("BLOCKED_PREFLIGHT_REPORT: formal training requires --preflight-report from this exact source SHA", flush=True)
+        return 2
+    try:
+        preflight_info = validate_preflight_report(
+            args.preflight_report, plan, source_sha=source_sha,
+            expected_epochs=args.epochs, expected_budget=budget,
+            expected_lr=args.lr,
+            expected_projector_lr_multiplier=args.projector_lr_multiplier,
+            expected_warmup_fraction=args.warmup_fraction,
+            expected_seed=args.seed,
+            expected_checkpoint_every_steps=args.checkpoint_every_steps,
+        )
+    except Exception as exc:
+        print(f"BLOCKED_PREFLIGHT_REPORT: {type(exc).__name__}: {exc}", flush=True)
+        return 2
+    plan["preflight_report_path"] = preflight_info["path"]
+    plan["preflight_report_sha256"] = preflight_info["sha256"]
+    if not args.gpu_smoke_report:
+        print("BLOCKED_GPU_SMOKE_REPORT: formal training requires --gpu-smoke-report from this exact source SHA", flush=True)
+        return 2
+    try:
+        smoke_info = validate_gpu_smoke_report(
+            args.gpu_smoke_report, plan, preflight_info, args, source_sha=source_sha
+        )
+    except Exception as exc:
+        print(f"BLOCKED_GPU_SMOKE_REPORT: {type(exc).__name__}: {exc}", flush=True)
+        return 2
+    plan["gpu_smoke_report_path"] = smoke_info["path"]
+    plan["gpu_smoke_report_sha256"] = smoke_info["sha256"]
+    plan["gpu_smoke_peak_allocated_gb"] = smoke_info["peak_allocated_gb"]
+    plan["gpu_smoke_peak_reserved_gb"] = smoke_info["peak_reserved_gb"]
+    plan["checkpoint_state_bytes"] = smoke_info["checkpoint_state_bytes"]
+    plan["checkpoint_count_estimate"] = smoke_info["checkpoint_count_estimate"]
+    plan["estimated_checkpoint_storage_gb"] = smoke_info["estimated_checkpoint_storage_gb"]
 
     if args.resource_mode == "shared-memory":
         if not args.accept_shared_gpu_risk or args.max_process_memory_gb is None:
