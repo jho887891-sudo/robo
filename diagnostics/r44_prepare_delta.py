@@ -20,6 +20,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(ROOT, "training"))
 import r44_delta_v1 as D  # noqa: E402
+import m2_multitask_data as M2  # noqa: E402
+import m2_task_normalizer as TN  # noqa: E402
+from r44_preflight_contract import (  # noqa: E402
+    final_preflight_status, make_training_manifest, sha256_file_stable,
+)
 
 TOP = ("left_arm_joint_states", "left_ee_joint_states",
        "right_arm_joint_states", "right_ee_joint_states")
@@ -59,8 +64,11 @@ def load_14d(path):
         cams = [c for c in CAMERAS if ("vision/%s/colors" % c) in h]
         out["T"] = T
         out["cameras"] = cams
-        out["instruction"] = str(np.asarray(h["instruction"][()]).item()) \
-            if "instruction" in h else None
+        if "instruction" in h:
+            raw_instruction = np.asarray(h["instruction"][()]).item()
+            out["instruction"] = raw_instruction.decode("utf-8") if isinstance(raw_instruction, bytes) else str(raw_instruction)
+        else:
+            out["instruction"] = None
     if out["state"].shape[1] != 14 or out["action"].shape[1] != 14:
         raise D.R44ContractError("%s is not 14D (%s / %s)"
                                  % (path, out["state"].shape, out["action"].shape))
@@ -68,7 +76,10 @@ def load_14d(path):
 
 
 def scan(splits, root):
-    manifest = {"tasks": {}, "totals": {"train_samples": 0, "dev_samples": 0}}
+    manifest = {
+        "tasks": {}, "totals": {"train_samples": 0, "dev_samples": 0},
+        "files": {}, "instructions": {}, "hash_errors": [], "instruction_violations": [],
+    }
     deltas = {}
     max_contract_err = 0.0
     contract_violations = []
@@ -76,16 +87,45 @@ def scan(splits, root):
         block = {"train_episodes": 0, "dev_episodes": 0, "train_samples": 0,
                  "dev_samples": 0, "excluded": [], "frames_min": None, "frames_max": None}
         deltas[task] = []
+        expected_instruction = M2.TASK_PROMPTS[task]
+        observed_instruction = None
         for which in ("train", "dev"):
             for rel in d[which]:
                 path = os.path.join(root, task, "arx_x5", "data", os.path.basename(rel))
                 if not os.path.isfile(path):
                     block["excluded"].append({"episode": rel, "reason": "file missing"})
                     continue
-                ep = load_14d(path)
+                try:
+                    st0 = os.stat(path)
+                    ep = load_14d(path)
+                    file_record = sha256_file_stable(path)
+                    st1 = os.stat(path)
+                    ident0 = (st0.st_size, st0.st_mtime_ns, st0.st_ino, st0.st_dev)
+                    ident1 = (st1.st_size, st1.st_mtime_ns, st1.st_ino, st1.st_dev)
+                    if ident0 != ident1:
+                        raise RuntimeError("file identity changed between HDF5 scan and SHA256")
+                except Exception as exc:
+                    manifest["hash_errors"].append({"episode": rel, "path": os.path.abspath(path),
+                                                    "error": repr(exc)})
+                    block["excluded"].append({"episode": rel, "reason": "scan/hash failure"})
+                    continue
+
+                key = "%s/%s" % (task, os.path.basename(rel))
+                manifest["files"][key] = file_record
+                instruction = ep.get("instruction")
+                if instruction is None:
+                    manifest["instruction_violations"].append(
+                        {"episode": key, "reason": "missing /instruction dataset"})
+                else:
+                    if observed_instruction is None:
+                        observed_instruction = instruction
+                    if instruction != expected_instruction:
+                        manifest["instruction_violations"].append(
+                            {"episode": key, "expected": expected_instruction, "observed": instruction})
                 if len(ep["cameras"]) != 3:
                     block["excluded"].append({"episode": rel, "reason": "cameras=%s" % ep["cameras"]})
                     continue
+
                 # A_t == S_{t+1} on the whole episode
                 err = float(np.max(np.abs(ep["action"][:-1] - ep["state"][1:])))
                 max_contract_err = max(max_contract_err, err)
@@ -102,6 +142,12 @@ def scan(splits, root):
                     block["dev_samples"] += n
                 block["frames_max"] = max(block["frames_max"] or 0, ep["T"])
                 block["frames_min"] = min(block["frames_min"] or 10 ** 9, ep["T"])
+
+        if observed_instruction is not None:
+            manifest["instructions"][task] = {
+                "text": observed_instruction,
+                "sha256": hashlib.sha256(observed_instruction.encode("utf-8")).hexdigest(),
+            }
         block["train_samples"] = int(block["train_samples"])
         block["dev_samples"] = int(block["dev_samples"])
         manifest["tasks"][task] = block
@@ -115,7 +161,9 @@ def scan(splits, root):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--splits", default=os.path.join(ROOT, "data", "m2_splits.json"))
-    ap.add_argument("--hdf5-root", default="/home/T7/ojh/robot_actual/data/data/hdf5")
+    ap.add_argument("--hdf5-root", default=os.environ.get("M2_HDF5_ROOT", "/home/T7/ojh/robot_actual/data/data/hdf5"))
+    ap.add_argument("--feature-normalizer", default=os.environ.get("M2_NORMALIZER_JSON", ""),
+                    help="existing TRAIN-only M2 42D feature normalizer; required for a trainable manifest")
     ap.add_argument("--out", required=True)
     ap.add_argument("--base-seed", type=int, default=0)
     ap.add_argument("--epochs", type=int, default=5)
@@ -149,10 +197,12 @@ def main():
                               json.dumps(detail, sort_keys=True, default=str)[:300]), flush=True)
         return ok
 
-    splits_doc = json.load(open(args.splits))
+    splits_path = os.path.abspath(os.path.expanduser(args.splits))
+    with open(splits_path, encoding="utf-8") as fh:
+        splits_doc = json.load(fh)
     splits = splits_doc["splits"]
-    report["splits_path"] = args.splits
-    report["splits_sha256"] = sha256_file(args.splits)
+    report["splits_path"] = splits_path
+    report["splits_sha256"] = sha256_file(splits_path)
 
     manifest, deltas = scan(splits, args.hdf5_root)
     manifest["split_sha256"] = report["splits_sha256"]
@@ -166,10 +216,23 @@ def main():
           manifest["max_abs_action_vs_next_state"] == 0.0,
           {"max_abs_err": manifest["max_abs_action_vs_next_state"],
            "violations": len(manifest["contract_violations"])})
+    expected_episode_count = sum(len(d["train"]) + len(d["dev"]) for d in splits.values())
+    check("all_hdf5_files_hashed_stably",
+          not manifest["hash_errors"] and len(manifest["files"]) == expected_episode_count,
+          {"expected_files": expected_episode_count, "hashed_files": len(manifest["files"]),
+           "hash_errors": manifest["hash_errors"][:5]})
+    instruction_ok = (not manifest["instruction_violations"]
+                      and set(manifest["instructions"]) == set(splits)
+                      and all(manifest["instructions"][t]["text"] == M2.TASK_PROMPTS[t] for t in splits))
+    check("instruction_text_matches_frozen_task_contract", instruction_ok,
+          {"instruction_violations": manifest["instruction_violations"][:5],
+           "tasks_with_instruction": sorted(manifest["instructions"])})
 
     payload = D.fit_normalizer(deltas, split_sha256=report["splits_sha256"])
     D.validate_normalizer(payload)
-    save_json(os.path.join(out, "normalizer.json"), payload)
+    normalizer_path = os.path.join(out, "normalizer.json")
+    save_json(normalizer_path, payload)
+    delta_normalizer_file_sha256 = sha256_file(normalizer_path)
     check("normalizer_fitted_on_train_only", True,
           {"tasks": {k: v["n_rows"] for k, v in payload["tasks"].items()},
            "sha256": payload["sha256"]})
@@ -271,24 +334,49 @@ def main():
 
     dataset_hashes = {"splits_sha256": report["splits_sha256"],
                       "normalizer_sha256": payload["sha256"],
+                      "normalizer_file_sha256": delta_normalizer_file_sha256,
                       "episode_files": {}}
-    for task, d in splits.items():
-        rows = []
-        for rel in d["train"] + d["dev"]:
-            path = os.path.join(args.hdf5_root, task, "arx_x5", "data", os.path.basename(rel))
-            if os.path.isfile(path):
-                st = os.stat(path)
-                rows.append({"episode": os.path.basename(rel), "size_bytes": st.st_size,
-                             "mtime_ns": st.st_mtime_ns})
-        dataset_hashes["episode_files"][task] = rows
+    for key, rec in sorted(manifest["files"].items()):
+        task, episode = key.split("/", 1)
+        dataset_hashes["episode_files"].setdefault(task, []).append({
+            "episode": episode, **rec
+        })
     save_json(os.path.join(out, "dataset_hashes.json"), dataset_hashes)
+
+    feature_normalizer_path = os.path.abspath(os.path.expanduser(args.feature_normalizer)) if args.feature_normalizer else ""
+    feature_normalizer_sha256 = None
+    feature_error = None
+    if feature_normalizer_path and os.path.isfile(feature_normalizer_path):
+        try:
+            dev_lists = {t: [M2.split_qualified(k)[1] for k in splits[t]["dev"]] for t in splits}
+            TN.load_payload(feature_normalizer_path, tasks=list(splits), dev_lists=dev_lists)
+            feature_normalizer_sha256 = sha256_file(feature_normalizer_path)
+        except Exception as exc:
+            feature_error = repr(exc)
+    else:
+        feature_error = "feature normalizer path missing or file absent"
+    check("feature_normalizer_matches_frozen_split",
+          feature_error is None,
+          {"path": feature_normalizer_path, "sha256": feature_normalizer_sha256, "error": feature_error})
+
+    training_manifest = make_training_manifest(
+        split_sha256=report["splits_sha256"],
+        feature_normalizer_sha256=feature_normalizer_sha256,
+        delta_normalizer_sha256=delta_normalizer_file_sha256,
+        delta_normalizer_payload_sha256=payload["sha256"],
+        files=manifest["files"],
+        instructions=manifest["instructions"],
+    )
+    save_json(os.path.join(out, "r44_dataset_manifest.json"), training_manifest)
 
     budget_ok = budget["sufficient"]
     check("gpu_budget_covers_the_approved_plan", budget_ok,
           {"required_gpu_hours": round(budget["total_gpu_hours_max"], 1),
            "approved_gpu_hours": args.gpu_hours_available})
     report["budget"] = budget
-    report["status"] = "READY" if budget_ok else "BLOCKED_BUDGET"
+    status, failed_checks = final_preflight_status(report["checks"], budget_ok)
+    report["status"] = status
+    report["failed_contract_checks"] = failed_checks
     report["elapsed_s"] = time.time() - t0
     save_json(os.path.join(out, "report.json"), report)
     with open(os.path.join(out, "environment.txt"), "w", encoding="utf-8") as fh:
@@ -296,7 +384,7 @@ def main():
         fh.write("numpy %s\n" % np.__version__)
         fh.write("hdf5_root %s\n" % args.hdf5_root)
         fh.write("host %s\n" % os.uname().nodename)
-    code = 0 if budget_ok else 2
+    code = 0 if report["status"] == "READY" else (2 if report["status"] == "BLOCKED_BUDGET" else 3)
     with open(os.path.join(out, "exit_code.txt"), "w", encoding="utf-8") as fh:
         fh.write(str(code) + "\n")
     names = sorted(n for n in os.listdir(out) if n != "SHA256SUMS")
