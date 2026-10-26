@@ -13,6 +13,7 @@ Safety properties:
 from __future__ import annotations
 
 import argparse
+import atexit
 import hashlib
 import json
 import math
@@ -71,6 +72,24 @@ def task_episode_names(task: str, qualified_names: list[str], M2) -> list[str]:
             raise ValueError(f"{task}: split entry {key!r} belongs to {key_task!r}")
         out.append(episode)
     return out
+
+
+def acquire_gpu_lane_lock(args):
+    """Fail fast if another repo-managed heavy GPU job already owns the single-GPU lane."""
+    import r15_ledger as L15
+
+    old_wait = os.environ.get("R15_GPU_LOCK_WAIT_S")
+    os.environ["R15_GPU_LOCK_WAIT_S"] = str(float(args.gpu_lock_wait_seconds))
+    lock = L15.GpuJobLock(args.ledger_dir)
+    try:
+        lock.__enter__()
+    finally:
+        if old_wait is None:
+            os.environ.pop("R15_GPU_LOCK_WAIT_S", None)
+        else:
+            os.environ["R15_GPU_LOCK_WAIT_S"] = old_wait
+    atexit.register(lock.__exit__, None, None, None)
+    return lock
 
 
 def current_git_sha() -> str:
@@ -861,6 +880,9 @@ def parse_args(argv=None):
     ap.add_argument("--formal-training-authorized", action="store_true")
     ap.add_argument("--preflight-only", action="store_true")
     ap.add_argument("--resource-mode", choices=("time-window", "shared-memory"), default="time-window")
+    ap.add_argument("--ledger-dir", default=os.environ.get("R15_LEDGER_DIR", None))
+    ap.add_argument("--gpu-lock-wait-seconds", type=float, default=0.0,
+                    help="fail fast by default if another repo-managed GPU job holds the lane")
     ap.add_argument("--gpu-window-confirmed", action="store_true")
     ap.add_argument("--accept-shared-gpu-risk", action="store_true")
     ap.add_argument("--max-process-memory-gb", type=float, default=None)
@@ -878,6 +900,7 @@ def main(argv=None) -> int:
     float_args = {
         "gpu-budget-hours": args.gpu_budget_hours,
         "runtime-stop-margin-seconds": args.runtime_stop_margin_seconds,
+        "gpu-lock-wait-seconds": args.gpu_lock_wait_seconds,
         "min-free-gpu-gb": args.min_free_gpu_gb,
         "expected-peak-gpu-memory-gb": args.expected_peak_gpu_memory_gb,
         "budget-margin-fraction": args.budget_margin_fraction,
@@ -888,8 +911,8 @@ def main(argv=None) -> int:
     for name, value in float_args.items():
         if not math.isfinite(float(value)):
             raise SystemExit(f"--{name} must be finite")
-    if args.gpu_budget_hours < 0 or args.runtime_stop_margin_seconds < 0:
-        raise SystemExit("GPU budget and runtime stop margin must be >= 0")
+    if args.gpu_budget_hours < 0 or args.runtime_stop_margin_seconds < 0 or args.gpu_lock_wait_seconds < 0:
+        raise SystemExit("GPU budget, runtime stop margin, and lock wait must be >= 0")
     if args.min_free_gpu_gb <= 0 or args.expected_peak_gpu_memory_gb <= 0:
         raise SystemExit("GPU memory thresholds must be > 0")
     if args.max_process_memory_gb is not None and (
@@ -983,6 +1006,8 @@ def main(argv=None) -> int:
         raise SystemExit(f"output directory must be new or empty: {out_dir}")
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Serialize repo-managed heavy GPU jobs before hashing/loading the base model.
+    gpu_lock = acquire_gpu_lane_lock(args)
     # Base-model identity is CPU/file based. Do it before creating a CUDA context.
     import r15_resume as RS
     base_identity = RS.attest_base_model(str(Path(args.base_model).expanduser().resolve()))
@@ -1099,6 +1124,7 @@ def main(argv=None) -> int:
             "dataset_manifest_sha256": plan["dataset_manifest_sha256"],
             "base_model_identity": base_identity, "model_info": model_info, "scheduler": scheduler_info,
             "budget": budget, "gpu_before": gpu_before, "resource_mode": args.resource_mode,
+            "gpu_lock_path": gpu_lock.path,
             "memory_cap": memory_cap_info, "gpu_window_confirmed": args.gpu_window_confirmed,
             "gradient_checkpointing": args.gradient_checkpointing, "seed": args.seed,
         })
@@ -1117,6 +1143,7 @@ def main(argv=None) -> int:
                                  "stop_reason": stop_controller.reason, "last_checkpoint": last_checkpoint,
                                  "global_step": global_step})
         stop_controller.restore_signal_handlers()
+        gpu_lock.__exit__(None, None, None)
         return 0
 
     train_path = out_dir / "train_metrics.jsonl"
@@ -1353,10 +1380,12 @@ def main(argv=None) -> int:
             "gpu_before": gpu_before, "gpu_after": gpu_snapshot(args, enforce_headroom=False),
             "peak_memory_gb": float(torch.cuda.max_memory_allocated()) / (1024**3),
             "training_started": True, "resource_mode": args.resource_mode,
+            "gpu_lock_path": gpu_lock.path,
         })
         return 0 if status in ("COMPLETED", "EARLY_STOPPED", "STOPPED_SAFE") else 3
     finally:
         stop_controller.restore_signal_handlers()
+        gpu_lock.__exit__(None, None, None)
 
 
 if __name__ == "__main__":
