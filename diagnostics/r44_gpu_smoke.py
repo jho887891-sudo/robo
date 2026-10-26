@@ -246,10 +246,8 @@ def main(argv=None) -> int:
         if time.monotonic() - smoke_start > args.max_wall_seconds:
             raise TimeoutError("smoke wall limit exceeded before the disposable optimizer step")
         trainable_lora = [p for p in vla.parameters() if p.requires_grad]
-        optimizer = torch.optim.AdamW(
-            [{"params": trainable_lora, "lr": args.lr},
-             {"params": list(projector.parameters()), "lr": args.lr * args.projector_lr_multiplier}],
-            weight_decay=0.0,
+        optimizer, scheduler, scheduler_info = R44.make_optimizer_and_scheduler(
+            vla, projector, args, total_steps=plan["n_train"] * args.epochs
         )
         vla.train()
         projector.train()
@@ -275,17 +273,56 @@ def main(argv=None) -> int:
         if not math.isfinite(grad_norm):
             raise FloatingPointError("non-finite gradient norm in disposable GPU smoke step")
         optimizer.step()
+        scheduler.step()
         torch.cuda.synchronize()
         step_seconds = time.perf_counter() - step_start
+
+        # Measure the exact resumable state serialization in RAM. No checkpoint file is written.
+        checkpoint_state = R44.checkpoint_state(
+            torch, vla, projector, optimizer, scheduler,
+            epoch=0, cursor=1, order=order, global_step=1,
+            plan=plan, base_identity=report["base_model_identity"], model_info=model_info,
+            prompts=prompts, prompt_ids=prompt_ids,
+            run_state={"schema": "r44-run-state/v1", "dev_history": [],
+                       "best_dev_mae": None, "stale_epochs": 0,
+                       "completed_epochs": 0, "global_step": 1},
+        )
+        serialization_start = time.perf_counter()
+        checkpoint_buffer = io.BytesIO()
+        torch.save(checkpoint_state, checkpoint_buffer)
+        checkpoint_state_bytes = int(len(checkpoint_buffer.getbuffer()))
+        checkpoint_serialization_seconds = time.perf_counter() - serialization_start
+        checkpoint_buffer.close()
+        del checkpoint_state
+        torch.cuda.synchronize()
+
         peak_allocated_gb = float(torch.cuda.max_memory_allocated()) / (1024**3)
         peak_reserved_gb = float(torch.cuda.max_memory_reserved()) / (1024**3)
         free_bytes, total_bytes = torch.cuda.mem_get_info()
+        free_after_gb = float(free_bytes) / (1024**3)
+        peak_within_expected = peak_allocated_gb <= args.expected_peak_gpu_memory_gb
+        peak_within_cap = (
+            None if args.max_process_memory_gb is None
+            else peak_reserved_gb <= args.max_process_memory_gb
+        )
+        memory_pass = (
+            peak_within_expected
+            and peak_within_cap is not False
+            and free_after_gb >= args.min_free_gpu_gb
+        )
+        checkpoint_count_estimate = (
+            math.ceil(plan["n_train"] * args.epochs / args.checkpoint_every_steps)
+            + args.epochs + 1
+        )
+        estimated_checkpoint_storage_gb = (
+            checkpoint_state_bytes * checkpoint_count_estimate / (1024**3)
+        )
 
         current_sha = R44.current_git_sha()
         if current_sha != report["source_sha"]:
             raise RuntimeError("repository HEAD changed during GPU smoke")
         report.update({
-            "status": "PASS_SMOKE",
+            "status": "PASS_SMOKE" if memory_pass else "FAIL_GPU_SMOKE",
             "utc_end": R44.utcnow(),
             "source_sha": current_sha,
             "sample": {"index": sample_index, "task": task, "episode": episode, "t": int(t)},
@@ -299,17 +336,20 @@ def main(argv=None) -> int:
             "measured_peak_allocated_gb": peak_allocated_gb,
             "measured_peak_reserved_gb": peak_reserved_gb,
             "baseline_allocated_gb_after_model_load": baseline_allocated_gb,
-            "global_free_memory_after_step_gb": float(free_bytes) / (1024**3),
+            "global_free_memory_after_step_gb": free_after_gb,
             "global_total_memory_gb": float(total_bytes) / (1024**3),
-            "peak_within_expected_peak": peak_allocated_gb <= args.expected_peak_gpu_memory_gb,
-            "peak_within_allocator_cap": (
-                None if args.max_process_memory_gb is None
-                else peak_allocated_gb <= args.max_process_memory_gb
-            ),
-            "memory_budget_verdict": (
-                "PASS_WITHIN_EXPECTED_PEAK" if peak_allocated_gb <= args.expected_peak_gpu_memory_gb
-                else "PEAK_EXCEEDS_ESTIMATE"
-            ),
+            "peak_within_expected_peak": peak_within_expected,
+            "peak_within_allocator_cap": peak_within_cap,
+            "memory_budget_verdict": "PASS_WITHIN_EXPECTED_PEAK" if memory_pass else "FAIL_MEMORY_GATE",
+            "checkpoint_size_status": "MEASURED",
+            "checkpoint_state_bytes": checkpoint_state_bytes,
+            "checkpoint_serialization_seconds": checkpoint_serialization_seconds,
+            "checkpoint_serialization_mode": "in-memory only; no checkpoint file written",
+            "checkpoint_every_steps": int(args.checkpoint_every_steps),
+            "epochs_max": int(args.epochs),
+            "checkpoint_count_estimate": int(checkpoint_count_estimate),
+            "estimated_checkpoint_storage_gb": estimated_checkpoint_storage_gb,
+            "scheduler_info": scheduler_info,
             "model_info": model_info,
             "gpu_after_model_cleanup": None,
             "compute_processes_after": None,
@@ -323,12 +363,17 @@ def main(argv=None) -> int:
         report["cuda_peak_includes_one_adamw_step"] = True
         report["persistent_weight_changes"] = False
         report["persistent_optimizer_steps"] = 0
+        if not memory_pass:
+            report["error"] = (
+                "measured peak/global-free-memory gate failed; do not launch formal training "
+                "with this memory configuration"
+            )
         R44.atomic_json(out_dir / "report.json", report)
         R44.atomic_json(out_dir / "SHA256SUMS.json", {
             "report.json": R44.sha256_file(out_dir / "report.json"),
         })
         print(json.dumps(report, indent=2, sort_keys=True, default=str), flush=True)
-        return 0
+        return 0 if memory_pass else 3
     except BaseException as exc:
         report.update({
             "status": "FAIL_GPU_SMOKE",
