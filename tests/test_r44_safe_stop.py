@@ -1,6 +1,8 @@
 import signal
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 from pathlib import Path
 
 from training.r44_safe_stop import (
@@ -94,6 +96,30 @@ class SafeStopTests(unittest.TestCase):
             )
             self.assertFalse(stopped)
             self.assertFalse(target.exists())
+
+    def test_cuda_probe_applies_memory_guard(self):
+        gib = 1024**3
+        fake_torch = SimpleNamespace(
+            cuda=SimpleNamespace(
+                is_available=lambda: True,
+                mem_get_info=lambda: (23 * gib, 50 * gib),
+            )
+        )
+        controller = R44StopController(
+            "/nonexistent/STOP", min_free_gpu_gb=24, consecutive_low_memory_samples=1
+        )
+        with patch.dict("sys.modules", {"torch": fake_torch}):
+            self.assertTrue(controller.observe_cuda_free_memory())
+        self.assertIn("below_threshold", controller.reason)
+
+    def test_cuda_probe_failure_requests_safe_stop(self):
+        fake_torch = SimpleNamespace(
+            cuda=SimpleNamespace(is_available=lambda: False)
+        )
+        controller = R44StopController("/nonexistent/STOP", min_free_gpu_gb=24)
+        with patch.dict("sys.modules", {"torch": fake_torch}):
+            self.assertTrue(controller.observe_cuda_free_memory())
+        self.assertEqual(controller.reason, "cuda_unavailable_for_resource_guard")
 
     def test_invalid_gpu_memory_sample_requests_stop(self):
         controller = R44StopController(
