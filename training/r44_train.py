@@ -148,7 +148,7 @@ def append_jsonl(path: Path, record: dict) -> None:
 
 def stat_identity(path: Path) -> tuple:
     st = path.stat()
-    return (int(st.st_size), int(st.st_mtime_ns), int(st.st_ino))
+    return (int(st.st_size), int(st.st_mtime_ns), int(st.st_ino), int(st.st_dev))
 
 
 def load_runtime_modules(args):
@@ -218,6 +218,9 @@ def load_and_validate_cpu_plan(args, modules) -> dict:
     D.validate_normalizer(delta_payload)
     if delta_payload.get("fit", {}).get("split_sha256") != split_sha:
         raise ValueError("joint_delta_v1 normalizer was fitted against a different split SHA")
+    if manifest_doc := json.loads(manifest_path.read_text(encoding="utf-8")):
+        if manifest_doc.get("delta_normalizer_payload_sha256") != delta_payload.get("sha256"):
+            raise ValueError("dataset manifest delta-normalizer payload SHA mismatch")
     if set(delta_payload.get("tasks", {})) != set(TASKS):
         raise ValueError("joint_delta_v1 normalizer does not contain exactly the three frozen tasks")
 
@@ -394,7 +397,7 @@ def build_model(args, modules):
             vla.enable_input_require_grads()
 
     cfg = LoraConfig(
-        r=32, lora_alpha=32, lora_dropout=0.0,
+        r=32, lora_alpha=16, lora_dropout=0.0,
         target_modules=["q_proj", "v_proj"], init_lora_weights="gaussian",
     )
     vla = get_peft_model(vla, cfg)
@@ -420,7 +423,7 @@ def build_model(args, modules):
         "target_module_count": len(target_modules),
         "trainable_lora_parameter_count": sum(p.numel() for p in lora_params),
         "projector_parameter_count": sum(p.numel() for p in projector.parameters()),
-        "lora_config": {"r": 32, "lora_alpha": 32, "scale": 1.0,
+        "lora_config": {"r": 32, "lora_alpha": 16, "scale": 0.5,
                         "target_modules": ["q_proj", "v_proj"], "dropout": 0.0},
     }
 
@@ -442,6 +445,35 @@ def build_runtime_labels(prompt_ids, state, action, task, delta_payload, modules
     _bins, token_ids = D.encode_delta(delta, task, delta_payload)
     lab = build_label_block(prompt_ids, [int(x) for x in token_ids], STOP_TOKEN_ID)
     return lab, delta
+
+
+def episode_images(proc, episode_path: Path, t: int, cams: int, modules):
+    """Load one task-qualified HDF5 frame using the same camera order and transform as R11."""
+    import cv2
+    import h5py
+    import numpy as np
+    import torch
+    from PIL import Image
+
+    M2 = modules[3]
+    if cams != 3:
+        raise ValueError("R44 image contract requires exactly 3 cameras")
+    tiles = []
+    with h5py.File(episode_path, "r") as h:
+        for cam in M2.CAMERA_ORDER[:cams]:
+            dataset = h["vision/" + cam + "/colors"]
+            if t < 0 or t >= len(dataset):
+                raise IndexError(f"{episode_path}: frame {t} outside camera dataset length {len(dataset)}")
+            buf = dataset[t]
+            img = cv2.imdecode(np.frombuffer(bytes(buf), np.uint8), cv2.IMREAD_COLOR)
+            if img is None:
+                raise ValueError(f"{episode_path}: failed to decode JPEG {cam} frame {t}")
+            img = img[..., ::-1]
+            tiles.append(proc.image_processor.apply_transform(Image.fromarray(np.ascontiguousarray(img))))
+    pixel_values = torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to("cuda")
+    if pixel_values.shape[1] != cams:
+        raise RuntimeError(f"camera transform produced {tuple(pixel_values.shape)} for cams={cams}")
+    return pixel_values
 
 
 def read_state_action(path: Path, TC):
@@ -628,7 +660,7 @@ def evaluate_dev(
             lab = build_label_block(prompt_ids[task], [int(x) for x in token_ids], STOP_TOKEN_ID)
             inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
             tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
-            pv = M2._episode_images(proc, episode, int(t), args.cams, plan["indexes"][task]["hdf5_dir"])
+            pv = episode_images(proc, plan["episode_paths"][f"{task}/{episode}"], int(t), args.cams, modules)
             pr = torch.from_numpy(np.asarray(row["features"], dtype=np.float32)).reshape(1, 42).to("cuda")
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 out = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
@@ -751,7 +783,8 @@ def parse_args(argv=None):
     ap.add_argument("--run-id", default="")
     ap.add_argument("--epochs", type=int, default=5)
     ap.add_argument("--min-epochs", type=int, default=2)
-    ap.add_argument("--early-stopping-patience", type=int, default=2)
+    ap.add_argument("--early-stopping-patience", type=int, default=0,
+                    help="0 disables early stopping; formal default is all 5 full epochs")
     ap.add_argument("--lr", type=float, default=5e-4)
     ap.add_argument("--projector-lr-multiplier", type=float, default=0.1)
     ap.add_argument("--warmup-fraction", type=float, default=0.01)
@@ -784,6 +817,8 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     if args.epochs < 1 or args.epochs > 5 or args.min_epochs < 1 or args.min_epochs > args.epochs:
         raise SystemExit("epochs must be 1..5 and min-epochs must be within 1..epochs")
+    if args.early_stopping_patience < 0:
+        raise SystemExit("early-stopping-patience must be >= 0; use 0 to disable early stopping")
     if args.cams != 3:
         raise SystemExit("R44 frozen contract requires exactly 3 cameras")
     base_model_path = Path(args.base_model).expanduser().resolve() if args.base_model else None
@@ -839,6 +874,13 @@ def main(argv=None) -> int:
     if args.resource_mode == "shared-memory":
         if not args.accept_shared_gpu_risk or args.max_process_memory_gb is None:
             print("BLOCKED_SHARED_MODE: require --accept-shared-gpu-risk and --max-process-memory-gb", flush=True)
+            return 2
+        if args.max_process_memory_gb < args.expected_peak_gpu_memory_gb:
+            print(
+                "BLOCKED_SHARED_MODE: allocator cap %.2f GiB is below configured expected peak %.2f GiB; "
+                "do not run without a measured lower peak (e.g. verified checkpointing)."
+                % (args.max_process_memory_gb, args.expected_peak_gpu_memory_gb), flush=True
+            )
             return 2
     elif args.max_process_memory_gb is not None:
         print("BLOCKED_CONFIG: memory cap is only accepted in shared-memory mode", flush=True)
@@ -909,6 +951,8 @@ def main(argv=None) -> int:
         optimizer.load_state_dict(state["optimizer_state"])
         scheduler.load_state_dict(state["scheduler_state"])
         global_step, epoch, cursor = int(state["global_step"]), int(state["epoch"]), int(state["cursor"])
+        run_state = state.get("run_state", run_state)
+        run_state = {**run_state, "global_step": global_step, "last_checkpoint": str(ckpt_path)}
         order = np.asarray(state["order"], dtype=np.int64)
         expected_order = D.EpochSampler(plan["n_train"], args.seed, epoch).order
         if not np.array_equal(order, expected_order):
@@ -1006,7 +1050,9 @@ def main(argv=None) -> int:
             if cursor >= plan["n_train"]:
                 # A checkpoint exists at the completed-epoch boundary. Evaluate if not already recorded.
                 already_evaluated = int(run_state.get("completed_epochs", 0)) >= epoch + 1
-                if already_evaluated and epoch + 1 >= args.min_epochs and int(run_state.get("stale_epochs", 0)) >= args.early_stopping_patience:
+                if (already_evaluated and args.early_stopping_patience > 0
+                        and epoch + 1 >= args.min_epochs
+                        and int(run_state.get("stale_epochs", 0)) >= args.early_stopping_patience):
                     status = "EARLY_STOPPED"
                     break
                 if not already_evaluated:
@@ -1042,7 +1088,7 @@ def main(argv=None) -> int:
                         save_run_state(out_dir, {**run_state, "status": status,
                                                  "stop_reason": stop_controller.reason})
                         break
-                    if epoch + 1 >= args.min_epochs and stale >= args.early_stopping_patience:
+                            if args.early_stopping_patience > 0 and epoch + 1 >= args.min_epochs and stale >= args.early_stopping_patience:
                         status = "EARLY_STOPPED"
                         break
                 epoch += 1
@@ -1090,7 +1136,7 @@ def main(argv=None) -> int:
             action_vec = np.asarray(actions[int(t)], dtype=np.float32)
             lab, _delta = build_runtime_labels(prompt_ids[task], state_vec, action_vec, task,
                                                plan["delta_payload"], modules)
-            pv = M2._episode_images(proc, episode, int(t), args.cams, plan["indexes"][task]["hdf5_dir"])
+            pv = episode_images(proc, plan["episode_paths"][f"{task}/{episode}"], int(t), args.cams, modules)
             pr = torch.from_numpy(np.asarray(row["features"], dtype=np.float32)).reshape(1, 42).to("cuda")
             inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
             tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
@@ -1153,6 +1199,9 @@ def main(argv=None) -> int:
                                          plan=plan, base_identity=base_identity, model_info=model_info,
                                          prompts=prompts, prompt_ids=prompt_ids, run_state=run_state)
                 last_checkpoint = str(save_checkpoint(out_dir, state))
+                save_run_state(out_dir, {**run_state, "status": "RUNNING",
+                                         "last_checkpoint": last_checkpoint, "global_step": global_step,
+                                         "epoch": epoch, "cursor": cursor})
                 print(f"[R44] checkpoint saved: {last_checkpoint}", flush=True)
 
             if global_step % args.resource_check_every == 0:
