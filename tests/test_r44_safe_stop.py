@@ -1,0 +1,107 @@
+import signal
+import tempfile
+import unittest
+from pathlib import Path
+
+from training.r44_safe_stop import (
+    R44StopController,
+    atomic_save_checkpoint,
+    stop_and_checkpoint_if_requested,
+)
+
+
+class SafeStopTests(unittest.TestCase):
+    def test_stop_file_requests_stop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stop_path = Path(tmp) / "STOP"
+            controller = R44StopController(stop_path)
+            self.assertFalse(controller.should_stop())
+            stop_path.write_text("stop", encoding="utf-8")
+            self.assertTrue(controller.should_stop())
+            self.assertIn("stop_file", controller.reason)
+
+    def test_signal_handler_only_marks_request_until_safe_poll(self):
+        controller = R44StopController("/nonexistent/STOP")
+        controller._signal_handler(signal.SIGTERM, None)
+        self.assertTrue(controller.stop_requested)
+        self.assertEqual(controller.reason, "signal:SIGTERM")
+        self.assertTrue(controller.should_stop())
+
+    def test_manual_request_is_idempotent(self):
+        controller = R44StopController("/nonexistent/STOP")
+        controller.request_stop("manual")
+        controller.request_stop("second")
+        self.assertTrue(controller.stop_requested)
+        self.assertEqual(controller.reason, "manual")
+
+    def test_low_gpu_memory_requires_configured_consecutive_samples(self):
+        controller = R44StopController(
+            "/nonexistent/STOP", min_free_gpu_gb=24, consecutive_low_memory_samples=2
+        )
+        gib = 1024**3
+        self.assertFalse(controller.observe_gpu_free_memory(23 * gib))
+        self.assertFalse(controller.observe_gpu_free_memory(25 * gib))
+        self.assertFalse(controller.observe_gpu_free_memory(23 * gib))
+        self.assertTrue(controller.observe_gpu_free_memory(22 * gib))
+        self.assertIn("below_threshold", controller.reason)
+
+    def test_atomic_save_replaces_only_after_success(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "last.pt"
+            target.write_bytes(b"old-good-checkpoint")
+
+            def failing_writer(stream):
+                stream.write(b"partial-new")
+                raise RuntimeError("serialization failed")
+
+            with self.assertRaisesRegex(RuntimeError, "serialization failed"):
+                atomic_save_checkpoint(target, failing_writer)
+            self.assertEqual(target.read_bytes(), b"old-good-checkpoint")
+            self.assertEqual(list(Path(tmp).glob(".last.pt.*.tmp")), [])
+
+    def test_atomic_save_commits_new_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "last.pt"
+            target.write_bytes(b"old")
+            atomic_save_checkpoint(target, lambda stream: stream.write(b"new-good"))
+            self.assertEqual(target.read_bytes(), b"new-good")
+            self.assertEqual(list(Path(tmp).glob(".last.pt.*.tmp")), [])
+
+    def test_stop_boundary_saves_once_and_returns_true(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = R44StopController(Path(tmp) / "STOP")
+            controller.request_stop("SIGTERM")
+            target = Path(tmp) / "last.pt"
+            state = {"global_step": 12, "epoch": 1}
+            stopped = stop_and_checkpoint_if_requested(
+                controller,
+                destination=target,
+                state_factory=lambda: state,
+                writer_factory=lambda obj: lambda stream: stream.write(repr(obj).encode()),
+            )
+            self.assertTrue(stopped)
+            self.assertEqual(target.read_bytes(), repr(state).encode())
+
+    def test_no_stop_does_not_write_checkpoint(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            controller = R44StopController(Path(tmp) / "STOP")
+            target = Path(tmp) / "last.pt"
+            stopped = stop_and_checkpoint_if_requested(
+                controller,
+                destination=target,
+                state_factory=lambda: self.fail("must not build state"),
+                writer_factory=lambda obj: lambda stream: stream.write(b"x"),
+            )
+            self.assertFalse(stopped)
+            self.assertFalse(target.exists())
+
+    def test_invalid_gpu_memory_sample_requests_stop(self):
+        controller = R44StopController(
+            "/nonexistent/STOP", min_free_gpu_gb=24
+        )
+        self.assertTrue(controller.observe_gpu_free_memory(-1))
+        self.assertEqual(controller.reason, "gpu_memory_probe_invalid")
+
+
+if __name__ == "__main__":
+    unittest.main()
