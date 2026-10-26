@@ -520,6 +520,13 @@ def build_label_block(prompt_ids, action_token_ids, stop_token_id: int = STOP_TO
     return {"input_ids": ids, "labels": labels, "n_prompt": len(prompt), "action_tokens": tokens}
 
 
+def should_early_stop(min_epochs: int, patience: int, completed_epochs: int, stale_epochs: int) -> bool:
+    """Patience 0 explicitly disables early stopping."""
+    if min_epochs < 1 or patience < 0 or completed_epochs < 0 or stale_epochs < 0:
+        raise ValueError("early-stopping counts must be non-negative and min_epochs >= 1")
+    return patience > 0 and completed_epochs >= min_epochs and stale_epochs >= patience
+
+
 def estimate_budget_hours(
     n_train: int,
     n_dev: int,
@@ -1264,7 +1271,7 @@ def parse_args(argv=None):
     ap.add_argument("--resume-from", default="")
     ap.add_argument("--run-id", default="")
     ap.add_argument("--epochs", type=int, default=5)
-    ap.add_argument("--min-epochs", type=int, default=2)
+    ap.add_argument("--min-epochs", type=int, default=5)
     ap.add_argument("--early-stopping-patience", type=int, default=0,
                     help="0 disables early stopping; formal default is all 5 full epochs")
     ap.add_argument("--lr", type=float, default=5e-4)
@@ -1370,8 +1377,12 @@ def main(argv=None) -> int:
     if args.preflight_only:
         return 0
 
-    if args.epochs != 5:
-        print("BLOCKED_EPOCH_COUNT: formal R44 requires exactly 5 epochs; smaller runs are not formal training", flush=True)
+    if args.epochs != 5 or args.min_epochs != 5 or args.early_stopping_patience != 0:
+        print(
+            "BLOCKED_EPOCH_POLICY: formal R44 requires exactly 5 full epochs, min-epochs=5, "
+            "and early-stopping-patience=0",
+            flush=True,
+        )
         return 2
 
     # All explicit approvals and budget checks happen before any torch CUDA call/model load.
@@ -1666,9 +1677,10 @@ def main(argv=None) -> int:
             if cursor >= plan["n_train"]:
                 # A checkpoint exists at the completed-epoch boundary. Evaluate if not already recorded.
                 already_evaluated = int(run_state.get("completed_epochs", 0)) >= epoch + 1
-                if (already_evaluated and args.early_stopping_patience > 0
-                        and epoch + 1 >= args.min_epochs
-                        and int(run_state.get("stale_epochs", 0)) >= args.early_stopping_patience):
+                if already_evaluated and should_early_stop(
+                    args.min_epochs, args.early_stopping_patience, epoch + 1,
+                    int(run_state.get("stale_epochs", 0)),
+                ):
                     status = "EARLY_STOPPED"
                     break
                 if not already_evaluated:
@@ -1704,7 +1716,8 @@ def main(argv=None) -> int:
                         save_run_state(out_dir, {**run_state, "status": status,
                                                  "stop_reason": stop_controller.reason})
                         break
-                    if args.early_stopping_patience > 0 and epoch + 1 >= args.min_epochs and stale >= args.early_stopping_patience:
+                    if should_early_stop(args.min_epochs, args.early_stopping_patience,
+                                         epoch + 1, stale):
                         status = "EARLY_STOPPED"
                         break
                 epoch += 1
