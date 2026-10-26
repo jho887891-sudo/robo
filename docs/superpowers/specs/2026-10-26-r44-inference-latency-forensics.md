@@ -1,113 +1,110 @@
-# R44: OpenVLA inference latency forensics
+# R44: bounded OpenVLA inference latency attribution
 
 **Status:** SPEC ONLY. No production behavior changed by this document.  
 **Date:** 2026-10-26  
-**Frozen implementation base:** `d99635c4cebff1a5b8ee459ad60aea7695408bc6`  
-**GPU smoke evidence commit:** `034d4f9eff69b9750050b8e1d655c9c2a535874c`  
-**Evidence report:** `evidence/r42_rate_limit_gpu_smoke_20261025T093237Z/report.json`  
-**Main protection:** `main` must remain `329614f54d3090b9b6ab120855ba50fbc93bdd1e` and must not be modified.
+**Frozen implementation/source SHA:** `d99635c4cebff1a5b8ee459ad60aea7695408bc6`  
+**Prior GPU smoke evidence commit:** `034d4f9eff69b9750050b8e1d655c9c2a535874c`  
+**Prior approved execution plan:** Issue #46 comment `6408387411`  
+**Main protection:** `main` must remain `329614f54d3090b9b6ab120855ba50fbc93bdd1e`.
 
-## 1. Question and current evidence
+## 1. Question and evidence boundary
 
-The R42 GPU smoke proves one real OpenVLA-7B forward/decode request on an NVIDIA RTX A6000 using synthetic RGB/state. The single request reports 11,899.14 ms total (10,842.17 ms forward, 1,043.92 ms preprocessing, 12.84 ms decode). This is a **single first-observed inference**, not a steady-state latency distribution. Steady-state latency for the current R15 Stage 300 checkpoint is UNKNOWN.
+The R42 GPU smoke report records one first-observed inference on synthetic RGB/state:
+- total: 11,899.14 ms
+- preprocessing: 1,043.92 ms
+- forward: 10,842.17 ms
+- decode: 12.84 ms
+
+This is **one request, not a warmed steady-state latency distribution**. Current R15 Stage 300 P50/P95/P99 remains UNKNOWN.
 
 At the frozen source:
-- `R42_KV_CACHE` defaults to `0`.
-- With KV cache disabled, `R42DeployServer._decode_tokens()` loops over 14 action tokens and calls `next_token_logits(prefix, pixel_values, feat)` for every token, recomputing the multimodal prefix each time.
-- The existing KV path performs one multimodal prefill plus 13 incremental language-model steps.
-- Prior KV parity and latency evidence was collected on a different checkpoint. It is useful as a hypothesis only, not as evidence for the current Stage 300 checkpoint.
-- The vision-only cache patch persists by replacing `vision_backbone.forward`. Do not benchmark it in the same process unless the original method is explicitly restored and tested. It is not the primary R44 hypothesis.
+- `R42_KV_CACHE=0` and `R42_VISION_CACHE=0` are the required baseline flags.
+- With KV cache disabled, `R42DeployServer._decode_tokens()` performs 14 calls to `backend.next_token_logits(prefix, pixel_values, feat)`, recomputing the multimodal forward for each action token.
+- The immediate task is to measure this exact baseline and attribute the latency. **Do not run a cache-path experiment in R44.**
+- Existing KV-cache evidence comes from another checkpoint, includes free-running token differences, and is not authorization to enable caching. Any cache experiment requires a separate exact-checkpoint parity task and explicit review.
+- The vision-cache flag alone does not prove that the vision cache was installed. Historical evidence on a different checkpoint showed exact output but approximately 1.0002x speedup; do not prioritize it here.
 
 ## 2. Goal
 
-On the exact current R42 implementation and exact Stage 300 checkpoint, determine:
-1. warmed full-recompute latency;
-2. warmed KV-cache latency;
-3. whether free-running token differences occur and their physical action impact;
-4. whether the KV path preserves the existing 14D physical-bound and max-rate contracts;
-5. GPU memory headroom and reproducibility metadata.
+Measure steady-state latency and per-token cost on the exact current R42 implementation and R15 Stage 300 checkpoint, while preserving the default full-recompute path. Confirm repeated-input determinism, safety-contract integrity, runtime/checkpoint identity, and GPU memory behavior.
 
-This is a bounded diagnostic, **not permission to enable cache by default or to run an episode**.
+This is diagnosis only, not a deployment or closed-loop gate.
 
-## 3. Frozen inputs and artifacts
+## 3. Frozen inputs and identity
 
-Use the deployment config already recorded in the smoke report:
-- Base model: `/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine`
-- Checkpoint: `/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300`
-- Policy: `OpenVLA_R42`, task `push_T`
-- Three camera order: `cam_head, cam_left_wrist, cam_right_wrist`
-- Action contract: 14 tokens, legal token IDs 31744..31999
-- Control contract: 25 Hz, `dt=0.04`
-- Same synthetic observation generator and midpoint state as `diagnostics/r42_rate_limit_gpu_smoke.py`; record the exact generated RGB/state bytes or their SHA256. Do not substitute real observations or another checkpoint.
+Use the exact smoke checkout/source:
+- production source SHA: `d99635c4cebff1a5b8ee459ad60aea7695408bc6`
+- base model: `/home/dgut/pusht_runtime/model_cache/openvla-7b-pristine`
+- checkpoint: `/home/T7/ojh/robot_actual/r11/runs/r15_stage_300_20261021T030423Z/checkpoints/step300`
+- policy/task: `OpenVLA_R42` / `push_T`
+- cameras: `cam_head, cam_left_wrist, cam_right_wrist`
+- action IDs: 14 tokens, legal window 31744..31999
+- control: 25 Hz, `dt=0.04`
+- runtime flags: `R42_POLICY=''`, `R42_KV_CACHE=0`, `R42_VISION_CACHE=0`
 
-Before execution, re-check that the local deployment config resolves to these paths and that the checkpoint manifest, LoRA adapter, projector, normalizer contract and base-model configuration match the smoke report. Hash the base model weight shards too if feasible; if not, explicitly retain full base-weight identity as UNKNOWN. Never rewrite or re-save any checkpoint.
+Use the same deterministic synthetic observation generator and midpoint state as `diagnostics/r42_rate_limit_gpu_smoke.py`. Record the exact RGB/state fixture or its SHA256. Do not use real observations, another checkpoint, or a different prompt.
 
-## 4. Implementation scope
+Before loading, verify that the existing repository remote is the expected `jho887891-sudo/robo`, the production checkout is exactly at the frozen SHA, and the working tree is clean. Do not use Git wrappers or alter Git's reported state. If the source, path, runtime, or checkpoint differs, stop BLOCKED.
 
-Create a new standalone diagnostic entry point, e.g. `diagnostics/r44_inference_latency_forensics.py`, plus CPU tests. Do not change production inference code, default environment flags, `deploy.yml`, action codec, safety limits, checkpoint files or `main`.
+## 4. Instrumentation scope
 
-Use one loaded model instance and compare only these two modes:
-- **A / FULL:** `backend.kv_cache_enabled=False`, `backend.vision_cache_enabled=False`; no vision monkey-patch may be installed.
-- **B / KV:** `backend.kv_cache_enabled=True`, `backend.vision_cache_enabled=False`; use the existing one-prefill + 13-step path.
+Use the official path:
+`Model.update_obs -> Model.get_action -> R42DeployServer.act -> _decode_tokens`.
 
-Do not run the vision-only cache arm in this process. If a later task needs it, isolate it in a separate process or add and test an explicit unpatch/restore operation first.
+Do not edit production policy/server/model files. Use a temporary external driver or isolated diagnostic-only file. Wrap `backend.next_token_logits` externally to record, for each call:
+- request index and action-token position k (0..13);
+- prefix length;
+- wall-clock milliseconds for the call;
+- legal output-window bounds and returned argmax token;
+- request-level preprocess/forward/decode/total times.
 
-For each measured trial:
-- restore the model's episode history and previous-command latch to a clean reset state;
-- feed identical RGB/state, prompt, timestamp and metadata;
-- synchronize CUDA immediately before starting and after finishing each timed region;
-- record the 14 legal token IDs/bins, decoded action14, latency phases, rate-limited dimensions, max absolute action delta, peak allocated and reserved CUDA memory;
-- time each full-forward or incremental step separately where practical, without changing numerical behavior;
-- ensure the cache is created and discarded within that one action and cannot survive into another trial.
+The backend returns logits via `.cpu().numpy()`, which synchronizes the result transfer. Record the timing method and CUDA synchronization points; synchronize before and after each end-to-end request. Do not attribute model loading to action latency. The instrumentation must not change token selection, input tensors, cache flags, model weights, or action decoding.
 
-Use the same loaded model and exact weights for both modes. Do not reload or change weights between arms. If the source cannot safely toggle modes on the same backend, stop and report BLOCKED rather than weakening the comparison.
+## 5. Fixed execution budget and gates
 
-## 5. Fixed budget and order
+1. Capture GPU model, driver/CUDA, `nvidia-smi`, compute-process ownership, free/total VRAM, Python/PyTorch/Transformers versions, and source/checkpoint identity.
+2. Require at least 24 GB free CUDA VRAM before model load. If free memory is below threshold, GPU ownership is unclear, or another process makes the run unsafe, record BLOCKED and exit without loading. Never kill/suspend processes.
+3. Load the model once and record load time separately.
+4. Run exactly **one warm-up action** through the official path. Exclude it from summaries.
+5. Run exactly **20 measured action requests**, each with the same deterministic synthetic RGB/state fixture. Reset episode history and previous-command latch before each request so every request starts with the same first-step contract.
+6. Hard wall-clock budget: 15 minutes from model-load start. No automatic retry, threshold lowering, or package installation.
+7. Stop on OOM, CUDA/device error, non-finite output, illegal token, physical/rate contract violation, changed checkpoint hash, unexpected side effect, or budget overrun. Preserve partial evidence and report BLOCKED/PARTIAL/FAIL honestly.
 
-1. Read-only environment/GPU gate. Require at least 24 GB free CUDA memory before loading. Never kill or suspend other processes.
-2. Load the model exactly once. Record load duration separately from inference duration.
-3. Run 2 warmup actions in FULL and 2 in KV. Exclude warmups from latency summaries.
-4. Run 10 measured actions in each mode, interleaved by round (FULL then KV per round), resetting history and latches before every action.
-5. Hard wall-clock budget: 10 minutes after model loading. Hard inference budget: 24 total action calls including warmups. Stop on OOM, CUDA/device error, non-finite output, illegal token, safety-contract violation, unexpected cache persistence, or any need to mutate weights.
-6. No training, optimizer steps, HDF5 writes, simulator launch, robot connection/command, deployment, package installation, or source/checkpoint mutation.
+No training, optimizer steps, cache-path experiment, HDF5 writes, checkpoint writes, simulator launch, robot connection/command, deployment, package installation, or source-policy modification.
 
-If the GPU precondition fails, record BLOCKED and exit without loading the model.
+## 6. Required report and acceptance
 
-## 6. Required comparisons and acceptance
+Report request-level P50/P95/P99, mean, max, requests/second, and ratio to the 40 ms control period for total, preprocessing, forward and decode latency. Report per-token P50/P95/P99 and position-wise mean/max; clearly state that P99 from 20 samples is a screening estimate only.
 
-For both modes, report P50/P95/P99 for total, preprocessing, forward and decode latency, plus per-token timing and CUDA allocated/reserved/peak memory.
+For each measured action verify:
+- exactly 14 action tokens, each in 31744..31999;
+- finite 14D output;
+- physical position bounds satisfied;
+- `abs(action14 - prev_cmd14) <= max_rate14 * 0.04 + 1e-5`;
+- `dt=0.04`, no `unsafe` or rate-conflict signal;
+- repeated identical input produces the same tokens and action, or any variation is explicitly reported.
 
-Correctness:
-- All 14 IDs per action must lie in 31744..31999.
-- All actions must be finite and satisfy the frozen physical bounds.
-- All actions must satisfy `abs(action14 - prev_cmd14) <= max_rate14 * 0.04 + 1e-5`.
-- No unsafe/rate-conflict signal.
-- Report exact free-running token equality rate, differing token indices/bins, maximum bin delta, max absolute action-coordinate delta and normalized/physical residual delta if recoverable from the frozen decoder.
-- Do not demand bit-identical BF16 logits as the sole acceptance criterion; token and action effects must be reported explicitly.
-- A cache speed claim is supported only if both modes use the same loaded weights, identical inputs, the same process/GPU and the same warmup/timing method.
-- A speed improvement is **not** sufficient to authorize deployment. If any free-running token differs, preserve the result and mark semantic parity as measured-but-not-identical; do not silently change defaults.
+If any request exceeds 40 ms, label 25 Hz real-time compliance **NOT MET**. Do not imply that correct `dt` wiring proves the server can execute at 25 Hz. The output is not evidence of closed-loop Push-T success.
 
-Performance interpretation:
-- 25 Hz requires an end-to-end policy request within 40 ms per control step. If the measured P50/P95 is above 40 ms, label the 25 Hz requirement FAIL/NOT MET; do not redefine the target or imply that a faster cache meets real-time control if it does not.
-- A single cold request is not a steady-state distribution.
-- The output is a diagnostic only, not evidence of closed-loop Push-T success.
+## 7. Hashes and evidence
 
-## 7. Evidence and GitHub delivery
+Hash the actual base-model weight shards (`*.safetensors`) plus base config, checkpoint manifest, LoRA adapter/config, proprio projector, normalizer/split contract, and relevant production source files before and after the run. Record full path, byte size and SHA256. If hashing the full base weights cannot finish within the budget, keep full base-weight identity UNKNOWN and explain why; do not label it verified based only on the config file.
 
-Create a new unique output directory outside the repository, never overwrite earlier evidence. Include:
-- `report.json` with schema/version, UTC timestamps, source SHA/branch/worktree status, full config and checkpoint paths, all relevant SHA256 hashes, dependency versions, GPU/driver/CUDA data, flags, warmup count, measured count, per-trial records and summary statistics;
+Write to a new unique directory outside the repository, never overwrite existing evidence. Include:
+- `report.json` with schema/version, UTC timestamps, frozen production SHA, diagnostic driver identity, full source/checkpoint/config paths, hashes, dependency versions, GPU/process snapshots, flags, warmup count, measured count, per-trial/per-token records and summary statistics;
 - raw `console.log`;
 - `environment.txt`;
-- `nvidia-smi-before.csv` and `nvidia-smi-after.csv`;
+- `nvidia-smi-before.csv` and `nvidia-smi-after.csv`, including process ownership if supported;
 - `SHA256SUMS` covering every evidence file except itself;
 - explicit `exit_code.txt`.
 
-Preserve the original R42 smoke report and commit unchanged. Commit code/tests/evidence-manifest references only on an isolated R44 branch; do not modify `main`, merge PR #47/#48, or convert either draft to ready. Report branch name, final SHA, exact command, test counts and evidence path. Do not claim success if the report, hashes or raw logs are missing.
+## 8. GitHub delivery and stop rules
 
-## 8. Stop and decision rules
+Use an isolated branch `evidence/r42-perf-diagnosis-<UTCSTAMP>` based on the frozen source SHA. Commit only the diagnostic driver (if needed) and evidence directory; do not change production source/policy, deployment config, `main`, PR #47 or PR #48. Preserve the prior smoke evidence unchanged.
 
-- **BLOCKED:** GPU below threshold, source/checkpoint identity mismatch, dirty/unverified checkout, or unable to reset/toggle paths without side effects.
-- **FAIL:** runtime exception, illegal tokens, non-finite actions, safety violation, stale cache, malformed evidence, or exceeded hard budget.
-- **PASS (diagnostic only):** both arms complete with intact evidence and all safety contracts pass. This does not mean 25 Hz is met.
-- If KV is materially faster and token/action differences remain bounded, present the measured trade-off for review. Do not change the default from FULL to KV without a separate explicit decision.
-- If both arms remain far above 40 ms, stop optimizing this narrow path and report that the 25 Hz requirement needs a separate architecture-level decision (e.g. action chunking or a smaller/distilled policy). Do not start such work or training without authorization.
+- **BLOCKED:** pre-load gate fails, source/checkpoint identity mismatch, dirty checkout, or runtime differs from the frozen environment.
+- **PARTIAL:** a valid run starts but the hard budget or environment interrupts it; preserve completed samples and all raw logs.
+- **FAIL:** runtime or contract failure, non-finite/illegal action, safety violation, hash mismatch, or malformed evidence.
+- **PASS (diagnostic only):** 1 warm-up + 20 measured baseline requests complete with valid evidence and all contracts intact. This is not a 25 Hz or rollout PASS.
+
+Post branch name/SHA, exit code, completed sample count, evidence path, and VERIFIED/BLOCKED/UNKNOWN conclusions to Issue #46. Keep PR #47 and #48 as drafts and Issue #46 open. Do not run a simulator or robot episode after this task.
