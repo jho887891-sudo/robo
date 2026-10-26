@@ -688,6 +688,49 @@ def persist_budget_ledger(
     return elapsed
 
 
+def run_artifact_manifest_path(out_dir: Path, status: str, global_step: int) -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stem = f"artifact_manifest_step{int(global_step):06d}_{status}_{stamp}"
+    target = out_dir / f"{stem}.json"
+    suffix = 1
+    while target.exists():
+        target = out_dir / f"{stem}_{suffix:02d}.json"
+        suffix += 1
+    return target
+
+
+def write_run_artifact_manifest(
+    out_dir: Path, target_path: Path, *, source_sha: str, status: str, global_step: int,
+) -> Path:
+    """Hash every run artifact, including checkpoints and logs, while excluding only this manifest."""
+    root = out_dir.resolve()
+    target = target_path.resolve()
+    files = {}
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.resolve() == target:
+            continue
+        before = stat_identity(path)
+        digest = sha256_file(path)
+        after = stat_identity(path)
+        if before != after:
+            raise RuntimeError(f"run artifact changed while hashing: {path}")
+        files[path.relative_to(root).as_posix()] = {
+            "sha256": digest,
+            "size_bytes": int(before[0]),
+        }
+    atomic_json(target, {
+        "schema": "r44-run-artifact-manifest/v1",
+        "created_utc": utcnow(),
+        "source_sha": source_sha,
+        "status": status,
+        "global_step": int(global_step),
+        "manifest_excludes_itself": True,
+        "file_count": len(files),
+        "files": files,
+    })
+    return target
+
+
 def load_runtime_modules(args):
     """Import repository/runtime modules only after CLI parsing; no CUDA context is created here."""
     # Keep the ARX marker present for the entire process lifetime before any Prismatic import.
