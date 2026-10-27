@@ -28,6 +28,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from training import r45_data as R45DATA
+
 
 REPO = Path(__file__).resolve().parents[1]
 EXPECTED_GPU_UUID = "GPU-73599ded-b934-3bb7-53fe-4fb3121db213"
@@ -738,7 +740,7 @@ def evaluate_dev(
             lab = build_label_block(prompt_ids[task], [int(x) for x in token_ids], STOP_TOKEN_ID)
             inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
             tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
-            pv = episode_images(proc, plan["episode_paths"][f"{task}/{episode}"], int(t), args.cams, modules)
+            pv, data_timing = r45_reader.load_images(proc, plan["episode_paths"][f"{task}/{episode}"], int(t), args.cams, M2.CAMERA_ORDER)
             pr = torch.from_numpy(np.asarray(row["features"], dtype=np.float32)).reshape(1, 42).to("cuda")
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 out = vla(input_ids=inp, attention_mask=torch.ones_like(inp), pixel_values=pv,
@@ -1056,7 +1058,8 @@ def main(argv=None) -> int:
     model_info["memory_cap"] = memory_cap_info
     total_steps = plan["n_train"] * args.epochs
     optimizer, scheduler, scheduler_info = make_optimizer_and_scheduler(vla, projector, args, total_steps)
-    state_cache = load_state_cache(plan, TC)
+    r45_reader = R45DATA.RuntimeReader()
+    state_cache = r45_reader.load_state_cache(plan, TC)
     stop_controller = R44StopController(
         out_dir / "STOP", min_free_gpu_gb=args.min_free_gpu_gb,
         consecutive_low_memory_samples=2,
@@ -1285,6 +1288,7 @@ def main(argv=None) -> int:
             pr = torch.from_numpy(np.asarray(row["features"], dtype=np.float32)).reshape(1, 42).to("cuda")
             inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
             tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
+            sample_start = time.perf_counter()
             step_start = time.perf_counter()
             optimizer.zero_grad(set_to_none=True)
             try:
@@ -1329,7 +1333,9 @@ def main(argv=None) -> int:
                 "loss": float(loss.detach().float().cpu()), "grad_norm": grad_norm,
                 "lr_lora": float(optimizer.param_groups[0]["lr"]),
                 "lr_projector": float(optimizer.param_groups[1]["lr"]),
-                "step_wall_seconds": step_seconds, "utc": utcnow(),
+                "step_wall_seconds": step_seconds, "sample_wall_seconds": time.perf_counter() - sample_start,
+                "samples_per_sec": 1.0 / max(1e-9, time.perf_counter() - sample_start),
+                "data_timing": data_timing, "utc": utcnow(),
             })
             append_jsonl(coverage_path, {
                 "global_step": global_step, "epoch": epoch + 1, "cursor": cursor, "sample_index": sample_idx,
