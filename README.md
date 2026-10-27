@@ -1,3 +1,9 @@
+> **当前项目状态与新会话交接入口**：请先阅读 [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) 和 [AGENTS.md](AGENTS.md)。
+> 本 README 记录的是 **2026-10-18 左右的历史闭环验证快照**，不代表 R44/R45 的最新研发进度。
+> 当前 R44/R45 的代码与 CPU/GPU Gate 详见状态文档；不要在新对话中从这里重头开始。
+
+---
+
 # 纯 OpenVLA 在 RoboDojo 中的真实执行验证（提交包）
 
 本包内容：把「纯 OpenVLA（3 相机 + 14 维 proprio，离散动作 token）接入 RoboDojo 官方评测闭环」的
