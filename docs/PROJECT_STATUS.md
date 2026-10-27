@@ -65,6 +65,34 @@ R45-D GitHub 分支的 CPU 证据：
 
 推荐新审计分支：`audit/r45-training-runtime-fixes-20261027`，基线严格采用 `0b35b13f94d71ca15b6704a3b6bd0cffb2ad4e57`，执行前核对其是否已经存在更晚审计提交。
 
+## 五 Epoch 训练提速执行路线（当前 PLAN）
+
+**科学目标不变**：三任务 TRAIN=108780、DEV=28268；5 个完整 Epoch，总计 543900 次 TRAIN 样本访问。保留 3 路相机、42D proprio、14D `joint_delta_v1`、OpenVLA-7B + LoRA `r=32/alpha=16/q_proj,v_proj`。正式训练样本覆盖与优化器更新次数分别报告；不得以少跑样本、改模型、只测 CPU 或只测单步冒充加速。
+
+| 阶段 | 具体行动 | 成本 / 依赖 | Gate 与交付 |
+|---|---|---|---|
+| **P0: R45-E 止损修复（现在）** | 修复 TRAIN `data_timing` 未绑定、DEV `r45_reader` 未绑定；把 `sample_start` 移到数据准备之前；消除 `r45_gpu_bench.py` 的 `sleep(0.001)` 虚假 PASS；R45 假模型中断检查点游标与积累批次最小修复 | **CPU only**，不同缺陷可并行 | 实际进入 TRAIN/DEV 控制流程的 CPU stub RED→GREEN；静态字符串匹配不能单独算集成 PASS；独立审计分支、测试命令、日志、SHA |
+| **P1: 数据通路 CPU 基准与保真** | 比较旧 `episode_images` 与 R45 Reader 固定样本输出；测 HDF5 open/read、JPEG、processor、CPU 数据准备、缓存命中与内存；安全测试 worker 预取和句柄生命周期，拒绝跨进程共享句柄；不改变采样顺序 | **CPU only**，可与 P0 无依赖测试并行 | 基线和优化图像/标签/特征完全符合相同契约；CPU 阶段分段时间和内存峰值留证；确认真实 TRAIN 接口实际调用优化后的 Reader |
+| **P2: GPU Smoke（待明确授权）** | 真实 7B、3 相机、[1,42]、14 action tokens + STOP、bf16 前反向和一次临时 AdamW 更新；冻结基座与 LoRA 实际模块检查；峰值显存、loss/grad finite、资源保护、原始日志；不导出模型 | 需要研究负责人批准短时 GPU 窗口，独占/确认共享资源安全 | 不 OOM、接口/归一化不漂移、无其他进程受影响、显存余量满足 Gate；失败仅留证，不自动正式训练 |
+| **P3: GPU 吞吐量 A/B（待单独授权）** | 用同一份冻结样本、同一模型 SHA/随机种子/优化语义，测旧 loader 和优化 loader；只在测出瓶颈后尝试兼容 SDPA/Attention、Micro-batch；同步或 CUDA Events 正确计时，区分 warm-up 与 steady；记录数据阶段、前向、反向、optimizer、峰值显存以及 end-to-end samples/sec | 建议申请**单卡最多 30 分钟总墙钟**（含加载、warm-up、收尾），独立外部超时；申请不代表授权 | 真实 forward/backward/update，绝不允许 `sleep` 占位性能作为 PASS；依实际计时判断 CPU I/O bound 还是 GPU compute/memory bound；不够样本或被截断标记 UNKNOWN |
+| **P4: 模型计算进一步优化（有条件）** | 若 GPU 计算明显主导，检查支持的 SDPA/FlashAttention 路径、训练精度和 batch；若视觉塔完全冻结且可证等价，独立评估视觉特征缓存；gradient checkpointing 作为节省显存手段，可能牺牲速度；任何改变 optimizer 更新次数的方案单独标注语义差异 | CPU 兼容性验证后才申请额外少量 GPU 比较 | 数值/形状/目标一致、没有违背冻结模块与归一化约束；无收益则停止继续堆优化 |
+| **P5: 重新估预算并申请正式训练** | 用真实 TRAIN steady samples/sec、全 DEV 耗时、模型载入、checkpoint I/O、资源边际估算 5 Epoch；按预算、显存、恢复回归和训练覆盖 Gate 决定是否进入正式训练 | 正式全量训练需用户**单独明确批准** | 给出可信 GPU-hours 范围、检查点/STOP/恢复计划、TRAIN/DEV/HOLDOUT 隔离与独立评估；未批准不得启动 |
+
+### 如何判断优化方向
+
+- **CPU/I/O 瓶颈**：数据准备占比较高，先 HDF5 句柄复用/解码多进程/预取、减少重复读取；避免把无命中收益的 256 MB 缓存当作已验证提速。
+- **GPU 计算瓶颈**：forward/backward 占大头，优先兼容 Attention kernel，之后测有效 micro-batch 与梯度累积；不要仅凭每步更短就认定总训练时间更短。
+- **显存瓶颈**：先测峰值及余量，再评估 batch 或 checkpointing；`set_per_process_memory_fraction` 只限 PyTorch 分配器，不等于独占/硬显存隔离。
+- **GPU Smoke 先于性能测试**，没有真实模型通过单步烟测不得进入大规模基准。
+- **相同优化语义下**以完整样本/墙钟秒为首要比较指标；把 warm-up、预处理、加载、DEV、checkpoint 分开。若 Batch 导致优化器更新次数与学习率调度变化，另列非等价对照。
+- 老实验的 **~605 GPU-hours** 是用其他训练路径的旧单步耗时外推，**不是当前 R45 的实测结论**。真实数据缺失时总预算必须为 UNKNOWN。
+
+预计正式训练计算：
+`train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
+还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
+
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence，别再新造第二份总计划。当前下一步仍为 P0 R45-E。未经研究负责人同意不得自动运行 P2/P3/P5。
+
 ### GPU Gate，尚未获授权
 
 R45-E 完成并复核后，单独申请以下资源，**申请不等于授权**：
