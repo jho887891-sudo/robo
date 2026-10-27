@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import time
+from collections import OrderedDict
 
 import numpy as np
 
@@ -194,10 +195,13 @@ def feature42(history, contract):
 class RuntimeReader:
     """Formal-entry reader: worker/process-local HDF5 handles, bounded image cache, phase timing."""
 
-    def __init__(self, cache_bytes=256 * 1024 * 1024):
+    def __init__(self, cache_bytes=256 * 1024 * 1024, max_open_handles=24):
         self.cache_bytes = int(cache_bytes)
-        self._handles = {}
-        self._images = {}
+        self.max_open_handles = int(max_open_handles)
+        if self.cache_bytes < 0 or self.max_open_handles < 1:
+            raise ValueError("cache_bytes must be >= 0 and max_open_handles must be >= 1")
+        self._handles = OrderedDict()
+        self._images = OrderedDict()
         self._cache_bytes = 0
         self.totals = {"hdf5_read_s": 0.0, "jpeg_preprocess_s": 0.0,
                        "state_label_s": 0.0, "cpu_to_gpu_s": 0.0,
@@ -206,10 +210,15 @@ class RuntimeReader:
     def _handle(self, path):
         path = os.fspath(path)
         h = self._handles.get(path)
-        if h is None:
-            import h5py
-            h = h5py.File(path, "r")
-            self._handles[path] = h
+        if h is not None:
+            self._handles.move_to_end(path)
+            return h
+        if len(self._handles) >= self.max_open_handles:
+            _, oldest = self._handles.popitem(last=False)
+            oldest.close()
+        import h5py
+        h = h5py.File(path, "r")
+        self._handles[path] = h
         return h
 
     def load_state_cache(self, plan, contract):
@@ -222,6 +231,11 @@ class RuntimeReader:
         return cache
 
     def load_images(self, proc, path, t, cams, camera_order, device="cuda"):
+        """Read the 3-camera sample and report non-overlapping host-side phase times.
+
+        cpu_to_gpu_s measures host-observed transfer duration, not CUDA kernel execution.
+        A real GPU throughput benchmark must use synchronization/events separately.
+        """
         import cv2
         import numpy as np
         import torch
@@ -229,32 +243,49 @@ class RuntimeReader:
         if cams != 3:
             raise ValueError("R45 reader requires exactly 3 cameras")
         key = (os.fspath(path), int(t), tuple(camera_order[:cams]))
-        t0 = time.perf_counter()
         tiles = self._images.get(key)
-        if tiles is None:
+        read_s = 0.0
+        jpeg_s = 0.0
+        cache_hit = tiles is not None
+        if cache_hit:
+            self._images.move_to_end(key)
+        else:
             h = self._handle(path)
             tiles = []
             for cam in camera_order[:cams]:
+                read_start = time.perf_counter()
                 raw = h["vision/" + cam + "/colors"][int(t)]
+                read_s += time.perf_counter() - read_start
+                decode_start = time.perf_counter()
                 img = cv2.imdecode(np.frombuffer(bytes(raw), np.uint8), cv2.IMREAD_COLOR)
                 if img is None:
                     raise ValueError("JPEG decode failed for %s t=%d cam=%s" % (path, t, cam))
                 img = img[..., ::-1]
-                tiles.append(proc.image_processor.apply_transform(Image.fromarray(np.ascontiguousarray(img))))
+                tiles.append(proc.image_processor.apply_transform(
+                    Image.fromarray(np.ascontiguousarray(img))
+                ))
+                jpeg_s += time.perf_counter() - decode_start
             size = sum(int(x.numel() * x.element_size()) for x in tiles)
             if size <= self.cache_bytes:
                 self._images[key] = tiles
                 self._cache_bytes += size
                 while self._cache_bytes > self.cache_bytes and self._images:
-                    old, old_tiles = self._images.popitem()
+                    _, old_tiles = self._images.popitem(last=False)
                     self._cache_bytes -= sum(int(x.numel() * x.element_size()) for x in old_tiles)
-        self.totals["jpeg_preprocess_s"] += time.perf_counter() - t0
-        t1 = time.perf_counter()
+        transfer_start = time.perf_counter()
         pixel_values = torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to(device)
-        self.totals["cpu_to_gpu_s"] += time.perf_counter() - t1
+        transfer_s = time.perf_counter() - transfer_start
+        self.totals["hdf5_read_s"] += read_s
+        self.totals["jpeg_preprocess_s"] += jpeg_s
+        self.totals["cpu_to_gpu_s"] += transfer_s
         self.totals["samples"] += 1
-        return pixel_values, {"jpeg_preprocess_s": time.perf_counter() - t0,
-                              "cpu_to_gpu_s": time.perf_counter() - t1}
+        return pixel_values, {
+            "hdf5_read_s": read_s,
+            "jpeg_preprocess_s": jpeg_s,
+            "cpu_to_gpu_s": transfer_s,
+            "cache_hit": cache_hit,
+            "timing_kind": "host_wall_no_cuda_event",
+        }
 
     def close(self):
         for h in self._handles.values():
@@ -264,3 +295,4 @@ class RuntimeReader:
                 pass
         self._handles.clear()
         self._images.clear()
+        self._cache_bytes = 0
