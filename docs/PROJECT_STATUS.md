@@ -7,7 +7,7 @@
 
 ## 30 秒状态摘要
 
-**当前研发位置：R45-D CPU 交付已完成，R45-E 运行时缺陷修复待完成。GPU Smoke、真实 GPU 吞吐基准和正式 5 Epoch 训练均未获授权，未运行。**
+**当前研发位置：R45-D CPU 交付已完成；R45-E 独立修复已由 ChatGPT 实施，PR #50 的 GitHub CPU Gate 全部通过，尚未合入 R45-D。GPU Smoke、真实 GPU 吞吐基准和正式 5 Epoch 训练均未获授权，未运行。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -49,6 +49,15 @@ R45-D GitHub 分支的 CPU 证据：
 - 原始测试输出与退出码：[`evidence/r45-cpu-gate-20261027/`](https://github.com/jho887891-sudo/robo/tree/0b35b13f94d71ca15b6704a3b6bd0cffb2ad4e57/evidence/r45-cpu-gate-20261027/)。
 
 **不能宣称：**真实 7B 前反向训练已 PASS、24 GB 显存足够、训练吞吐已加速、完整 Epoch 训练成功，或 GPU benchmark 已完成。
+
+## R45-E 直接修复交付（2026-10-27）
+
+- **修复 PR（独立审计分支）**：[#50](https://github.com/jho887891-sudo/robo/pull/50)，分支 `audit/r45-direct-runtime-fixes-20261027`，代码/CPU CI 固定 SHA `a9685ae53a39d90589ca1a5d97bdb039e1ce4549`，以 R45-D `0b35b13` 为基线，**尚未合并到 R45 正式分支**。
+- **VERIFIED CPU**：GitHub Actions [R45 Runtime CPU Gate run 40477763136](https://github.com/jho887891-sudo/robo/actions/runs/40477763136) 全部成功；真实运行的 CPU 测试：R44 delta 15/15、R45 contract 4/4、运行时回归 6/6、**合成 HDF5 + Torch2.5.1 CPU 假模型训练/中断恢复 3/3**；Python 编译检查通过。实验仅用 GitHub CPU runner，未启动用户训练服务器 GPU。
+- **已修复**：正式 R44 TRAIN 的 Reader 和 `data_timing` 绑定、完整样本计时与 GPU 同步、DEV reader 注入；RuntimeReader 的句柄上限与缓存 LRU、相互独立的阶段计时；R45 假模型的已提交优化器步数游标、梯度累积尾批次、恢复契约；正式 LoRA `q_proj/v_proj`；模拟 GPU Benchmark 永久拒绝 `PASS`，已授权但尚未实现真实引擎时退出码 3。
+- **尚不可声称**：CPU stub/假模型通过并不等于 OpenVLA-7B GPU forward/backward/显存/性能验证。新的 benchmark 刻意保持 `BLOCKED_NOT_IMPLEMENTED`，不会输出伪吞吐或初始化 CUDA。
+- **下一个 Gate**：在真实服务器复核 PR #50 CPU 契约与环境、确认修复能安全进入正式 R44 后，以独立审批的 GPU Smoke 验证 7B 真实计算。未获研究负责人授权不启动任何 GPU 任务。不要重做已通过的 GitHub 6+15+4+3 CPU CI。
+- **合并限制**：本 PR 以 R45 分支为目标，尚未合并；代码未经合并前，下节问题描述仍适用于冻结的 **R45-D SHA `0b35b13`**。
 
 ## 未解决的高优先级运行时问题（R45-E）
 
