@@ -1,0 +1,6 @@
+d9eeb70465b4328d447f775669ce5db3f17dee261e798a9f9666aa758a4e82b9  /tmp/r45-integrated-throughput-20261027/evidence/r45-cpu-gate-20261027/code_sha.txt
+2871595da13707e7b486cd36c9d6e3a96ef32fc169481b009506ebb2d7f055c9  /tmp/r45-integrated-throughput-20261027/evidence/r45-cpu-gate-20261027/exit_codes.txt
+3bf610cf6b39a27daee69fc2655e7dfe6a43200bc118f39fe8693d07bda0ce6a  /tmp/r45-integrated-throughput-20261027/evidence/r45-cpu-gate-20261027/gpu_bench_refusal.stderr
+1ae761b2a726c066dd52bbc3eea7be146adc5c8dc7939197e2c98071029ec6a9  /tmp/r45-integrated-throughput-20261027/evidence/r45-cpu-gate-20261027/r44_delta.stdout
+cbaa88a86c0a75dab0668fa3951e70ac0f745b9f51ac66a03cd12f36bb55116c  /tmp/r45-integrated-throughput-20261027/evidence/r45-cpu-gate-20261027/r45_contract.stdout
+8ecae6e28557f7dfd3b51fad8c70cbca16f178a7ec788cd0667d834d9b591406  /tmp/r45-integrated-throughput-20261027/evidence/r45-cpu-gate-20261027/r45_pipeline.stdout

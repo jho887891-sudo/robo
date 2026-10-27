@@ -1,0 +1,4 @@
+r44_delta=0
+r45_contract=0
+r45_pipeline=0
+gpu_bench_refusal=2

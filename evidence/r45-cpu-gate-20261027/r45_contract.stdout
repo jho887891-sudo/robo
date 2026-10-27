@@ -1,0 +1,9 @@
+test_builds_42d_state_velocity_acceleration (__main__.TestR45Contract) ... ok
+test_pinned_defaults (__main__.TestR45Contract) ... ok
+test_rejects_wrong_width_and_unproven_alignment (__main__.TestR45Contract) ... ok
+test_target_and_lora_are_not_silently_changed (__main__.TestR45Contract) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.032s
+
+OK
