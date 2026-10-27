@@ -30,10 +30,11 @@ printf 'R45_F_EVIDENCE=%s\n' "$out"
 printf '%s\n' "$R45_EXPECTED_SHA" > "$out/code_sha.txt"
 python3 --version > "$out/python_version.txt" 2>&1
 git status --porcelain=v2 --branch > "$out/git_status.txt"
-git remote -v > "$out/git_remotes.txt"
+# Do not archive remote URLs here: they may contain credentials.
 git rev-parse HEAD > "$out/git_head.txt"
 
 # Import/version queries on CPU only; never touch torch.cuda or nvidia-smi here.
+set +e
 python3 - > "$out/packages.json" 2> "$out/packages.stderr" <<'PY'
 import importlib.metadata as md
 import json, platform
@@ -43,8 +44,9 @@ print(json.dumps({
     "packages": {name: md.version(name) for name in packages},
 }, indent=2, sort_keys=True))
 PY
+packages_rc=$?
+printf 'packages=%s\n' "$packages_rc" > "$out/exit_codes.txt"
 
-set +e
 python3 -m training.r44_train \
   --preflight-only --out "$out/preflight-output-unused" \
   --splits "$root/data/m2_splits.json" \
@@ -55,7 +57,7 @@ python3 -m training.r44_train \
   --base-model "$R44_BASE_MODEL" \
   --oft-root "$R44_OFT_ROOT" > "$out/r44_real_data_preflight.stdout" 2> "$out/r44_real_data_preflight.stderr"
 preflight_rc=$?
-printf 'r44_real_data_preflight=%s\n' "$preflight_rc" > "$out/exit_codes.txt"
+printf 'r44_real_data_preflight=%s\n' "$preflight_rc" >> "$out/exit_codes.txt"
 
 python3 -m unittest discover -s tests -p 'test_r45_runtime_gate.py' -v \
   > "$out/r45_runtime.stdout" 2> "$out/r45_runtime.stderr"
@@ -81,7 +83,7 @@ set -e
   find . -maxdepth 1 -type f ! -name SHA256SUMS -print0 |
     sort -z | xargs -0 -r sha256sum > SHA256SUMS
 )
-if (( preflight_rc || runtime_rc || toy_rc || delta_rc || contract_rc )); then
+if (( packages_rc || preflight_rc || runtime_rc || toy_rc || delta_rc || contract_rc )); then
   printf 'STATUS=BLOCKED_CPU_GATE\nEVIDENCE=%s\n' "$out"
   exit 3
 fi
