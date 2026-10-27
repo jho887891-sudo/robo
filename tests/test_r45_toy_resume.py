@@ -109,9 +109,8 @@ class TestToyStopResume(unittest.TestCase):
         rc = self.run_toy(stopped, ["--max-steps", "1"])
         self.assertEqual(rc.returncode, 0, rc.stderr[-3000:])
         stopck = self.checkpoint(stopped, "*_stopped")
-        payload = json.loads(self.normalizer.read_text())
-        payload["created_by_auditor"] = "different normalizer identity"
-        self.normalizer.write_text(json.dumps(payload))
+        changed = np.random.default_rng(99).normal(0, 0.03, (300, 14)).astype(np.float32)
+        self.normalizer.write_text(json.dumps(D.fit_normalizer({"push_T": changed})))
         denied = self.run_toy(self.root / "rejected", ["--resume", str(stopck)])
         self.assertNotEqual(denied.returncode, 0)
         self.assertIn("BLOCKED", denied.stderr + denied.stdout)
