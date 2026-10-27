@@ -63,6 +63,9 @@ def main():
         print("BLOCKED: requested budget %.2f h exceeds the 2 h benchmark ceiling" %
               args.approve_hours, file=sys.stderr)
         return 2
+    print("BLOCKED_NOT_IMPLEMENTED: real OpenVLA forward/backward/optimizer path is not connected; no performance PASS is valid.", file=sys.stderr)
+    return 2
+
     out = os.path.abspath(args.out)
     if os.path.exists(out):
         print("BLOCKED: output directory exists: " + out, file=sys.stderr)

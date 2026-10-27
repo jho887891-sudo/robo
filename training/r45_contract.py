@@ -16,7 +16,7 @@ class R45Config:
     cameras: tuple = field(default=("cam_head", "cam_left_wrist", "cam_right_wrist"))
     lora_r: int = 32
     lora_alpha: int = 16
-    lora_targets: str = "all-linear"
+    lora_targets: str = "q_proj/v_proj"
     epochs: int = 5
     train_samples: int = 108780
     dev_samples: int = 28268

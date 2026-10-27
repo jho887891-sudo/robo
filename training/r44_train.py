@@ -1284,11 +1284,13 @@ def main(argv=None) -> int:
             action_vec = np.asarray(actions[int(t)], dtype=np.float32)
             lab, _delta = build_runtime_labels(prompt_ids[task], state_vec, action_vec, task,
                                                plan["delta_payload"], modules)
-            pv = episode_images(proc, plan["episode_paths"][f"{task}/{episode}"], int(t), args.cams, modules)
+            sample_start = time.perf_counter()
+            pv, data_timing = r45_reader.load_images(proc, plan["episode_paths"][f"{task}/{episode}"], int(t), args.cams, M2.CAMERA_ORDER)
             pr = torch.from_numpy(np.asarray(row["features"], dtype=np.float32)).reshape(1, 42).to("cuda")
             inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
             tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
-            sample_start = time.perf_counter()
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
             step_start = time.perf_counter()
             optimizer.zero_grad(set_to_none=True)
             try:
@@ -1324,6 +1326,8 @@ def main(argv=None) -> int:
                 status = "FAIL_NUMERICS"
                 break
 
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
             step_seconds = time.perf_counter() - step_start
             cursor += 1
             global_step += 1

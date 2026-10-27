@@ -223,7 +223,7 @@ def main():
         groups.append({"params": proj_params, "lr": args.lr * 0.1, "name": "projector"})
     import torch
     opt = torch.optim.AdamW(groups, weight_decay=0.0)
-    steps_per_epoch = max(1, len(entries) // (args.micro_batch * args.grad_accum))
+    steps_per_epoch = max(1, (len(entries) + args.micro_batch * args.grad_accum - 1) // (args.micro_batch * args.grad_accum))
     total_steps = steps_per_epoch * args.epochs
     warmup = max(1, int(total_steps * args.warmup_frac))
     sched = torch.optim.lr_scheduler.LambdaLR(
@@ -253,10 +253,14 @@ def main():
         order = DATA.EpochOrder(len(entries), args.base_seed, epoch)
         idxs = order.order
         model.train()
+        accum_batches = 0
+        current_cursor = cursor
         for j in range(cursor, len(idxs), args.micro_batch):
             if STOP["requested"]:
                 break
-            batch = [ds[int(idxs[k])] for k in range(j, min(j + args.micro_batch, len(idxs)))]
+            end = min(j + args.micro_batch, len(idxs))
+            batch = [ds[int(idxs[k])] for k in range(j, end)]
+            current_cursor = end
             if args.model == "fake":
                 # toy path: build a 42D vector from the observed history only (state, v, acc)
                 pr = np.stack([
@@ -272,16 +276,19 @@ def main():
             else:
                 loss = torch.tensor(0.0, requires_grad=True)
             (loss / args.grad_accum).backward()
-            if (j // args.micro_batch + 1) % args.grad_accum == 0:
+            accum_batches += 1
+            is_last_batch = end == len(idxs)
+            if accum_batches == args.grad_accum or is_last_batch:
                 torch.nn.utils.clip_grad_norm_(lora_params, 1.0)
                 opt.step()
                 sched.step()
                 opt.zero_grad(set_to_none=True)
                 global_step += 1
+                accum_batches = 0
             seen += len(batch)
             if global_step % 10 == 0:
                 rec = {"utc": utc_now(), "epoch": epoch, "step": global_step,
-                       "cursor": j + args.micro_batch, "loss": float(loss.detach()),
+                       "cursor": end, "loss": float(loss.detach()),
                        "samples_seen": seen,
                        "samples_per_s": round(seen / max(1e-9, time.time() - t0), 3),
                        "lr_lora": opt.param_groups[0]["lr"]}
@@ -296,7 +303,7 @@ def main():
                 _ckpt(args.out, model, opt, sched, epoch, j + args.micro_batch, global_step,
                       order, entries, args, "periodic", phase="mid_epoch")
         if STOP["requested"]:
-            _ckpt(args.out, model, opt, sched, epoch, len(idxs), global_step, order, entries,
+            _ckpt(args.out, model, opt, sched, epoch, current_cursor, global_step, order, entries,
                   args, "stopped", phase="mid_epoch")
             break
         nxt_order = DATA.EpochOrder(len(entries), args.base_seed, epoch + 1)
