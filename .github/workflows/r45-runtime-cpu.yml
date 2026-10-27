@@ -28,6 +28,10 @@ jobs:
         run: python -m py_compile training/r44_train.py training/r45_data.py training/r45_train.py training/r45_contract.py diagnostics/r45_gpu_bench.py tests/test_r45_runtime_gate.py
       - name: Regression gate (no CUDA, no HDF5 dataset)
         run: python -m unittest discover -s tests -p 'test_r45_runtime_gate.py' -v
+      - name: Retest R44 delta and R45 frozen contract
+        run: |
+          python tests/test_r44_delta_v1.py
+          python tests/test_r45_contract.py
       - name: Install CPU-only toy dependencies
         run: |
           python -m pip install --disable-pip-version-check h5py
