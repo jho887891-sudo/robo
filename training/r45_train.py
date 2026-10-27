@@ -217,8 +217,12 @@ def main():
     save_json(os.path.join(args.out, "dataset_manifest.json"), manifest)
 
     ds = DATA.R45Dataset(entries, decode=(args.model == "real"))
-    loader = DATA_loader(ds, args.workers, args.micro_batch)
-
+    # This is the CPU control-plane harness. DATA_loader is not consumed here;
+    # the genuine OpenVLA training path is training/r44_train.py.
+    import torch
+    random.seed(args.base_seed)
+    np.random.seed(args.base_seed)
+    torch.manual_seed(args.base_seed)
     model = build_model(args.model, None)
     lora_params = [p for p in model.parameters() if p.requires_grad]
     proj_params = list(model.proprio_projector.parameters()) if args.model == "real" else []
