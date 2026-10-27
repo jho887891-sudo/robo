@@ -1151,6 +1151,7 @@ def main(argv=None) -> int:
         save_run_state(out_dir, {**run_state, "status": "STOPPED_SAFE",
                                  "stop_reason": stop_controller.reason, "last_checkpoint": last_checkpoint,
                                  "global_step": global_step})
+        r45_reader.close()
         stop_controller.restore_signal_handlers()
         gpu_lock.__exit__(None, None, None)
         return 0
@@ -1308,6 +1309,8 @@ def main(argv=None) -> int:
                     raise FloatingPointError(f"non-finite gradient norm at step {global_step + 1}")
                 optimizer.step()
                 scheduler.step()
+                # Require completed CUDA work for real end-to-end sample wall time.
+                torch.cuda.synchronize()
             except torch.cuda.OutOfMemoryError as exc:
                 optimizer.zero_grad(set_to_none=True)
                 torch.cuda.empty_cache()
