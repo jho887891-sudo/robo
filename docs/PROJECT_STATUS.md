@@ -59,6 +59,16 @@ R45-D GitHub 分支的 CPU 证据：
 - **下一个 Gate**：在真实服务器复核 PR #50 CPU 契约与环境、确认修复能安全进入正式 R44 后，以独立审批的 GPU Smoke 验证 7B 真实计算。未获研究负责人授权不启动任何 GPU 任务。不要重做已通过的 GitHub 6+15+4+3 CPU CI。
 - **合并限制**：本 PR 以 R45 分支为目标，尚未合并；代码未经合并前，下节问题描述仍适用于冻结的 **R45-D SHA `0b35b13`**。
 
+## R45-F：服务器实际数据 CPU Gate（已提供命令入口，执行 UNKNOWN）
+
+在 [PR #50](https://github.com/jho887891-sudo/robo/pull/50) 的代码分支 `audit/r45-direct-runtime-fixes-20261027` 已提交 `scripts/r45_server_cpu_gate.sh`；在真实 Linux 服务器只需用**全新干净 worktree 和当时最新 PR 完整 SHA** 执行这个脚本。脚本校验固定 SHA、真实 R44 数据/normalizer/model config、R44 `--preflight-only` 与 R44/R45 CPU 契约及合成 HDF5 停止恢复，导出 `exit_codes.txt`、原始日志、SHA256SUMS。不会创建 CUDA 上下文，也不会正式训练。
+
+运行前必须显式提供实际服务器路径（从既有可验证证据查找，不能猜测）：`M2_HDF5_ROOT`、`M2_NORMALIZER_JSON`、`R44_DELTA_NORMALIZER`、`R44_DATASET_MANIFEST`、`R44_BASE_MODEL`、`R44_OFT_ROOT`，以及 `R45_EXPECTED_SHA`。生成的 CPU 证据目录名由脚本输出。
+
+**分工：** ChatGPT 负责 GitHub 代码修复、PR、测试与审计；DeepSeek 负责真实 Linux 服务器的干净 worktree 和 CPU 现场执行，并在获明确授权后运行 GPU 实验。
+
+**此脚本通过之前不得启动 GPU。** 通过之后下一步是准备可执行的真实 7B GPU Smoke；现有 `diagnostics/r45_gpu_bench.py` 故意 `BLOCKED_NOT_IMPLEMENTED`，不能直接测出吞吐。此阶段的运行状态始终与 GitHub CI 状态分开记录。
+
 ## 未解决的高优先级运行时问题（R45-E）
 
 以下为针对 **R45-D SHA 0b35b13** 的源码核查，尚无 RED→GREEN 修复证据：
