@@ -195,7 +195,7 @@ def run_profile(args):
         "seed": args.seed, "per_task": args.per_task, "repeats": args.repeats,
         "phase": {k: describe([float(row[k]) for row in records])
                   for k in ("legacy_cpu_s", "r45_cpu_s", "hdf5_read_s",
-                            "jpeg_preprocess_s", "cpu_to_gpu_s")},
+                            "jpeg_preprocess_s", "cpu_tensor_preparation_s")},
         "cache_hits": int(sum(row["cache_hit"] for row in records)),
         "cache_total": len(records),
         "cache": reader_stats,
