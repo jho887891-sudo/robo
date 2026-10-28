@@ -7,7 +7,7 @@
 
 ## 30 秒状态摘要
 
-**当前研发位置：R45-E 双分支交叉审计已完成；统一修复与 CPU 数据瓶颈工具已在 PR #51 实现，GitHub CI 和真实 TRAIN CPU profile 的验收状态应分别核查。GPU Smoke、真实 GPU 吞吐基准和正式 5 Epoch 均未获授权。**
+**当前研发位置：PR #51 的 R45-E CPU 实现已由 GitHub CI 验证；R45-F 真实服务器 Gate 在确认数据根目录前 BLOCKED（exit 2），真实 TRAIN CPU profile 未运行。GPU Smoke、吞吐基准及正式 5 Epoch 均未授权。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -58,6 +58,15 @@ R45-D GitHub 分支的 CPU 证据：
 - **尚不可声称**：CPU stub/假模型通过并不等于 OpenVLA-7B GPU forward/backward/显存/性能验证。新的 benchmark 刻意保持 `BLOCKED_NOT_IMPLEMENTED`，不会输出伪吞吐或初始化 CUDA。
 - **下一个 Gate**：在真实服务器复核 PR #50 CPU 契约与环境、确认修复能安全进入正式 R44 后，以独立审批的 GPU Smoke 验证 7B 真实计算。未获研究负责人授权不启动任何 GPU 任务。不要重做已通过的 GitHub 6+15+4+3 CPU CI。
 - **合并限制**：本 PR 以 R45 分支为目标，尚未合并；代码未经合并前，下节问题描述仍适用于冻结的 **R45-D SHA `0b35b13`**。
+
+## 2026-10-28 R45-F 现场结果：环境/挂载阻塞
+
+- **真实服务器现场：BLOCKED**。DeepSeek 在干净隔离 worktree `/tmp/robo-r45-cpu-io-20261028` 检出固定 SHA `9c142448c83ee0ab08e8f990fb84d759e8f2afb3`；`scripts/r45_server_cpu_gate.sh` 因缺失 `M2_HDF5_ROOT` 退出码 **2**；其他必需模型/normalizer/manifest/OFT 路径变量亦未设置。没有执行真实 TRAIN HDF5/JPEG profile，GPU 未启动。
+- 执行端回传的只读证据目录：`/tmp/r45-cpu-io-attempt-20261028/`（尚未从服务器直接获取，用户回传的运行声明与 GitHub CI 是不同证据层级）。
+- **GitHub 代码线索**：[data/README.md](https://github.com/jho887891-sudo/robo/blob/audit/r45-e-unified-cpu-profile-20261028/data/README.md) 和 [diagnostics/r44_prepare_delta.py](https://github.com/jho887891-sudo/robo/blob/audit/r45-e-unified-cpu-profile-20261028/diagnostics/r44_prepare_delta.py) 曾使用 `/home/T7/ojh/robot_actual/data/data/hdf5`。**仅是历史候选路径，不代表当前主机上存在或者已挂载**。
+- **ChatGPT 已新增** `diagnostics/r45_discover_data_root.py`：不需要预先设置环境变量，**只读**检查历史候选与手动提供的根目录下全部冻结 TRAIN/DEV 文件是否存在且非空；输出结构化 JSON。不会漫游整盘、修改挂载、接触 CUDA 或自动下载数据。该清单 Gate 即便 PASS，也仍需 HDF5 内容/hash/数据契约进一步验证。
+- 优先只做路径发现（可额外经 DeepSeek 获取只读挂载信息）；**一旦唯一完整 HDF5 根目录核验存在，直接运行已有的 `diagnostics/r45_cpu_io_profile.py`，它仅依赖 HDF5 根目录与仓库的 `data/m2_splits.json`，无需先配置模型、OFT 或四份 normalizer。** 正式 R44 全套 CPU Gate 仍须全部变量具备，不能用 I/O 代理结果替代。
+- 未确认真实目录或主机缺少正确挂载时，状态保持 BLOCKED；不得自动猜路径、造假样本、更改服务器挂载、复制数据或启动 GPU。
 
 ## R45-E 统一 CPU Gate 验证（2026-10-28）
 
