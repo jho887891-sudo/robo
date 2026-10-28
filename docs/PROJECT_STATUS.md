@@ -5,9 +5,17 @@
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
+## R45-K GitHub 原始证据入库（2026-10-28，当前唯一交接任务）
+
+- **当前已知而未独立核验的服务器结果**：R45-J 固定 `675ffe99fac7f57584bfbcfc23756755eaad02ab`，报告 `BLOCKED_DELTA_MISMATCH` exit 3；历史 NumPy 1.26.4，当前 NumPy 2.2.6；`np.quantile(float64)`、手写 float32 lerp 和手写 float64 lerp 各在 q01/q99 六个数组上精确匹配冻结结果。**有三个匹配候选，不是唯一历史计算路径**。历史 preflight 未加密绑定运行源码，不能认定版本差异已获根因证明。
+- **缺少的可访问证据**：真实服务器 `/tmp/r45j-quantile-20261028T145657Z/report.json`、`/tmp/r45j-evidence-20261028T145657Z/`、R45-I `/tmp/r45i-delta-fast-20261028T105947Z/report.json`、历史 R44 `environment.txt` 以及相关 SHA/exit/stdout/stderr 只由执行者文字回传，**尚未在 GitHub 看到原始文件**。历史 `numpy==1.26.4` 的同入口复跑尚未执行，标记 NOT_RUN；历史源码身份链 UNKNOWN。
+- **研究负责人新规则**：由 DeepSeek 在真实服务器复制原始小体积证据并推送到独立 evidence 分支，保留路径、完整 SHA256、源代码 SHA、环境、退出码和原始日志；GitHub 仓库为 PUBLIC，严禁推送密钥、原始 HDF5、权重、检查点及敏感配置。若不能安全公开则报告 BLOCKED_PUBLICATION/具体缺口，脱敏必须标注，不得冒充未修改原文件。ChatGPT 负责 GitHub 交叉审计、代码修复和 PR 维护，**不再靠文字摘要猜测原始文件身份或实验机制**。
+- **唯一下一步**：按 [PR #51 R45-K 交接评论](https://github.com/jho887891-sudo/robo/pull/51#issuecomment-6472814664) 建新隔离 worktree，从最新集成代码 SHA 开独立 `evidence/r45ij-quantile-20261028` 分支，推送 `evidence/r45ij-quantile-20261028/` 原始 JSON、命令/日志、SHA 清单与 evidence index。回传 push exit 0、GitHub 分支 URL 和 40 位 SHA。**未能推送就不能写 PUBLISHED**；证据入库不解除训练 Gate。
+- **随后但不与入库混为一谈**：在隔离 NumPy 1.26.4 环境复跑同入口 CPU 14D 统计并保存 GitHub 证据，精确对比历史冻结 payload SHA；无历史源码执行证明时仅可说明复现兼容，不能证明历史运行身份。
+
 ## 30 秒状态摘要
 
-**当前研发位置：R45-I 真实服务器快诊返回 `BLOCKED_DELTA_MISMATCH`（exit 3），精准定位为三个任务的 `q01/q99` 共 6 个数组数值差异（最大绝对误差约 3.35e-7）；`target_mean/std`、`zero_fraction`、行数、fit 元数据与 split SHA 均与冻结 payload 相同。PR #51 已实现纯 CPU 数值插值路径指纹，历史 NumPy/运算精度根因尚 UNKNOWN。未生成正式 Manifest、未运行 OFT/模型权重哈希/正式 CPU Gate，GPU 一律未授权。**
+**当前研发位置：R45-J 服务器报告冻结 q01/q99 可由三种候选插值路径 84/84 精确复现，历史 NumPy 1.26.4、当前 2.2.6；但历史计算路径未唯一确定，源码运行身份也未绑定，正式训练仍 `BLOCKED_DELTA_MISMATCH`。R45-J 原始 JSON/日志当前只在服务器 `/tmp`，尚未通过 GitHub 独立取证。用户要求 DeepSeek 先将合适公开的 R45-I/J 原始证据提交独立 GitHub evidence 分支（R45-K），再由 ChatGPT 独立交叉审计；证据缺失一律明说 UNKNOWN，不猜测。正式 CPU Gate / GPU 全部未授权。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -178,7 +186,7 @@ R45-D GitHub 分支的 CPU 证据：
 `train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
 还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
 
-**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-I 分位数 q01/q99 数值插值路径指纹核对；在冻结 normalizer SHA 不匹配的根因查明之前不得重跑正式 HDF5 哈希或启动 GPU；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-K 将既有 R45-I/J 原始服务器证据安全推送到独立 GitHub evidence 分支并交叉审计；之后再做 NumPy 1.26.4 独立重现实验；根因查明前不得启动正式 Gate/GPU；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
 
 ### GPU Gate，尚未获授权
 
