@@ -38,7 +38,7 @@ class TestFastDeltaDiagnostics(unittest.TestCase):
                 index = int(path.stem.split("_")[-1])
                 extra = (task == "push_T" and index < 60) if part == "train" else (
                     task == "push_T" and index in range(80, 88))
-                T = (454 if part == "train" else 472) + 3 + int(extra)
+                T = (453 if part == "train" else 471) + 3 + int(extra)
                 state = np.arange(T, dtype=np.float64).reshape(-1, 1) * np.ones((1, 14))
                 action = np.concatenate([state[1:], state[-1:]], axis=0)
                 calls.append(str(path))
