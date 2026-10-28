@@ -151,5 +151,72 @@ class TestOFTStaticFingerprints(unittest.TestCase):
             self.assertEqual(second.returncode, 2)
 
 
+class TestFrozenDeltaMismatchDiagnostics(unittest.TestCase):
+    def test_exact_diff_contains_recomputed_statistics_not_tolerance_acceptance(self):
+        from diagnostics.r45_delta_payload_diff import compare_delta_payloads
+        base = {"schema": "r44-delta-normalizer/v1",
+                "fit": {"source": "TRAIN only", "quantiles": [0.01, 0.99]},
+                "tasks": {"push_T": {"q01": [0.0] * 14, "q99": [1.0] * 14,
+                                     "target_mean": [0.2] * 14,
+                                     "n_rows": 36260}},
+                "sha256": "frozen"}
+        new = json.loads(json.dumps(base))
+        new["tasks"]["push_T"]["target_mean"][8] = 0.20000000001
+        new["sha256"] = "different"
+        result = compare_delta_payloads(base, new)
+        self.assertEqual(result["status"], "BLOCKED_DELTA_MISMATCH")
+        self.assertFalse(result["exact_payload_sha_equal"])
+        self.assertEqual(result["changed_field_count"], 1)
+        self.assertEqual(result["changed_fields"][0]["field"],
+                         "tasks.push_T.target_mean")
+        self.assertEqual(result["changed_fields"][0]["indices"], [8])
+        self.assertGreater(result["changed_fields"][0]["max_abs_diff"], 0)
+
+    def test_failed_full_scan_writes_diagnostic_only_and_fails_closed(self):
+        from diagnostics.r45_reattest_r44_manifest import (
+            DeltaPayloadMismatch, write_blocked_delta_evidence)
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            splits = root / "splits.json"
+            feature = root / "42d.json"
+            delta = root / "delta.json"
+            for p in (splits, feature, delta):
+                p.write_bytes(p.name.encode())
+            output = root / "evidence"
+            files = {"push_T/episode_0.hdf5": {
+                "path": "/frozen/episode_0.hdf5", "sha256": "opaque-test-sha",
+                "size_bytes": 42}}
+            err = DeltaPayloadMismatch(
+                {"schema": "r45-delta-payload-difference/v1",
+                 "status": "BLOCKED_DELTA_MISMATCH", "changed_fields": [
+                     {"field": "tasks.push_T.q01",
+                      "frozen": [0.0], "recomputed": [0.1]}]},
+                files, {"train_samples": 108780, "dev_samples": 28268})
+            args = SimpleNamespace(splits=splits, feature_normalizer=feature,
+                                   delta_normalizer=delta)
+            write_blocked_delta_evidence(
+                output, err, args,
+                provenance={"source_sha": "f" * 40, "numpy_version": "test"})
+            self.assertFalse((output / "r44_dataset_manifest.json").exists())
+            self.assertFalse((output / "report.json").exists())
+            report = json.loads((output / "failure_report.json").read_text())
+            self.assertEqual(report["status"], "BLOCKED_DELTA_MISMATCH")
+            self.assertFalse(report["formal_manifest_created"])
+            self.assertEqual(report["hdf5_file_count"], 1)
+            inventory = json.loads(
+                (output / "hdf5_inventory_diagnostic_only.json").read_text())
+            self.assertTrue(inventory["not_a_training_manifest"])
+            sums = (output / "SHA256SUMS").read_text().splitlines()
+            self.assertEqual(len(sums), 2)
+            for entry in sums:
+                expected, filename = entry.split("  ", 1)
+                self.assertEqual(hashlib.sha256(
+                    (output / filename).read_bytes()).hexdigest(), expected)
+            with self.assertRaises(FileExistsError):
+                write_blocked_delta_evidence(output, err, args,
+                                             provenance={"source_sha": "f" * 40})
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
