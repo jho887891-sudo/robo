@@ -171,7 +171,9 @@ class TestRuntimeReader(unittest.TestCase):
         self.assertEqual(counters["opens"], 1)
         self.assertEqual(b["hdf5_read_s"], 0)
         self.assertEqual(b["jpeg_preprocess_s"], 0)
-        self.assertEqual(b["cpu_to_gpu_s"], 0.0)\n        self.assertEqual(b["transfer_device"], "cpu")\n        self.assertGreaterEqual(b["cpu_tensor_preparation_s"], 0.0)
+        self.assertEqual(b["cpu_to_gpu_s"], 0.0)
+        self.assertEqual(b["transfer_device"], "cpu")
+        self.assertGreaterEqual(b["cpu_tensor_preparation_s"], 0.0)
         reader.close()
 
 
