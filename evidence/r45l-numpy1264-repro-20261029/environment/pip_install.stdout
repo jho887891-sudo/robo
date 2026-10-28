@@ -1,0 +1,7 @@
+Collecting numpy==1.26.4
+  Using cached numpy-1.26.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.2 MB)
+Collecting h5py==3.16.0
+  Downloading h5py-3.16.0-cp310-cp310-manylinux_2_28_x86_64.whl (5.1 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.1/5.1 MB 20.9 kB/s eta 0:00:00
+Installing collected packages: numpy, h5py
+Successfully installed h5py-3.16.0 numpy-1.26.4
