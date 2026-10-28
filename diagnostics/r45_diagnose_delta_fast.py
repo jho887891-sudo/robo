@@ -97,7 +97,7 @@ def scan_delta_only(split, root, read_episode=None):
     return deltas, stat_inventory, {"train_samples": n_train, "dev_samples": n_dev}
 
 
-def diagnose(splits, root, feature, delta, scan_fn=None):
+def diagnose(splits, root, feature, delta, scan_fn=None, quantile_forensics=False):
     import r44_delta_v1 as D
     import m2_multitask_data as M2
     import m2_task_normalizer as TN
@@ -115,6 +115,10 @@ def diagnose(splits, root, feature, delta, scan_fn=None):
     deltas, inventory, counts = scanned
     derived = D.fit_normalizer(deltas, split_sha256=split_sha)
     difference = compare_delta_payloads(frozen, derived)
+    quantile_fingerprint = None
+    if quantile_forensics:
+        from r45_quantile_fingerprint import fingerprint_quantiles
+        quantile_fingerprint = fingerprint_quantiles(deltas, frozen)
     outcome = "DELTA_ONLY_COMPATIBLE_NOT_FULL_ATTESTED" if (
         frozen["sha256"] == derived["sha256"]) else "BLOCKED_DELTA_MISMATCH"
     try:
@@ -135,6 +139,7 @@ def diagnose(splits, root, feature, delta, scan_fn=None):
         "feature_normalizer_file_sha256": sha_file(feature),
         "delta_normalizer_file_sha256": sha_file(delta),
         "difference": difference,
+        "quantile_arithmetic_fingerprint": quantile_fingerprint,
         "source_sha": source_sha,
         "script_sha256": sha_file(Path(__file__)),
         "numpy_version": np.__version__,
@@ -152,13 +157,16 @@ def main():
     p.add_argument("--feature-normalizer", type=Path, required=True)
     p.add_argument("--delta-normalizer", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True, help="new directory only")
+    p.add_argument("--quantile-forensics", action="store_true",
+                   help="compare float32/float64 quantile interpolation variants on the same TRAIN rows")
     args = p.parse_args()
     if args.out.exists():
         print("BLOCKED_OUTPUT_EXISTS", file=sys.stderr)
         return 2
     try:
         report = diagnose(args.splits, args.hdf5_root,
-                          args.feature_normalizer, args.delta_normalizer)
+                          args.feature_normalizer, args.delta_normalizer,
+                          quantile_forensics=args.quantile_forensics)
         args.out.mkdir(parents=True, exist_ok=False)
         f = args.out / "report.json"
         f.write_text(json.dumps(report, indent=2, sort_keys=True,
