@@ -68,6 +68,7 @@ R45-D GitHub 分支的 CPU 证据：
 - **缓存与 Worker（报告值）**：256 MiB 解码图像缓存命中 **0/240**，120 张三相机张量约 **331,776,000 B**，大于缓存上限 **268,435,456 B**；只读 1/2/4 worker 的解码代理吞吐 **53.6/123.5/157.2 样本/s**（含启动）。该 Worker 任务**没有接入正式训练器**，不宣称生产训练可以达到对应数值。
 - **真实现场证据**：`/tmp/r45f-cpu-execution-20261028/`；`data-root-discovery-20261028T074515Z.json`、`profile-20261028T075000Z/report.json`、`samples.jsonl`、`selected_samples.json`、目录内与外层 `SHA256SUMS`，执行端报告校验全部通过；如需独立 VERIFY，需取得原始 JSON、SHA256 内容和执行日志。
 - **由结果驱动的 CPU-only 代码变更**：正式 `training/r44_train.py` 中 `RuntimeReader(cache_bytes=0)`，保留 HDF5 句柄复用，因为完整 TRAIN 每样本一轮仅访问一次，不值得让大缓存留存无法复用的解码张量；`diagnostics/r44_gpu_smoke.py` 改为使用相同 Reader 以提高真实训练与 Smoke 输入路径一致性，修正直接运行的项目根导入路径；新增 CPU 回归测试。**这些代码变更尚无 GPU 运行结果、加速收益仍 UNKNOWN**。
+- **GitHub CPU 验证**：[R45 Runtime CPU Gate run 40652969926](https://github.com/jho887891-sudo/robo/actions/runs/40652969926) **36/36 PASS**（发现工具 3、R44 15、R45 contract 4、运行时 9、合成 JPEG profile 2、Toy stop-resume 3），代码 SHA `96cf84e522914e1e5934ef27e202d4cff0c6d131`；R4/R5 CPU workflow 同样 PASS。该 CI 验证了未授权 GPU Smoke 入口退出码 2、真 R45 Reader 源码接入和测试语法，**没有实际启动 GPU Smoke**。
 - **唯一下一步**：已发现原始数据，但 `M2_NORMALIZER_JSON`、`R44_DELTA_NORMALIZER`、`R44_DATASET_MANIFEST`、`R44_BASE_MODEL`、`R44_OFT_ROOT` 尚未经过当前服务器的完整路径/身份验证；先只读核验已有 R44 产物与模型位置，完成 `scripts/r45_server_cpu_gate.sh` 的完整 CPU preflight。通过后再由研究负责人单独审批一次性真实 7B GPU Smoke。GPU 吞吐与正式训练都不能提前启动。
 
 ## 2026-10-28 R45-F 现场结果：环境/挂载阻塞
