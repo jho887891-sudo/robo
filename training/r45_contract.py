@@ -38,7 +38,7 @@ class R45Config:
             raise ContractError("camera order must be the approved three-camera order")
         if self.lora_r != 32 or self.lora_alpha != 16:
             raise ContractError("LoRA must use r=32 and alpha=16")
-        if self.lora_targets not in ("all-linear", "q_proj/v_proj"):
+        if self.lora_targets != "q_proj/v_proj":
             raise ContractError("LoRA target set must be explicit")
         if self.epochs != 5:
             raise ContractError("formal training must use five epochs")
