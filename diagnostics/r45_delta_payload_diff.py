@@ -33,7 +33,7 @@ def _single(path, before, after):
 def compare_delta_payloads(frozen, reconstructed):
     """Summarize differences without silently tolerating any mismatch."""
     fields = []
-    for name in ("schema", "target", "codec", "n_bins", "token_window"):
+    for name in sorted((set(frozen) | set(reconstructed)) - {"sha256", "fit", "tasks"}):
         fields.append(_single(name, frozen.get(name), reconstructed.get(name)))
     f_fit = frozen.get("fit") or {}
     r_fit = reconstructed.get("fit") or {}
@@ -50,9 +50,10 @@ def compare_delta_payloads(frozen, reconstructed):
             fields.append(_single(f"tasks.{task}.{name}", before.get(name),
                                   after.get(name)))
     changed = [x for x in fields if not x["equal"]]
+    hashes_equal = frozen.get("sha256") == reconstructed.get("sha256")
     return {
         "schema": "r45-delta-payload-difference/v1",
-        "status": "BLOCKED_DELTA_MISMATCH" if changed else "PAYLOAD_FIELDS_EQUAL",
+        "status": "BLOCKED_DELTA_MISMATCH" if (changed or not hashes_equal) else "EXACT_MATCH",
         "frozen_payload_sha256": frozen.get("sha256"),
         "recomputed_payload_sha256": reconstructed.get("sha256"),
         "exact_payload_sha_equal": frozen.get("sha256") == reconstructed.get("sha256"),
