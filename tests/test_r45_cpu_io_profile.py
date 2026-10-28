@@ -62,7 +62,7 @@ class TestR45CpuIoProfile(unittest.TestCase):
         self.assertEqual(report["status"], "CPU_IO_PROXY_PASS")
         self.assertEqual(report["index_n"], 5)
         self.assertEqual(report["selected_n"], 2)
-        self.assertEqual(report["cache_hits"], 2)
+        self.assertEqual(report["cache_hits"], 2)\n        self.assertIn("cpu_tensor_preparation_s", report["phase"])\n        self.assertNotIn("cpu_to_gpu_s", report["phase"])
         self.assertEqual([v["workers"] for v in report["worker_runs"]], [1, 2])
         self.assertTrue((out / "SHA256SUMS").exists())
         self.assertEqual(len((out / "samples.jsonl").read_text().splitlines()), 4)
