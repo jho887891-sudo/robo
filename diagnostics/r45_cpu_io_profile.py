@@ -41,7 +41,7 @@ def select_samples(index, per_task, seed):
         if len(candidates) < per_task:
             raise ValueError(f"{task}: {len(candidates)} TRAIN samples < requested {per_task}")
         keyed = sorted(candidates, key=lambda pair:
-            hashlib.sha256(f"{seed}|{task}|{pair[0]}|{pair[1]}".encode()).digest())
+            hashlib.sha256(f"{seed}|{task}|{Path(pair[0]).name}|{pair[1]}".encode()).digest())
         chosen.extend((task, path, t) for path, t in keyed[:per_task])
     if not chosen:
         raise ValueError("empty TRAIN index")
@@ -162,6 +162,7 @@ def run_profile(args):
         reader.close()
 
     workers = []
+    worker_reference = None
     for count in counts:
         start_pool = time.perf_counter()
         # Explicit 'spawn' avoids inheriting a parent's HDF5 handles.
@@ -170,6 +171,10 @@ def run_profile(args):
                 max_workers=count, mp_context=mp.get_context("spawn"),
                 initializer=R45.worker_init, initargs=(0,)) as executor:
             results = list(executor.map(worker_decode, chosen))
+        if worker_reference is None:
+            worker_reference = results
+        elif results != worker_reference:
+            raise AssertionError(f"worker pixel shape/order differs at workers={count}")
         workers.append({"workers": count, "samples": len(results),
                         "total_wall_s_including_startup": time.perf_counter() - start_pool,
                         "decoded_pixel_count": sum(x[3] for x in results)})
@@ -182,6 +187,8 @@ def run_profile(args):
         "scope": "real TRAIN HDF5, 3-camera JPEG, identity CPU transform, no model/GPU",
         "excluded": ["production image resize/normalize", "CPU->CUDA", "7B model",
                      "training optimizer", "training samples/sec"],
+        "limitations": "Proxy benchmark is not a fair end-to-end GPU A/B; OS page cache, "
+                       "processor cost and worker startup affect measured wall time.",
         "split_sha256": sha_file(source),
         "sample_manifest_sha256": plan_hash,
         "index_n": len(entries), "selected_n": len(chosen),
