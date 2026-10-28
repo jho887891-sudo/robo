@@ -59,6 +59,14 @@ R45-D GitHub 分支的 CPU 证据：
 - **下一个 Gate**：在真实服务器复核 PR #50 CPU 契约与环境、确认修复能安全进入正式 R44 后，以独立审批的 GPU Smoke 验证 7B 真实计算。未获研究负责人授权不启动任何 GPU 任务。不要重做已通过的 GitHub 6+15+4+3 CPU CI。
 - **合并限制**：本 PR 以 R45 分支为目标，尚未合并；代码未经合并前，下节问题描述仍适用于冻结的 **R45-D SHA `0b35b13`**。
 
+## R45-E 统一 CPU Gate 验证（2026-10-28）
+
+- 唯一集成 PR：[**#51**](https://github.com/jho887891-sudo/robo/pull/51)，测试代码 SHA `9dfe10cb38da0e03f6820c49f6cb5e1eb244c73f`，基础分支仍为 R45-D `0b35b13`。
+- **GitHub CI 已实测 PASS**：[R45 Runtime CPU Gate run 40640540599](https://github.com/jho887891-sudo/robo/actions/runs/40640540599)：R44 15/15、R45 contract 4/4、运行时 6/6、真实 JPEG 的合成 HDF5 CPU profile 2/2、Toy 停止恢复 3/3，合计 **30/30**；R4、R5 CPU 工作流也 PASS。均为 GitHub CPU runner，不代表服务器真实 TRAIN 数据已经测过。
+- 原 [PR #50](https://github.com/jho887891-sudo/robo/pull/50) 因被 #51 完整覆盖，已关闭未合并；历史 Git commit、测试证据保留。今后不在 #50 继续追加修复。
+- **现阶段唯一下一步**：真实服务器运行 `scripts/r45_server_cpu_gate.sh` 和 `diagnostics/r45_cpu_io_profile.py`；所有结果必须具有实际 SHA、退出码、原始输出和 `report.json`；CPU profile 数据仍 UNKNOWN，GPU 一律 BLOCKED。
+- 真实 CPU profile 只能判断 HDF5/JPEG/缓存/Worker 的 I/O 代理瓶颈。正式模型的图像预处理、CPU→GPU、前反向仍未测；不能把 CPU 图像代理的速度当训练加速倍率。
+
 ## 2026-10-28 R45-E 交叉审计与唯一集成分支
 
 - DeepSeek 的 R45-E 实际提交 `audit/r45-training-runtime-fixes-20261027@5da8f97c811cfe9e2d790583c68c0d9a985903e2` 已核验 GitHub 远端存在。其 R44 14/14、R45 pipeline 12/12、contract 4/4 的单项原始日志支持独立测试有通过。**但该 SHA 仍有未绑定的 DEV `r45_reader`、训练样本时间遗漏 state/label 阶段、Toy 训练中途累积批次恢复风险，不能直接称整个训练路径 VERIFIED。**
@@ -70,7 +78,7 @@ R45-D GitHub 分支的 CPU 证据：
 
 ## R45-F：服务器实际数据 CPU Gate（已提供命令入口，执行 UNKNOWN）
 
-在 [PR #50](https://github.com/jho887891-sudo/robo/pull/50) 的代码分支 `audit/r45-direct-runtime-fixes-20261027` 已提交 `scripts/r45_server_cpu_gate.sh`；在真实 Linux 服务器只需用**全新干净 worktree 和当时最新 PR 完整 SHA** 执行这个脚本。脚本校验固定 SHA、真实 R44 数据/normalizer/model config、R44 `--preflight-only` 与 R44/R45 CPU 契约及合成 HDF5 停止恢复，导出 `exit_codes.txt`、原始日志、SHA256SUMS。不会创建 CUDA 上下文，也不会正式训练。
+在 [PR #51](https://github.com/jho887891-sudo/robo/pull/51) 的统一代码分支 `audit/r45-e-unified-cpu-profile-20261028` 已提交 `scripts/r45_server_cpu_gate.sh`；在真实 Linux 服务器只需用**全新干净 worktree 和当时最新 PR 完整 SHA** 执行这个脚本。脚本校验固定 SHA、真实 R44 数据/normalizer/model config、R44 `--preflight-only` 与 R44/R45 CPU 契约及合成 HDF5 停止恢复，导出 `exit_codes.txt`、原始日志、SHA256SUMS。不会创建 CUDA 上下文，也不会正式训练。
 
 运行前必须显式提供实际服务器路径（从既有可验证证据查找，不能猜测）：`M2_HDF5_ROOT`、`M2_NORMALIZER_JSON`、`R44_DELTA_NORMALIZER`、`R44_DATASET_MANIFEST`、`R44_BASE_MODEL`、`R44_OFT_ROOT`，以及 `R45_EXPECTED_SHA`。生成的 CPU 证据目录名由脚本输出。
 
@@ -119,7 +127,7 @@ R45-D GitHub 分支的 CPU 证据：
 `train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
 还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
 
-**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence，别再新造第二份总计划。当前下一步仍为 P0 R45-E。未经研究负责人同意不得自动运行 P2/P3/P5。
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-F 真实 TRAIN CPU 数据通路审计。未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
 
 ### GPU Gate，尚未获授权
 
