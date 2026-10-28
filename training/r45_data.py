@@ -277,12 +277,17 @@ class RuntimeReader:
         transfer_s = time.perf_counter() - transfer_start
         self.totals["hdf5_read_s"] += read_s
         self.totals["jpeg_preprocess_s"] += jpeg_s
-        self.totals["cpu_to_gpu_s"] += transfer_s
+        is_cuda = str(device).startswith("cuda")
+        self.totals["cpu_to_gpu_s"] += transfer_s if is_cuda else 0.0
         self.totals["samples"] += 1
         return pixel_values, {
             "hdf5_read_s": read_s,
             "jpeg_preprocess_s": jpeg_s,
-            "cpu_to_gpu_s": transfer_s,
+            # For device='cpu' no GPU transfer occurred. Preserve the legacy
+            # key but use a separate CPU tensor-preparation field.
+            "cpu_to_gpu_s": transfer_s if is_cuda else 0.0,
+            "cpu_tensor_preparation_s": 0.0 if is_cuda else transfer_s,
+            "transfer_device": str(device),
             "cache_hit": cache_hit,
             "timing_kind": "host_wall_no_cuda_event",
         }
