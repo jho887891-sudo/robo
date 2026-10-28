@@ -67,6 +67,7 @@ R45-D GitHub 分支的 CPU 证据：
 - 新增 `diagnostics/r45_diagnose_delta_fast.py`：只读 300 回合 `state/action` 与任务元信息，先得到冻结/重算 delta 数值差异，**不重复全量读取 34.5 GB 图像或计算整个 HDF5 SHA**；即使 SHA 匹配也不会生成严格 manifest，更不会代表正式 CPU Gate PASS。任何差异继续 `BLOCKED_DELTA_MISMATCH`。
 - 更新 `diagnostics/r45_reattest_r44_manifest.py`：如果后续确需完整扫描，即使 delta 不匹配，也会在全新 `--out` 目录写 `failure_report.json`、`hdf5_inventory_diagnostic_only.json` 和 `SHA256SUMS`，保留原始逐文件 SHA 和字段差异；**不会写出可用于正式训练的 `r44_dataset_manifest.json`**。
 - **唯一下一步**：由真实 Linux 执行端在最新 PR #51 的干净 worktree **先运行 fast delta 诊断**（同一 frozen split/42D/delta 文件），回传具体字段差异、完整 SHA 和证据。若 mismatch，分析差异根源，不再重新读 34.5 GB；若精确 SHA 通过，才考虑全量 R44 manifest 和 OFT 版本核验。GPU 继续 BLOCKED。
+- **最新 GitHub CPU Gate**：[run 40666654200](https://github.com/jho887891-sudo/robo/actions/runs/40666654200)，代码 SHA `5d112eb6eceb839682580e18647bc3031d1e6378`，**46/46 PASS**：发现工具 3、严格 Manifest/OFT/差异报告 7、快速 14D delta 3、运行时 9、R44 15、R45 4、JPEG proxy 2、CPU toy resume 3；R4/R5 CI 亦通过。只有合成/CPU 源码验证，不代表真实服务器差异已定位。
 
 ## R45-G 现场阻塞与 CPU-only 修复（2026-10-28，当前）
 
