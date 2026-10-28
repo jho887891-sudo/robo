@@ -704,7 +704,7 @@ def load_run_state(out_dir: Path) -> dict:
 
 def evaluate_dev(
     torch, proc, vla, projector, plan, state_cache, prompts, prompt_ids, args, modules, stop_controller,
-    *, runtime_deadline: float | None = None,
+    *, r45_reader, runtime_deadline: float | None = None,
 ):
     import numpy as np
     _R11, _R, _TC, M2, TN, D = modules
@@ -1151,6 +1151,7 @@ def main(argv=None) -> int:
         save_run_state(out_dir, {**run_state, "status": "STOPPED_SAFE",
                                  "stop_reason": stop_controller.reason, "last_checkpoint": last_checkpoint,
                                  "global_step": global_step})
+        r45_reader.close()
         stop_controller.restore_signal_handlers()
         gpu_lock.__exit__(None, None, None)
         return 0
@@ -1206,7 +1207,7 @@ def main(argv=None) -> int:
                 if not already_evaluated:
                     eval_result = evaluate_dev(torch, proc, vla, projector, plan, state_cache,
                                                prompts, prompt_ids, args, modules, stop_controller,
-                                               runtime_deadline=runtime_deadline)
+                                               r45_reader=r45_reader, runtime_deadline=runtime_deadline)
                     if not eval_result["complete"]:
                         status = "STOPPED_SAFE"
                         save_run_state(out_dir, {**run_state, "status": status,
@@ -1275,6 +1276,7 @@ def main(argv=None) -> int:
                 save_run_state(out_dir, {**run_state, "status": status, "stop_reason": stop_controller.reason,
                                          "last_checkpoint": last_checkpoint, "global_step": global_step})
                 break
+            sample_start = time.perf_counter()  # include state, labels, JPEG and host->GPU enqueue
             sample_idx = int(order[cursor])
             task, episode, t = plan["train_samples"][sample_idx]
             states, actions = state_cache[(task, episode)]
@@ -1284,13 +1286,13 @@ def main(argv=None) -> int:
             action_vec = np.asarray(actions[int(t)], dtype=np.float32)
             lab, _delta = build_runtime_labels(prompt_ids[task], state_vec, action_vec, task,
                                                plan["delta_payload"], modules)
-            sample_start = time.perf_counter()
-            pv, data_timing = r45_reader.load_images(proc, plan["episode_paths"][f"{task}/{episode}"], int(t), args.cams, M2.CAMERA_ORDER)
+            pv, data_timing = r45_reader.load_images(
+                proc, plan["episode_paths"][f"{task}/{episode}"], int(t),
+                args.cams, M2.CAMERA_ORDER,
+            )
             pr = torch.from_numpy(np.asarray(row["features"], dtype=np.float32)).reshape(1, 42).to("cuda")
             inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
             tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
-            if torch.cuda.is_available():
-                torch.cuda.synchronize()
             step_start = time.perf_counter()
             optimizer.zero_grad(set_to_none=True)
             try:
@@ -1307,6 +1309,8 @@ def main(argv=None) -> int:
                     raise FloatingPointError(f"non-finite gradient norm at step {global_step + 1}")
                 optimizer.step()
                 scheduler.step()
+                # Require completed CUDA work for real end-to-end sample wall time.
+                torch.cuda.synchronize()
             except torch.cuda.OutOfMemoryError as exc:
                 optimizer.zero_grad(set_to_none=True)
                 torch.cuda.empty_cache()
@@ -1326,8 +1330,6 @@ def main(argv=None) -> int:
                 status = "FAIL_NUMERICS"
                 break
 
-            if torch.cuda.is_available():
-                torch.cuda.synchronize()
             step_seconds = time.perf_counter() - step_start
             cursor += 1
             global_step += 1
@@ -1398,6 +1400,7 @@ def main(argv=None) -> int:
         })
         return 0 if status in ("COMPLETED", "EARLY_STOPPED", "STOPPED_SAFE") else 3
     finally:
+        r45_reader.close()
         stop_controller.restore_signal_handlers()
         gpu_lock.__exit__(None, None, None)
 
