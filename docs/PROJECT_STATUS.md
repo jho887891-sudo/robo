@@ -7,7 +7,7 @@
 
 ## 30 秒状态摘要
 
-**当前研发位置：R45-G 服务器正式 R44 CPU Preflight BLOCKED_MISSING_R44_ARTIFACTS：42D 和历史 delta normalizer 已验证、7B 模型目录结构存在；严格 R44 manifest 缺失且 OFT 源码候选歧义，正式 Gate 没有执行。PR #51 已实现 CPU-only 严格 manifest 重核验与 OFT 静态来源指纹工具，GitHub CPU CI PASS；真实服务器重核验尚未执行。GPU Smoke、吞吐基准和 5 Epoch 正式训练均未授权。**
+**当前研发位置：R45-H 真实服务器严格 manifest 重核验返回 `BLOCKED_DELTA_MISMATCH`（exit 3）。已完成原始 HDF5 扫描，但冻结 delta normalizer payload SHA 与 TRAIN 重算 SHA 不同；工具没有写出正式清单，后续 OFT/模型哈希/正式 CPU Gate 未运行。PR #51 已补充先读取 14D 状态动作的轻量差异诊断和失败报告保留机制，真实服务器尚未重跑。GPU Smoke、吞吐基准和 5 Epoch 正式训练均未授权。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -58,6 +58,15 @@ R45-D GitHub 分支的 CPU 证据：
 - **尚不可声称**：CPU stub/假模型通过并不等于 OpenVLA-7B GPU forward/backward/显存/性能验证。新的 benchmark 刻意保持 `BLOCKED_NOT_IMPLEMENTED`，不会输出伪吞吐或初始化 CUDA。
 - **下一个 Gate**：在真实服务器复核 PR #50 CPU 契约与环境、确认修复能安全进入正式 R44 后，以独立审批的 GPU Smoke 验证 7B 真实计算。未获研究负责人授权不启动任何 GPU 任务。不要重做已通过的 GitHub 6+15+4+3 CPU CI。
 - **合并限制**：本 PR 以 R45 分支为目标，尚未合并；代码未经合并前，下节问题描述仍适用于冻结的 **R45-D SHA `0b35b13`**。
+
+## R45-H 全量核验失败与轻量诊断修复（2026-10-28，当前最新）
+
+- **服务器原始回传**：固定 `e0d82671d9d461faf463a39f754ac97c9a0dd817` 的干净 worktree `/tmp/robo-r45h-20261028` 运行 `diagnostics/r45_reattest_r44_manifest.py`，**退出码 3，BLOCKED_DELTA_MISMATCH**。原始 `/tmp/r45h-execution-20261028T092913Z/` 保存 command/stdout/stderr/exit code/SHA256SUMS。进程累计读约 **34.5 GB**；因严格 SHA 不同，工具拒绝创建目标目录与正式 manifest。完成扫描不等于正式数据契约全部通过，**不要把 HDF5 全部哈希判成独立 VERIFIED**。没有运行 OFT、模型 shard 哈希、正式 CPU Gate、CUDA/GPU。
+- **差异来源尚 UNKNOWN**：可能来自历史冻结归一化器或其生成代码版本、数据变更、浮点统计/量化细节；只有冻结/recomputed 整体 SHA 不同，无法确认任何一项。不得改变当前冻结 `joint_delta_v1`、`alpha=16`、归一化器或绕过严格 hash。
+- **直接修改 PR #51 的诊断代码**：新增 `diagnostics/r45_delta_payload_diff.py`，逐字段比较 `fit`、`q01/q99`、`target_mean`、`target_std`、`zero_fraction`、`n_rows` 等，并保留精确数值/索引、SHA，**不引入任何“差不多相等就放行”容差**。
+- 新增 `diagnostics/r45_diagnose_delta_fast.py`：只读 300 回合 `state/action` 与任务元信息，先得到冻结/重算 delta 数值差异，**不重复全量读取 34.5 GB 图像或计算整个 HDF5 SHA**；即使 SHA 匹配也不会生成严格 manifest，更不会代表正式 CPU Gate PASS。任何差异继续 `BLOCKED_DELTA_MISMATCH`。
+- 更新 `diagnostics/r45_reattest_r44_manifest.py`：如果后续确需完整扫描，即使 delta 不匹配，也会在全新 `--out` 目录写 `failure_report.json`、`hdf5_inventory_diagnostic_only.json` 和 `SHA256SUMS`，保留原始逐文件 SHA 和字段差异；**不会写出可用于正式训练的 `r44_dataset_manifest.json`**。
+- **唯一下一步**：由真实 Linux 执行端在最新 PR #51 的干净 worktree **先运行 fast delta 诊断**（同一 frozen split/42D/delta 文件），回传具体字段差异、完整 SHA 和证据。若 mismatch，分析差异根源，不再重新读 34.5 GB；若精确 SHA 通过，才考虑全量 R44 manifest 和 OFT 版本核验。GPU 继续 BLOCKED。
 
 ## R45-G 现场阻塞与 CPU-only 修复（2026-10-28，当前）
 
@@ -159,7 +168,7 @@ R45-D GitHub 分支的 CPU 证据：
 `train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
 还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
 
-**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-G 严格 manifest 重核验及 OFT 源码来源确认，之后才是正式 R44 CPU preflight；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-H 冻结 delta normalizer 与真实 TRAIN 的轻量逐字段差异定位；在不一致查清之前不得重跑正式 HDF5 哈希或启动 GPU；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
 
 ### GPU Gate，尚未获授权
 
