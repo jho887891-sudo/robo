@@ -18,6 +18,8 @@ on:
       - 'diagnostics/r45_reattest_r44_manifest.py'
       - 'diagnostics/r45_delta_payload_diff.py'
       - 'diagnostics/r45_diagnose_delta_fast.py'
+      - 'diagnostics/r45_quantile_fingerprint.py'
+      - 'tests/test_r45_quantile_fingerprint.py'
       - 'tests/test_r45_diagnose_delta_fast.py'
       - 'diagnostics/r45_audit_oft_candidates.py'
       - 'tests/test_r45_reattest_manifest.py'
@@ -42,6 +44,8 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_r45_reattest_manifest.py' -v
       - name: Fast TRAIN 14D delta mismatch diagnostic tests
         run: python -m unittest discover -s tests -p 'test_r45_diagnose_delta_fast.py' -v
+      - name: Numerical quantile fingerprint tests (CPU, no dataset)
+        run: python -m unittest discover -s tests -p 'test_r45_quantile_fingerprint.py' -v
       - name: Server CPU preflight syntax and fail-closed gate
         run: |
           bash -n scripts/r45_server_cpu_gate.sh
@@ -51,7 +55,7 @@ jobs:
           fi
           grep -q 'R45_EXPECTED_SHA' /tmp/r45-refusal.log
       - name: Syntax check
-        run: python -m py_compile training/r44_train.py training/r45_data.py training/r45_train.py training/r45_contract.py diagnostics/r45_gpu_bench.py diagnostics/r44_gpu_smoke.py tests/test_r45_runtime_gate.py diagnostics/r45_cpu_io_profile.py tests/test_r45_cpu_io_profile.py diagnostics/r45_discover_data_root.py tests/test_r45_discover_data_root.py diagnostics/r45_reattest_r44_manifest.py diagnostics/r45_delta_payload_diff.py diagnostics/r45_diagnose_delta_fast.py tests/test_r45_diagnose_delta_fast.py diagnostics/r45_audit_oft_candidates.py tests/test_r45_reattest_manifest.py
+        run: python -m py_compile training/r44_train.py training/r45_data.py training/r45_train.py training/r45_contract.py diagnostics/r45_gpu_bench.py diagnostics/r44_gpu_smoke.py tests/test_r45_runtime_gate.py diagnostics/r45_cpu_io_profile.py tests/test_r45_cpu_io_profile.py diagnostics/r45_discover_data_root.py tests/test_r45_discover_data_root.py diagnostics/r45_reattest_r44_manifest.py diagnostics/r45_delta_payload_diff.py diagnostics/r45_diagnose_delta_fast.py tests/test_r45_diagnose_delta_fast.py diagnostics/r45_quantile_fingerprint.py tests/test_r45_quantile_fingerprint.py diagnostics/r45_audit_oft_candidates.py tests/test_r45_reattest_manifest.py
       - name: Regression gate (no CUDA, no HDF5 dataset)
         run: python -m unittest discover -s tests -p 'test_r45_runtime_gate.py' -v
       - name: Retest R44 delta and R45 frozen contract
