@@ -1058,7 +1058,11 @@ def main(argv=None) -> int:
     model_info["memory_cap"] = memory_cap_info
     total_steps = plan["n_train"] * args.epochs
     optimizer, scheduler, scheduler_info = make_optimizer_and_scheduler(vla, projector, args, total_steps)
-    r45_reader = R45DATA.RuntimeReader()
+    # R45-F real TRAIN CPU profile: 0/240 cache hits at 256 MiB, and each
+    # TRAIN sample is visited once per full epoch. Avoid retaining CPU image
+    # tensors that cannot improve unique-sample throughput. Keep HDF5 handles.
+    # Re-evaluate caching separately if a future sampler repeats images.
+    r45_reader = R45DATA.RuntimeReader(cache_bytes=0)
     state_cache = r45_reader.load_state_cache(plan, TC)
     stop_controller = R44StopController(
         out_dir / "STOP", min_free_gpu_gb=args.min_free_gpu_gb,
