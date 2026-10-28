@@ -7,7 +7,7 @@
 
 ## 30 秒状态摘要
 
-**当前研发位置：R45-H 真实服务器严格 manifest 重核验返回 `BLOCKED_DELTA_MISMATCH`（exit 3）。已完成原始 HDF5 扫描，但冻结 delta normalizer payload SHA 与 TRAIN 重算 SHA 不同；工具没有写出正式清单，后续 OFT/模型哈希/正式 CPU Gate 未运行。PR #51 已补充先读取 14D 状态动作的轻量差异诊断和失败报告保留机制，真实服务器尚未重跑。GPU Smoke、吞吐基准和 5 Epoch 正式训练均未授权。**
+**当前研发位置：R45-I 真实服务器快诊返回 `BLOCKED_DELTA_MISMATCH`（exit 3），精准定位为三个任务的 `q01/q99` 共 6 个数组数值差异（最大绝对误差约 3.35e-7）；`target_mean/std`、`zero_fraction`、行数、fit 元数据与 split SHA 均与冻结 payload 相同。PR #51 已实现纯 CPU 数值插值路径指纹，历史 NumPy/运算精度根因尚 UNKNOWN。未生成正式 Manifest、未运行 OFT/模型权重哈希/正式 CPU Gate，GPU 一律未授权。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -58,6 +58,14 @@ R45-D GitHub 分支的 CPU 证据：
 - **尚不可声称**：CPU stub/假模型通过并不等于 OpenVLA-7B GPU forward/backward/显存/性能验证。新的 benchmark 刻意保持 `BLOCKED_NOT_IMPLEMENTED`，不会输出伪吞吐或初始化 CUDA。
 - **下一个 Gate**：在真实服务器复核 PR #50 CPU 契约与环境、确认修复能安全进入正式 R44 后，以独立审批的 GPU Smoke 验证 7B 真实计算。未获研究负责人授权不启动任何 GPU 任务。不要重做已通过的 GitHub 6+15+4+3 CPU CI。
 - **合并限制**：本 PR 以 R45 分支为目标，尚未合并；代码未经合并前，下节问题描述仍适用于冻结的 **R45-D SHA `0b35b13`**。
+
+## R45-I q01/q99 六数组微小差异定位（2026-10-28，当前最新）
+
+- **执行端回传**：干净 worktree `/tmp/robo-r45i-20261028`，SHA `e91c30ef31caa7e3fa37f5ada616a23ee77964ed`；`diagnostics/r45_diagnose_delta_fast.py` 退出码 **3**、状态 `BLOCKED_DELTA_MISMATCH`。仅读 300 回合的 14D state/action 元信息、TRAIN 108780 / DEV 28268 行，未哈希整个 HDF5、未生成正式 Manifest、未接触 GPU。服务器原始报告 `/tmp/r45i-delta-fast-20261028T105947Z/report.json` 的 SHA256 `611d717e9fa1c22d389575f48730300c439ec77885b221314fcdac9c757c78aa`；它目前仅由执行者回传，尚未直接取得字节独立复算。
+- **精确差异**：冻结 delta normalizer 文件 SHA256 `795052b0e6716d374488296b52befdbb012bd1840a7ccca57dfbf4df9e07383f`（与 R45-G 一致）；冻结 payload SHA256 `9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459`，当前 TRAIN 重算 SHA256 `0ff5872eec929bf4af770840b61a0f39789937c7c23ff0157cf059dd24cf36cf`。仅 `push_T`、`stack_bowls`、`sweep_blocks` 的 `q01` 和 `q99` 六个数组不同，差异维度分别为 (3/14,12/14)、(4/14,10/14)、(1/14,11/14)。最大绝对误差分别 `7.45e-9/2.533e-7`、`3.725e-9/4.098e-8`、`7.45e-9/3.353e-7`。其余 `target_mean/std`、`zero_fraction`、`n_rows`、`fit`、split SHA 均相同。
+- **机制判断**：这种只发生在分位数的末位差异，值得优先审计 `np.quantile(float32)` 在不同 NumPy 版本/插值计算精度下的舍入；**这只是优先验证假说，不是已经证明的根因**。严格 payload SHA 必须相同，不能直接 `np.allclose` 放行。
+- **GitHub 直接补充**：`diagnostics/r45_quantile_fingerprint.py` 为同一 TRAIN 14D 行的 `q01/q99` 同时计算当前 NumPy float32、NumPy float64、手写 float32 插值、float32 加权和、手写 float64 插值五种纯诊断候选。`diagnostics/r45_diagnose_delta_fast.py --quantile-forensics` 在**一次轻量读取中**写各任务、各维度候选值与冻结值的精确匹配/差异，不生成 Manifest、不能覆盖 normalizer、不能证明历史版本来源。
+- **唯一下一步**：执行端固定 PR #51 最新 SHA，在新干净 worktree **只运行一次 fast delta --quantile-forensics**；回传 `report.json`、`SHA256SUMS`、NumPy 版本与每种候选算法逐任务 `exact_float32_match_count`。如有精确匹配候选，仍要核验历史 numpy/脚本源码身份才可确定根因；如无匹配，进一步查数据/其他运算实现，不做正式 CPU Gate，更不启动 GPU。
 
 ## R45-H 全量核验失败与轻量诊断修复（2026-10-28，当前最新）
 
@@ -169,7 +177,7 @@ R45-D GitHub 分支的 CPU 证据：
 `train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
 还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
 
-**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-H 冻结 delta normalizer 与真实 TRAIN 的轻量逐字段差异定位；在不一致查清之前不得重跑正式 HDF5 哈希或启动 GPU；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-I 分位数 q01/q99 数值插值路径指纹核对；在冻结 normalizer SHA 不匹配的根因查明之前不得重跑正式 HDF5 哈希或启动 GPU；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
 
 ### GPU Gate，尚未获授权
 
