@@ -1,0 +1,55 @@
+name: R45 Runtime CPU Gate
+on:
+  pull_request:
+    paths:
+      - 'training/r44_train.py'
+      - 'training/r45_train.py'
+      - 'training/r45_data.py'
+      - 'training/r45_contract.py'
+      - 'diagnostics/r45_gpu_bench.py'
+      - 'tests/test_r45_runtime_gate.py'
+      - 'tests/test_r45_toy_resume.py'
+      - 'scripts/r45_server_cpu_gate.sh'
+      - 'diagnostics/r45_cpu_io_profile.py'
+      - 'tests/test_r45_cpu_io_profile.py'
+      - '.github/workflows/r45-runtime-cpu.yml'
+  workflow_dispatch:
+jobs:
+  runtime-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Minimal CPU dependency
+        run: python -m pip install --disable-pip-version-check "numpy>=1.26,<3"
+      - name: Server CPU preflight syntax and fail-closed gate
+        run: |
+          bash -n scripts/r45_server_cpu_gate.sh
+          if env -u R45_EXPECTED_SHA bash scripts/r45_server_cpu_gate.sh > /tmp/r45-refusal.log 2>&1; then
+            echo 'ERROR: preflight accepted missing pinned SHA'
+            exit 1
+          fi
+          grep -q 'R45_EXPECTED_SHA' /tmp/r45-refusal.log
+      - name: Syntax check
+        run: python -m py_compile training/r44_train.py training/r45_data.py training/r45_train.py training/r45_contract.py diagnostics/r45_gpu_bench.py tests/test_r45_runtime_gate.py diagnostics/r45_cpu_io_profile.py tests/test_r45_cpu_io_profile.py
+      - name: Regression gate (no CUDA, no HDF5 dataset)
+        run: python -m unittest discover -s tests -p 'test_r45_runtime_gate.py' -v
+      - name: Retest R44 delta and R45 frozen contract
+        run: |
+          python tests/test_r44_delta_v1.py
+          python tests/test_r45_contract.py
+      - name: Install CPU-only toy dependencies
+        run: |
+          python -m pip install --disable-pip-version-check h5py
+          python -m pip install --disable-pip-version-check 'torch==2.5.1' --index-url https://download.pytorch.org/whl/cpu
+      - name: Install real JPEG CPU decode dependencies
+        run: python -m pip install --disable-pip-version-check pillow opencv-python-headless
+      - name: Synthetic HDF5 real JPEG I/O cache and worker profile
+        run: python -m unittest discover -s tests -p 'test_r45_cpu_io_profile.py' -v
+      - name: Synthetic HDF5 CPU toy stop-resume integration
+        run: python -m unittest discover -s tests -p 'test_r45_toy_resume.py' -v
