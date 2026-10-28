@@ -33,8 +33,12 @@ def _single(path, before, after):
 def compare_delta_payloads(frozen, reconstructed):
     """Summarize differences without silently tolerating any mismatch."""
     fields = []
-    for name in ("schema", "target", "codec", "n_bins", "token_window", "fit"):
+    for name in ("schema", "target", "codec", "n_bins", "token_window"):
         fields.append(_single(name, frozen.get(name), reconstructed.get(name)))
+    f_fit = frozen.get("fit") or {}
+    r_fit = reconstructed.get("fit") or {}
+    for name in sorted(set(f_fit) | set(r_fit)):
+        fields.append(_single(f"fit.{name}", f_fit.get(name), r_fit.get(name)))
     a_tasks = frozen.get("tasks") or {}
     b_tasks = reconstructed.get("tasks") or {}
     all_tasks = sorted(set(a_tasks) | set(b_tasks))
