@@ -177,5 +177,44 @@ class TestRuntimeReader(unittest.TestCase):
         reader.close()
 
 
+class TestR45ZeroHitPolicy(unittest.TestCase):
+    def test_formal_train_disables_unique_sample_cache(self):
+        main = find_func(tree("training/r44_train.py"), "main")
+        reader_constructors = [n for n in ast.walk(main)
+                               if isinstance(n, ast.Call)
+                               and isinstance(n.func, ast.Attribute)
+                               and n.func.attr == "RuntimeReader"]
+        self.assertEqual(len(reader_constructors), 1)
+        cache_kw = next(k.value for k in reader_constructors[0].keywords
+                        if k.arg == "cache_bytes")
+        self.assertIsInstance(cache_kw, ast.Constant)
+        self.assertEqual(cache_kw.value, 0)
+
+    def test_smoke_uses_real_formal_reader_and_closes_it(self):
+        parsed = tree("diagnostics/r44_gpu_smoke.py")
+        main = find_func(parsed, "main")
+        image_calls = [n for n in ast.walk(main)
+                       if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                       and n.func.attr == "load_images"]
+        self.assertEqual(len(image_calls), 1)
+        self.assertNotIn("R44.episode_images(",
+                         (ROOT / "diagnostics/r44_gpu_smoke.py").read_text(encoding="utf-8"))
+        close_calls = [n for n in ast.walk(main)
+                       if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                       and n.func.attr == "close"]
+        self.assertGreaterEqual(len(close_calls), 1)
+
+    def test_smoke_refuses_without_explicit_authorization_or_cuda(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "not_created"
+            r = subprocess.run(
+                [sys.executable, str(ROOT / "diagnostics/r44_gpu_smoke.py"),
+                 "--out", str(out)], capture_output=True, text=True, timeout=20,
+            )
+            self.assertEqual(r.returncode, 2, r.stderr)
+            self.assertIn("BLOCKED_AUTHORIZATION", r.stdout)
+            self.assertFalse(out.exists())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
