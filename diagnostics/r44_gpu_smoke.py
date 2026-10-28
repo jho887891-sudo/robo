@@ -20,6 +20,10 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 TRAINING = REPO / "training"
+# Direct invocation (python diagnostics/r44_gpu_smoke.py) otherwise sets
+# sys.path[0]=diagnostics and cannot import training.r45_data from R44.
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
 if str(TRAINING) not in sys.path:
     sys.path.insert(0, str(TRAINING))
 
