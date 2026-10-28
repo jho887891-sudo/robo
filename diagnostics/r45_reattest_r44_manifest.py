@@ -31,6 +31,81 @@ def sha_file(path):
     return d.hexdigest()
 
 
+class DeltaPayloadMismatch(ValueError):
+    """The 300-file scan passed, but frozen delta payload differed."""
+    def __init__(self, diagnostics, files, totals):
+        super().__init__("BLOCKED_DELTA_MISMATCH: TRAIN-derived delta payload differs "
+                         "from frozen normalizer; no manifest was created")
+        self.diagnostics = diagnostics
+        self.files = files
+        self.totals = totals
+
+
+def _provenance():
+    import platform
+    import subprocess
+    import numpy as np
+    import h5py
+    sha = subprocess.check_output(
+        ["git", "-C", str(REPO), "rev-parse", "HEAD"],
+        text=True, timeout=20).strip()
+    if len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha):
+        raise ValueError("cannot attest exact Git source SHA")
+    return {
+        "source_sha": sha,
+        "script_sha256": sha_file(Path(__file__)),
+        "python_version": platform.python_version(),
+        "numpy_version": np.__version__,
+        "h5py_version": h5py.__version__,
+    }
+
+
+def _write_evidence(out, payloads):
+    """New directory only; never writes or replaces historical evidence."""
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=False)
+    for name, data in payloads.items():
+        if "/" in name or name == "SHA256SUMS":
+            raise ValueError("invalid evidence filename")
+        (out / name).write_text(
+            json.dumps(data, indent=2, sort_keys=True, allow_nan=False) + "\n",
+            encoding="utf-8")
+    with (out / "SHA256SUMS").open("x", encoding="utf-8") as fh:
+        for name in sorted(payloads):
+            fh.write(f"{sha_file(out / name)}  {name}\n")
+
+
+def write_blocked_delta_evidence(out, exc, args, provenance=None):
+    """Retain completed all-HDF5 hashes and numerical differences, NOT a manifest."""
+    report = {
+        "schema": "r45-r44-manifest-reattest/v1",
+        "status": "BLOCKED_DELTA_MISMATCH",
+        "formal_manifest_created": False,
+        "training_authorized": False,
+        "gpu_used": False,
+        "source": "completed original HDF5 scan, rejected frozen delta compatibility",
+        "delta_differences": exc.diagnostics,
+        "hdf5_file_count": len(exc.files),
+        "hdf5_totals": exc.totals,
+        "split_file_sha256": sha_file(args.splits),
+        "feature_normalizer_file_sha256": sha_file(args.feature_normalizer),
+        "delta_normalizer_file_sha256": sha_file(args.delta_normalizer),
+        "limitations": ("All HDF5 file hashes passed the source scanner, but "
+                        "TRAIN delta statistics did not match the frozen payload. "
+                        "Do not use this inventory as a training dataset manifest."),
+    }
+    report.update(provenance if provenance is not None else _provenance())
+    inventory = {
+        "schema": "r45-hdf5-inventory/diagnostic-only",
+        "not_a_training_manifest": True,
+        "files": exc.files,
+    }
+    _write_evidence(out, {
+        "failure_report.json": report,
+        "hdf5_inventory_diagnostic_only.json": inventory,
+    })
+
+
 def validated_manifest(*, splits_path, root, feature_path, delta_path,
                        scan_fn=None):
     import r44_delta_v1 as D
@@ -101,9 +176,10 @@ def validated_manifest(*, splits_path, root, feature_path, delta_path,
 
     reconstructed = D.fit_normalizer(deltas, split_sha256=split_sha)
     if reconstructed["sha256"] != frozen["sha256"]:
-        raise ValueError(
-            "BLOCKED_DELTA_MISMATCH: TRAIN-derived delta normalizer does not "
-            "match supplied frozen payload, refuse to re-fit or replace it")
+        from r45_delta_payload_diff import compare_delta_payloads
+        raise DeltaPayloadMismatch(
+            compare_delta_payloads(frozen, reconstructed),
+            audit["files"], audit["totals"])
     manifest = make_training_manifest(
         split_sha256=split_sha,
         feature_normalizer_sha256=sha_file(feature_path),
@@ -155,41 +231,30 @@ def main(argv=None):
         manifest, report = validated_manifest(
             splits_path=args.splits, root=args.hdf5_root,
             feature_path=args.feature_normalizer, delta_path=args.delta_normalizer)
-        # Provenance is recorded only after validation; no CUDA, model or training.
-        import platform
-        import subprocess
-        import numpy as np
-        import h5py
-        sha = subprocess.check_output(
-            ["git", "-C", str(REPO), "rev-parse", "HEAD"],
-            text=True, timeout=20).strip()
-        if len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha):
-            raise ValueError("cannot attest exact Git source SHA")
-        report.update({
-            "source_sha": sha,
-            "script_sha256": sha_file(Path(__file__)),
-            "python_version": platform.python_version(),
-            "numpy_version": np.__version__,
-            "h5py_version": h5py.__version__,
-        })
-        # Full validation happens before new evidence directory is created.
+        # No source identity / package versions are silently inferred.
+        report.update(_provenance())
         out = args.out.resolve()
-        out.mkdir(parents=True, exist_ok=False)
-        files = {
+        _write_evidence(out, {
             "r44_dataset_manifest.json": manifest,
             "report.json": report,
-        }
-        for name, payload in files.items():
-            target = out / name
-            target.write_text(json.dumps(payload, indent=2, sort_keys=True,
-                                         allow_nan=False) + "\n", encoding="utf-8")
-        with (out / "SHA256SUMS").open("w", encoding="utf-8") as fh:
-            for name in sorted(files):
-                fh.write(f"{sha_file(out / name)}  {name}\n")
+        })
         print(json.dumps({"status": "CPU_MANIFEST_REATTEST_PASS",
                           "manifest_path": str(out / "r44_dataset_manifest.json"),
                           "evidence": str(out)}, sort_keys=True))
         return 0
+    except DeltaPayloadMismatch as exc:
+        # A complete 300-file scan has already finished. Do not discard its
+        # exact numeric disagreement and original file hashes after 34+ GB IO.
+        try:
+            write_blocked_delta_evidence(args.out, exc, args)
+            print(f"BLOCKED_DELTA_MISMATCH: diagnostic evidence={args.out}",
+                  file=sys.stderr, flush=True)
+        except Exception as save_exc:
+            print(f"BLOCKED_DIAGNOSTIC_WRITE: {type(save_exc).__name__}: {save_exc}",
+                  file=sys.stderr, flush=True)
+        print(f"BLOCKED_MANIFEST_REATTEST: {type(exc).__name__}: {exc}",
+              file=sys.stderr, flush=True)
+        return 3
     except Exception as exc:
         print(f"BLOCKED_MANIFEST_REATTEST: {type(exc).__name__}: {exc}",
               file=sys.stderr, flush=True)
