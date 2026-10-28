@@ -1,13 +1,13 @@
 # RoboDojo / OpenVLA 项目状态（唯一日常交接入口）
 
-> 状态快照：2026-10-27。此文档是**项目索引**，不是无需核验的最新运行结果。
+> 状态快照：2026-10-28。此文档是**项目索引**，不是无需核验的最新运行结果。
 > 仓库：[`jho887891-sudo/robo`](https://github.com/jho887891-sudo/robo)。
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
 ## 30 秒状态摘要
 
-**当前研发位置：R45-D CPU 交付已完成，R45-E 运行时缺陷修复待完成。GPU Smoke、真实 GPU 吞吐基准和正式 5 Epoch 训练均未获授权，未运行。**
+**当前研发位置：R45-E 双分支交叉审计已完成；统一修复与 CPU 数据瓶颈工具已在 PR #51 实现，GitHub CI 和真实 TRAIN CPU profile 的验收状态应分别核查。GPU Smoke、真实 GPU 吞吐基准和正式 5 Epoch 均未获授权。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -50,16 +50,33 @@ R45-D GitHub 分支的 CPU 证据：
 
 **不能宣称：**真实 7B 前反向训练已 PASS、24 GB 显存足够、训练吞吐已加速、完整 Epoch 训练成功，或 GPU benchmark 已完成。
 
-## R45-E 最小修复状态（2026-10-27）
+## R45-E 直接修复交付（2026-10-27）
 
-- 工作分支：audit/r45-training-runtime-fixes-20261027，基线 0b35b13f94d71ca15b6704a3b6bd0cffb2ad4e57。
-- VERIFIED：tests/test_r45_pipeline.py 12/12、tests/test_r45_contract.py 4/4、tests/test_r44_train_core.py 14/14；py_compile 通过。
-- VERIFIED：正式 R44 TRAIN 路径已改用 RuntimeReader.load_images，样本计时从数据准备前开始，并在 GPU 计算后同步 CUDA；DEV 路径的 R45 reader 绑定已存在且保持一致。
-- VERIFIED：R45 停止检查点保存实际已提交游标；梯度累积在末尾不完整批次执行一次更新；有效优化器步数按向上取整计算。
-- IMPLEMENTED：r45_gpu_bench.py 在真实 OpenVLA forward/backward/optimizer 尚未接入时 fail-closed 为 BLOCKED_NOT_IMPLEMENTED，不再生成模拟 PASS。
-- UNKNOWN：CPU 读取瓶颈对固定真实 TRAIN 样本的完整 HDF5/JPEG/cache/worker 对比尚未完成；本轮没有 GPU/CUDA、真实 OpenVLA 或正式训练。
-- 证据目录：evidence/r45-e-cpu-20261027/。日志 SHA256 已随提交保存；pytest 命令因远端未安装 pytest 退出 1，仓库 unittest 入口为实际通过口径。
-- 唯一下一步：先完成 CPU 固定样本数据瓶颈审计，再单独申请真实 GPU Smoke；未经授权不启动。
+- **修复 PR（独立审计分支）**：[#50](https://github.com/jho887891-sudo/robo/pull/50)，分支 `audit/r45-direct-runtime-fixes-20261027`，代码/CPU CI 固定 SHA `a9685ae53a39d90589ca1a5d97bdb039e1ce4549`，以 R45-D `0b35b13` 为基线，**尚未合并到 R45 正式分支**。
+- **VERIFIED CPU**：GitHub Actions [R45 Runtime CPU Gate run 40477763136](https://github.com/jho887891-sudo/robo/actions/runs/40477763136) 全部成功；真实运行的 CPU 测试：R44 delta 15/15、R45 contract 4/4、运行时回归 6/6、**合成 HDF5 + Torch2.5.1 CPU 假模型训练/中断恢复 3/3**；Python 编译检查通过。实验仅用 GitHub CPU runner，未启动用户训练服务器 GPU。
+- **已修复**：正式 R44 TRAIN 的 Reader 和 `data_timing` 绑定、完整样本计时与 GPU 同步、DEV reader 注入；RuntimeReader 的句柄上限与缓存 LRU、相互独立的阶段计时；R45 假模型的已提交优化器步数游标、梯度累积尾批次、恢复契约；正式 LoRA `q_proj/v_proj`；模拟 GPU Benchmark 永久拒绝 `PASS`，已授权但尚未实现真实引擎时退出码 3。
+- **尚不可声称**：CPU stub/假模型通过并不等于 OpenVLA-7B GPU forward/backward/显存/性能验证。新的 benchmark 刻意保持 `BLOCKED_NOT_IMPLEMENTED`，不会输出伪吞吐或初始化 CUDA。
+- **下一个 Gate**：在真实服务器复核 PR #50 CPU 契约与环境、确认修复能安全进入正式 R44 后，以独立审批的 GPU Smoke 验证 7B 真实计算。未获研究负责人授权不启动任何 GPU 任务。不要重做已通过的 GitHub 6+15+4+3 CPU CI。
+- **合并限制**：本 PR 以 R45 分支为目标，尚未合并；代码未经合并前，下节问题描述仍适用于冻结的 **R45-D SHA `0b35b13`**。
+
+## 2026-10-28 R45-E 交叉审计与唯一集成分支
+
+- DeepSeek 的 R45-E 实际提交 `audit/r45-training-runtime-fixes-20261027@5da8f97c811cfe9e2d790583c68c0d9a985903e2` 已核验 GitHub 远端存在。其 R44 14/14、R45 pipeline 12/12、contract 4/4 的单项原始日志支持独立测试有通过。**但该 SHA 仍有未绑定的 DEV `r45_reader`、训练样本时间遗漏 state/label 阶段、Toy 训练中途累积批次恢复风险，不能直接称整个训练路径 VERIFIED。**
+- 该 SHA 的 `evidence/r45-e-cpu-20261027/` 仅有 `pytest.log`、`unittest.log`、`r44_train_core.log`、`r45_contract.log`、`r45_pipeline.log`。其中 pytest 不可用、unittest 有三个导入错误；**GitHub 当前目录未找到所报告的 SHA256 清单**，留待原执行者补足证据，不能捏造为通过。
+- 我之前直接修复的 [PR #50](https://github.com/jho887891-sudo/robo/pull/50) 已得到 GitHub CPU Gate（含真实 JPEG 之外的合成 HDF5 CPU Toy stop-resume）通过，但它和 DeepSeek R45-E 形成两条并行分支。
+- 为避免重复维护：**以 [PR #51](https://github.com/jho887891-sudo/robo/pull/51) 分支 `audit/r45-e-unified-cpu-profile-20261028` 为唯一待验收集成入口。** 它从 DeepSeek E 提交出发、保留旧日志、拣选此前已验证的 TRAIN/DEV/Reader/Benchmark/恢复修复，并新增真实 TRAIN CPU profile 工具及测试。待该 PR 全部 Gate 通过，再关闭被替代的 PR #50（不删除其 commit/证据）。
+- 新工具 `diagnostics/r45_cpu_io_profile.py`：按固定 SHA256 选择每任务 TRAIN 样本，比较 HDF5 每样本重开+JPEG 的 CPU Shadow 与有界 Reader；检验像素完全一致，测量冷/暖缓存、CPU host 时间、1/2/4 进程独立读解码的耗时，输出 `report.json`、`samples.jsonl`、`selected_samples.json` 和 `SHA256SUMS`。**严格不代表正式 OpenVLA image processor / GPU training 的速度。**
+- 真实 TRAIN CPU profile **尚未在服务器执行，真实性能数字 UNKNOWN**；所有 GPU 实验继续 BLOCKED。当前任务是先通过 PR #51 CPU CI，再由 DeepSeek 仅在服务器使用该代码和受控 CPU 预算跑固定真实 TRAIN 样本；交回原始报告和完整 SHA。不要重复 R44/R45 已有训练设计。
+
+## R45-F：服务器实际数据 CPU Gate（已提供命令入口，执行 UNKNOWN）
+
+在 [PR #50](https://github.com/jho887891-sudo/robo/pull/50) 的代码分支 `audit/r45-direct-runtime-fixes-20261027` 已提交 `scripts/r45_server_cpu_gate.sh`；在真实 Linux 服务器只需用**全新干净 worktree 和当时最新 PR 完整 SHA** 执行这个脚本。脚本校验固定 SHA、真实 R44 数据/normalizer/model config、R44 `--preflight-only` 与 R44/R45 CPU 契约及合成 HDF5 停止恢复，导出 `exit_codes.txt`、原始日志、SHA256SUMS。不会创建 CUDA 上下文，也不会正式训练。
+
+运行前必须显式提供实际服务器路径（从既有可验证证据查找，不能猜测）：`M2_HDF5_ROOT`、`M2_NORMALIZER_JSON`、`R44_DELTA_NORMALIZER`、`R44_DATASET_MANIFEST`、`R44_BASE_MODEL`、`R44_OFT_ROOT`，以及 `R45_EXPECTED_SHA`。生成的 CPU 证据目录名由脚本输出。
+
+**分工：** ChatGPT 负责 GitHub 代码修复、PR、测试与审计；DeepSeek 负责真实 Linux 服务器的干净 worktree 和 CPU 现场执行，并在获明确授权后运行 GPU 实验。
+
+**此脚本通过之前不得启动 GPU。** 通过之后下一步是准备可执行的真实 7B GPU Smoke；现有 `diagnostics/r45_gpu_bench.py` 故意 `BLOCKED_NOT_IMPLEMENTED`，不能直接测出吞吐。此阶段的运行状态始终与 GitHub CI 状态分开记录。
 
 ## 未解决的高优先级运行时问题（R45-E）
 
