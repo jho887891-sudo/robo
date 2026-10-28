@@ -66,6 +66,7 @@ R45-D GitHub 分支的 CPU 证据：
 - **机制判断**：这种只发生在分位数的末位差异，值得优先审计 `np.quantile(float32)` 在不同 NumPy 版本/插值计算精度下的舍入；**这只是优先验证假说，不是已经证明的根因**。严格 payload SHA 必须相同，不能直接 `np.allclose` 放行。
 - **GitHub 直接补充**：`diagnostics/r45_quantile_fingerprint.py` 为同一 TRAIN 14D 行的 `q01/q99` 同时计算当前 NumPy float32、NumPy float64、手写 float32 插值、float32 加权和、手写 float64 插值五种纯诊断候选。`diagnostics/r45_diagnose_delta_fast.py --quantile-forensics` 在**一次轻量读取中**写各任务、各维度候选值与冻结值的精确匹配/差异，不生成 Manifest、不能覆盖 normalizer、不能证明历史版本来源。
 - **唯一下一步**：执行端固定 PR #51 最新 SHA，在新干净 worktree **只运行一次 fast delta --quantile-forensics**；回传 `report.json`、`SHA256SUMS`、NumPy 版本与每种候选算法逐任务 `exact_float32_match_count`。如有精确匹配候选，仍要核验历史 numpy/脚本源码身份才可确定根因；如无匹配，进一步查数据/其他运算实现，不做正式 CPU Gate，更不启动 GPU。
+- **GitHub CPU CI PASS 49/49**：[R45 Runtime CPU Gate run 40708257285](https://github.com/jho887891-sudo/robo/actions/runs/40708257285)，测试代码 SHA `6568c0625188d303fae4303df63cd329cd5dd304`。新分位数 fingerprint 测试 3/3、之前 46/46 回归全部 PASS；R4/R5 workflow 同样 PASS。尚未在真实 TRAIN 上运行候选对照，真实冻结 q 的算法来源 UNKNOWN。
 
 ## R45-H 全量核验失败与轻量诊断修复（2026-10-28，当前最新）
 
