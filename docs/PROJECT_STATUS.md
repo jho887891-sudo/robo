@@ -67,7 +67,7 @@ R45-D GitHub 分支的 CPU 证据：
 - **BLOCKED**：现场只有 875 字节旧 `dataset_manifest.json`，不符合 `r44-dataset-manifest/v1` 严格 SHA/HDF5 文件列表契约；OFT 源码目录发现 5 个候选，无历史运行链可唯一证明。**UNKNOWN**：候选 `/home/T7/ojh/robot_actual/openvla_offline_bundle/models/openvla-7b` 的三个 safetensors 权重分片完整 SHA，模型目录结构存在不等于模型身份已核验。
 - **GitHub 已实施**：新增 `diagnostics/r45_reattest_r44_manifest.py`，复用已有 `r44_prepare_delta.scan` 全量 HDF5 状态/动作/三相机/任务指令/稳定 SHA256 核验；要求 300 回合，TRAIN 108780、DEV 28268，重算 TRAIN delta payload SHA 与**已有冻结 normalizer 完全相同**，否则拒绝；不会替换旧归一化器。仅成功时在**全新目录**创建 `r44_dataset_manifest.json`（明确标注为新核验产物，非找回历史 manifest）、`report.json`、`SHA256SUMS`。
 - **GitHub 已实施**：新增 `diagnostics/r45_audit_oft_candidates.py`，对执行端明确提供的 5 个 OFT 目录只读报告关键 `prismatic` 源文件 SHA、Git HEAD 与历史默认路径是否一致，**绝不自动挑选**。若不能证明历史来源或得到研究负责人对候选身份确认，仍须 BLOCKED。
-- **GitHub CPU CI PASS 41/41**：[run 40659154948](https://github.com/jho887891-sudo/robo/actions/runs/40659154948)；新增 strict manifest/OFT 测试 5/5，原有 36/36 回归不变，R4/R5 CPU 也 PASS。**服务器真实 300 个 HDF5 完整稳定哈希重核验尚未运行，不能宣称正式 R44 Gate PASS**。
+- **GitHub CPU CI PASS 41/41**：[run 40659435953](https://github.com/jho887891-sudo/robo/actions/runs/40659435953)，代码 SHA `24edd76e4270230887f17c804b12e0648f44581e`；新增 strict manifest/OFT 测试 5/5，原有 36/36 回归不变，R4/R5 CPU 也 PASS。报告新增代码 SHA、脚本 SHA、Python/numpy/h5py 版本，便于独立核验。**服务器真实 300 个 HDF5 完整稳定哈希重核验尚未运行，不能宣称正式 R44 Gate PASS**。
 - **唯一下一步**：服务器在 PR #51 最新干净 worktree 中运行这两个 CPU 审计入口，补齐严格新清单和 OFT 版本来源；再完成已有的 `scripts/r45_server_cpu_gate.sh`。失败只回传 BLOCKED 和原始证据，不生成替代数据、训练模型或自启 GPU。
 
 ## R45-F 真实 TRAIN CPU I/O 现场复核报告（2026-10-28，最新）
