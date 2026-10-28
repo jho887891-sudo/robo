@@ -14,9 +14,17 @@
 - **仍明确缺失**：历史正式 preflight 未记录运行源码 SHA，候选历史 worktree SHA `fd0a7b87813dd55bb330a0f722a8ba6f69cbf5e3` 不是运行身份链；历史 NumPy 1.26.4 在**同一真实 TRAIN 数据上按原始 `np.quantile(float32)` 入口的复算**尚未执行；缺失正式严格 manifest、OFT 正式根、模型权重完整 SHA 和正式 CPU Gate 实测。**训练仍 `BLOCKED_DELTA_MISMATCH`，无 GPU 授权**。
 - **唯一下一步 R45-L**：隔离 Linux CPU 环境固定 `numpy==1.26.4`，不改变当前全局 2.2.6，使用原始 frozen 14D TRAIN 同入口运行 `r45_diagnose_delta_fast.py`（不要重复全 HDF5/JPEG 34.5 GB 哈希）；验证 `np.quantile(float32)` 是否完整复现冻结 payload SHA `9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459`，保存原始证据并**安全推送独立 GitHub evidence 分支**。匹配仅为数值路径兼容性证据；历史运行源码身份无法凭数值匹配自动证明。仍不生成正式 Manifest / Gate，也不运行 GPU。
 
+## R45-L GitHub 数值复现已发布（2026-10-29，已读原始报告）
+
+- [`evidence/r45l-numpy1264-repro-20261029@6e55782c3defa30363249e84b7abe7e90460c4c1`](https://github.com/jho887891-sudo/robo/tree/6e55782c3defa30363249e84b7abe7e90460c4c1/evidence/r45l-numpy1264-repro-20261029)：GitHub 远端 HEAD 与证据提交 SHA 一致。ChatGPT 直接读取 `profile/report.json`、`execution/diagnosis.exit_code` 与 `environment/runtime_versions.txt`，并非只凭执行端摘要。
+- 真实 CPU 隔离环境：Python 3.10.12、NumPy **1.26.4**、h5py 3.16.0；诊断进程退出码 **0**；300 回合，TRAIN **108780** / DEV **28268**。原始报告中 `difference.status=EXACT_MATCH`，`changed_field_count=0`，冻结与重算 payload SHA 都为 `9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459`；顶层诊断状态为 `DELTA_ONLY_COMPATIBLE_NOT_FULL_ATTESTED`。
+- **已证明**：在这个真实环境、同一数据与代码入口下，NumPy 1.26.4 能数值复现冻结归一化器。**未证明**：历史运行时源码 SHA 的独立身份链；并未获得严格全量 HDF5 Manifest、完成正式 CPU Gate、运行 GPU 训练。
+- **性能另有独立证据缺口**：R45-F 的 44.040 / 20.677 ms 三相机 CPU **恒等变换代理**数据目前仅有 `docs/PROJECT_STATUS.md` 的执行端汇总；实际服务器 `/tmp/r45f-cpu-execution-20261028/profile-20261028T075000Z/` 中原始 `report.json`、`samples.jsonl`、`selected_samples.json`、命令/stdout/stderr/exit 与 `SHA256SUMS` 尚未在本次检查的 GitHub R45 分支中找到独立提交。不能宣称这两组时延已经通过 ChatGPT 对原始样本的复算，更不能称 GPU 训练 2.13 倍加速。
+- **下一步两条不相互替代的工作**：数据契约线 R45-M 在同样隔离 NumPy 1.26.4 环境执行一次正式 300 HDF5 SHA + 严格 Manifest 校验，原始证据入 GitHub，失败保持 BLOCKED；性能证据线先将既有 R45-F 原始小型文件发布独立证据分支，ChatGPT 再交叉审计，无需重复 GPU 或 HDF5 训练数据。之后仍须核查 OFT/7B 权重、正式 CPU Gate；所有 GPU 活动需另行授权。
+
 ## 30 秒状态摘要
 
-**当前研发位置：R45-K 原始证据已经提交独立 GitHub 分支并由 ChatGPT 直接交叉审计：HEAD 及根 SHA256 校验成功，7 份关键文件独立哈希 7/7 与清单一致。R45-I/J 报告中的六组 q01/q99 差异和三种 84/84 复现候选获得源码证据支撑，但历史 NumPy 1.26.4 同入口实际复跑与源码执行身份链尚缺失。训练契约仍 `BLOCKED_DELTA_MISMATCH`；正式 manifest、OFT 确认、CPU Gate、GPU 训练仍未通过/未授权。下一步 R45-L 仅做 CPU 隔离版本精确复现并 GitHub 留证。**
+**当前研发位置：R45-L 已在隔离 NumPy 1.26.4 环境中真实复现冻结 delta normalizer，原始报告 GitHub 可读（exit 0、差异字段 0、payload SHA 完全匹配）。但严格 HDF5 Manifest、OFT 来源、权重校验和正式 CPU Gate 尚未执行/通过，GPU 未授权，训练仍 BLOCKED。R45-F 图像 CPU 代理时延 44.040/20.677 ms 目前只有执行端汇总，原始逐样本 GitHub 证据仍缺失，不得把 2.13× 中位数比值当正式训练加速。下一步数据契约线 R45-M；性能证据线先补交 R45-F 文件。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -187,7 +195,7 @@ R45-D GitHub 分支的 CPU 证据：
 `train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
 还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
 
-**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-L 服务器隔离 NumPy 1.26.4 环境精确复现当前冻结数据中的 TRAIN q01/q99，保存并推送独立 GitHub 原始证据；根因/完整合同未查明前不得生成正式 Manifest 或启动 CPU Gate/GPU；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前数据契约下一步为 R45-M 在隔离 NumPy 1.26.4 下重新验证完整 HDF5 哈希并生成严格 Manifest；性能证据下一步为 R45-F 原始 CPU I/O 样本与报告上 GitHub。均不授权 GPU/训练；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
 
 ### GPU Gate，尚未获授权
 
