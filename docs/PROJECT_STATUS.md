@@ -70,8 +70,8 @@ R45-D GitHub 分支的 CPU 证据：
 
 ## R45-E 统一 CPU Gate 验证（2026-10-28）
 
-- 唯一集成 PR：[**#51**](https://github.com/jho887891-sudo/robo/pull/51)，测试代码 SHA `9dfe10cb38da0e03f6820c49f6cb5e1eb244c73f`，基础分支仍为 R45-D `0b35b13`。
-- **GitHub CI 已实测 PASS**：[R45 Runtime CPU Gate run 40640540599](https://github.com/jho887891-sudo/robo/actions/runs/40640540599)：R44 15/15、R45 contract 4/4、运行时 6/6、真实 JPEG 的合成 HDF5 CPU profile 2/2、Toy 停止恢复 3/3，合计 **30/30**；R4、R5 CPU 工作流也 PASS。均为 GitHub CPU runner，不代表服务器真实 TRAIN 数据已经测过。
+- 唯一集成 PR：[**#51**](https://github.com/jho887891-sudo/robo/pull/51)，已通过 Gate 的数据根目录发现工具代码 SHA `1b85b2762220a080be6491ce106f8f7234a99e9a`，基础分支仍为 R45-D `0b35b13`。
+- **GitHub CI 已实测 PASS**：[R45 Runtime CPU Gate run 40647917075](https://github.com/jho887891-sudo/robo/actions/runs/40647917075)：数据根目录发现/缺失/不覆盖测试 3/3、R44 15/15、R45 contract 4/4、运行时 6/6、合成真实 JPEG 的 HDF5 CPU profile 2/2、Toy 停止恢复 3/3，合计 **33/33**；R4、R5 CPU 工作流也 PASS。均为 GitHub CPU runner，不代表服务器真实 TRAIN 数据已经测过。
 - 原 [PR #50](https://github.com/jho887891-sudo/robo/pull/50) 因被 #51 完整覆盖，已关闭未合并；历史 Git commit、测试证据保留。今后不在 #50 继续追加修复。
 - **现阶段唯一下一步**：真实服务器运行 `scripts/r45_server_cpu_gate.sh` 和 `diagnostics/r45_cpu_io_profile.py`；所有结果必须具有实际 SHA、退出码、原始输出和 `report.json`；CPU profile 数据仍 UNKNOWN，GPU 一律 BLOCKED。
 - 真实 CPU profile 只能判断 HDF5/JPEG/缓存/Worker 的 I/O 代理瓶颈。正式模型的图像预处理、CPU→GPU、前反向仍未测；不能把 CPU 图像代理的速度当训练加速倍率。
