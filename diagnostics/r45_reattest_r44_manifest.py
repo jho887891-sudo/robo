@@ -155,6 +155,23 @@ def main(argv=None):
         manifest, report = validated_manifest(
             splits_path=args.splits, root=args.hdf5_root,
             feature_path=args.feature_normalizer, delta_path=args.delta_normalizer)
+        # Provenance is recorded only after validation; no CUDA, model or training.
+        import platform
+        import subprocess
+        import numpy as np
+        import h5py
+        sha = subprocess.check_output(
+            ["git", "-C", str(REPO), "rev-parse", "HEAD"],
+            text=True, timeout=20).strip()
+        if len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha):
+            raise ValueError("cannot attest exact Git source SHA")
+        report.update({
+            "source_sha": sha,
+            "script_sha256": sha_file(Path(__file__)),
+            "python_version": platform.python_version(),
+            "numpy_version": np.__version__,
+            "h5py_version": h5py.__version__,
+        })
         # Full validation happens before new evidence directory is created.
         out = args.out.resolve()
         out.mkdir(parents=True, exist_ok=False)
