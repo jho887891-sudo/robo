@@ -1,0 +1,112 @@
+{
+  "base_seed": 0,
+  "epochs": [
+    {
+      "complete": true,
+      "epoch": 0,
+      "first_10": [
+        4425,
+        12189,
+        23425,
+        83145,
+        96397,
+        91343,
+        45786,
+        106632,
+        27728,
+        45791
+      ],
+      "max_visits": 1,
+      "min_visits": 1,
+      "order_hash": "fa60fdaa1d629a1c4a5c73f0654f2eb51ed5ed65b326f78918c873299f202e58",
+      "total": 108780,
+      "unique_seen": 108780
+    },
+    {
+      "complete": true,
+      "epoch": 1,
+      "first_10": [
+        29050,
+        47046,
+        46700,
+        31249,
+        100660,
+        81852,
+        104519,
+        26443,
+        368,
+        27144
+      ],
+      "max_visits": 1,
+      "min_visits": 1,
+      "order_hash": "1e34dee80918d8ea19b9c8d54c1634223fd01c06ec6bfc33e3e2c7948b9051b4",
+      "total": 108780,
+      "unique_seen": 108780
+    },
+    {
+      "complete": true,
+      "epoch": 2,
+      "first_10": [
+        49811,
+        12611,
+        86985,
+        84098,
+        65874,
+        32096,
+        3805,
+        69855,
+        107549,
+        23693
+      ],
+      "max_visits": 1,
+      "min_visits": 1,
+      "order_hash": "c1419f91c217322b1c342d21a24ed98549b286405c58952821c8a6de8d2be295",
+      "total": 108780,
+      "unique_seen": 108780
+    },
+    {
+      "complete": true,
+      "epoch": 3,
+      "first_10": [
+        40464,
+        32123,
+        55014,
+        81064,
+        41684,
+        8189,
+        107826,
+        87058,
+        55773,
+        81977
+      ],
+      "max_visits": 1,
+      "min_visits": 1,
+      "order_hash": "7579a5ffe79521768069cd32eebd329c58ecc2f85b39bee4e0703a50e74419c4",
+      "total": 108780,
+      "unique_seen": 108780
+    },
+    {
+      "complete": true,
+      "epoch": 4,
+      "first_10": [
+        78485,
+        442,
+        19175,
+        47412,
+        87634,
+        7602,
+        6417,
+        29287,
+        23282,
+        28739
+      ],
+      "max_visits": 1,
+      "min_visits": 1,
+      "order_hash": "0f970c2d84a0dbaf78d9845683e011ac252fa6c34dc307d9fdd228ebc41eb9e4",
+      "total": 108780,
+      "unique_seen": 108780
+    }
+  ],
+  "invariant": "unique_seen == total and min_visits == max_visits == 1",
+  "n_train": 108780
+}

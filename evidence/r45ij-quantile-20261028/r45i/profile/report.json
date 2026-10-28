@@ -1,0 +1,2721 @@
+{
+  "dataset_stat_inventory_only": [
+    {
+      "episode": "push_T/episode_0000000.hdf5",
+      "mtime_ns": 1789532357775057900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 357,
+      "size_bytes": 86643968,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000003.hdf5",
+      "mtime_ns": 1789532400543344000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 231,
+      "size_bytes": 55107104,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000004.hdf5",
+      "mtime_ns": 1789532337521040700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 358,
+      "size_bytes": 88954557,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000005.hdf5",
+      "mtime_ns": 1789532330177468200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 277,
+      "size_bytes": 66298288,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000006.hdf5",
+      "mtime_ns": 1789532474563363600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 402,
+      "size_bytes": 98578508,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000009.hdf5",
+      "mtime_ns": 1789532495728355100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 770,
+      "size_bytes": 197090415,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000010.hdf5",
+      "mtime_ns": 1789532380981491600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 317,
+      "size_bytes": 76835688,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000012.hdf5",
+      "mtime_ns": 1789532437770123300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 415,
+      "size_bytes": 101344096,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000014.hdf5",
+      "mtime_ns": 1789532474795868000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 292,
+      "size_bytes": 70476238,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000015.hdf5",
+      "mtime_ns": 1789532477671098600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 330,
+      "size_bytes": 80732444,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000017.hdf5",
+      "mtime_ns": 1789532521215689400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 430,
+      "size_bytes": 105796674,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000018.hdf5",
+      "mtime_ns": 1789532500862767000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 313,
+      "size_bytes": 74584664,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000019.hdf5",
+      "mtime_ns": 1789532489649797300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 194,
+      "size_bytes": 46794899,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000020.hdf5",
+      "mtime_ns": 1789532517813438700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 292,
+      "size_bytes": 70114273,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000021.hdf5",
+      "mtime_ns": 1789532549244535400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 353,
+      "size_bytes": 86152140,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000022.hdf5",
+      "mtime_ns": 1789532540498546100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 383,
+      "size_bytes": 93799338,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000024.hdf5",
+      "mtime_ns": 1789532560873322700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 452,
+      "size_bytes": 111227753,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000025.hdf5",
+      "mtime_ns": 1789532582105684500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 550,
+      "size_bytes": 136660020,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000026.hdf5",
+      "mtime_ns": 1789532566326279500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 425,
+      "size_bytes": 104418616,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000027.hdf5",
+      "mtime_ns": 1789532565278185000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 307,
+      "size_bytes": 73439248,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000028.hdf5",
+      "mtime_ns": 1789532576106767000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 400,
+      "size_bytes": 98084155,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000029.hdf5",
+      "mtime_ns": 1789532577051280600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 282,
+      "size_bytes": 67713773,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000030.hdf5",
+      "mtime_ns": 1789532577658791700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 247,
+      "size_bytes": 59573568,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000031.hdf5",
+      "mtime_ns": 1789532572581380700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 174,
+      "size_bytes": 40808324,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000032.hdf5",
+      "mtime_ns": 1789532596422173300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 316,
+      "size_bytes": 76585439,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000033.hdf5",
+      "mtime_ns": 1789532599841946600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 317,
+      "size_bytes": 76573288,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000034.hdf5",
+      "mtime_ns": 1789532614132251400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 430,
+      "size_bytes": 105879810,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000035.hdf5",
+      "mtime_ns": 1789532596029258900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 209,
+      "size_bytes": 49277376,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000036.hdf5",
+      "mtime_ns": 1789532600477589600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 224,
+      "size_bytes": 53314223,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000037.hdf5",
+      "mtime_ns": 1789532607712162400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 270,
+      "size_bytes": 64678796,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000038.hdf5",
+      "mtime_ns": 1789532620253431600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 387,
+      "size_bytes": 93117908,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000039.hdf5",
+      "mtime_ns": 1789532608835128300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 219,
+      "size_bytes": 53179802,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000040.hdf5",
+      "mtime_ns": 1789532628128271900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 281,
+      "size_bytes": 68713648,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000042.hdf5",
+      "mtime_ns": 1789532618434520200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 166,
+      "size_bytes": 39441311,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000043.hdf5",
+      "mtime_ns": 1789532638225822800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 337,
+      "size_bytes": 81713008,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000044.hdf5",
+      "mtime_ns": 1789532685783912000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 504,
+      "size_bytes": 125768708,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000045.hdf5",
+      "mtime_ns": 1789532649185084000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 291,
+      "size_bytes": 69635006,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000046.hdf5",
+      "mtime_ns": 1789532642860131800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 165,
+      "size_bytes": 38747408,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000049.hdf5",
+      "mtime_ns": 1789532684696085000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 185,
+      "size_bytes": 44043144,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000050.hdf5",
+      "mtime_ns": 1789532760250881400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 564,
+      "size_bytes": 141476594,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000051.hdf5",
+      "mtime_ns": 1789532728890642200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 380,
+      "size_bytes": 92822702,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000053.hdf5",
+      "mtime_ns": 1789532713921421800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 251,
+      "size_bytes": 59753208,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000055.hdf5",
+      "mtime_ns": 1789532751824233200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 327,
+      "size_bytes": 80562368,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000056.hdf5",
+      "mtime_ns": 1789532744454282400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 167,
+      "size_bytes": 39354108,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000057.hdf5",
+      "mtime_ns": 1789532769333121000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 268,
+      "size_bytes": 64600513,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000058.hdf5",
+      "mtime_ns": 1789532796443675700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 341,
+      "size_bytes": 82107848,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000059.hdf5",
+      "mtime_ns": 1789532821743785700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 414,
+      "size_bytes": 101744714,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000060.hdf5",
+      "mtime_ns": 1789532814079675600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 423,
+      "size_bytes": 103961030,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000061.hdf5",
+      "mtime_ns": 1789532791659666800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 249,
+      "size_bytes": 59971604,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000062.hdf5",
+      "mtime_ns": 1789532813946478600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 291,
+      "size_bytes": 69770834,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000064.hdf5",
+      "mtime_ns": 1789532803648848400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 238,
+      "size_bytes": 56370537,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000065.hdf5",
+      "mtime_ns": 1789532828034631700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 331,
+      "size_bytes": 80218974,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000067.hdf5",
+      "mtime_ns": 1789532827790931500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 319,
+      "size_bytes": 77237202,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000068.hdf5",
+      "mtime_ns": 1789532824722134600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 225,
+      "size_bytes": 53503616,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000069.hdf5",
+      "mtime_ns": 1789532847476026400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 352,
+      "size_bytes": 85223633,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000070.hdf5",
+      "mtime_ns": 1789532873896766700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 299,
+      "size_bytes": 72064668,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000071.hdf5",
+      "mtime_ns": 1789532866961037200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 300,
+      "size_bytes": 72946184,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000072.hdf5",
+      "mtime_ns": 1789532874717724300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 426,
+      "size_bytes": 104457470,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000073.hdf5",
+      "mtime_ns": 1789532930001451400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 183,
+      "size_bytes": 42707150,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000074.hdf5",
+      "mtime_ns": 1789532883659587800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 232,
+      "size_bytes": 56371103,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000075.hdf5",
+      "mtime_ns": 1789532871164282400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 248,
+      "size_bytes": 60607693,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000076.hdf5",
+      "mtime_ns": 1789532873512196200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 156,
+      "size_bytes": 36977507,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000077.hdf5",
+      "mtime_ns": 1789532953246914800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 510,
+      "size_bytes": 125984075,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000079.hdf5",
+      "mtime_ns": 1789532915007923400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 348,
+      "size_bytes": 84141824,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000081.hdf5",
+      "mtime_ns": 1789532918659684000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 355,
+      "size_bytes": 86646038,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000082.hdf5",
+      "mtime_ns": 1789532930920544900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 463,
+      "size_bytes": 114495934,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000083.hdf5",
+      "mtime_ns": 1789532951603902700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 368,
+      "size_bytes": 89534109,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000084.hdf5",
+      "mtime_ns": 1789532932484583500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 224,
+      "size_bytes": 53331021,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000085.hdf5",
+      "mtime_ns": 1789532973459338800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 368,
+      "size_bytes": 89268844,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000086.hdf5",
+      "mtime_ns": 1789532942124130700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 180,
+      "size_bytes": 42540788,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000088.hdf5",
+      "mtime_ns": 1789533003183387400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 444,
+      "size_bytes": 109144208,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000089.hdf5",
+      "mtime_ns": 1789533000093957000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 389,
+      "size_bytes": 94132752,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000090.hdf5",
+      "mtime_ns": 1789532955014593400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 153,
+      "size_bytes": 35847344,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000092.hdf5",
+      "mtime_ns": 1789532988469048200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 231,
+      "size_bytes": 54451436,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000093.hdf5",
+      "mtime_ns": 1789532989465028000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 208,
+      "size_bytes": 49021410,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000095.hdf5",
+      "mtime_ns": 1789532989178765000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 225,
+      "size_bytes": 54113744,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000096.hdf5",
+      "mtime_ns": 1789533013759125600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 297,
+      "size_bytes": 73419968,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000097.hdf5",
+      "mtime_ns": 1789533036093710400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 283,
+      "size_bytes": 67939846,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000098.hdf5",
+      "mtime_ns": 1789533028800376500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 245,
+      "size_bytes": 58829072,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000099.hdf5",
+      "mtime_ns": 1789533012474881500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 186,
+      "size_bytes": 43806875,
+      "subset": "train"
+    },
+    {
+      "episode": "push_T/episode_0000001.hdf5",
+      "mtime_ns": 1789532355436267500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 510,
+      "size_bytes": 126864896,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000002.hdf5",
+      "mtime_ns": 1789532444245988500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 417,
+      "size_bytes": 102558848,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000007.hdf5",
+      "mtime_ns": 1789532334257661500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 234,
+      "size_bytes": 56294189,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000008.hdf5",
+      "mtime_ns": 1789532400929529400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 381,
+      "size_bytes": 92896424,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000011.hdf5",
+      "mtime_ns": 1789532441320292500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 269,
+      "size_bytes": 64825480,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000013.hdf5",
+      "mtime_ns": 1789532453073333500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 345,
+      "size_bytes": 83310452,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000016.hdf5",
+      "mtime_ns": 1789532493688319400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 284,
+      "size_bytes": 68320819,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000023.hdf5",
+      "mtime_ns": 1789532546173497400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 357,
+      "size_bytes": 86132768,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000041.hdf5",
+      "mtime_ns": 1789532665664775400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 477,
+      "size_bytes": 117612488,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000047.hdf5",
+      "mtime_ns": 1789532758345071900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 398,
+      "size_bytes": 97582259,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000048.hdf5",
+      "mtime_ns": 1789532725612613300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 415,
+      "size_bytes": 101766694,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000052.hdf5",
+      "mtime_ns": 1789532739682297600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 424,
+      "size_bytes": 103989382,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000054.hdf5",
+      "mtime_ns": 1789532769139140800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 419,
+      "size_bytes": 102131798,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000063.hdf5",
+      "mtime_ns": 1789532792727850400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 199,
+      "size_bytes": 47613364,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000066.hdf5",
+      "mtime_ns": 1789532890113951900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 249,
+      "size_bytes": 58993844,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000078.hdf5",
+      "mtime_ns": 1789532900238947400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 178,
+      "size_bytes": 42082624,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000080.hdf5",
+      "mtime_ns": 1789532907287853000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 180,
+      "size_bytes": 42287150,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000087.hdf5",
+      "mtime_ns": 1789532952959179600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 258,
+      "size_bytes": 61591163,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000091.hdf5",
+      "mtime_ns": 1789532998977406100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 390,
+      "size_bytes": 95135249,
+      "subset": "dev"
+    },
+    {
+      "episode": "push_T/episode_0000094.hdf5",
+      "mtime_ns": 1789533003133145600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 307,
+      "size_bytes": 73979268,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000000.hdf5",
+      "mtime_ns": 1789533028487264000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 238,
+      "size_bytes": 57154028,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000001.hdf5",
+      "mtime_ns": 1789533042250635400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 364,
+      "size_bytes": 89449825,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000002.hdf5",
+      "mtime_ns": 1789533089813109600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 339,
+      "size_bytes": 117464684,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000003.hdf5",
+      "mtime_ns": 1789533070637641300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 364,
+      "size_bytes": 87863284,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000005.hdf5",
+      "mtime_ns": 1789533063362657300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 290,
+      "size_bytes": 69943502,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000006.hdf5",
+      "mtime_ns": 1789533089581366300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 457,
+      "size_bytes": 114378568,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000007.hdf5",
+      "mtime_ns": 1789533100067583400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 397,
+      "size_bytes": 101102568,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000008.hdf5",
+      "mtime_ns": 1789533086447738200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 301,
+      "size_bytes": 73488728,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000011.hdf5",
+      "mtime_ns": 1789533111194476800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 300,
+      "size_bytes": 72303824,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000012.hdf5",
+      "mtime_ns": 1789533102669912400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 201,
+      "size_bytes": 48704924,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000013.hdf5",
+      "mtime_ns": 1789533112732537400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 218,
+      "size_bytes": 66096485,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000014.hdf5",
+      "mtime_ns": 1789533163334279500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 237,
+      "size_bytes": 57909128,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000015.hdf5",
+      "mtime_ns": 1789533112745725600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 202,
+      "size_bytes": 50694468,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000017.hdf5",
+      "mtime_ns": 1789533166520947900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 333,
+      "size_bytes": 82976936,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000018.hdf5",
+      "mtime_ns": 1789533174603361700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 236,
+      "size_bytes": 56982721,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000019.hdf5",
+      "mtime_ns": 1789533128515743100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 250,
+      "size_bytes": 59836828,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000021.hdf5",
+      "mtime_ns": 1789533169363299400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 367,
+      "size_bytes": 89969938,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000022.hdf5",
+      "mtime_ns": 1789533144918413000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 280,
+      "size_bytes": 84382887,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000023.hdf5",
+      "mtime_ns": 1789533166560421600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 442,
+      "size_bytes": 111145743,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000024.hdf5",
+      "mtime_ns": 1789533218963581000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 411,
+      "size_bytes": 142046096,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000025.hdf5",
+      "mtime_ns": 1789533202428126700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 285,
+      "size_bytes": 96569096,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000026.hdf5",
+      "mtime_ns": 1789533187118742900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 437,
+      "size_bytes": 107431848,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000027.hdf5",
+      "mtime_ns": 1789533201525952200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 427,
+      "size_bytes": 104718968,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000028.hdf5",
+      "mtime_ns": 1789533203075807600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 304,
+      "size_bytes": 78673205,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000029.hdf5",
+      "mtime_ns": 1789533215241596900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 290,
+      "size_bytes": 112686928,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000030.hdf5",
+      "mtime_ns": 1789533229197416200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 425,
+      "size_bytes": 104801676,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000031.hdf5",
+      "mtime_ns": 1789533211396827900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 424,
+      "size_bytes": 104584193,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000032.hdf5",
+      "mtime_ns": 1789533284049575600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 401,
+      "size_bytes": 170631364,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000034.hdf5",
+      "mtime_ns": 1789533222476654400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 433,
+      "size_bytes": 166426764,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000035.hdf5",
+      "mtime_ns": 1789533218494891200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 441,
+      "size_bytes": 109290968,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000039.hdf5",
+      "mtime_ns": 1789533229115238200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 443,
+      "size_bytes": 110490524,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000040.hdf5",
+      "mtime_ns": 1789533230321651800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 458,
+      "size_bytes": 117937148,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000041.hdf5",
+      "mtime_ns": 1789533246357444700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 509,
+      "size_bytes": 193391656,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000042.hdf5",
+      "mtime_ns": 1789533255898161800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 510,
+      "size_bytes": 210570080,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000043.hdf5",
+      "mtime_ns": 1789533251693758100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 437,
+      "size_bytes": 164722928,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000045.hdf5",
+      "mtime_ns": 1789533246098081600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 416,
+      "size_bytes": 106516027,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000046.hdf5",
+      "mtime_ns": 1789533246407217900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 448,
+      "size_bytes": 108493029,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000047.hdf5",
+      "mtime_ns": 1789533252809228400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 564,
+      "size_bytes": 151655378,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000048.hdf5",
+      "mtime_ns": 1789533264473565500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 464,
+      "size_bytes": 114337630,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000049.hdf5",
+      "mtime_ns": 1789533264396949800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 316,
+      "size_bytes": 111568574,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000052.hdf5",
+      "mtime_ns": 1789533276297187300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 471,
+      "size_bytes": 181202432,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000054.hdf5",
+      "mtime_ns": 1789533281306480200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 777,
+      "size_bytes": 209589068,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000055.hdf5",
+      "mtime_ns": 1789533279794951900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 630,
+      "size_bytes": 156781853,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000056.hdf5",
+      "mtime_ns": 1789533283834265400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 709,
+      "size_bytes": 182846368,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000057.hdf5",
+      "mtime_ns": 1789533281736566400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 602,
+      "size_bytes": 157117473,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000058.hdf5",
+      "mtime_ns": 1789533291812913800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 635,
+      "size_bytes": 233043136,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000059.hdf5",
+      "mtime_ns": 1789533292658089200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 623,
+      "size_bytes": 161352784,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000060.hdf5",
+      "mtime_ns": 1789533304908544900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 471,
+      "size_bytes": 179529212,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000061.hdf5",
+      "mtime_ns": 1789533310836171300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 719,
+      "size_bytes": 182801922,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000062.hdf5",
+      "mtime_ns": 1789533304872149500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 472,
+      "size_bytes": 124107293,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000063.hdf5",
+      "mtime_ns": 1789533302694731600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 466,
+      "size_bytes": 116529672,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000064.hdf5",
+      "mtime_ns": 1789533314934330300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 766,
+      "size_bytes": 197987007,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000067.hdf5",
+      "mtime_ns": 1789533318494599800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 657,
+      "size_bytes": 169154828,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000068.hdf5",
+      "mtime_ns": 1789533318636291500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 512,
+      "size_bytes": 128590258,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000069.hdf5",
+      "mtime_ns": 1789533323152142100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 660,
+      "size_bytes": 170974466,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000070.hdf5",
+      "mtime_ns": 1789533326181800200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 691,
+      "size_bytes": 242036330,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000071.hdf5",
+      "mtime_ns": 1789533322189041000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 512,
+      "size_bytes": 126003928,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000072.hdf5",
+      "mtime_ns": 1789533322813433500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 430,
+      "size_bytes": 111230391,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000073.hdf5",
+      "mtime_ns": 1789533325539047400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 704,
+      "size_bytes": 180877410,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000074.hdf5",
+      "mtime_ns": 1789533341705492500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 592,
+      "size_bytes": 152742408,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000075.hdf5",
+      "mtime_ns": 1789533349305394700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 435,
+      "size_bytes": 153318188,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000076.hdf5",
+      "mtime_ns": 1789533350478939300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 613,
+      "size_bytes": 234212216,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000077.hdf5",
+      "mtime_ns": 1789533346692371800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 733,
+      "size_bytes": 187801192,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000078.hdf5",
+      "mtime_ns": 1789533349525831600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 533,
+      "size_bytes": 134358104,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000079.hdf5",
+      "mtime_ns": 1789533346786969900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 646,
+      "size_bytes": 162053855,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000082.hdf5",
+      "mtime_ns": 1789533454297765900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 581,
+      "size_bytes": 211415384,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000083.hdf5",
+      "mtime_ns": 1789533397165010900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 532,
+      "size_bytes": 133210283,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000085.hdf5",
+      "mtime_ns": 1789533428942307500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 652,
+      "size_bytes": 164956808,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000086.hdf5",
+      "mtime_ns": 1789533471198273500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 589,
+      "size_bytes": 210249464,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000087.hdf5",
+      "mtime_ns": 1789533397160539400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 471,
+      "size_bytes": 116913338,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000088.hdf5",
+      "mtime_ns": 1789533411658212600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 392,
+      "size_bytes": 97274333,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000089.hdf5",
+      "mtime_ns": 1789533457499314400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 509,
+      "size_bytes": 188565544,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000091.hdf5",
+      "mtime_ns": 1789533443735474900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 534,
+      "size_bytes": 134161409,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000092.hdf5",
+      "mtime_ns": 1789533474090022900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 291,
+      "size_bytes": 119592662,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000093.hdf5",
+      "mtime_ns": 1789533467035060800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 249,
+      "size_bytes": 92447852,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000094.hdf5",
+      "mtime_ns": 1789533459591839100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 323,
+      "size_bytes": 77777154,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000095.hdf5",
+      "mtime_ns": 1789533472080039000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 247,
+      "size_bytes": 78157818,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000097.hdf5",
+      "mtime_ns": 1789533481368671300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 229,
+      "size_bytes": 58860320,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000098.hdf5",
+      "mtime_ns": 1789533490109102100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 278,
+      "size_bytes": 68858014,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000099.hdf5",
+      "mtime_ns": 1789533483634590800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 263,
+      "size_bytes": 64501234,
+      "subset": "train"
+    },
+    {
+      "episode": "stack_bowls/episode_0000004.hdf5",
+      "mtime_ns": 1789533097957683100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 277,
+      "size_bytes": 68110168,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000009.hdf5",
+      "mtime_ns": 1789533079602782500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 263,
+      "size_bytes": 63640990,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000010.hdf5",
+      "mtime_ns": 1789533092720120200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 242,
+      "size_bytes": 58884063,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000016.hdf5",
+      "mtime_ns": 1789533130679409900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 245,
+      "size_bytes": 59218432,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000020.hdf5",
+      "mtime_ns": 1789533140039684900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 290,
+      "size_bytes": 71473841,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000033.hdf5",
+      "mtime_ns": 1789533215987431200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 321,
+      "size_bytes": 107930768,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000036.hdf5",
+      "mtime_ns": 1789533228228357100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 662,
+      "size_bytes": 165971323,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000037.hdf5",
+      "mtime_ns": 1789533226134573200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 405,
+      "size_bytes": 107385728,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000038.hdf5",
+      "mtime_ns": 1789533228101830400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 477,
+      "size_bytes": 126494888,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000044.hdf5",
+      "mtime_ns": 1789533248996991300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 567,
+      "size_bytes": 145128038,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000050.hdf5",
+      "mtime_ns": 1789533263957851400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 446,
+      "size_bytes": 111153211,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000051.hdf5",
+      "mtime_ns": 1789533262296212000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 352,
+      "size_bytes": 85578633,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000053.hdf5",
+      "mtime_ns": 1789533272140935500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 560,
+      "size_bytes": 141200448,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000065.hdf5",
+      "mtime_ns": 1789533312956203000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 655,
+      "size_bytes": 173993820,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000066.hdf5",
+      "mtime_ns": 1789533317927724600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 466,
+      "size_bytes": 172638956,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000080.hdf5",
+      "mtime_ns": 1789533360186611600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 616,
+      "size_bytes": 162430217,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000081.hdf5",
+      "mtime_ns": 1789533357580577600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 549,
+      "size_bytes": 148230704,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000084.hdf5",
+      "mtime_ns": 1789533419973017000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 533,
+      "size_bytes": 198909656,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000090.hdf5",
+      "mtime_ns": 1789533442003169800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 567,
+      "size_bytes": 143844398,
+      "subset": "dev"
+    },
+    {
+      "episode": "stack_bowls/episode_0000096.hdf5",
+      "mtime_ns": 1789533466791314500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 223,
+      "size_bytes": 54931076,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000003.hdf5",
+      "mtime_ns": 1789533557321463800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 854,
+      "size_bytes": 222119260,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000004.hdf5",
+      "mtime_ns": 1789533574088061800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 707,
+      "size_bytes": 187784198,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000007.hdf5",
+      "mtime_ns": 1789533576537285300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 464,
+      "size_bytes": 122800137,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000008.hdf5",
+      "mtime_ns": 1789533634096008700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 615,
+      "size_bytes": 162039920,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000010.hdf5",
+      "mtime_ns": 1789533838618832400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 537,
+      "size_bytes": 136909328,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000011.hdf5",
+      "mtime_ns": 1789533650788347600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 774,
+      "size_bytes": 203568596,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000014.hdf5",
+      "mtime_ns": 1789533709090183900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 540,
+      "size_bytes": 136018547,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000015.hdf5",
+      "mtime_ns": 1789533867608343500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 495,
+      "size_bytes": 124764098,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000017.hdf5",
+      "mtime_ns": 1789533872447778500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 462,
+      "size_bytes": 114431633,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000018.hdf5",
+      "mtime_ns": 1789534043172265300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 830,
+      "size_bytes": 228505305,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000020.hdf5",
+      "mtime_ns": 1789533995032910100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 856,
+      "size_bytes": 218593400,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000021.hdf5",
+      "mtime_ns": 1789533777364118300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 791,
+      "size_bytes": 204778494,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000022.hdf5",
+      "mtime_ns": 1789533788922788900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 663,
+      "size_bytes": 175805276,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000023.hdf5",
+      "mtime_ns": 1789533918278798700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 515,
+      "size_bytes": 127466626,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000025.hdf5",
+      "mtime_ns": 1789533903093392600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 355,
+      "size_bytes": 92619626,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000026.hdf5",
+      "mtime_ns": 1789533901528474200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 559,
+      "size_bytes": 143005484,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000027.hdf5",
+      "mtime_ns": 1789533949446142300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 427,
+      "size_bytes": 111055878,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000028.hdf5",
+      "mtime_ns": 1789533943193481900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 438,
+      "size_bytes": 111218072,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000029.hdf5",
+      "mtime_ns": 1789533938801521900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 440,
+      "size_bytes": 115354074,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000030.hdf5",
+      "mtime_ns": 1789533946556847700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 414,
+      "size_bytes": 107707397,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000031.hdf5",
+      "mtime_ns": 1789533986935319200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 407,
+      "size_bytes": 104245388,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000032.hdf5",
+      "mtime_ns": 1789534096457378100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 386,
+      "size_bytes": 100342167,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000033.hdf5",
+      "mtime_ns": 1789534030739232900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 378,
+      "size_bytes": 98178074,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000034.hdf5",
+      "mtime_ns": 1789534034972604200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 632,
+      "size_bytes": 164395493,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000035.hdf5",
+      "mtime_ns": 1789534024443938800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 799,
+      "size_bytes": 206238422,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000036.hdf5",
+      "mtime_ns": 1789534030907675100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 546,
+      "size_bytes": 146419457,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000037.hdf5",
+      "mtime_ns": 1789534041861324400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 645,
+      "size_bytes": 163845392,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000038.hdf5",
+      "mtime_ns": 1789534082813429900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 836,
+      "size_bytes": 224653072,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000039.hdf5",
+      "mtime_ns": 1789534070424773800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 558,
+      "size_bytes": 140997941,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000040.hdf5",
+      "mtime_ns": 1789534100689676000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 701,
+      "size_bytes": 183223080,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000042.hdf5",
+      "mtime_ns": 1789534212187419100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 809,
+      "size_bytes": 206052140,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000043.hdf5",
+      "mtime_ns": 1789534107960923700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 698,
+      "size_bytes": 182028105,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000044.hdf5",
+      "mtime_ns": 1789534206014792200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 748,
+      "size_bytes": 194002864,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000045.hdf5",
+      "mtime_ns": 1789534148682209700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 782,
+      "size_bytes": 203642148,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000046.hdf5",
+      "mtime_ns": 1789534135760053600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 582,
+      "size_bytes": 152637953,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000047.hdf5",
+      "mtime_ns": 1789534134559024200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 674,
+      "size_bytes": 179524379,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000048.hdf5",
+      "mtime_ns": 1789534165656510000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 802,
+      "size_bytes": 214952738,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000050.hdf5",
+      "mtime_ns": 1789534224213035000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 845,
+      "size_bytes": 215490888,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000051.hdf5",
+      "mtime_ns": 1789534277901371500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 681,
+      "size_bytes": 179504168,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000052.hdf5",
+      "mtime_ns": 1789534253997408900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 581,
+      "size_bytes": 145678008,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000053.hdf5",
+      "mtime_ns": 1789534220599291600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 762,
+      "size_bytes": 197410928,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000054.hdf5",
+      "mtime_ns": 1789534217434681700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 524,
+      "size_bytes": 136517149,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000055.hdf5",
+      "mtime_ns": 1789534285161661300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 845,
+      "size_bytes": 226824408,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000056.hdf5",
+      "mtime_ns": 1789534258894130400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 575,
+      "size_bytes": 158514792,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000057.hdf5",
+      "mtime_ns": 1789534285178103600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 596,
+      "size_bytes": 154039844,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000058.hdf5",
+      "mtime_ns": 1789535193036504400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 979,
+      "size_bytes": 255983814,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000059.hdf5",
+      "mtime_ns": 1789534290327332200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 562,
+      "size_bytes": 145156943,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000060.hdf5",
+      "mtime_ns": 1789534390070763500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 642,
+      "size_bytes": 170041343,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000062.hdf5",
+      "mtime_ns": 1789534527576036500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 744,
+      "size_bytes": 193752536,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000064.hdf5",
+      "mtime_ns": 1789536019944310800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 694,
+      "size_bytes": 185409931,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000065.hdf5",
+      "mtime_ns": 1789535621882653700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 766,
+      "size_bytes": 201256026,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000066.hdf5",
+      "mtime_ns": 1789534988178912300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 509,
+      "size_bytes": 127595560,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000067.hdf5",
+      "mtime_ns": 1789534465774323300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 667,
+      "size_bytes": 175582668,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000068.hdf5",
+      "mtime_ns": 1789534707832614400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 604,
+      "size_bytes": 154053674,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000069.hdf5",
+      "mtime_ns": 1789535763539081200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 543,
+      "size_bytes": 141331190,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000070.hdf5",
+      "mtime_ns": 1789534834515675000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 535,
+      "size_bytes": 139800348,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000073.hdf5",
+      "mtime_ns": 1789534945396002100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 880,
+      "size_bytes": 235858623,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000074.hdf5",
+      "mtime_ns": 1789535073140354400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 709,
+      "size_bytes": 182008344,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000077.hdf5",
+      "mtime_ns": 1789536386088761000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 719,
+      "size_bytes": 182632252,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000078.hdf5",
+      "mtime_ns": 1789536345208080500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 643,
+      "size_bytes": 164689906,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000079.hdf5",
+      "mtime_ns": 1789535156111966900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 497,
+      "size_bytes": 130014068,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000080.hdf5",
+      "mtime_ns": 1789535416655268600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 618,
+      "size_bytes": 156645599,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000081.hdf5",
+      "mtime_ns": 1789535294296367300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 610,
+      "size_bytes": 160055413,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000082.hdf5",
+      "mtime_ns": 1789535366053758100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 554,
+      "size_bytes": 140777582,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000084.hdf5",
+      "mtime_ns": 1789535818903343800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 341,
+      "size_bytes": 87493168,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000085.hdf5",
+      "mtime_ns": 1789535492567482300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 379,
+      "size_bytes": 95699052,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000086.hdf5",
+      "mtime_ns": 1789536292863909000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 374,
+      "size_bytes": 96575284,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000087.hdf5",
+      "mtime_ns": 1789535538383651600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 346,
+      "size_bytes": 85648671,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000088.hdf5",
+      "mtime_ns": 1789535581511485300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 378,
+      "size_bytes": 98710712,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000089.hdf5",
+      "mtime_ns": 1789535747194893700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 470,
+      "size_bytes": 123591453,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000090.hdf5",
+      "mtime_ns": 1789536354332528100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 431,
+      "size_bytes": 110619656,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000091.hdf5",
+      "mtime_ns": 1789536348821794400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 408,
+      "size_bytes": 101564639,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000092.hdf5",
+      "mtime_ns": 1789536389348037800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 478,
+      "size_bytes": 124298538,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000093.hdf5",
+      "mtime_ns": 1789536336264180400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 471,
+      "size_bytes": 120236552,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000094.hdf5",
+      "mtime_ns": 1789536101073389700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 458,
+      "size_bytes": 118442404,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000095.hdf5",
+      "mtime_ns": 1789536304424937800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 457,
+      "size_bytes": 118356648,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000096.hdf5",
+      "mtime_ns": 1789536384183200300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 514,
+      "size_bytes": 135220653,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000097.hdf5",
+      "mtime_ns": 1789536379699631400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 493,
+      "size_bytes": 128926520,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000098.hdf5",
+      "mtime_ns": 1789536422745246600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 483,
+      "size_bytes": 126728114,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000099.hdf5",
+      "mtime_ns": 1789536450705943100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 525,
+      "size_bytes": 138080312,
+      "subset": "train"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000000.hdf5",
+      "mtime_ns": 1789533590897407500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 700,
+      "size_bytes": 186278903,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000001.hdf5",
+      "mtime_ns": 1789533608745879400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 983,
+      "size_bytes": 258273716,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000002.hdf5",
+      "mtime_ns": 1789533604926037800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 1061,
+      "size_bytes": 266147056,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000005.hdf5",
+      "mtime_ns": 1789533547009218600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 694,
+      "size_bytes": 184319126,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000006.hdf5",
+      "mtime_ns": 1789533538193168000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 550,
+      "size_bytes": 138896905,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000009.hdf5",
+      "mtime_ns": 1789533591591998400,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 546,
+      "size_bytes": 135172643,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000012.hdf5",
+      "mtime_ns": 1789533621387351800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 468,
+      "size_bytes": 121888637,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000013.hdf5",
+      "mtime_ns": 1789533670672806000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 646,
+      "size_bytes": 174708706,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000016.hdf5",
+      "mtime_ns": 1789533666144446200,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 512,
+      "size_bytes": 132541338,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000019.hdf5",
+      "mtime_ns": 1789533807655712100,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 712,
+      "size_bytes": 183698203,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000024.hdf5",
+      "mtime_ns": 1789533895223109300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 447,
+      "size_bytes": 110950718,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000041.hdf5",
+      "mtime_ns": 1789534082058744000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 597,
+      "size_bytes": 158255168,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000049.hdf5",
+      "mtime_ns": 1789534229034123500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 738,
+      "size_bytes": 196044485,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000061.hdf5",
+      "mtime_ns": 1789534375785972500,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 571,
+      "size_bytes": 145152728,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000063.hdf5",
+      "mtime_ns": 1789535011702083700,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 617,
+      "size_bytes": 166391508,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000071.hdf5",
+      "mtime_ns": 1789534790884131600,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 609,
+      "size_bytes": 153943628,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000072.hdf5",
+      "mtime_ns": 1789535481233622800,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 750,
+      "size_bytes": 192777014,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000075.hdf5",
+      "mtime_ns": 1789535066033562000,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 666,
+      "size_bytes": 173247407,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000076.hdf5",
+      "mtime_ns": 1789535069730411300,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 594,
+      "size_bytes": 151175207,
+      "subset": "dev"
+    },
+    {
+      "episode": "sweep_blocks/episode_0000083.hdf5",
+      "mtime_ns": 1789535426927824900,
+      "note": "stat identity only, not HDF5 content SHA256",
+      "rows": 400,
+      "size_bytes": 104388687,
+      "subset": "dev"
+    }
+  ],
+  "delta_normalizer_file_sha256": "795052b0e6716d374488296b52befdbb012bd1840a7ccca57dfbf4df9e07383f",
+  "difference": {
+    "changed_field_count": 6,
+    "changed_fields": [
+      {
+        "equal": false,
+        "field": "tasks.push_T.q01",
+        "frozen": [
+          -0.04922698065638542,
+          -0.11328116059303284,
+          -0.07948944717645645,
+          -0.08400125801563263,
+          -0.027293767780065536,
+          -0.035425469279289246,
+          -0.10000000149011612,
+          -0.047890517860651016,
+          -0.11843657493591309,
+          -0.08943191170692444,
+          -0.0947830080986023,
+          -0.027958489954471588,
+          -0.03566528484225273,
+          -0.10000000149011612
+        ],
+        "indices": [
+          0,
+          3,
+          11
+        ],
+        "kind": "numeric_array",
+        "max_abs_diff": 7.450580596923828e-09,
+        "n_mismatched": 3,
+        "recomputed": [
+          -0.04922698438167572,
+          -0.11328116059303284,
+          -0.07948944717645645,
+          -0.08400126546621323,
+          -0.027293767780065536,
+          -0.035425469279289246,
+          -0.10000000149011612,
+          -0.047890517860651016,
+          -0.11843657493591309,
+          -0.08943191170692444,
+          -0.0947830080986023,
+          -0.027958491817116737,
+          -0.03566528484225273,
+          -0.10000000149011612
+        ]
+      },
+      {
+        "equal": false,
+        "field": "tasks.push_T.q99",
+        "frozen": [
+          0.049334701150655746,
+          0.09372171014547348,
+          0.07683000713586807,
+          0.05707857385277748,
+          0.028480803593993187,
+          0.034248288720846176,
+          0.10000000149011612,
+          0.04846760258078575,
+          0.09269726276397705,
+          0.0833594799041748,
+          0.058647800236940384,
+          0.026908576488494873,
+          0.037868618965148926,
+          0.10000000149011612
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "kind": "numeric_array",
+        "max_abs_diff": 2.5331974029541016e-07,
+        "n_mismatched": 12,
+        "recomputed": [
+          0.04933472350239754,
+          0.09372178465127945,
+          0.07683008909225464,
+          0.05707864835858345,
+          0.02848098799586296,
+          0.034248314797878265,
+          0.10000000149011612,
+          0.04846765473484993,
+          0.09269751608371735,
+          0.08335953950881958,
+          0.058647897094488144,
+          0.026908623054623604,
+          0.03786862641572952,
+          0.10000000149011612
+        ]
+      },
+      {
+        "equal": false,
+        "field": "tasks.stack_bowls.q01",
+        "frozen": [
+          -0.04509386047720909,
+          -0.11899416893720627,
+          -0.10262349247932434,
+          -0.05335730314254761,
+          -0.031428687274456024,
+          -0.04582170397043228,
+          -0.10000000149011612,
+          -0.038714125752449036,
+          -0.10623693466186523,
+          -0.08643365651369095,
+          -0.05552932992577553,
+          -0.038536109030246735,
+          -0.03168698772788048,
+          -0.10000000149011612
+        ],
+        "indices": [
+          3,
+          4,
+          7,
+          10
+        ],
+        "kind": "numeric_array",
+        "max_abs_diff": 3.725290298461914e-09,
+        "n_mismatched": 4,
+        "recomputed": [
+          -0.04509386047720909,
+          -0.11899416893720627,
+          -0.10262349247932434,
+          -0.053357306867837906,
+          -0.03142869099974632,
+          -0.04582170397043228,
+          -0.10000000149011612,
+          -0.038714129477739334,
+          -0.10623693466186523,
+          -0.08643365651369095,
+          -0.055529333651065826,
+          -0.038536109030246735,
+          -0.03168698772788048,
+          -0.10000000149011612
+        ]
+      },
+      {
+        "equal": false,
+        "field": "tasks.stack_bowls.q99",
+        "frozen": [
+          0.05226663500070572,
+          0.07155659049749374,
+          0.06370193511247635,
+          0.06199253723025322,
+          0.04355967417359352,
+          0.045580022037029266,
+          0.10000000149011612,
+          0.03333219513297081,
+          0.07495161145925522,
+          0.0641736090183258,
+          0.05719462037086487,
+          0.03140725940465927,
+          0.03581357002258301,
+          0.10000000149011612
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          9,
+          11,
+          12
+        ],
+        "kind": "numeric_array",
+        "max_abs_diff": 4.0978193283081055e-08,
+        "n_mismatched": 10,
+        "recomputed": [
+          0.05226663127541542,
+          0.07155658304691315,
+          0.06370192766189575,
+          0.061992496252059937,
+          0.04355964809656143,
+          0.04558001831173897,
+          0.10000000149011612,
+          0.03333219140768051,
+          0.07495161145925522,
+          0.06417360156774521,
+          0.05719462037086487,
+          0.031407248228788376,
+          0.03581353649497032,
+          0.10000000149011612
+        ]
+      },
+      {
+        "equal": false,
+        "field": "tasks.sweep_blocks.q01",
+        "frozen": [
+          -0.03829431161284447,
+          -0.13003744184970856,
+          -0.11088099330663681,
+          -0.08922469615936279,
+          -0.04121660441160202,
+          -0.07766406983137131,
+          -0.10000000149011612,
+          -0.05160582438111305,
+          -0.11252513527870178,
+          -0.08305015414953232,
+          -0.09658557176589966,
+          -0.0415508970618248,
+          -0.05542820319533348,
+          -0.10000000149011612
+        ],
+        "indices": [
+          8
+        ],
+        "kind": "numeric_array",
+        "max_abs_diff": 7.450580596923828e-09,
+        "n_mismatched": 1,
+        "recomputed": [
+          -0.03829431161284447,
+          -0.13003744184970856,
+          -0.11088099330663681,
+          -0.08922469615936279,
+          -0.04121660441160202,
+          -0.07766406983137131,
+          -0.10000000149011612,
+          -0.05160582438111305,
+          -0.11252514272928238,
+          -0.08305015414953232,
+          -0.09658557176589966,
+          -0.0415508970618248,
+          -0.05542820319533348,
+          -0.10000000149011612
+        ]
+      },
+      {
+        "equal": false,
+        "field": "tasks.sweep_blocks.q99",
+        "frozen": [
+          0.04248540475964546,
+          0.09721151739358902,
+          0.08923391997814178,
+          0.08108415454626083,
+          0.05247946083545685,
+          0.10726264119148254,
+          0.10000000149011612,
+          0.04326217994093895,
+          0.0695304200053215,
+          0.07062696665525436,
+          0.08254767209291458,
+          0.043176744133234024,
+          0.04411020502448082,
+          0.10000000149011612
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          4,
+          5,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "kind": "numeric_array",
+        "max_abs_diff": 3.3527612686157227e-07,
+        "n_mismatched": 11,
+        "recomputed": [
+          0.04248546063899994,
+          0.09721173346042633,
+          0.08923397213220596,
+          0.08108415454626083,
+          0.052479472011327744,
+          0.1072629764676094,
+          0.10000000149011612,
+          0.0432622991502285,
+          0.06953045725822449,
+          0.07062697410583496,
+          0.08254769444465637,
+          0.04317675903439522,
+          0.04411033168435097,
+          0.10000000149011612
+        ]
+      }
+    ],
+    "comparison_scope": "All top-level fields except sha256 and all per-task fields",
+    "exact_payload_sha_equal": false,
+    "frozen_payload_sha256": "9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459",
+    "interpretation": "Exact SHA256 identity is mandatory even for tiny numerical diffs. This report diagnoses differences; it never authorizes retraining.",
+    "recomputed_payload_sha256": "0ff5872eec929bf4af770840b61a0f39789937c7c23ff0157cf059dd24cf36cf",
+    "schema": "r45-delta-payload-difference/v1",
+    "status": "BLOCKED_DELTA_MISMATCH"
+  },
+  "episode_count": 300,
+  "feature_normalizer_file_sha256": "7c404f08e32fe3ead3b2bc17eca97f9106aff74107fd173d03cf8adfca4e4d13",
+  "formal_manifest_created": false,
+  "full_hdf5_sha256_checked": false,
+  "gpu_used": false,
+  "limitations": "No image data/full HDF5 SHA256 read; never use this report as r44-dataset-manifest/v1. Even a matching delta payload does not authorize CPU Gate or GPU.",
+  "numpy_version": "2.2.6",
+  "python_version": "3.10.12",
+  "schema": "r45-fast-delta-diagnosis/v1",
+  "script_sha256": "00eff87bd0cbd4c5655b3dc6f3c42d259301c0151831f474f81f1c7cd67f4e25",
+  "source_sha": "e91c30ef31caa7e3fa37f5ada616a23ee77964ed",
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "status": "BLOCKED_DELTA_MISMATCH",
+  "train_rows_and_dev_rows": {
+    "dev_samples": 28268,
+    "train_samples": 108780
+  }
+}

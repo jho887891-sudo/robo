@@ -1,0 +1,1 @@
+python3 diagnostics/r45_diagnose_delta_fast.py --splits data/m2_splits.json --hdf5-root /home/T7/ojh/robot_actual/data/data/hdf5 --feature-normalizer data/m2_task_normalizer_3task.json --delta-normalizer /tmp/r44-preflight-20261026T065550Z/normalizer.json --out /tmp/r45i-delta-fast-20261028T105947Z

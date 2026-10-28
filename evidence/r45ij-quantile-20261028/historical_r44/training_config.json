@@ -1,0 +1,30 @@
+{
+  "checkpoint_every_fraction_of_epoch": 0.25,
+  "dev_eval_every_epoch": true,
+  "epochs_max": 5,
+  "epochs_min": 2,
+  "lora": {
+    "lora_alpha": 32,
+    "lora_dropout": 0.0,
+    "r": 32,
+    "target_modules": [
+      "q_proj",
+      "v_proj"
+    ]
+  },
+  "n_train_samples": 108780,
+  "normalizer_sha256": "9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459",
+  "optimizer": {
+    "grad_clip": 1.0,
+    "name": "AdamW",
+    "projector_lr_scale": 0.1,
+    "weight_decay": 0.0
+  },
+  "precision": "bf16",
+  "sampler": {
+    "base_seed": 0,
+    "type": "epoch_complete_no_replacement"
+  },
+  "target": "Delta_t = A_t - S_t (A_t == S_{t+1}, no velocity term)",
+  "target_representation": "joint_delta_v1"
+}

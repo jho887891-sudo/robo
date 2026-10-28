@@ -1,0 +1,4 @@
+python 3.10.12
+numpy 1.26.4
+hdf5_root /home/T7/ojh/robot_actual/data/data/hdf5
+host [REDACTED]

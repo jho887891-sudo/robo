@@ -1,0 +1,16 @@
+{
+  "redactions": [
+    {
+      "committed_path": "evidence/r45ij-quantile-20261028/historical_r44/environment.txt.redacted",
+      "committed_sha256": "747f402148f5e3bb16cdf45a5098e46dd4f70150d296ec2eb9543f04cfd48075",
+      "original_server_path": "/tmp/r44-preflight-20261026T065550Z/environment.txt",
+      "original_sha256": "6e8d935042060ab1f78a5ffbf8fb163ae570e965b18db66d4f3f496638eaf8fe",
+      "reason": "Archived environment exposed an internal hostname; Python and NumPy version lines were retained.",
+      "redacted_fields": [
+        "host"
+      ]
+    }
+  ],
+  "schema": "r45-redaction-manifest/v1",
+  "unmodified_originals_not_copied": []
+}
