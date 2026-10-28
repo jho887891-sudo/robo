@@ -7,7 +7,7 @@
 
 ## 30 秒状态摘要
 
-**当前研发位置：R45-F 服务器真实 TRAIN 三相机 CPU I/O profile 已回传 PASS（退出码 0），但正式 R44 全套 CPU preflight 仍需核对模型、normalizer、manifest 和 OFT 路径；真实 7B GPU Smoke、性能基准和 5 Epoch 正式训练均未授权。PR #51 继续作为唯一待合并集成分支。**
+**当前研发位置：R45-G 服务器正式 R44 CPU Preflight BLOCKED_MISSING_R44_ARTIFACTS：42D 和历史 delta normalizer 已验证、7B 模型目录结构存在；严格 R44 manifest 缺失且 OFT 源码候选歧义，正式 Gate 没有执行。PR #51 已实现 CPU-only 严格 manifest 重核验与 OFT 静态来源指纹工具，GitHub CPU CI PASS；真实服务器重核验尚未执行。GPU Smoke、吞吐基准和 5 Epoch 正式训练均未授权。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -58,6 +58,17 @@ R45-D GitHub 分支的 CPU 证据：
 - **尚不可声称**：CPU stub/假模型通过并不等于 OpenVLA-7B GPU forward/backward/显存/性能验证。新的 benchmark 刻意保持 `BLOCKED_NOT_IMPLEMENTED`，不会输出伪吞吐或初始化 CUDA。
 - **下一个 Gate**：在真实服务器复核 PR #50 CPU 契约与环境、确认修复能安全进入正式 R44 后，以独立审批的 GPU Smoke 验证 7B 真实计算。未获研究负责人授权不启动任何 GPU 任务。不要重做已通过的 GitHub 6+15+4+3 CPU CI。
 - **合并限制**：本 PR 以 R45 分支为目标，尚未合并；代码未经合并前，下节问题描述仍适用于冻结的 **R45-D SHA `0b35b13`**。
+
+## R45-G 现场阻塞与 CPU-only 修复（2026-10-28，当前）
+
+**现场结论：`BLOCKED_MISSING_R44_ARTIFACTS`，正式 CPU Gate 未执行，无退出码，未触 CUDA。** 固定 SHA `b13efad6a9fd8d546aa5b26035c600486c78fb70`，工作区 `/tmp/robo-r45g-preflight-20261028`；执行日志 `/tmp/r45g-server-preflight-20261028T081500Z/`（服务器路径，原始字节尚未直接获取，以下是现场回传）。
+
+- **VERIFIED（执行端）**：42D 三任务归一化器 `data/m2_task_normalizer_3task.json`，文件 SHA256 `7c404f08…e4d13`；历史 `/tmp/r44-preflight-20261026T065550Z/normalizer.json` 为 `joint_delta_v1`、三任务、TRAIN split 绑定，payload SHA256 `9f7c4f00…ba459`、文件 SHA256 `795052b0…7383f`。历史 `BLOCKED_BUDGET` 是预算未授权，不等于数据契约失败；历史 LoRA alpha=32 不代表现 R44 alpha=16，**不得覆盖本轮冻结配置**。
+- **BLOCKED**：现场只有 875 字节旧 `dataset_manifest.json`，不符合 `r44-dataset-manifest/v1` 严格 SHA/HDF5 文件列表契约；OFT 源码目录发现 5 个候选，无历史运行链可唯一证明。**UNKNOWN**：候选 `/home/T7/ojh/robot_actual/openvla_offline_bundle/models/openvla-7b` 的三个 safetensors 权重分片完整 SHA，模型目录结构存在不等于模型身份已核验。
+- **GitHub 已实施**：新增 `diagnostics/r45_reattest_r44_manifest.py`，复用已有 `r44_prepare_delta.scan` 全量 HDF5 状态/动作/三相机/任务指令/稳定 SHA256 核验；要求 300 回合，TRAIN 108780、DEV 28268，重算 TRAIN delta payload SHA 与**已有冻结 normalizer 完全相同**，否则拒绝；不会替换旧归一化器。仅成功时在**全新目录**创建 `r44_dataset_manifest.json`（明确标注为新核验产物，非找回历史 manifest）、`report.json`、`SHA256SUMS`。
+- **GitHub 已实施**：新增 `diagnostics/r45_audit_oft_candidates.py`，对执行端明确提供的 5 个 OFT 目录只读报告关键 `prismatic` 源文件 SHA、Git HEAD 与历史默认路径是否一致，**绝不自动挑选**。若不能证明历史来源或得到研究负责人对候选身份确认，仍须 BLOCKED。
+- **GitHub CPU CI PASS 41/41**：[run 40659154948](https://github.com/jho887891-sudo/robo/actions/runs/40659154948)；新增 strict manifest/OFT 测试 5/5，原有 36/36 回归不变，R4/R5 CPU 也 PASS。**服务器真实 300 个 HDF5 完整稳定哈希重核验尚未运行，不能宣称正式 R44 Gate PASS**。
+- **唯一下一步**：服务器在 PR #51 最新干净 worktree 中运行这两个 CPU 审计入口，补齐严格新清单和 OFT 版本来源；再完成已有的 `scripts/r45_server_cpu_gate.sh`。失败只回传 BLOCKED 和原始证据，不生成替代数据、训练模型或自启 GPU。
 
 ## R45-F 真实 TRAIN CPU I/O 现场复核报告（2026-10-28，最新）
 
@@ -148,7 +159,7 @@ R45-D GitHub 分支的 CPU 证据：
 `train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
 还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
 
-**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45 正式训练器的真实数据契约 CPU preflight（找齐已有 normalizer、manifest、7B 模型与 OFT）；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一下一步为 R45-G 严格 manifest 重核验及 OFT 源码来源确认，之后才是正式 R44 CPU preflight；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
 
 ### GPU Gate，尚未获授权
 
