@@ -5,6 +5,17 @@
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
+## R46 PR #53 一轮修复核对（2026-10-30，已关闭 P0-A，仍不具备 R47 就绪条件）
+
+- **PR HEAD**：[`codex/r46-smoke-supervisor-20261029@0c7dc144a0e7dc1c79cceb36e4df6e4c6257f85a`](https://github.com/jho887891-sudo/robo/pull/53)，仍为 Draft。修复源码提交 `a9f2618cd9ec2707a71dde43e07096c99ce9c3ea`。
+- **P0-A 真实参数桥接已修复（静态 + Windows CPU 证据）**：`diagnostics/r46_openvla_smoke.py` 新增 `_build_r44_argv`，只传 R44 支持的参数；`--max-wall-seconds` 由 wrapper/supervisor 保留，新 `tests/test_r46_openvla_smoke_args.py` 直接使用 R44 严格 `parse_args` 并通过。公开 `review-fix-a9f2618/exit_codes.txt` 五项为 0，Windows 21 项通过、11 项 Linux POSIX 专属跳过。RED 证据是新 helper 缺失的导入错误，不是原参数错误复现。
+- **P0-B 尚未修复**：子进程当前在 GPU 步骤后 `r46_openvla_smoke.py:271` 仍调用 `probe_gpu(uuid,0,0)`；函数 `r46_smoke_supervisor.py:267-269` 遇到任何 compute PID 就抛错。真实训练计算过程中自己的 CUDA PID 可能被误判；需分离“运行前无其它进程准入”和“运行后允许自己 PID 的快照”，加 CPU mock 测试。
+- **P1-C 尚未修复**：`r46_smoke_supervisor.py:89` 只判断现在在批准窗口内，没有验证请求最长运行时间与批准结束时刻兼容；需拒绝越窗申请或以审批结束时刻限制进程级 deadline，附边界测试。
+- **最新 Linux CPU Gate 未运行**：服务器 `172.31.68.251` 连接超时。旧 Linux 11/11 命令、88/88 测试仅适用于旧实现 SHA `75b6a1f84d4af513472f20df5548117a5e908066`；不能将其上移为 `a9f2618` 的 Linux PASS。服务器不可达是 `BLOCKED_INFRA`，不是代码测试 FAIL。
+- **行动**：见 [PR #53 新审计评论](https://github.com/jho887891-sudo/robo/pull/53#issuecomment-6502649766)。先完成 B/C 的代码和 CPU-only 测试，再对最终精确源码 SHA 在 Linux 上跑完整 CPU Gate、保存 exit/stdout/stderr/sha256 并交叉审计。**R46=PARTIAL_CPU_PASS / R47=BLOCKED_CODE_REVIEW_AND_GPU_APPROVAL / R48=NOT_RUN**。未经授权不运行 CUDA、模型加载、GPU Smoke、Benchmark 或正式训练。
+
+> 本节 supersede 下方旧 R46 PR #53 初次审计所述“P0-A 仍需修复”，旧记录保留历史证据。
+
 ## R46 PR #53 独立源码审计（2026-10-30，CPU 证据 PASS，但 R47 仍 BLOCKED）
 
 - **实际 PR 状态**：[Draft PR #53](https://github.com/jho887891-sudo/robo/pull/53)，HEAD `934a59c68184de85549dae1cf193d94a4924b58d`，实现经 Linux 测试的 SHA `75b6a1f84d4af513472f20df5548117a5e908066`，两者间新增文件均是 evidence/文档（已用 GitHub compare 核对）；已有 `R46-A/B/C/D` 的执行端 CPU 证据、已创建 PR 的 `R46-E` 不应被等同真实 GPU 通过。
