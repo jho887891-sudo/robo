@@ -19,12 +19,12 @@
 - [`evidence/r45l-numpy1264-repro-20261029@6e55782c3defa30363249e84b7abe7e90460c4c1`](https://github.com/jho887891-sudo/robo/tree/6e55782c3defa30363249e84b7abe7e90460c4c1/evidence/r45l-numpy1264-repro-20261029)：GitHub 远端 HEAD 与证据提交 SHA 一致。ChatGPT 直接读取 `profile/report.json`、`execution/diagnosis.exit_code` 与 `environment/runtime_versions.txt`，并非只凭执行端摘要。
 - 真实 CPU 隔离环境：Python 3.10.12、NumPy **1.26.4**、h5py 3.16.0；诊断进程退出码 **0**；300 回合，TRAIN **108780** / DEV **28268**。原始报告中 `difference.status=EXACT_MATCH`，`changed_field_count=0`，冻结与重算 payload SHA 都为 `9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459`；顶层诊断状态为 `DELTA_ONLY_COMPATIBLE_NOT_FULL_ATTESTED`。
 - **已证明**：在这个真实环境、同一数据与代码入口下，NumPy 1.26.4 能数值复现冻结归一化器。**未证明**：历史运行时源码 SHA 的独立身份链；并未获得严格全量 HDF5 Manifest、完成正式 CPU Gate、运行 GPU 训练。
-- **性能另有独立证据缺口**：R45-F 的 44.040 / 20.677 ms 三相机 CPU **恒等变换代理**数据目前仅有 `docs/PROJECT_STATUS.md` 的执行端汇总；实际服务器 `/tmp/r45f-cpu-execution-20261028/profile-20261028T075000Z/` 中原始 `report.json`、`samples.jsonl`、`selected_samples.json`、命令/stdout/stderr/exit 与 `SHA256SUMS` 尚未在本次检查的 GitHub R45 分支中找到独立提交。不能宣称这两组时延已经通过 ChatGPT 对原始样本的复算，更不能称 GPU 训练 2.13 倍加速。
-- **下一步两条不相互替代的工作**：数据契约线 R45-M 在同样隔离 NumPy 1.26.4 环境执行一次正式 300 HDF5 SHA + 严格 Manifest 校验，原始证据入 GitHub，失败保持 BLOCKED；性能证据线先将既有 R45-F 原始小型文件发布独立证据分支，ChatGPT 再交叉审计，无需重复 GPU 或 HDF5 训练数据。之后仍须核查 OFT/7B 权重、正式 CPU Gate；所有 GPU 活动需另行授权。
+- **R45-F CPU 代理性能证据现已入库并直接复算统计**：独立分支 [`evidence/r45f-cpu-profile-20261029@f89142ce42dc7432ea9eb87e3126138f74b57bd9`](https://github.com/jho887891-sudo/robo/tree/f89142ce42dc7432ea9eb87e3126138f74b57bd9/evidence/r45f-cpu-profile-20261029) 包含 240 行未脱敏 `samples.jsonl`、120 个固定采样点、脱敏 `report.json.redacted`、执行记录、根 `SHA256SUMS` 与 `redaction_manifest.json`。GitHub 远端 HEAD 已核对；ChatGPT 直接解析 240 行重新计算旧路径中位 **44.039588887 ms**、R45 **20.676928340 ms**；均值 **51.219876512 / 24.601895649 ms**，P95 **77.563808 / 47.433375 ms**，均与提交报告一致。配对 240 次中 R45 更快 **197**、更慢 **43**；缓存命中 **0/240**，执行端 profile exit **0**。这只是 **CPU 恒等图像变换代理**，原路径始终先于 R45 测量，存在系统缓存/顺序偏差风险；不能声称正式 7B GPU 训练提速 2.13 倍。报告中路径字段已经脱敏，`redaction_manifest` 保留原始和提交版的不同哈希，ChatGPT 不拥有未脱敏服务器原始 report。
+- **下一步只做尚未完成的工作**：R45-M 在隔离 NumPy 1.26.4 环境完成 300 HDF5 严格 SHA + Manifest；继续核查 OFT 唯一源码根与 7B 模型权重完整 SHA，正式 CPU Gate 记录原始退出码和日志。R45-F 既有 CPU 代理报告不再要求重复提交或重跑；后续真实 GPU 样本/秒 A/B 需要研究负责人另行授权，严禁将 CPU 代理时延外推为正式训练时间。
 
 ## 30 秒状态摘要
 
-**当前研发位置：R45-L 已在隔离 NumPy 1.26.4 环境中真实复现冻结 delta normalizer，原始报告 GitHub 可读（exit 0、差异字段 0、payload SHA 完全匹配）。但严格 HDF5 Manifest、OFT 来源、权重校验和正式 CPU Gate 尚未执行/通过，GPU 未授权，训练仍 BLOCKED。R45-F 图像 CPU 代理时延 44.040/20.677 ms 目前只有执行端汇总，原始逐样本 GitHub 证据仍缺失，不得把 2.13× 中位数比值当正式训练加速。下一步数据契约线 R45-M；性能证据线先补交 R45-F 文件。**
+**当前研发位置：R45-L 在隔离 NumPy 1.26.4 环境中真实复现冻结 delta normalizer（exit 0、差异字段 0、payload SHA 完全匹配）；R45-F 的真实 TRAIN 三相机 CPU 代理性能原始逐样本数据现已提交 GitHub（evidence SHA `f89142ce42dc7432ea9eb87e3126138f74b57bd9`），ChatGPT 独立复算 240 行，旧/R45 中位 44.040/20.677 ms，一致；但不是训练加速证明。严格 300 HDF5 Manifest、OFT 唯一源码身份、7B 权重 SHA 和正式 CPU Gate 仍未通过，GPU 未授权，训练 BLOCKED。下一步 R45-M 完整数据契约核验，后续仅在授权后测试真实 7B GPU 吞吐。**
 
 | 事项 | 状态 | 固定证据 |
 |---|---|---|
@@ -108,12 +108,12 @@ R45-D GitHub 分支的 CPU 证据：
 
 ## R45-F 真实 TRAIN CPU I/O 现场复核报告（2026-10-28，最新）
 
-- **执行端报告：PASS，退出码 0**。固定执行 SHA `5ddddc1b4b926cb9ee467c1fa7305aff935e2314`；服务器隔离 worktree `/tmp/robo-r45f-cpu-real-20261028` 干净，未修改仓库/数据、未接触 GPU。**以下性能数值由 DeepSeek 现场执行回传，我已核验 GitHub 工具实现，但尚未直接取得服务器原始 report 字节做独立复算。**
+- **执行端报告：PASS，退出码 0**。固定执行 SHA `5ddddc1b4b926cb9ee467c1fa7305aff935e2314`；服务器隔离 worktree `/tmp/robo-r45f-cpu-real-20261028` 干净，未修改仓库/数据、未接触 GPU。**2026-10-29 更新：原始逐样本 `samples.jsonl` 已发布 GitHub，ChatGPT 直接读取并独立复算 240 行时延统计，与脱敏报告相同；未脱敏原始 report 仍仅在服务器，故不得将脱敏副本声明为原始字节。**
 - **数据定位**：`/home/T7/ojh/robot_actual/data/data/hdf5`；执行端确认位于 `/dev/vdb2` 的 `fuseblk` 已挂载目录；TRAIN **240/240**、DEV **60/60** 文件存在且非空；真实 TRAIN 建索引 **108,780** 样本。
 - **CPU profile 固定样本**：三任务各 40，共 120 个 TRAIN 样本，重复两次 **240 次**；旧逐次重开 HDF5 路径和 R45 Reader 的三相机**恒等 CPU 图像变换代理**张量相同。此检查**不包含生产 resize/normalize，也不等价于完整训练数据契约预检**。
 - **读图时延（报告值）**：旧路径中位数 **44.040 ms/样本**，R45 Reader 中位数 **20.677 ms/样本**，中位比值约 **2.13×**（两条独立统计量的比值，不是严格配对提速）；HDF5 JPEG 字节读取均值 **1.259 ms**，JPEG 解码与代理变换 **13.303 ms**，CPU tensor 准备 **7.488 ms**。
 - **缓存与 Worker（报告值）**：256 MiB 解码图像缓存命中 **0/240**，120 张三相机张量约 **331,776,000 B**，大于缓存上限 **268,435,456 B**；只读 1/2/4 worker 的解码代理吞吐 **53.6/123.5/157.2 样本/s**（含启动）。该 Worker 任务**没有接入正式训练器**，不宣称生产训练可以达到对应数值。
-- **真实现场证据**：`/tmp/r45f-cpu-execution-20261028/`；`data-root-discovery-20261028T074515Z.json`、`profile-20261028T075000Z/report.json`、`samples.jsonl`、`selected_samples.json`、目录内与外层 `SHA256SUMS`，执行端报告校验全部通过；如需独立 VERIFY，需取得原始 JSON、SHA256 内容和执行日志。
+- **真实现场证据**：服务器原件 `/tmp/r45f-cpu-execution-20261028/`；GitHub 已发布安全脱敏副本及未改动逐样本数据 [R45-F evidence @ f89142ce](https://github.com/jho887891-sudo/robo/tree/f89142ce42dc7432ea9eb87e3126138f74b57bd9/evidence/r45f-cpu-profile-20261029)，包含根 SHA256SUMS、原件/发布件哈希映射与 profile exit 0。独立验证范围为 240 行统计复算和 GitHub 文件可读，尚非完整端到端 GPU 性能验证。
 - **由结果驱动的 CPU-only 代码变更**：正式 `training/r44_train.py` 中 `RuntimeReader(cache_bytes=0)`，保留 HDF5 句柄复用，因为完整 TRAIN 每样本一轮仅访问一次，不值得让大缓存留存无法复用的解码张量；`diagnostics/r44_gpu_smoke.py` 改为使用相同 Reader 以提高真实训练与 Smoke 输入路径一致性，修正直接运行的项目根导入路径；新增 CPU 回归测试。**这些代码变更尚无 GPU 运行结果、加速收益仍 UNKNOWN**。
 - **GitHub CPU 验证**：[R45 Runtime CPU Gate run 40652969926](https://github.com/jho887891-sudo/robo/actions/runs/40652969926) **36/36 PASS**（发现工具 3、R44 15、R45 contract 4、运行时 9、合成 JPEG profile 2、Toy stop-resume 3），代码 SHA `96cf84e522914e1e5934ef27e202d4cff0c6d131`；R4/R5 CPU workflow 同样 PASS。该 CI 验证了未授权 GPU Smoke 入口退出码 2、真 R45 Reader 源码接入和测试语法，**没有实际启动 GPU Smoke**。
 - **唯一下一步**：已发现原始数据，但 `M2_NORMALIZER_JSON`、`R44_DELTA_NORMALIZER`、`R44_DATASET_MANIFEST`、`R44_BASE_MODEL`、`R44_OFT_ROOT` 尚未经过当前服务器的完整路径/身份验证；先只读核验已有 R44 产物与模型位置，完成 `scripts/r45_server_cpu_gate.sh` 的完整 CPU preflight。通过后再由研究负责人单独审批一次性真实 7B GPU Smoke。GPU 吞吐与正式训练都不能提前启动。
@@ -195,7 +195,7 @@ R45-D GitHub 分支的 CPU 证据：
 `train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
 还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
 
-**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前数据契约下一步为 R45-M 在隔离 NumPy 1.26.4 下重新验证完整 HDF5 哈希并生成严格 Manifest；性能证据下一步为 R45-F 原始 CPU I/O 样本与报告上 GitHub。均不授权 GPU/训练；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前数据契约下一步为 R45-M 在隔离 NumPy 1.26.4 下重新验证完整 HDF5 哈希并生成严格 Manifest；R45-F CPU 代理原始逐样本证据已经 GitHub 入库和统计复算，不能作为 GPU 训练吞吐证明；均不授权 GPU/训练；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
 
 ### GPU Gate，尚未获授权
 
