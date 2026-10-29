@@ -40,8 +40,8 @@
     "R46-E": {
       "status": "IMPLEMENTED",
       "exit_code": 0,
-      "evidence": "evidence/r46-cpu-20261029/review-fix-a9f2618",
-      "decision": "ARGUMENT_BRIDGE_FIXED_WINDOWS_CPU_PASS_LINUX_GATE_PENDING",
+      "evidence": "evidence/r46-cpu-20261029/review-fixes-beca55e",
+      "decision": "GPU_PID_AND_APPROVAL_WINDOW_CPU_REGRESSIONS_PASS_LINUX_GATE_PENDING",
       "pr": "https://github.com/jho887891-sudo/robo/pull/53"
     },
     "R47-1": {
@@ -98,8 +98,16 @@
   "automatic_transition_rule": "No GPU action without separate completed research-lead authorization.",
   "post_review_fix": {
     "commit": "a9f2618cd9ec2707a71dde43e07096c99ce9c3ea",
-    "red": "test failed because bridge helper was absent",
-    "green": "5 commands exit 0; 21 tests pass; 11 POSIX-only skips",
+    "status": "CPU_REGRESSION_PASS",
     "linux_gate": "PENDING"
+  },
+  "latest_cpu_fix": {
+    "commit": "beca55e633c27fea152d3db4aac0eb9ab2ba2c2a",
+    "commands": 5,
+    "command_failures": 0,
+    "tests_passed": 25,
+    "posix_only_skipped": 11,
+    "evidence": "evidence/r46-cpu-20261029/review-fixes-beca55e",
+    "linux_server": "BLOCKED_SSH_TIMEOUT"
   }
 }

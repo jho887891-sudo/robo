@@ -29,6 +29,7 @@ No model weights were loaded in this task. No CUDA context, GPU smoke, GPU bench
 - Independent review found that the parent compared the approved model identity list but did not hash the actual model directory before GPU admission. A regression test failed before the fix (`model-identity-red/`); the parent now resolves exactly one forwarded `--base-model`, rehashes every identity file, verifies the three-shard index, and rejects mismatch before GPU probing. The regression test and all 22 Linux supervisor tests passed (`model-identity-green/` and final Gate).
 - The report-schema test first failed against the prior implementation commit because `validate_smoke_report` did not exist; the captured import failure is in `report-schema-red/`. The CPU-only validator was added and wired into report writing; its positive fixture returns only `CPU_REPORT_SCHEMA_VALID`, not a GPU result.
 - PR #53 review identified a separate argument-bridge defect: the child wrapper's `--max-wall-seconds` was incorrectly appended to `R44.parse_args()`, although the R44 parser does not define it. A direct bridge regression was first run RED (helper absent at import), then GREEN after extracting `_build_r44_argv`; the helper now keeps the supervisor's time budget out of the R44 CLI while preserving the outer approval/deadline checks. The test directly passes the generated argv through `R44.parse_args()` without CUDA. Fix commit: `a9f2618cd9ec2707a71dde43e07096c99ce9c3ea`. Its Windows CPU evidence is in `review-fix-a9f2618/`: 5/5 commands exit 0, 21 tests passed and 11 POSIX-only tests skipped. This does not replace or extend the earlier Linux 88-test Gate at SHA `75b6a1f...`; the updated Linux Gate remains pending.
+- A second review pass fixed two CPU-reproducible safety defects in commit `beca55e633c27fea152d3db4aac0eb9ab2ba2c2a`: post-smoke GPU inventory now permits only the current smoke PID while rejecting any other compute PID; approval validation rejects a time window with less remaining time than the requested hard limit and tests the exact-fit boundary. RED was observed for both cases before the implementation. Windows evidence is in `review-fixes-beca55e/`: 5/5 commands exit 0, 25 tests passed and 11 Linux process-supervisor tests were skipped. SSH to the Linux server timed out, so the complete updated Linux Gate is still pending.
 - The final clean-commit Gate was run after both fixes and report-schema tests; earlier failed logs remain for audit and are not presented as passing evidence.
 
 ## IMPLEMENTED
@@ -36,7 +37,7 @@ No model weights were loaded in this task. No CUDA context, GPU smoke, GPU bench
 - `diagnostics/r46_smoke_supervisor.py`: external approval schema validation; source, manifest, sample and actual model-file identity verification; UUID/memory/compute-process admission; parent-owned evidence; a monotonic hard deadline capped at 1800 seconds; Linux process-session supervision with SIGINT/SIGKILL and PDEATHSIG.
 - `diagnostics/r46_smoke_contract.py`, `diagnostics/r46_freeze_samples.py`, and `diagnostics/r46_openvla_smoke.py`: strict five-record TRAIN plan, deterministic CPU sample freezing, a CPU-tested report schema, and the real standard OpenVLA five-step smoke child. The child refuses direct launch before importing Torch unless the parent/session/device boundary is present.
 - CPU regression tests and `.github/workflows/r45-runtime-cpu.yml` integration.
-- Post-review fix: `_build_r44_argv` in `diagnostics/r46_openvla_smoke.py` forwards only supported R44 options; `tests/test_r46_openvla_smoke_args.py` verifies the exact bridge is accepted by the real R44 parser.
+- Post-review fixes: `_build_r44_argv` in `diagnostics/r46_openvla_smoke.py` forwards only supported R44 options; `probe_gpu(..., allowed_compute_pids=...)` permits only explicitly allowed process IDs; approval windows must fit the entire requested runtime. CPU regression coverage is in `tests/test_r46_openvla_smoke_args.py` and `tests/test_r46_smoke_supervisor.py`.
 
 ## Source-path audit
 
@@ -50,7 +51,7 @@ No model weights were loaded in this task. No CUDA context, GPU smoke, GPU bench
 
 - The supplied approval document is a template (`template_only=true`, `approved=false`). R47 is `STOP_WAIT_GPU_APPROVAL`; this CPU work does not authorize running the smoke.
 - The real five-step model loading/forward/backward/optimizer path has **not** been executed. GPU memory, CUDA-device identity, GPU latency/throughput, and model runtime compatibility remain UNKNOWN.
-- R46 is **not GPU-execution-ready** until the post-review CPU fix passes the updated Linux CPU Gate on the new commit. The earlier 88/88 result applies only to its recorded SHA.
+- R46 is **not GPU-execution-ready** until the post-review CPU fixes pass the updated Linux CPU Gate on the new commit. The earlier 88/88 result applies only to its recorded SHA.
 - R45's stable GPU benchmark remains `BLOCKED_NOT_IMPLEMENTED`. A five-sample preliminary smoke, if separately authorized and run, cannot substitute for stable throughput or a five-epoch estimate.
 - R48 remains `NOT_RUN` because it depends on real R47 GPU evidence.
 

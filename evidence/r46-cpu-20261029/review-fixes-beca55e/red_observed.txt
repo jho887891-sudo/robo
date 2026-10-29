@@ -1,0 +1,5 @@
+RED regression evidence from the pre-fix run:
+- `test_gpu_probe_ignores_only_explicitly_allowed_current_process`: TypeError, allowed_compute_pids unsupported.
+- `test_gpu_probe_still_rejects_other_process_when_current_pid_is_allowed`: TypeError, allowed_compute_pids unsupported.
+- `test_rejects_window_that_cannot_fit_the_requested_wall_budget`: failed because ApprovalError was not raised.
+Full captured terminal output is preserved in the task execution record; after the code fix all three tests pass in supervisor.stderr.

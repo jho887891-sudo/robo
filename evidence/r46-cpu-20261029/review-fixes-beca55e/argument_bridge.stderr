@@ -1,0 +1,6 @@
+test_child_wall_limit_is_not_forwarded_to_r44_parser (test_r46_openvla_smoke_args.R46R44ArgumentBridgeTests.test_child_wall_limit_is_not_forwarded_to_r44_parser) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.012s
+
+OK
