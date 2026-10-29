@@ -22,6 +22,13 @@
 - **R45-F CPU 代理性能证据现已入库并直接复算统计**：独立分支 [`evidence/r45f-cpu-profile-20261029@f89142ce42dc7432ea9eb87e3126138f74b57bd9`](https://github.com/jho887891-sudo/robo/tree/f89142ce42dc7432ea9eb87e3126138f74b57bd9/evidence/r45f-cpu-profile-20261029) 包含 240 行未脱敏 `samples.jsonl`、120 个固定采样点、脱敏 `report.json.redacted`、执行记录、根 `SHA256SUMS` 与 `redaction_manifest.json`。GitHub 远端 HEAD 已核对；ChatGPT 直接解析 240 行重新计算旧路径中位 **44.039588887 ms**、R45 **20.676928340 ms**；均值 **51.219876512 / 24.601895649 ms**，P95 **77.563808 / 47.433375 ms**，均与提交报告一致。配对 240 次中 R45 更快 **197**、更慢 **43**；缓存命中 **0/240**，执行端 profile exit **0**。这只是 **CPU 恒等图像变换代理**，原路径始终先于 R45 测量，存在系统缓存/顺序偏差风险；不能声称正式 7B GPU 训练提速 2.13 倍。报告中路径字段已经脱敏，`redaction_manifest` 保留原始和提交版的不同哈希，ChatGPT 不拥有未脱敏服务器原始 report。
 - **下一步只做尚未完成的工作**：R45-M 在隔离 NumPy 1.26.4 环境完成 300 HDF5 严格 SHA + Manifest；继续核查 OFT 唯一源码根与 7B 模型权重完整 SHA，正式 CPU Gate 记录原始退出码和日志。R45-F 既有 CPU 代理报告不再要求重复提交或重跑；后续真实 GPU 样本/秒 A/B 需要研究负责人另行授权，严禁将 CPU 代理时延外推为正式训练时间。
 
+## R45-MNP 一次性 CPU 证据闭环 SPEC（2026-10-29，已提交、未执行）
+
+- **唯一当前执行入口**：[R45_MNP_ONE_SHOT_CPU_EVIDENCE_SPEC.md @ 4569b507ab0f03891b883ae55f60f1752ba1c6f3](https://github.com/jho887891-sudo/robo/blob/4569b507ab0f03891b883ae55f60f1752ba1c6f3/docs/R45_MNP_ONE_SHOT_CPU_EVIDENCE_SPEC.md)。执行端锁定**执行时 PR #51 最新 40 位 SHA**，通过一个独立 CPU worktree 接单，一次性完成 M 严格 300 HDF5 Manifest、N 五个 OFT 候选静态身份/来源审计及 7B 模型分片流式 SHA、P 前置全部满足才执行正式 `scripts/r45_server_cpu_gate.sh`，最后将全部阶段证据安全推送同一**新的独立 GitHub evidence 分支**。
+- **已证实但不重复**：R45-L NumPy 1.26.4 delta payload 精确匹配；R45-F 240 行 CPU 代理时延复算。**不是整体 GPU 吞吐/训练提速证明**。
+- **必须真实报告的阻塞**：R45-M 需要对全部 HDF5 重新稳定哈希；当前 CPU Gate 也会再哈希一次，不能宣称只有一次 34.5 GB I/O。OFT 候选 5 个只有结构检查，不自动唯一选用；没有运行来源绑定/负责人明确批准就 `BLOCKED_OFT_PROVENANCE`。模型三权重分片现存的完整 SHA 仍 UNKNOWN，不能凭 config.json 判 PASS。M 或 N 失败时继续剩余独立 CPU 审计，但不能运行 P；不能伪造 exit0。GPU/训练不授权。
+- **最终交付口径**：每阶段 PASS/BLOCKED/NOT_RUN、原始 command/stdout/stderr/退出码、固定 source SHA、SHA256SUMS、脱敏原件与发布件不同 SHA、GitHub evidence URL + 完整 commit SHA，一次性回传。只有 M+N+P+证据发布均通过才标记 `CPU_READY_FOR_SEPARATE_GPU_APPROVAL`；任何结果都不得自动启动 GPU。
+
 ## 30 秒状态摘要
 
 **当前研发位置：R45-L 在隔离 NumPy 1.26.4 环境中真实复现冻结 delta normalizer（exit 0、差异字段 0、payload SHA 完全匹配）；R45-F 的真实 TRAIN 三相机 CPU 代理性能原始逐样本数据现已提交 GitHub（evidence SHA `f89142ce42dc7432ea9eb87e3126138f74b57bd9`），ChatGPT 独立复算 240 行，旧/R45 中位 44.040/20.677 ms，一致；但不是训练加速证明。严格 300 HDF5 Manifest、OFT 唯一源码身份、7B 权重 SHA 和正式 CPU Gate 仍未通过，GPU 未授权，训练 BLOCKED。下一步 R45-M 完整数据契约核验，后续仅在授权后测试真实 7B GPU 吞吐。**
@@ -195,7 +202,7 @@ R45-D GitHub 分支的 CPU 证据：
 `train_seconds = 543900 / measured_end_to_end_train_samples_per_second`；
 还应加入 5 轮 DEV、模型加载/恢复、checkpoint/文件校验、可观测的资源开销与审定安全余量。以上没有实测吞吐前只是公式，不是承诺。
 
-**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前数据契约下一步为 R45-M 在隔离 NumPy 1.26.4 下重新验证完整 HDF5 哈希并生成严格 Manifest；R45-F CPU 代理原始逐样本证据已经 GitHub 入库和统计复算，不能作为 GPU 训练吞吐证明；均不授权 GPU/训练；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
+**持久化原则**：每个阶段只更新本文件的状态、SHA、唯一下一步；完整原始日志放 evidence。当前唯一执行任务为按 docs/R45_MNP_ONE_SHOT_CPU_EVIDENCE_SPEC.md 一次性完成严格数据 Manifest、OFT/7B 身份和在前置均通过时正式 CPU Gate，并安全推送 GitHub evidence；R45-L/R45-F 已结束，不重复运行；GPU/训练未授权；未经研究负责人同意不得自动运行 GPU Smoke、GPU Benchmark 或正式 5 Epoch。
 
 ### GPU Gate，尚未获授权
 
