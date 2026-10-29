@@ -5,6 +5,19 @@
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
+## R45-MNP 最新现场证据交叉审计（2026-10-29，覆盖下方旧待办状态）
+
+**最新 evidence 分支 SHA：[`dc4fd308ae050988c5ab3c93120fa6f8524cf019`](https://github.com/jho887891-sudo/robo/tree/dc4fd308ae050988c5ab3c93120fa6f8524cf019/evidence/r45-mnp-evidence-20261029)**；执行固定代码 SHA `d5be4de94ea37f1d5a715d5d47b7ebb16e07b097`（PR #51）。已直接读取 `FINAL_REPORT.md`、`stage_status.json`、M01 的 `report.json`/严格 Manifest、N02 模型身份报告和 P01 的原始 traceback；**未独立读取/重算服务器上 300 个 HDF5 原始字节**。
+
+- **M01 已有真实完成报告，按执行端证据为 PASS**：`CPU_MANIFEST_REATTEST_PASS`、300 HDF5 文件记录、三个任务各 100 回合、TRAIN 108780 / DEV 28268、NumPy 1.26.4/h5py 3.16.0、冻结和重算 delta payload 均 `9f7c4f00fc2945825cc892493c21127b5e38d4f83a212bf91f7cf410776ba459`；**不能继续沿用下面旧快照中的“M01 未执行/失败”**。正式 Gate 需要的是服务器保留的**原始**严格 Manifest，不是 GitHub 已替换路径的脱敏版。
+- **N02 已有静态权重 SHA**：`model_identity.json` 记录 3 片 safetensors 的完整文件名、大小、SHA256，索引覆盖；状态明确为 `FILE_IDENTITY_VERIFIED_PROVENANCE_UNCHECKED`，不表示历史来源、7B CUDA 模型加载或运行成功。**模型目标为标准 OpenVLA-7B + LoRA + 42D projector，不是 OFT 模型。历史五个 OFT 候选来源选择不再是必要 Gate。**
+- **P01 实际运行但未通过**：`commands/p01.exit_code=130`，`gate/r45-f-cpu/exit_codes.txt` 只有 `packages=0`；Python 的 `KeyboardInterrupt` 发生在 `training/r44_train.py:355` 重新 SHA256 读取 HDF5 时，**不能断言文件损坏，也不能把它当作完整 CPU Gate PASS**。运行 Gate 的系统 Python 依赖为 NumPy **2.2.6**、Torch 2.5.1+cu124、Transformers 4.46.3、PEFT 0.13.2；之前通过 M01 的隔离 Python 是 NumPy **1.26.4**，但不具备完整训练依赖。必须选用单一满足冻结数值与运行时依赖的 CPU 环境，并在执行前确认 `which python3`、`python3 -c 'import numpy,torch,transformers,peft; ...'`。
+- **源码兼容性仍待验证**：冻结 `training/r44_train.py` 与 `scripts/r45_server_cpu_gate.sh` 仍强制 `--oft-root` / `R44_OFT_ROOT` 并从其中导入 `prismatic` 模块。这是代码运行依赖问题，不是要求选 OFT 模型，也不能用无来源的占位目录绕过。当前 Gate 在这个路径被实际验证之前即被中断；运行兼容性 UNKNOWN。
+- **证据完整性待修正，不重跑 34+ GB HDF5**：发布的 `r44_dataset_manifest.json` 有 **300 个 `<REDACTED_LOCAL_PATH>`**，其 `manifest/manifest-reattest/SHA256SUMS` 所记原件 SHA（Manifest `a220bd45…`、report `ccf6df41…`）与仓库根 `SHA256SUMS` 中发布文件的 SHA（`d031308b…`、`c4755b02…`）不同；`redaction_manifest.json` 的 `files=[]` 没有记录原件→发布件映射。旧 `manifest/status.txt`、`model/status.txt`、`gate/status.txt`、`environment/status.txt` 保留首次阻塞快照，与新版 `stage_status.json` 不一致，必须标为历史快照或发布单独补充说明。**执行端报告 sha256sum -c exit 0 不等于确认脱敏文件与服务器原件字节一致**。
+- **唯一下一步**：①补充证据版本和原件/发布件 SHA 对照（不修改原始证据）；②在不覆盖既有环境的前提下确认能同时满足 NumPy 1.26.4 和 Torch/Transformers/PEFT 的实际 CPU 解释器；③确认标准 OpenVLA 需要的 `prismatic` 模块导入接口及现有参数处理，必要时独立代码修复+CPU 回归；④只重跑尚未完成的 `scripts/r45_server_cpu_gate.sh`（真实脚本会再次扫描全部 HDF5，不能伪称省去该检查），提交原始 exit/log，再复核。**未授权 GPU，正式训练仍 BLOCKED**。
+
+> 此小节替代下文旧 R45-L、旧 R45-MNP SPEC 与 30 秒摘要中关于“尚无严格 Manifest/模型权重 SHA、必须确定 OFT 历史唯一来源”的过时任务描述；旧文保留历史记录，不代表当前动作。
+
 ## R45-K GitHub 原始证据已入库与交叉审计（2026-10-28，VERIFIED）
 
 - **PUBLISHED / GitHub HEAD VERIFIED**：独立分支 [`evidence/r45ij-quantile-20261028`](https://github.com/jho887891-sudo/robo/tree/evidence/r45ij-quantile-20261028) HEAD = `246cac50021f26f4d0a192025c9128479fecd413`，GitHub commit 直接返回 39 个新增文件（其中 1 个为根 SHA256SUMS），`SHA256SUMS` 记录 **38 个路径、无重复**。DeepSeek 报告 push exit 0、服务端 sha256sum 38/38 退出码 0；GitHub 远端 ref/commit 已由 ChatGPT 直接读取。不能仅由 GitHub API 独立证明之前本地 git push 的进程退出码。
