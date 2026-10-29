@@ -1,0 +1,1 @@
+bash scripts/r45_server_cpu_gate.sh

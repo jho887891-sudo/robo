@@ -1,41 +1,35 @@
 {
   "schema": "r45-mnp-stage-status/v1",
-  "snapshot_utc": "2026-10-29T05:30:00Z",
+  "snapshot_utc": "2026-10-29T06:00:00Z",
   "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
   "stages": {
     "E01": {
       "exit_code": null,
-      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
-      "status": "RUNNING"
+      "status": "IN_PROGRESS"
     },
     "M01": {
-      "blocker": "strict reattestation still active at snapshot; no final result",
-      "exit_code": null,
-      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
-      "status": "BLOCKED_STORAGE_IO"
+      "detail": "CPU_MANIFEST_REATTEST_PASS; 300 full HDF5 hashes; TRAIN108780 DEV28268; delta payload SHA exact match.",
+      "exit_code": 0,
+      "status": "PASS"
     },
     "N01": {
-      "blocker": "four viable candidates; selected null; historical source binding absent",
-      "exit_code": 0,
-      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
-      "status": "BLOCKED_OFT_PROVENANCE"
+      "detail": "No historical OFT source identity gate required. Runtime compatibility finding recorded separately.",
+      "exit_code": null,
+      "status": "REMOVED_BY_ARCHITECTURE_DECISION"
     },
     "N02": {
-      "blocker": "weight hashing and source attestation incomplete",
-      "exit_code": null,
-      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
-      "status": "BLOCKED_MODEL_IDENTITY"
+      "detail": "Three safetensors SHA/index/config inventory verified; provenance remains unchecked.",
+      "exit_code": 0,
+      "status": "PARTIAL_PASS_PROVENANCE_UNKNOWN"
     },
     "P01": {
-      "blocker": "M01/N01/N02 not all PASS",
-      "exit_code": null,
-      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
-      "status": "NOT_RUN_BLOCKED_PREREQUISITE"
+      "detail": "Formal Gate interrupted during repeat full HDF5 SHA read; only packages child completed; subsequent tests did not run.",
+      "exit_code": 130,
+      "status": "BLOCKED_STORAGE_IO"
     },
     "S00": {
-      "blocker": "isolated venv lacks torch, transformers, peft",
+      "detail": "Python3.10.12, NumPy1.26.4, h5py3.16.0 isolated environment verified; torch/transformers/peft missing there. Gate shell selected system Python packages NumPy2.2.6, Torch2.5.1+cu124, Transformers4.46.3, PEFT0.13.2.",
       "exit_code": null,
-      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
       "status": "BLOCKED_ENVIRONMENT"
     }
   }

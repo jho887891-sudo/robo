@@ -1,61 +1,11 @@
 {
-  "files": [
-    {
-      "original_sha256": "01f840662e5406a47f1409f3991f25f812c2b90c581e0b687bb03077fe17fc2f",
-      "published_path": "commands/m01.command.txt",
-      "published_sha256": "1794064ba640fb03533d70da309964d594b918ef1a238b76762864c0780cacdd",
-      "redaction": "local absolute paths replaced with semantic placeholders"
-    },
-    {
-      "original_sha256": "e69cf08d0e564c0e9acad8ddc11e502d5891b46ccf175d7d0d1823f13162658c",
-      "published_path": "commands/n01.command.txt",
-      "published_sha256": "e6c72e78bf086cf62b5529ba04cc5bb122b61c0b4b214aaf33695af10acb37c0",
-      "redaction": "local absolute paths replaced with semantic placeholders"
-    },
-    {
-      "original_sha256": "69524026454602be6a201fe193bc53ba7a44ffb191044679681a91bc4ed7eccf",
-      "published_path": "commands/n01.stdout",
-      "published_sha256": "43692844c5a696527d07b475ba8f0f4a002a80ad30cebb25678e344d57590956",
-      "redaction": "local absolute paths replaced with semantic placeholders"
-    },
-    {
-      "original_sha256": "f3e47e9e4209b5b768a2e4b455669a86c2cedaa8180fb8b287795f559b85e298",
-      "published_path": "commands/n01_corrected.stdout",
-      "published_sha256": "8df6655a63a52d03d3dc51305c854a50d2b8270e43b3d6d61cef44936fbfbab2",
-      "redaction": "local absolute paths replaced with semantic placeholders"
-    },
-    {
-      "original_sha256": "756e4f11c3d632d7e83fdcc68d8a7462bf3c4189f69da3629f19ff167a9735a4",
-      "published_path": "commands/n02.command.txt",
-      "published_sha256": "0c0226ff482f0de460a40224abab838e26f8b0a747572467853ea51941231f0e",
-      "redaction": "local absolute paths replaced with semantic placeholders"
-    },
-    {
-      "original_sha256": "3b8debc29051a9d334972aced3572751cb3ae3b502ccf467f1ea3ee52ed3d66c",
-      "published_path": "environment/frozen_input_hashes.txt",
-      "published_sha256": "3f66ce27cdb303d8c67ec9f9679d5fd32c42f0984d7ee1a9320127701ad66362",
-      "redaction": "local absolute paths replaced with semantic placeholders"
-    },
-    {
-      "original_sha256": "0f53ac7f02a86c4a93c264f505f1c33f880a59f51d1f614112c0b0314ac3dd4c",
-      "published_path": "oft/oft_candidates.json",
-      "published_sha256": "8c7ca1562565689b10be52051c408d9d4298aaed974d8911f9684ae12c975bdc",
-      "redaction": "local absolute paths replaced with semantic placeholders"
-    },
-    {
-      "original_sha256": "7209dbcb8ef5ff1afb8422ae7abce965d21db2692c96e6a8149d10b11f76f6e7",
-      "published_path": "oft/oft_candidates_corrected.json",
-      "published_sha256": "c1835e8d620c9fefd80e5f6020a4b1da7a21051aa8fb50d8e6b08b6c76203bb6",
-      "redaction": "local absolute paths replaced with semantic placeholders"
-    }
-  ],
-  "path_handling": "Original server path strings are not published; their content file hashes are preserved here.",
-  "schema": "r45-mnp-redaction/v1",
-  "sensitive_payloads_excluded": [
+  "excluded": [
     "HDF5",
-    "JPEG/RGB images",
-    "model weight shards",
+    "images",
+    "model shards",
     "checkpoints",
     "credentials"
-  ]
+  ],
+  "files": [],
+  "schema": "r45-mnp-redaction/v1"
 }
