@@ -1,0 +1,36 @@
+{
+  "budget": {
+    "base_total_hours_estimate": 605.4309186111111,
+    "dev_hours_estimate": 14.134,
+    "dev_samples_per_epoch": 28268,
+    "epochs_max": 5,
+    "is_estimate_not_measurement": true,
+    "margin_fraction": 0.05,
+    "model_load_hours_estimate": 0.03229361111111111,
+    "optimizer_steps_max": 543900,
+    "required_budget_hours": 635.7024645416667,
+    "train_hours_estimate": 591.264625,
+    "train_samples_per_epoch": 108780
+  },
+  "cuda_context_created": false,
+  "dataset_manifest_sha256": "a220bd45e49c623c3a9f77dcf7460c95f8305909c05122e2d2a0556bff522ead",
+  "delta_normalizer_sha256": "795052b0e6716d374488296b52befdbb012bd1840a7ccca57dfbf4df9e07383f",
+  "dev_samples": 28268,
+  "dev_samples_sha256": "34c3bbea010d45c89db1223db385bb28ae3c8fe304f2d123386174e614cf6654",
+  "epochs_max": 5,
+  "feature_normalizer_sha256": "7c404f08e32fe3ead3b2bc17eca97f9106aff74107fd173d03cf8adfca4e4d13",
+  "instruction_sha256": {
+    "push_T": "364fa384d0e0487c56cbf22a2cff75898499120aaec1afa70ae6d230cb590996",
+    "stack_bowls": "d71f7610d0422e5cc63159a37ed8d3e3157b5e6c95b3948d54b5b69d630e3629",
+    "sweep_blocks": "149d04cd0e1b723f2858a51ead0d5091dec7b38b157211ff07ceade64ca5b4e3"
+  },
+  "min_epochs": 2,
+  "resource_mode": "time-window",
+  "schema": "r44-preflight/v1",
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "status": "CPU_CONTRACTS_PASS",
+  "train_samples": 108780,
+  "train_samples_sha256": "4db3b8111d7e3d04e714d2246ae318928da31d4ec11eb7459458e1a24f754a99",
+  "training_started": false,
+  "utc": "2026-10-29T09:47:13Z"
+}

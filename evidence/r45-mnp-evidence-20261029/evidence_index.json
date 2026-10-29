@@ -77,6 +77,146 @@
       "sha256": "5df3eef6558763a5ab535b506e649412dad526d99a3dfd7273a8fcdff0aa99ed"
     },
     {
+      "path": "cpu-gate-rerun-20261029/REPORT.md",
+      "sha256": "2a102e3924f1ab3f34a073e9860ab5fd0b1619ef86e6a1da861a6b6eff003898"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/SHA256SUMS.verify.exit_code",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/SHA256SUMS.verify.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/SHA256SUMS.verify.stdout",
+      "sha256": "94ad3ea80ce77531f5bfb7ea27a347ac5e819d6eab1c8d8732292abae0059c0e"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/command.txt",
+      "sha256": "26f9e39e03a086cf248ceb8bba39baeba1c5366d04bfa05a5b166817251dd309"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/code_sha.txt",
+      "sha256": "1423ec0ba3674f22b812d85f3ea5b65cc944fc4f9ec5342e0b030df18ac4c90a"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/exit_codes.txt",
+      "sha256": "1d9bf08999b68200b6c8f33ccbf6cd38099e380ec0776f3892319f7ccfbdb662"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/git_head.txt",
+      "sha256": "1423ec0ba3674f22b812d85f3ea5b65cc944fc4f9ec5342e0b030df18ac4c90a"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/git_status.txt",
+      "sha256": "e8be07a305897ecc8db002a57a34730acf594fe669d1f23a89092dd2d2b25257"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/packages.json",
+      "sha256": "41a37253e839a78f84a5ebf96d66b2383f1f6eefc6940c3420c9fd3bd313608b"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/packages.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/python_version.txt",
+      "sha256": "f6b75e07f1488db28a89724a522725e3e01af3dc78f6fd365f17eb4059e41056"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r44_delta.stderr",
+      "sha256": "6766844104cf56257f4957d2cc1876fa23c04490f84883c9a98729c78685f4bf"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r44_delta.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r44_real_data_preflight.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r44_real_data_preflight.stdout",
+      "sha256": "cbca7259bfd6d23c36147b6564bd88473284b3501e8f1e2a8d15a7c7832f3f1c"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r45_contract.stderr",
+      "sha256": "8a204f7ef219fde9c0d5dfda9f4c3d5e67bbaae1bab0c56f290f41ad839e1036"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r45_contract.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r45_runtime.stderr",
+      "sha256": "aae128c76ba347b5403c34594598e10c69c2d0638864641938870d8d08020097"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r45_runtime.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r45_toy_resume.stderr",
+      "sha256": "912d0d2c79aa206160110e90686658ebcd98ea5bbbb5d640749ab61a84206796"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate/r45_toy_resume.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate.exit_code",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/gate.stdout",
+      "sha256": "62a86cd1052cbcbfa61f57846b9e81ae4d6c78069ea38ec994ece75b307e4f56"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/python_path.txt",
+      "sha256": "00e04a3b8dc16653e46c0e1e96639f71564541168db3c373d6a71af41c9b9ca7"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/redaction_manifest.json",
+      "sha256": "de87c294917856342f1c9e3d1c3048c1330ca376f58c9c0051238dd79431cc7e"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/runtime-compat/compat.exit_code",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/runtime-compat/compat.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/runtime-compat/compat.stdout",
+      "sha256": "7e1a72a7abac9c2c80aab5afce92877c4e7f47688a507a1fc3c4a26f5319f276"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/runtime-compat/packages.json",
+      "sha256": "dc21f183f5ac47ec686559d4e811e7888d492958cd1383137bb9083cfc8474cc"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/runtime-compat/packages.stderr",
+      "sha256": "7937a559432fa961940c7d22e30c3e75e3f559b33cd669a1855930f0ee6fbd19"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/runtime-compat/prismatic-module-sha256.txt",
+      "sha256": "3a11cc4444a4f5561d827ac02bb52433733c9f68069add3adf124f5c519edf93"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/runtime-compat/prismatic-source-head.txt",
+      "sha256": "165116747a5ce815d89ebb064ac1f8d2a9101cfd35a80c5729167c42a1e3b022"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/runtime.txt",
+      "sha256": "13cc1b9420a609e504f1877409c7a154da765866a1fc8aa920f6cca3d4e22c4f"
+    },
+    {
       "path": "environment/disk_free.txt",
       "sha256": "876b0745ee02c3d4efdf54da6f6bba0143ee1f1271cf36888212753cf72d9d04"
     },

@@ -1,0 +1,19 @@
+Using ARX constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+status=PASS
+model_type=openvla
+auto_processor=PrismaticProcessor
+tokenizer=LlamaTokenizerFast
+dynamic_model_class=OpenVLAForActionPrediction
+action_dims=(14, 14, 25)
+frozen_modeling_sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+active_modeling_sha256=b5431a074c0025a12e46dc954a5e18d1d73477babb5ae42e3a12ab4b907f33a6
+modeling_sha_match=True
+prismatic_root=<PRISMATIC_RUNTIME_SOURCE>/prismatic
+torch=2.5.1+cu124 numpy=1.26.4
+cuda_context_initialized=False
+weights_loaded=false

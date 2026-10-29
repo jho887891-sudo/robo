@@ -1,0 +1,66 @@
+{
+  "entries": [
+    {
+      "original_sha256": "67e30fa724f3d22248f73cf4782a63eff36c1d41b22d942037cbda9be3ed4b2c",
+      "path": "python_path.txt",
+      "published_sha256": "00e04a3b8dc16653e46c0e1e96639f71564541168db3c373d6a71af41c9b9ca7",
+      "reason": "local absolute path redacted"
+    },
+    {
+      "original_sha256": "584fa6cb77615032479ecb5e660494f6abc825f028321cb2c43b043b08f7fc74",
+      "path": "runtime.txt",
+      "published_sha256": "13cc1b9420a609e504f1877409c7a154da765866a1fc8aa920f6cca3d4e22c4f",
+      "reason": "local absolute path redacted"
+    },
+    {
+      "original_sha256": "09fe38cf95ee38f35972f33b5d3883855ed8737703fc07cbf3befb601e874c6f",
+      "path": "gate.stdout",
+      "published_sha256": "62a86cd1052cbcbfa61f57846b9e81ae4d6c78069ea38ec994ece75b307e4f56",
+      "reason": "local absolute path redacted"
+    },
+    {
+      "original_sha256": "13c47076db67912ebb04d66519bde22d0c67267fa341571576b5212c8eacceb6",
+      "path": "runtime-compat/compat.stdout",
+      "published_sha256": "7e1a72a7abac9c2c80aab5afce92877c4e7f47688a507a1fc3c4a26f5319f276",
+      "reason": "local absolute path redacted"
+    },
+    {
+      "original_sha256": "a95566d986197b3df56ab361d2303436c74f0a846aa8ed99a0c3587e229408aa",
+      "path": "runtime-compat/prismatic-module-sha256.txt",
+      "published_sha256": "3a11cc4444a4f5561d827ac02bb52433733c9f68069add3adf124f5c519edf93",
+      "reason": "local absolute path redacted"
+    },
+    {
+      "original_sha256": "3d7d472ed81b7dc18ec7644d945faf99fec01c682c0222865b2ec50af17419f4",
+      "path": "runtime-compat/packages.stderr",
+      "published_sha256": "7937a559432fa961940c7d22e30c3e75e3f559b33cd669a1855930f0ee6fbd19",
+      "reason": "local absolute path redacted"
+    },
+    {
+      "original_sha256": "13c47076db67912ebb04d66519bde22d0c67267fa341571576b5212c8eacceb6",
+      "path": "runtime-compat/compat.stdout",
+      "published_sha256": "7e1a72a7abac9c2c80aab5afce92877c4e7f47688a507a1fc3c4a26f5319f276",
+      "reason": "local absolute path redacted"
+    },
+    {
+      "original_sha256": "a95566d986197b3df56ab361d2303436c74f0a846aa8ed99a0c3587e229408aa",
+      "path": "runtime-compat/prismatic-module-sha256.txt",
+      "published_sha256": "3a11cc4444a4f5561d827ac02bb52433733c9f68069add3adf124f5c519edf93",
+      "reason": "local absolute path redacted"
+    },
+    {
+      "original_sha256": "3d7d472ed81b7dc18ec7644d945faf99fec01c682c0222865b2ec50af17419f4",
+      "path": "runtime-compat/packages.stderr",
+      "published_sha256": "7937a559432fa961940c7d22e30c3e75e3f559b33cd669a1855930f0ee6fbd19",
+      "reason": "local absolute path redacted"
+    }
+  ],
+  "excluded": [
+    "HDF5 data",
+    "images",
+    "model weights",
+    "checkpoints",
+    "credentials"
+  ],
+  "schema": "r45-cpu-gate-redactions/v1"
+}
