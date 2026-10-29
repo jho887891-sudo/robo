@@ -1,0 +1,5 @@
+# N01 OFT provenance
+status=BLOCKED_OFT_PROVENANCE
+first audit exit=2 due supplied repository-root layout not matching tool expected source-root layout
+corrected audit exit=0; report=CANDIDATES_NEED_PROVENANCE; viable_count=4; selected=null
+historical runtime path exists but is not a Git repository; historical module source SHA differs for modeling_prismatic.py; no immutable R44 run binding found

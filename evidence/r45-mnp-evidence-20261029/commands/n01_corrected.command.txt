@@ -1,0 +1,1 @@
+python diagnostics/r45_audit_oft_candidates.py --candidate <repo1>/openvla_oft --candidate <repo2>/openvla_oft --candidate <repo3>/openvla_oft --candidate <repo4>/openvla_oft --candidate <offline-source>

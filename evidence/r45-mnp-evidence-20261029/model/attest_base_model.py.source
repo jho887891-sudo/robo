@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+"""Read-only CPU static SHA256 inventory of a local safetensors OpenVLA base.
+
+Does NOT assert model provenance or load/import torch; successful exit is NOT
+N02 PASS until independent historical source provenance is evidenced.
+"""
+import argparse
+import hashlib
+import json
+import os
+import pathlib
+import sys
+
+
+def file_record(path):
+    before = path.stat()
+    identity = lambda s: (s.st_size, s.st_mtime_ns, s.st_ino, s.st_dev)
+    digest = hashlib.sha256()
+    with path.open('rb') as f:
+        for chunk in iter(lambda: f.read(1 << 20), b''):
+            digest.update(chunk)
+    after = path.stat()
+    if identity(before) != identity(after):
+        raise RuntimeError(f'file changed while hashing: {path.name}')
+    if not path.is_file() or before.st_size <= 0:
+        raise RuntimeError(f'invalid/empty model file: {path.name}')
+    return {'name':path.name,'size_bytes':before.st_size,'sha256':digest.hexdigest()}
+
+
+def attest(root):
+    root = pathlib.Path(root).expanduser().resolve(strict=True)
+    if not root.is_dir():
+        raise ValueError('model root is not a directory')
+    config = root/'config.json'
+    if not config.is_file():
+        raise ValueError('config.json not found')
+    rows = {'config.json':file_record(config)}
+    shards = sorted(x for x in root.glob('*.safetensors') if x.is_file())
+    if not shards:
+        raise ValueError('no .safetensors files, unsupported or incomplete layout')
+    index = root/'model.safetensors.index.json'
+    index_present = index.is_file()
+    if index_present:
+        rows[index.name]=file_record(index)
+        parsed=json.loads(index.read_text(encoding='utf-8'))
+        weight_map=parsed.get('weight_map')
+        if not isinstance(weight_map,dict) or not weight_map:
+            raise ValueError('model index weight_map empty or invalid')
+        referenced=set(weight_map.values())
+        if not all(isinstance(x,str) and x and '/' not in x and "\\" not in x and x.endswith('.safetensors') for x in referenced):
+            raise ValueError('unsafe or non-safetensors index shard reference')
+        actual=set(x.name for x in shards)
+        if referenced!=actual:
+            raise ValueError(f'index mismatch: missing={sorted(referenced-actual)}, extra={sorted(actual-referenced)}')
+    else:
+        # A single safetensors is valid unindexed; multiple shards without index are ambiguous.
+        if len(shards)!=1:
+            raise ValueError('multiple safetensors without model.safetensors.index.json')
+    for shard in shards:
+        if shard.is_symlink():
+            raise ValueError(f'shard is symlink: {shard.name}; provenance requires manual review')
+        rows[shard.name]=file_record(shard)
+    optional_names=('preprocessor_config.json','processor_config.json','tokenizer_config.json','tokenizer.json', 'special_tokens_map.json', 'generation_config.json')
+    for name in optional_names:
+        p=root/name
+        if p.is_file():rows[name]=file_record(p)
+    return {'schema':'r45-static-base-identity/v1',
+            'status':'FILE_IDENTITY_VERIFIED_PROVENANCE_UNCHECKED',
+            'model_root':str(root),'indexed':index_present,'shard_count':len(shards),
+            'files':[rows[k] for k in sorted(rows)],
+            'gpu_used':False,'training_started':False,
+            'limitations':'This checks static file bytes/index only. It does NOT prove historical model provenance, compatibility, or GPU load.'}
+
+
+def main(argv=None):
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--model-root',required=True)
+    p.add_argument('--out',type=pathlib.Path,required=True,help='new file; must not exist')
+    args=p.parse_args(argv)
+    if args.out.exists():
+        print('BLOCKED_OUTPUT_EXISTS',file=sys.stderr);return 2
+    try:
+        report=attest(args.model_root)
+        args.out.parent.mkdir(parents=True,exist_ok=True)
+        fd=os.open(args.out,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+        with os.fdopen(fd,'w',encoding='utf-8') as fh:
+            json.dump(report,fh,indent=2,sort_keys=True,ensure_ascii=False)
+            fh.write('\n')
+        print(json.dumps({'status':report['status'],'shard_count':report['shard_count'],'out':str(args.out)}))
+        return 0
+    except Exception as exc:
+        print(f'BLOCKED_MODEL_IDENTITY: {type(exc).__name__}: {exc}',file=sys.stderr)
+        return 3
+
+if __name__=='__main__':raise SystemExit(main())

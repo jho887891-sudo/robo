@@ -1,0 +1,5 @@
+# S00 environment/source
+status=BLOCKED_ENVIRONMENT
+source_sha=d5be4de94ea37f1d5a715d5d47b7ebb16e07b097; clean detached worktree
+Python 3.10.12; NumPy 1.26.4; h5py 3.16.0; torch/transformers/peft not installed in isolated venv
+split and feature/delta normalizer SHA match SPEC expected values

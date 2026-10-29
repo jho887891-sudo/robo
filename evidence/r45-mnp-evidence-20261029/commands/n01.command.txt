@@ -1,0 +1,1 @@
+<REDACTED_LOCAL_PATH> <CLEAN_WORKTREE>/diagnostics/r45_audit_oft_candidates.py --candidate <REDACTED_LOCAL_PATH> --candidate <REDACTED_LOCAL_PATH> --candidate <REDACTED_LOCAL_PATH> --candidate <REDACTED_LOCAL_PATH> --candidate <OFT_CANDIDATE> --out <EVIDENCE_ROOT>/oft/oft_candidates.json

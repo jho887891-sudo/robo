@@ -1,0 +1,6 @@
+# M01 strict manifest reattestation
+status=BLOCKED_STORAGE_IO
+script_process_pid=3296574
+observed_state=D (uninterruptible storage page wait), later R (running)
+script_exit_code=null (still running; no truthful final code available at snapshot)
+stdout/stderr currently empty; no report or manifest emitted at snapshot

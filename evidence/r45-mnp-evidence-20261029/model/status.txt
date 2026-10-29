@@ -1,0 +1,6 @@
+# N02 base model
+status=BLOCKED_MODEL_PROVENANCE_AND_HASH_INCOMPLETE
+model directory/config/index/three safetensors present by read-only listing
+hash tool source SHA256=cee1ac21e3eb374bda977a316d4cbbdefd97959e6ea86693bb237710953fb102
+shard hashing not completed; no identity report
+source attestation not found

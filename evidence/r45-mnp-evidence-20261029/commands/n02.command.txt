@@ -1,0 +1,1 @@
+<REDACTED_LOCAL_PATH> <MODEL_ATTEST_TOOL> --model-root <R44_BASE_MODEL> --out <EVIDENCE_ROOT>/model/model_identity.json

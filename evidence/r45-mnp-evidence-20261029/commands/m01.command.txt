@@ -1,0 +1,1 @@
+python <CLEAN_WORKTREE>/diagnostics/r45_reattest_r44_manifest.py --splits <CLEAN_WORKTREE>/data/m2_splits.json --hdf5-root <M2_HDF5_ROOT> --feature-normalizer <CLEAN_WORKTREE>/data/m2_task_normalizer_3task.json --delta-normalizer <R44_DELTA_NORMALIZER> --out <EVIDENCE_ROOT>/manifest/manifest-reattest

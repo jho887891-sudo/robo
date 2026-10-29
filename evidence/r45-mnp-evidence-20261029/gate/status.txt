@@ -1,0 +1,4 @@
+# P01 CPU Gate
+status=NOT_RUN_BLOCKED_PREREQUISITE
+exit_code=null
+reason=M01,N01,N02 are not all PASS; do not execute the formal Gate

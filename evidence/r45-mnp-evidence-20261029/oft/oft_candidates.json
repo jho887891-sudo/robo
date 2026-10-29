@@ -1,0 +1,145 @@
+{
+  "candidate_count": 5,
+  "candidates": [
+    {
+      "exists": true,
+      "git_head": "72b3a52f2b069220088ef824ade5890885858379",
+      "historical_default": false,
+      "optional": {
+        "prismatic/__init__.py": "missing",
+        "vla-scripts": "missing"
+      },
+      "path": "<OFT_CANDIDATE_1>",
+      "required": {
+        "prismatic/extern/hf/configuration_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/modeling_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/processing_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        }
+      },
+      "resolved_path": "<OFT_CANDIDATE_1>",
+      "structurally_viable": false,
+      "symlink": false
+    },
+    {
+      "exists": true,
+      "git_head": "5a7f391e7ba1b6e04b505b5e1516f1e15db12c4a",
+      "historical_default": false,
+      "optional": {
+        "prismatic/__init__.py": "missing",
+        "vla-scripts": "missing"
+      },
+      "path": "<OFT_CANDIDATE_2>",
+      "required": {
+        "prismatic/extern/hf/configuration_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/modeling_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/processing_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        }
+      },
+      "resolved_path": "<OFT_CANDIDATE_2>",
+      "structurally_viable": false,
+      "symlink": false
+    },
+    {
+      "exists": true,
+      "git_head": "72b3a52f2b069220088ef824ade5890885858379",
+      "historical_default": false,
+      "optional": {
+        "prismatic/__init__.py": "missing",
+        "vla-scripts": "missing"
+      },
+      "path": "<OFT_CANDIDATE_3>",
+      "required": {
+        "prismatic/extern/hf/configuration_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/modeling_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/processing_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        }
+      },
+      "resolved_path": "<OFT_CANDIDATE_3>",
+      "structurally_viable": false,
+      "symlink": false
+    },
+    {
+      "exists": true,
+      "git_head": "fe71eb54675cef495fea817a637386a4f4529153",
+      "historical_default": false,
+      "optional": {
+        "prismatic/__init__.py": "missing",
+        "vla-scripts": "missing"
+      },
+      "path": "<OFT_CANDIDATE_4>",
+      "required": {
+        "prismatic/extern/hf/configuration_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/modeling_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/processing_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        }
+      },
+      "resolved_path": "<OFT_CANDIDATE_4>",
+      "structurally_viable": false,
+      "symlink": false
+    },
+    {
+      "exists": true,
+      "git_head": "bc339d9ad707454c0c115970db43c260067c61ab",
+      "historical_default": false,
+      "optional": {
+        "prismatic/__init__.py": "missing",
+        "vla-scripts": "missing"
+      },
+      "path": "<OFT_CANDIDATE_5>",
+      "required": {
+        "prismatic/extern/hf/configuration_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/modeling_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        },
+        "prismatic/extern/hf/processing_prismatic.py": {
+          "exists": false,
+          "sha256": null
+        }
+      },
+      "resolved_path": "<OFT_CANDIDATE_5>",
+      "structurally_viable": false,
+      "symlink": false
+    }
+  ],
+  "limitations": "Static source existence and SHA are not evidence of correct model runtime, import compatibility, or the historical R44/OFT checkout. A matching run log or explicitly approved source identity is required. No CUDA was accessed.",
+  "schema": "r45-oft-source-candidate-audit/v1",
+  "selected": null,
+  "status": "BLOCKED_NO_VIABLE_OFT_CANDIDATE",
+  "viable_count": 0
+}

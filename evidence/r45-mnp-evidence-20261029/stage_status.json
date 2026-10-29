@@ -1,0 +1,42 @@
+{
+  "schema": "r45-mnp-stage-status/v1",
+  "snapshot_utc": "2026-10-29T05:30:00Z",
+  "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
+  "stages": {
+    "E01": {
+      "exit_code": null,
+      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
+      "status": "RUNNING"
+    },
+    "M01": {
+      "blocker": "strict reattestation still active at snapshot; no final result",
+      "exit_code": null,
+      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
+      "status": "BLOCKED_STORAGE_IO"
+    },
+    "N01": {
+      "blocker": "four viable candidates; selected null; historical source binding absent",
+      "exit_code": 0,
+      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
+      "status": "BLOCKED_OFT_PROVENANCE"
+    },
+    "N02": {
+      "blocker": "weight hashing and source attestation incomplete",
+      "exit_code": null,
+      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
+      "status": "BLOCKED_MODEL_IDENTITY"
+    },
+    "P01": {
+      "blocker": "M01/N01/N02 not all PASS",
+      "exit_code": null,
+      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
+      "status": "NOT_RUN_BLOCKED_PREREQUISITE"
+    },
+    "S00": {
+      "blocker": "isolated venv lacks torch, transformers, peft",
+      "exit_code": null,
+      "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
+      "status": "BLOCKED_ENVIRONMENT"
+    }
+  }
+}
