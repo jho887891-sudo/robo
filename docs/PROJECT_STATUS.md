@@ -1,18 +1,27 @@
 # RoboDojo / OpenVLA 项目状态（唯一日常交接入口）
 
-> 状态快照：2026-10-28。此文档是**项目索引**，不是无需核验的最新运行结果。
+> 状态快照：2026-10-29。此文档是**项目索引**，不是无需核验的最新运行结果。
 > 仓库：[`jho887891-sudo/robo`](https://github.com/jho887891-sudo/robo)。
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
-## R45-MNP 正式收官 + R46 下一步（2026-10-29，最新证据 `705e186d`）
+## R46 CPU-only Smoke 安全准备（2026-10-29，最新状态）
+
+- **实现分支**：`codex/r46-smoke-supervisor-20261029`，提交 `75b6a1f84d4af513472f20df5548117a5e908066`，基于 PR #51 head `ba563d0f8c638b089f588027dd0af41ff290e1f4`。代码已推送；状态与证据汇总在当前工作树，草稿 PR 待创建。
+- **VERIFIED CPU Gate**：在该精确提交的干净 Linux worktree 上，11/11 命令 exit 0，88/88 R44/R45/R46 CPU tests 通过。环境 Python 3.10.12、NumPy 1.26.4、Torch 2.5.1+cu124、Transformers 4.46.3、PEFT 0.13.2、h5py 3.16.0、OpenCV 4.13.0。证据：`evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f/`。
+- **真实样本计划**：固定 5 个真实 push_T TRAIN episode（1 warm-up + 4 measured），CPU reader/processor 输出 `[1,18,224,224]`、42D 特征、14 action token + STOP、HDF5 SHA 与严格 Manifest 一致；计划 SHA `67458ab3c6b23518c8616ec229ff62ed9af51d3d6bc817d54b21cdd109937d4f`。证据：`sample-freeze-final/`。该结果不是 GPU smoke 或吞吐验证。
+- **IMPLEMENTED**：外部审批校验、父进程 1800 秒硬上限、Linux 自有 session 信号清理、GPU UUID/资源独占准入、CUDA 前 OpenVLA 模型文件与索引重哈希、固定样本 runner 及 CPU 回归已实现。发现的 PDEATHSIG 与实际模型哈希缺口均保留 RED 日志并修复后通过。
+- **STOP_WAIT_GPU_APPROVAL**：现有审批 JSON 仍是 `template_only=true/approved=false`；没有 CUDA context、GPU Smoke/benchmark、正式训练或部署。7B 权重加载、forward/backward、显存及 GPU throughput 仍 UNKNOWN。R45 stable benchmark 仍 `BLOCKED_NOT_IMPLEMENTED`；R48 `NOT_RUN`。
+- **交付**：完整报告见 [`evidence/r46-cpu-20261029/AUDIT_REPORT.md`](../evidence/r46-cpu-20261029/AUDIT_REPORT.md)。此状态由本分支更新，未改 main。
+
+## R45-MNP 正式收官历史摘要（2026-10-29，证据 `705e186d`）
 
 - **E01 最终收官已在独立 evidence 分支入库**：[`evidence/r45-mnp-cpu-20261029@705e186d551c01490e45bfb642b3f56da68240fb`](https://github.com/jho887891-sudo/robo/tree/705e186d551c01490e45bfb642b3f56da68240fb/evidence/r45-mnp-evidence-20261029)。GitHub ref 已核对。新 `FINAL_REPORT.md` 与 `stage_status.json`（schema `v2`）明确覆盖旧中途快照，但保留 Git 历史。状态：`S00=PASS`, `M01=PASS`, `P01=PASS_CPU_GATE_ONLY`, `E01=PASS`；OpenVLA CPU 接口 `PASS_CPU_ONLY`；`N01` OFT 历史溯源 Gate 已移除；`N02=PARTIAL_PASS_PROVENANCE_UNKNOWN`。**未经授权没有 CUDA、真实 7B GPU 模型加载或训练**。
 - **E01 脱敏与校验审计**：`redaction_manifest.json`（v2）现明确记录原始 Manifest SHA `a220bd45e49c623c3a9f77dcf7460c95f8305909c05122e2d2a0556bff522ead` → 发布版本 SHA `d031308b3c9615a375d6d5c6008983a03fd110865a4cf5591e1f46a42eed6a84`，原始报告 `ccf6df41…` → 发布报告 `c4755b02…`，原始与发布各有独立 SHA256SUMS；发布端记录 `sha256sum -c exit=0`。**ChatGPT 直接对照公开 Manifest 的前一提交和本提交：300/300 文件 key 相同、300/300 嵌入的 HDF5 SHA 字段相同**；未直接读取服务器上未脱敏的原始 HDF5 或 Manifest 字节，因此不冒称独立验真全部私有原件。
 - **OpenCV/NumPy 真实样本核验**：`cpu-gate-rerun-20261029/opencv-numpy-real-sample/stdout.json`、`exit_code=0`：NumPy 1.26.4 / OpenCV 4.13.0 对 `push_T/episode_0000000.hdf5` t=2 三相机 JPEG 解码得到 3 个 RGB、contiguous `uint8`、`480×640×3`；仅证明该具体样本路径可用，不代表全数据或模型训练已验证。OpenCV distribution 元数据仍要求 NumPy>=2，风险记录保留。
 - **GPU 方案是计划，不是已实现的五样本执行入口**：新 [`GPU_SMOKE_PLAN.md`](https://github.com/jho887891-sudo/robo/blob/705e186d551c01490e45bfb642b3f56da68240fb/evidence/r45-mnp-evidence-20261029/GPU_SMOKE_PLAN.md) 提议固定一个 TRAIN 任务五样本（预热 1 + 测量 4）、真实 7B 权重加载、LoRA/42D 前向反向、30 分钟**独立父进程硬停止**和待批准的 42 GiB free/48 GiB total 门槛。现有 `diagnostics/r45_gpu_bench.py` 仍明确 `BLOCKED_NOT_IMPLEMENTED`。
 - **新增源码审计发现：不要从零假设没有真实 Smoke**。`diagnostics/r44_gpu_smoke.py` **已经实现**标准 OpenVLA-7B+LoRA+42D 的**单个可丢弃真实 GPU optimizer step**，包括 R45 三相机读取、权重哈希与显存日志；但**从未被本次 GPU 实测**，不满足新的 5 样本及严格 30 分钟进程级硬截止。其 `--max-wall-seconds` 只在部分阶段主动检查，没有父进程 timeout+SIGKILL；现有 GPU 资源检查与计划的新独占门槛也需统一。历史的代码实现 ≠ GPU Smoke PASS。
-- **唯一下一步 CPU-only 工作包**：[Issue #52 R46 标准 OpenVLA GPU Smoke 入口安全加固](https://github.com/jho887891-sudo/robo/issues/52)：复用 `r44_gpu_smoke.py`、补进程级硬停止/显存独占 fail-closed、固定五样本与测量证据、CPU-only 模拟/回归测试；独立代码 PR 后停在 `STOP_WAIT_GPU_APPROVAL`。**不运行 GPU、不修改 main、不重做 MNP，正式 5 Epoch 训练没有授权。**
+- **后续授权状态**：Issue #52 所要求的 R46 CPU-only 安全准备已经完成，详细结果见上方 R46 状态与审计报告。真实 GPU smoke 仍需研究负责人另行明确授权；正式 5 Epoch 训练没有授权。
 
 > 该节为最新状态，以下旧 R45-MNP 的中途 BLOCKED 和旧版 OFT 工单只保留历史语境，不是当前待办。
 
@@ -279,3 +288,14 @@ R45-E 完成并复核后，单独申请以下资源，**申请不等于授权**�
 ## 新会话恢复指令
 
 > 继续 `jho887891-sudo/robo` OpenVLA/RoboDojo 项目。请先通过 GitHub 读取根目录 `AGENTS.md` 和 `docs/PROJECT_STATUS.md`，核验其中 R44/R45 分支 HEAD 是否更新，按 VERIFIED / IMPLEMENTED / BLOCKED / HYPOTHESIS 接续唯一下一步。不要重做已留证通过的阶段；不改 main、不运行未经批准的 GPU/正式训练、不覆盖 HDF5/权重/检查点。只在研究关键决策时找我。
+## R46 初始实施快照（已被上方最终 CPU Gate 状态覆盖）
+
+> 以下记录是在 Linux POSIX Gate 和最后两项安全修复之前写的中间快照；“being finalized”及旧样本计划 SHA 不代表最终状态。最终结果、精确提交 SHA 与当前证据以本文开头 R46 节为准。
+
+- **Code scope:** isolated branch `codex/r46-smoke-supervisor-20261029`, based on PR #51 source `ba563d0f8c638b089f588027dd0af41ff290e1f4`. R44 training entrypoint and model target were not changed. Added the standard-template approval validator, POSIX parent supervisor, real OpenVLA five-sample child path, pure sample contract, and CPU tests.
+- **Frozen model contract:** standard OpenVLA-7B + frozen base, LoRA r=32 / alpha=16 on q_proj/v_proj, 42D projector, three cameras in baseline order, `joint_delta_v1`, five TRAIN samples (one warm-up + four measured), exactly five disposable optimizer steps, no checkpoint/model export.
+- **Real TRAIN sample set:** `config/r46_smoke_samples.json`, plan SHA `7497fd7ab39a69cbb4de55391dc29f954efb785abd34537a7096a908eacbb417`; generated on the Linux CPU host from the original strict manifest and split. Five unique `push_T` TRAIN episodes; actual HDF5 SHA, RGB decode, production processor output `(1,18,224,224)`, finite 42D feature and legal 14-token target verified. CPU freeze log reports `cuda_initialized=false`.
+- **CPU verification:** Windows pure unit tests passed; Linux server POSIX supervisor tests and R44/R45 regression suite are being finalized with `CUDA_VISIBLE_DEVICES=`. The final log directory and exact code SHA will be linked after the current run exits.
+- **Performance evidence:** R46 smoke runner is implemented but not run. No 7B weights were loaded and no GPU timings, memory, or throughput were collected. R45 `r45_gpu_bench.py` remains `BLOCKED_NOT_IMPLEMENTED`.
+- **Authorization boundary:** The supplied `r47-gpu-approval-template/v1` is only a template (`approved=false`). R47 is `STOP_WAIT_GPU_APPROVAL`; no CUDA/GPU Smoke, benchmark, formal training, or deployment was started. R48 is `NOT_RUN` because it requires real R47 GPU evidence.
+- **Approval identity field:** when a research lead completes `approved_model_sha_list`, it must bind the full static OpenVLA identity file list (config, processor/tokenizer metadata, index, and all three weight shards); the runtime rehashes every listed file and cross-checks the index before creating CUDA context.

@@ -32,10 +32,10 @@
 
 **Files:** Create `evidence/r46-cpu-20261029/AUDIT.md`, `evidence/r46-cpu-20261029/r46_audit.json`, and command/output/exit/SHA files.
 
-- [ ] Record exact source SHA and clean worktree state.
-- [ ] Map R44 smoke, formal trainer, reader, placeholder benchmark, and existing tests to functions/lines.
-- [ ] Record frozen model/data contract and the parent-timeout/five-sample gaps without changing implementation.
-- [ ] Run AST parse and the existing R45 runtime gate; preserve raw stdout/stderr and exit codes.
+- [x] Record exact source SHA and clean worktree state.
+- [x] Map R44 smoke, formal trainer, reader, placeholder benchmark, and existing tests to functions/lines.
+- [x] Record frozen model/data contract and the parent-timeout/five-sample gaps without changing implementation.
+- [x] Run AST parse and the existing R45 runtime gate; preserve raw stdout/stderr and exit codes.
 
 ### Task 2: Add CPU-tested approval and parent timeout supervisor
 
@@ -43,11 +43,11 @@
 
 **Interface:** `validate_approval(doc, *, source_sha, now_utc, requested_wall_seconds)` returns a normalized validated approval or raises `ApprovalError`. CLI accepts an approval path, exact source SHA, unique output directory, hard wall seconds, and a fixed R46 child entrypoint plus child arguments.
 
-- [ ] Test missing/invalid approval refuses before child marker creation and output directory creation.
-- [ ] Test source SHA, GPU UUID, time window, max duration, exclusivity, memory minima, model/manifest/sample hashes fail closed.
-- [ ] Test child normal exit, SIGINT handling, SIGINT ignored then SIGKILL, and output-dir collision under POSIX.
-- [ ] Implement append+fsync JSONL lifecycle events, child PID/PGID and return code, and final report even on timeout.
-- [ ] Run CPU tests on Windows and POSIX Linux; explicitly mark unsupported platform behavior if needed.
+- [x] Test missing/invalid approval refuses before child marker creation and output directory creation.
+- [x] Test source SHA, GPU UUID, time window, max duration, exclusivity, memory minima, model/manifest/sample hashes fail closed.
+- [x] Test child normal exit, SIGINT handling, SIGINT ignored then SIGKILL, and output-dir collision under POSIX.
+- [x] Implement append+fsync JSONL lifecycle events, child PID/PGID and return code, and final report even on timeout.
+- [x] Run CPU tests on Windows and POSIX Linux; explicitly mark unsupported platform behavior if needed.
 
 ### Task 3: Add fixed real TRAIN sample-plan contract and R46 smoke runner
 
@@ -55,20 +55,20 @@
 
 **Interface:** `validate_sample_plan(plan, *, manifest, train_index, expected_sha)` validates exactly five unique TRAIN records, one warmup/four measured, sample/HDF5 identities, camera/proprio/action contract, and plan SHA. Runner uses one warmup and four measured disposable optimizer updates and emits `report.json` and `samples.jsonl`; it must not persist weights/checkpoints.
 
-- [ ] CPU tests reject wrong roles, duplicate samples, DEV membership, bad file SHA, invalid dimensions/camera order, illegal token count, and altered frozen hyperparameters.
-- [ ] Add runner/report schema tests with injected CPU fakes; assert no torch CUDA API is invoked by tests.
-- [ ] Implement actual model path by reusing `R44.build_model`, R45 `RuntimeReader`, `build_prompt_ids`, and `build_runtime_labels`; keep all GPU calls behind child-only execution after supervisor admission.
-- [ ] On Linux CPU server, select/verify five actual TRAIN HDF5 samples against the already-attested strict manifest, decode all three cameras, and freeze the plan SHA. If server access or contracts fail, stop this task as BLOCKED; do not fabricate IDs.
+- [x] CPU tests reject wrong roles, duplicate samples, DEV membership, bad file SHA, invalid dimensions/camera order, illegal token count, and altered frozen hyperparameters.
+- [x] Add runner/report schema tests with injected CPU fakes; assert no torch CUDA API is invoked by tests.
+- [x] Implement actual model path by reusing `R44.build_model`, R45 `RuntimeReader`, `build_prompt_ids`, and `build_runtime_labels`; keep all GPU calls behind child-only execution after supervisor admission.
+- [x] On Linux CPU server, select/verify five actual TRAIN HDF5 samples against the already-attested strict manifest, decode all three cameras, and freeze the plan SHA. If server access or contracts fail, stop this task as BLOCKED; do not fabricate IDs.
 
 ### Task 4: Full CPU gate, docs, and GitHub delivery
 
 **Files:** Modify `.github/workflows/r45-runtime-cpu.yml`, `docs/PROJECT_STATUS.md`; add sanitized R46 evidence under `evidence/r46-cpu-20261029/`.
 
-- [ ] Run existing R45 tests plus new R46 tests and syntax checks with command/stdout/stderr/exit files tied to the final source SHA.
-- [ ] Verify `r45_gpu_bench.py` still returns `BLOCKED_NOT_IMPLEMENTED` and `r44_gpu_smoke.py` remains authorization-blocked without creating output/CUDA.
-- [ ] `git diff --check`; verify frozen contract files unchanged except required test/CI documentation.
-- [ ] Commit on this isolated branch, push, open a draft PR; never merge.
-- [ ] Stop at `STOP_WAIT_GPU_APPROVAL`. R47/R48 GPU-dependent tasks remain NOT_RUN until separate research-lead authorization.
+- [x] Run existing R45 tests plus new R46 tests and syntax checks with command/stdout/stderr/exit files tied to the final source SHA.
+- [x] Verify `r45_gpu_bench.py` still returns `BLOCKED_NOT_IMPLEMENTED` and `r44_gpu_smoke.py` remains authorization-blocked without creating output/CUDA.
+- [x] `git diff --check`; verify frozen contract files unchanged except required test/CI documentation.
+- [x] Commit on this isolated branch, push, open a draft PR; never merge.
+- [x] Stop at `STOP_WAIT_GPU_APPROVAL`. R47/R48 GPU-dependent tasks remain NOT_RUN until separate research-lead authorization.
 
 ## Integration ruling
 
