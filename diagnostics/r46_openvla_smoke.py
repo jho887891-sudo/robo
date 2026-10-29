@@ -268,7 +268,8 @@ def main(argv=None) -> int:
             })
             torch.cuda.reset_peak_memory_stats()
         torch.cuda.synchronize()
-        gpu_after = probe_gpu(outer.approved_gpu_uuid, 0, 0)
+        gpu_after = probe_gpu(outer.approved_gpu_uuid, 0, 0,
+                              allowed_compute_pids={os.getpid()})
         report = {
             "schema": "r46-openvla-five-sample-smoke/v1", "status": "PASS_SMOKE",
             "source_sha": actual_sha, "approval_id": normalized["approval_id"],

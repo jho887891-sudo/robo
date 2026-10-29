@@ -86,7 +86,9 @@ def validate_approval(doc: dict, *, source_sha: str, requested_wall_seconds: flo
     start = _parse_utc(doc["approved_window_start_iso8601"], "approved_window_start_iso8601")
     end = _parse_utc(doc["approved_window_end_iso8601"], "approved_window_end_iso8601")
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
-    if end <= start or not start <= now <= end:
+    if end <= start:
+        raise ApprovalError("approved GPU window end must be later than its start")
+    if not start <= now < end:
         raise ApprovalError("current time is outside the approved GPU window")
     try:
         approved_cap = float(doc["approved_max_wall_seconds"])
@@ -97,6 +99,8 @@ def validate_approval(doc: dict, *, source_sha: str, requested_wall_seconds: flo
             or approved_cap <= 0 or requested <= 0 or approved_cap > MAX_WALL_SECONDS \
             or requested > approved_cap or requested > MAX_WALL_SECONDS:
         raise ApprovalError("requested wall limit exceeds approval or the 1800 second hard ceiling")
+    if requested > (end - now).total_seconds():
+        raise ApprovalError("approved window cannot fit the full requested wall limit")
     if doc["require_exclusive_gpu"] is not True:
         raise ApprovalError("exclusive GPU mode must be explicitly true")
     if doc["allowed_operation"] != "FIVE_SAMPLE_SMOKE_ONLY":
@@ -227,7 +231,8 @@ def validate_smoke_args(argv: list[str]) -> list[str]:
 
 
 def probe_gpu(gpu_uuid: str, min_total_gib: float, min_free_gib: float,
-              *, timeout_seconds: float = 15.0) -> dict:
+              *, timeout_seconds: float = 15.0,
+              allowed_compute_pids: set[int] | frozenset[int] = frozenset()) -> dict:
     """Read GPU inventory using nvidia-smi only; never imports torch or creates CUDA."""
     command = ["nvidia-smi", "--query-gpu=uuid,memory.total,memory.free,utilization.gpu",
                "--format=csv,noheader,nounits"]
@@ -264,10 +269,32 @@ def probe_gpu(gpu_uuid: str, min_total_gib: float, min_free_gib: float,
     )
     if proc.returncode != 0:
         raise RuntimeError(f"GPU process inventory unavailable (exit {proc.returncode})")
-    active = [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+    if any(not isinstance(pid, int) or isinstance(pid, bool) or pid <= 0
+           for pid in allowed_compute_pids):
+        raise ValueError("allowed compute PID set contains an invalid PID")
+    observed = []
+    allowed = []
+    for line in proc.stdout.splitlines():
+        if not line.strip():
+            continue
+        row = next(csv.reader([line]))
+        if len(row) < 1:
+            raise RuntimeError("nvidia-smi returned an unparseable compute process row")
+        try:
+            pid = int(row[0].strip())
+        except ValueError as exc:
+            raise RuntimeError("nvidia-smi returned an unparseable compute process PID") from exc
+        record = {"pid": pid, "process_name": row[1].strip() if len(row) > 1 else ""}
+        observed.append(record)
+        if pid in allowed_compute_pids:
+            allowed.append(pid)
+    active = [row for row in observed if row["pid"] not in allowed_compute_pids]
     if active:
-        raise RuntimeError("exclusive GPU admission refused; compute processes exist: " + "; ".join(active))
-    return {"gpu": gpu, "active_compute_processes": active, "nvidia_smi_exit_code": 0}
+        details = "; ".join(f"{row['pid']}, {row['process_name']}" for row in active)
+        raise RuntimeError("exclusive GPU admission refused; compute processes exist: " + details)
+    return {"gpu": gpu, "active_compute_processes": [],
+            "allowed_compute_processes": sorted(allowed),
+            "observed_compute_processes": observed, "nvidia_smi_exit_code": 0}
 
 
 def _append_event(stream, events_path: Path, record: dict) -> None:

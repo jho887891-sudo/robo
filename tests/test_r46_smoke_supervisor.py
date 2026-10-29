@@ -116,6 +116,22 @@ class ApprovalTests(unittest.TestCase):
             validate_approval(doc, source_sha="a" * 40, requested_wall_seconds=90,
                               expected_hashes=expected_hashes(), now=datetime.now(timezone.utc))
 
+    def test_rejects_window_that_cannot_fit_the_requested_wall_budget(self):
+        now = datetime.now(timezone.utc)
+        doc = approval_doc(now)
+        doc["approved_window_end_iso8601"] = (now + timedelta(seconds=89)).isoformat()
+        with self.assertRaisesRegex(ApprovalError, "full requested wall limit"):
+            validate_approval(doc, source_sha="a" * 40, requested_wall_seconds=90,
+                              expected_hashes=expected_hashes(), now=now)
+
+    def test_accepts_exactly_fitting_wall_budget_at_window_boundary(self):
+        now = datetime.now(timezone.utc)
+        doc = approval_doc(now)
+        doc["approved_window_end_iso8601"] = (now + timedelta(seconds=90)).isoformat()
+        result = validate_approval(doc, source_sha="a" * 40, requested_wall_seconds=90,
+                                   expected_hashes=expected_hashes(), now=now)
+        self.assertEqual(result["requested_wall_seconds"], 90)
+
     def test_unmodified_published_template_is_not_an_approval(self):
         doc = approval_doc()
         doc["template_only"] = True
@@ -173,6 +189,28 @@ class AdmissionTests(unittest.TestCase):
         with patch("diagnostics.r46_smoke_supervisor.subprocess.run", side_effect=occupied):
             with self.assertRaisesRegex(RuntimeError, "compute processes exist"):
                 probe_gpu("GPU-test-uuid", 48, 42)
+
+    def test_gpu_probe_ignores_only_explicitly_allowed_current_process(self):
+        outputs = [
+            SimpleNamespace(returncode=0, stdout="GPU-test-uuid, 49152, 43008, 1\n", stderr=""),
+            SimpleNamespace(returncode=0, stdout=f"{os.getpid()}, python\n", stderr=""),
+        ]
+        with patch("diagnostics.r46_smoke_supervisor.subprocess.run", side_effect=outputs):
+            result = probe_gpu("GPU-test-uuid", 48, 42,
+                               allowed_compute_pids={os.getpid()})
+        self.assertEqual(result["active_compute_processes"], [])
+        self.assertEqual(result["allowed_compute_processes"], [os.getpid()])
+
+    def test_gpu_probe_still_rejects_other_process_when_current_pid_is_allowed(self):
+        outputs = [
+            SimpleNamespace(returncode=0, stdout="GPU-test-uuid, 49152, 43008, 1\n", stderr=""),
+            SimpleNamespace(returncode=0,
+                             stdout=f"{os.getpid()}, python\n999999, other-process\n", stderr=""),
+        ]
+        with patch("diagnostics.r46_smoke_supervisor.subprocess.run", side_effect=outputs):
+            with self.assertRaisesRegex(RuntimeError, "999999"):
+                probe_gpu("GPU-test-uuid", 48, 42,
+                          allowed_compute_pids={os.getpid()})
 
     def test_model_identity_checks_index_and_all_three_actual_shards(self):
         with tempfile.TemporaryDirectory() as td:
