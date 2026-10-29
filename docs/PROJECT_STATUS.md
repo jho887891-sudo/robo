@@ -5,6 +5,18 @@
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
+## R46 PR #53 独立源码审计（2026-10-30，CPU 证据 PASS，但 R47 仍 BLOCKED）
+
+- **实际 PR 状态**：[Draft PR #53](https://github.com/jho887891-sudo/robo/pull/53)，HEAD `934a59c68184de85549dae1cf193d94a4924b58d`，实现经 Linux 测试的 SHA `75b6a1f84d4af513472f20df5548117a5e908066`，两者间新增文件均是 evidence/文档（已用 GitHub compare 核对）；已有 `R46-A/B/C/D` 的执行端 CPU 证据、已创建 PR 的 `R46-E` 不应被等同真实 GPU 通过。
+- **CPU 证据可确认**：`evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f/` 中 11 个命令退出码都是 0，R44/R45/R46 原始 unittest stderr 报告 6+3+22+9+3+15+4+14+12=**88/88**；证据根 `SHA256SUMS` 列 255 行，字段语法符合哈希清单。此处从 GitHub 读取退出码/日志/清单，但未独立重算全部 255 项文件字节。固定 5 个 TRAIN 样本计划 SHA `67458ab3c6b23518c8616ec229ff62ed9af51d3d6bc817d54b21cdd109937d4f`，GPU 尚未执行。
+- **P0 代码阻塞 A：参数解析必失败**：`diagnostics/r46_openvla_smoke.py:99-103` 将 `--max-wall-seconds` 转交 `R44.parse_args`；`training/r44_train.py:850-898` 未定义该参数，使用严格 `parse_args`。因此 real child 走该路径时会报 unknown argument；88 项 CPU 测试没有覆盖真实 R46→R44 参数组合。
+- **P0 代码阻塞 B：运行后 GPU 快照自相矛盾**：`r46_openvla_smoke.py:259` 在 CUDA Smoke 之后调用 `probe_gpu(uuid,0,0)`；后者 `r46_smoke_supervisor.py:267-269` 对**任何** compute PID 都拒绝。若 nvidia-smi 显示该 Smoke 进程本身，它将错报外部占用而无法给出 PASS；必须区分运行前独占准入与运行后的自进程采样。
+- **P1 审批窗口边界不完整**：`r46_smoke_supervisor.py:89` 只校验当前时间在 `[start,end]`，未保证请求 1800 秒在批准窗口内完成，可能越窗执行；需检查剩余时间或取 min(deadline,approval_end)，并在启动前复核。
+- **待核实增强项**：父进程负责大模型分片 SHA 读取，若存储层读操作卡住，循环的单调时钟检查本身不能保证严格硬截止，需要单独监督该阶段或明确书面限界。
+- **唯一下一步**：参见 [PR #53 审计评论](https://github.com/jho887891-sudo/robo/pull/53#issuecomment-6502056092)。先 CPU-only 修复上面 3 项，加真实 R46→R44 参数回归、自己 PID/外部 PID 的 GPU 快照 CPU mock、审批窗口跨界拒绝；在新的干净实现 SHA 运行新一轮 Linux CPU Gate、发布原始证据，并审计。**R47 状态 `BLOCKED_CODE_REVIEW_AND_GPU_APPROVAL`，R48 `NOT_RUN`，无 CUDA/Smoke/Benchmark/训练授权。**
+
+> 本节覆盖下方旧“R46 正在开发”及 PR #53 先前声明“CPU 实现已完全就绪”等可能过时口径；不能因静态 CPU 测试 PASS 将代码运行时缺陷视为已解决。
+
 ## R45-MNP 正式收官 + R46 下一步（2026-10-29，最新证据 `705e186d`）
 
 - **E01 最终收官已在独立 evidence 分支入库**：[`evidence/r45-mnp-cpu-20261029@705e186d551c01490e45bfb642b3f56da68240fb`](https://github.com/jho887891-sudo/robo/tree/705e186d551c01490e45bfb642b3f56da68240fb/evidence/r45-mnp-evidence-20261029)。GitHub ref 已核对。新 `FINAL_REPORT.md` 与 `stage_status.json`（schema `v2`）明确覆盖旧中途快照，但保留 Git 历史。状态：`S00=PASS`, `M01=PASS`, `P01=PASS_CPU_GATE_ONLY`, `E01=PASS`；OpenVLA CPU 接口 `PASS_CPU_ONLY`；`N01` OFT 历史溯源 Gate 已移除；`N02=PARTIAL_PASS_PROVENANCE_UNKNOWN`。**未经授权没有 CUDA、真实 7B GPU 模型加载或训练**。
