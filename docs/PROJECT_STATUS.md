@@ -5,6 +5,17 @@
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
+## R45-MNP 正式收官 + R46 下一步（2026-10-29，最新证据 `705e186d`）
+
+- **E01 最终收官已在独立 evidence 分支入库**：[`evidence/r45-mnp-cpu-20261029@705e186d551c01490e45bfb642b3f56da68240fb`](https://github.com/jho887891-sudo/robo/tree/705e186d551c01490e45bfb642b3f56da68240fb/evidence/r45-mnp-evidence-20261029)。GitHub ref 已核对。新 `FINAL_REPORT.md` 与 `stage_status.json`（schema `v2`）明确覆盖旧中途快照，但保留 Git 历史。状态：`S00=PASS`, `M01=PASS`, `P01=PASS_CPU_GATE_ONLY`, `E01=PASS`；OpenVLA CPU 接口 `PASS_CPU_ONLY`；`N01` OFT 历史溯源 Gate 已移除；`N02=PARTIAL_PASS_PROVENANCE_UNKNOWN`。**未经授权没有 CUDA、真实 7B GPU 模型加载或训练**。
+- **E01 脱敏与校验审计**：`redaction_manifest.json`（v2）现明确记录原始 Manifest SHA `a220bd45e49c623c3a9f77dcf7460c95f8305909c05122e2d2a0556bff522ead` → 发布版本 SHA `d031308b3c9615a375d6d5c6008983a03fd110865a4cf5591e1f46a42eed6a84`，原始报告 `ccf6df41…` → 发布报告 `c4755b02…`，原始与发布各有独立 SHA256SUMS；发布端记录 `sha256sum -c exit=0`。**ChatGPT 直接对照公开 Manifest 的前一提交和本提交：300/300 文件 key 相同、300/300 嵌入的 HDF5 SHA 字段相同**；未直接读取服务器上未脱敏的原始 HDF5 或 Manifest 字节，因此不冒称独立验真全部私有原件。
+- **OpenCV/NumPy 真实样本核验**：`cpu-gate-rerun-20261029/opencv-numpy-real-sample/stdout.json`、`exit_code=0`：NumPy 1.26.4 / OpenCV 4.13.0 对 `push_T/episode_0000000.hdf5` t=2 三相机 JPEG 解码得到 3 个 RGB、contiguous `uint8`、`480×640×3`；仅证明该具体样本路径可用，不代表全数据或模型训练已验证。OpenCV distribution 元数据仍要求 NumPy>=2，风险记录保留。
+- **GPU 方案是计划，不是已实现的五样本执行入口**：新 [`GPU_SMOKE_PLAN.md`](https://github.com/jho887891-sudo/robo/blob/705e186d551c01490e45bfb642b3f56da68240fb/evidence/r45-mnp-evidence-20261029/GPU_SMOKE_PLAN.md) 提议固定一个 TRAIN 任务五样本（预热 1 + 测量 4）、真实 7B 权重加载、LoRA/42D 前向反向、30 分钟**独立父进程硬停止**和待批准的 42 GiB free/48 GiB total 门槛。现有 `diagnostics/r45_gpu_bench.py` 仍明确 `BLOCKED_NOT_IMPLEMENTED`。
+- **新增源码审计发现：不要从零假设没有真实 Smoke**。`diagnostics/r44_gpu_smoke.py` **已经实现**标准 OpenVLA-7B+LoRA+42D 的**单个可丢弃真实 GPU optimizer step**，包括 R45 三相机读取、权重哈希与显存日志；但**从未被本次 GPU 实测**，不满足新的 5 样本及严格 30 分钟进程级硬截止。其 `--max-wall-seconds` 只在部分阶段主动检查，没有父进程 timeout+SIGKILL；现有 GPU 资源检查与计划的新独占门槛也需统一。历史的代码实现 ≠ GPU Smoke PASS。
+- **唯一下一步 CPU-only 工作包**：[Issue #52 R46 标准 OpenVLA GPU Smoke 入口安全加固](https://github.com/jho887891-sudo/robo/issues/52)：复用 `r44_gpu_smoke.py`、补进程级硬停止/显存独占 fail-closed、固定五样本与测量证据、CPU-only 模拟/回归测试；独立代码 PR 后停在 `STOP_WAIT_GPU_APPROVAL`。**不运行 GPU、不修改 main、不重做 MNP，正式 5 Epoch 训练没有授权。**
+
+> 该节为最新状态，以下旧 R45-MNP 的中途 BLOCKED 和旧版 OFT 工单只保留历史语境，不是当前待办。
+
 ## R45-MNP 正式 CPU Gate 已完成（2026-10-29，现场证据审计 PASS）
 
 - **证据固定提交**：[`evidence/r45-mnp-cpu-20261029@d37da9023319a887a8f0cba4a5ccb1fa242dcbcc`](https://github.com/jho887891-sudo/robo/tree/d37da9023319a887a8f0cba4a5ccb1fa242dcbcc/evidence/r45-mnp-evidence-20261029/cpu-gate-rerun-20261029)。**执行源码完整 SHA**：`d5be4de94ea37f1d5a715d5d47b7ebb16e07b097`（从 clean detached worktree 的 `git_head.txt` / `code_sha.txt` 读取）；本次新提交是 evidence，并非训练源码变更。
