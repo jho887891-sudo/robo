@@ -25,10 +25,11 @@ run_case() {
   printf '%s exit=%s\n' "$name" "$rc"
 }
 run_case ast_parse -c 'import ast,pathlib; files=["training/r44_train.py","training/r45_data.py","training/r45_train.py","diagnostics/r46_smoke_supervisor.py","diagnostics/r46_smoke_contract.py","diagnostics/r46_openvla_smoke.py","diagnostics/r46_freeze_samples.py"]; [ast.parse(pathlib.Path(f).read_text()) for f in files]; print("AST_PARSE_PASS", len(files))'
-run_case py_compile -m py_compile diagnostics/r46_smoke_supervisor.py diagnostics/r46_smoke_contract.py diagnostics/r46_openvla_smoke.py diagnostics/r46_freeze_samples.py tests/test_r46_smoke_supervisor.py tests/test_r46_smoke_contract.py tests/test_r46_freeze_samples.py
+run_case py_compile -m py_compile diagnostics/r46_smoke_supervisor.py diagnostics/r46_smoke_contract.py diagnostics/r46_openvla_smoke.py diagnostics/r46_freeze_samples.py tests/test_r46_smoke_supervisor.py tests/test_r46_smoke_contract.py tests/test_r46_freeze_samples.py tests/test_r46_openvla_smoke_args.py
 run_case r46_contract -m unittest discover -s tests -p test_r46_smoke_contract.py -v
 run_case r46_freeze_tests -m unittest discover -s tests -p test_r46_freeze_samples.py -v
 run_case r46_supervisor -m unittest discover -s tests -p test_r46_smoke_supervisor.py -v
+run_case r46_openvla_args -m unittest discover -s tests -p test_r46_openvla_smoke_args.py -v
 run_case r45_runtime_gate -m unittest discover -s tests -p test_r45_runtime_gate.py -v
 run_case r45_toy_resume -m unittest discover -s tests -p test_r45_toy_resume.py -v
 run_case r44_delta tests/test_r44_delta_v1.py
