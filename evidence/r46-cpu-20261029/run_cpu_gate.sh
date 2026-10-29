@@ -15,7 +15,7 @@ PY=$R46_CPU_PYTHON
   echo "git_status=$(git status --porcelain=v2 --branch | tr '\n' ';')"
   "$PY" -c 'import sys,numpy,torch,transformers,peft,h5py,cv2; print("python",sys.version.replace("\\n"," ")); print("numpy",numpy.__version__); print("torch",torch.__version__); print("transformers",transformers.__version__); print("peft",peft.__version__); print("h5py",h5py.__version__); print("opencv",cv2.__version__)'
 } > "$E/environment.txt" 2> "$E/environment.stderr"
-sha256sum diagnostics/r46_smoke_supervisor.py diagnostics/r46_smoke_contract.py diagnostics/r46_openvla_smoke.py diagnostics/r46_freeze_samples.py tests/test_r46_smoke_supervisor.py tests/test_r46_smoke_contract.py tests/test_r46_freeze_samples.py config/r46_smoke_samples.json > "$E/source_SHA256SUMS"
+sha256sum training/r44_train.py diagnostics/r46_smoke_supervisor.py diagnostics/r46_smoke_contract.py diagnostics/r46_openvla_smoke.py diagnostics/r46_freeze_samples.py tests/test_r46_smoke_supervisor.py tests/test_r46_smoke_contract.py tests/test_r46_freeze_samples.py tests/test_r46_openvla_smoke_args.py config/r46_smoke_samples.json > "$E/source_SHA256SUMS"
 run_case() {
   name=$1; shift
   set +e
