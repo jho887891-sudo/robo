@@ -1,0 +1,9 @@
+git_head=ba563d0f8c638b089f588027dd0af41ff290e1f4
+git_status=# branch.oid ba563d0f8c638b089f588027dd0af41ff290e1f4;# branch.head (detached);? config/;? diagnostics/r46_freeze_samples.py;? diagnostics/r46_openvla_smoke.py;? diagnostics/r46_smoke_contract.py;? diagnostics/r46_smoke_supervisor.py;? diagnostics/test_r46_smoke_supervisor.py;? tests/test_r46_freeze_samples.py;? tests/test_r46_smoke_contract.py;? tests/test_r46_smoke_supervisor.py;
+python 3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]
+numpy 1.26.4
+torch 2.5.1+cu124
+transformers 4.46.3
+peft 0.13.2
+h5py 3.16.0
+opencv 4.13.0

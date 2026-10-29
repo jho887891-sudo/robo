@@ -1,0 +1,20 @@
+test_out_of_range_values_are_clipped_not_extrapolated (__main__.TestCodec) ... ok
+test_recover_action_adds_state_not_velocity (__main__.TestCodec) ... ok
+test_roundtrip_and_legal_tokens (__main__.TestCodec) ... ok
+test_degenerate_dimension_is_rejected (__main__.TestNormalizer) ... ok
+test_fit_is_train_only_and_hashed (__main__.TestNormalizer) ... ok
+test_legacy_residual_payload_is_refused (__main__.TestNormalizer) ... ok
+test_refuse_legacy_checkpoint_metadata (__main__.TestNormalizer) ... ok
+test_tampering_breaks_the_hash (__main__.TestNormalizer) ... ok
+test_too_few_rows_rejected (__main__.TestNormalizer) ... ok
+test_wrong_schema_and_token_window_are_rejected_even_with_recomputed_hash (__main__.TestNormalizer) ... ok
+test_deterministic_and_epoch_dependent (__main__.TestSampler) ... ok
+test_epoch_is_a_complete_permutation (__main__.TestSampler) ... ok
+test_delta_is_action_minus_state (__main__.TestTarget) ... ok
+test_non_finite_rejected (__main__.TestTarget) ... ok
+test_step_contract_requires_bit_exact (__main__.TestTarget) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.126s
+
+OK

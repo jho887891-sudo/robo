@@ -1,0 +1,40 @@
+Using ARX constants:
+  NUM_ACTIONS_CHUNK = 25
+  ACTION_DIM = 14
+  PROPRIO_DIM = 14
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+{
+  "candidate_failures_before_five": [],
+  "cuda_initialized": false,
+  "plan": "/tmp/r46-cpu-sample-freeze-20261029T152624Z/r46_smoke_samples.json",
+  "sample_plan_sha256": "67458ab3c6b23518c8616ec229ff62ed9af51d3d6bc817d54b21cdd109937d4f",
+  "selected": [
+    {
+      "episode": "episode_0000003.hdf5",
+      "role": "warmup",
+      "t": 121
+    },
+    {
+      "episode": "episode_0000000.hdf5",
+      "role": "measured",
+      "t": 313
+    },
+    {
+      "episode": "episode_0000036.hdf5",
+      "role": "measured",
+      "t": 49
+    },
+    {
+      "episode": "episode_0000044.hdf5",
+      "role": "measured",
+      "t": 58
+    },
+    {
+      "episode": "episode_0000032.hdf5",
+      "role": "measured",
+      "t": 74
+    }
+  ],
+  "status": "CPU_SAMPLE_PLAN_FROZEN"
+}

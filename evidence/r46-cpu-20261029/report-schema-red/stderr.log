@@ -1,0 +1,21 @@
+test_r46_smoke_contract (unittest.loader._FailedTest.test_r46_smoke_contract) ... ERROR
+
+======================================================================
+ERROR: test_r46_smoke_contract (unittest.loader._FailedTest.test_r46_smoke_contract)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_r46_smoke_contract
+Traceback (most recent call last):
+  File "C:\Users\abcd1\AppData\Local\Programs\Python\Python311\Lib\unittest\loader.py", line 419, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\abcd1\AppData\Local\Programs\Python\Python311\Lib\unittest\loader.py", line 362, in _get_module_from_name
+    __import__(name)
+  File "E:\temp\robo-r46-wt\evidence\r46-cpu-20261029\report-schema-red\tests\test_r46_smoke_contract.py", line 11, in <module>
+    from diagnostics.r46_smoke_contract import (  # noqa: E402
+ImportError: cannot import name 'validate_smoke_report' from 'diagnostics.r46_smoke_contract' (E:\temp\robo-r46-wt\evidence\r46-cpu-20261029\report-schema-red\diagnostics\r46_smoke_contract.py)
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

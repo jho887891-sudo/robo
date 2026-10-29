@@ -1,0 +1,19 @@
+test_budget_includes_train_dev_load_and_margin (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_budget_rejects_invalid_counts (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_budget_rejects_negative_margin (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_budget_rejects_nonfinite_timing_values (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_formal_defaults_are_five_epochs_and_early_stopping_disabled (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_frozen_lora_hyperparameters_match_project_contract (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_gpu_smoke_requires_explicit_authorization_before_any_runtime_setup (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_label_block_masks_prompt_and_supervises_14_tokens_plus_stop (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_label_block_rejects_illegal_token (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_label_block_rejects_wrong_action_length (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_multitask_image_loader_uses_frozen_three_camera_order (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_resume_contract_pins_source_data_and_schedule (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_task_episode_names_preserves_task_qualification (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_verify_files_unchanged_detects_content_change_with_same_size_and_mtime (test_r44_train_core.R44TrainerCoreTests) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.025s
+
+OK

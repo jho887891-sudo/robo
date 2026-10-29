@@ -1,0 +1,9 @@
+test_accepts_exactly_one_warmup_and_four_distinct_train_episodes (test_r46_smoke_contract.SamplePlanTests) ... ok
+test_rejects_changed_source_contract_camera_order_and_label_shape (test_r46_smoke_contract.SamplePlanTests) ... ok
+test_rejects_dev_sample_and_duplicate_identity (test_r46_smoke_contract.SamplePlanTests) ... ok
+test_rejects_manifest_file_sha_split_sha_and_plan_digest_mismatch (test_r46_smoke_contract.SamplePlanTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.012s
+
+OK

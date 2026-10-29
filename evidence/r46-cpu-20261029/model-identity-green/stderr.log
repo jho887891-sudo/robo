@@ -1,0 +1,27 @@
+test_gpu_probe_accepts_only_matching_uuid_memory_and_no_compute_users (test_r46_smoke_supervisor.AdmissionTests) ... ok
+test_gpu_probe_refuses_wrong_uuid_low_memory_and_compute_occupancy (test_r46_smoke_supervisor.AdmissionTests) ... ok
+test_model_identity_checks_index_and_all_three_actual_shards (test_r46_smoke_supervisor.AdmissionTests) ... ok
+test_accepts_complete_in_window_approval_and_freezes_contract (test_r46_smoke_supervisor.ApprovalTests) ... ok
+test_only_frozen_input_paths_may_be_forwarded_to_smoke (test_r46_smoke_supervisor.ApprovalTests) ... ok
+test_rejects_budget_over_1800_and_live_training_authorization (test_r46_smoke_supervisor.ApprovalTests) ... ok
+test_rejects_missing_approval_fields_and_wrong_sha (test_r46_smoke_supervisor.ApprovalTests) ... ok
+test_rejects_out_of_window_wrong_hash_or_nonexclusive_resource_contract (test_r46_smoke_supervisor.ApprovalTests) ... ok
+test_rejects_unknown_approval_fields (test_r46_smoke_supervisor.ApprovalTests) ... ok
+test_rejects_wrong_approved_model_shard_identity (test_r46_smoke_supervisor.ApprovalTests) ... ok
+test_unmodified_published_template_is_not_an_approval (test_r46_smoke_supervisor.ApprovalTests) ... ok
+test_child_start_failure_still_writes_final_report (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_cli_without_approval_refuses_before_gpu_probe_child_or_output (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_cooperative_sigint_is_recorded_without_sigkill (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_deadline_sends_sigint_then_sigkill_only_to_owned_process_group (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_gpu_admission_failure_leaves_parent_owned_blocked_evidence (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_normal_child_exit_is_recorded_with_logs_and_unique_evidence (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_normal_exit_cleans_descendants_left_in_owned_session (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_output_collision_refuses_without_overwriting_existing_files (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_parent_verifies_on_disk_model_identity_before_gpu_admission (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_smoke_child_direct_invocation_refuses_before_torch_import (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+test_timeout_does_not_signal_unrelated_process_group (test_r46_smoke_supervisor.ParentSupervisorTests) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 2.799s
+
+OK

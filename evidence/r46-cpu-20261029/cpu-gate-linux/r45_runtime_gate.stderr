@@ -1,0 +1,14 @@
+test_refuses_both_unauthorized_and_placeholder_mode (test_r45_runtime_gate.TestBenchmarkRefusal) ... ok
+test_dev_reader_explicitly_bound_at_callsite (test_r45_runtime_gate.TestFormalTrainerWiring) ... ok
+test_fake_cpu_trainer_only_and_safe_stop_cursor (test_r45_runtime_gate.TestFormalTrainerWiring) ... ok
+test_train_reader_result_and_full_sample_timer (test_r45_runtime_gate.TestFormalTrainerWiring) ... ok
+test_formal_train_disables_unique_sample_cache (test_r45_runtime_gate.TestR45ZeroHitPolicy) ... ok
+test_smoke_refuses_without_explicit_authorization_or_cuda (test_r45_runtime_gate.TestR45ZeroHitPolicy) ... ok
+test_smoke_uses_real_formal_reader_and_closes_it (test_r45_runtime_gate.TestR45ZeroHitPolicy) ... ok
+test_hdf5_handles_evicted_and_closed (test_r45_runtime_gate.TestRuntimeReader) ... ok
+test_image_cache_hit_has_zero_read_and_decode_time (test_r45_runtime_gate.TestRuntimeReader) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.483s
+
+OK
