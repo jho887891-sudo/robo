@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from pathlib import Path
 
 SCHEMA = "r46-smoke-samples/v1"
@@ -152,3 +153,51 @@ def validate_sample_plan(plan: dict, *, split_doc: dict, manifest: dict,
                 raise SamplePlanError(f"sample {index}: cannot validate HDF5 structure: {exc}") from exc
     return {"sample_count": 5, "roles": roles, "unique_episodes": len(episodes),
             "sample_plan_sha256": plan["sample_plan_sha256"], "status": "CPU_SAMPLE_CONTRACT_PASS"}
+
+
+def validate_smoke_report(report: dict) -> dict:
+    """Validate report structure/scope without treating schema fixtures as GPU evidence."""
+    if not isinstance(report, dict) or report.get("schema") != "r46-openvla-five-sample-smoke/v1" \
+            or report.get("status") != "PASS_SMOKE":
+        raise SamplePlanError("smoke report schema or status is invalid")
+    if report.get("optimizer_steps_executed") != 5 or report.get("warmup_count") != 1 \
+            or report.get("measured_count") != 4:
+        raise SamplePlanError("smoke report must contain exactly five steps: one warmup and four measured")
+    if report.get("throughput_scope") != "preliminary_smoke_only_not_stable_training_throughput" \
+            or report.get("throughput_excludes_model_load") is not True \
+            or report.get("throughput_excludes_warmup_sample") is not True:
+        raise SamplePlanError("smoke report throughput must exclude load/warmup and remain preliminary")
+    if report.get("formal_training") is not False or report.get("weights_exported") is not False \
+            or report.get("checkpoint_exported") is not False \
+            or report.get("optimizer_state_exported") is not False:
+        raise SamplePlanError("smoke report must describe disposable smoke without exports or formal training")
+    samples = report.get("samples")
+    if not isinstance(samples, list) or len(samples) != 5:
+        raise SamplePlanError("smoke report must contain exactly five sample records")
+    expected_roles = FROZEN_CONTRACT["roles"]
+    timing_fields = {"hdf5_read_s", "jpeg_preprocess_s", "state_label_s", "host_to_gpu_s",
+                     "forward_s", "backward_s", "optimizer_s", "end_to_end_s"}
+    memory_fields = {"peak_allocated_gib", "peak_reserved_gib"}
+    for index, row in enumerate(samples):
+        if not isinstance(row, dict) or row.get("role") != expected_roles[index] \
+                or row.get("exit_status") != "PASS_STEP":
+            raise SamplePlanError(f"smoke report sample {index} role or step status is invalid")
+        for group, required in (("latency", timing_fields), ("memory", memory_fields)):
+            values = row.get(group)
+            if not isinstance(values, dict) or not required <= set(values):
+                raise SamplePlanError(f"smoke report sample {index} has incomplete {group} metrics")
+            for field in required:
+                value = values[field]
+                if not isinstance(value, (int, float)) or isinstance(value, bool) \
+                        or not math.isfinite(value) or value < 0:
+                    raise SamplePlanError(f"smoke report sample {index} has invalid {group}.{field}")
+        for field in ("loss", "grad_norm"):
+            value = row.get(field)
+            if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value):
+                raise SamplePlanError(f"smoke report sample {index} has invalid {field}")
+    throughput = report.get("smoke_interval_samples_per_second_excludes_model_load_and_warmup")
+    if not isinstance(throughput, (int, float)) or isinstance(throughput, bool) \
+            or not math.isfinite(throughput) or throughput <= 0:
+        raise SamplePlanError("smoke report preliminary throughput must be finite and positive")
+    return {"status": "CPU_REPORT_SCHEMA_VALID", "sample_count": len(samples),
+            "warmup_count": 1, "measured_count": 4}

@@ -66,7 +66,7 @@ def main(argv=None) -> int:
             _read_json as read_object, probe_gpu, sha256_file, validate_approval,
             model_identity_sha_list, verify_model_identity,
         )
-        from diagnostics.r46_smoke_contract import validate_sample_plan
+        from diagnostics.r46_smoke_contract import validate_sample_plan, validate_smoke_report
         actual_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO,
                                     capture_output=True, text=True, timeout=5, check=True).stdout.strip()
         if actual_sha != outer.source_sha:
@@ -280,6 +280,7 @@ def main(argv=None) -> int:
                                 "train_samples_sha256": cpu_plan["train_samples_sha256"],
                                 "dev_samples_sha256": cpu_plan["dev_samples_sha256"]},
         }
+        validate_smoke_report(report)
         out = Path(outer.out).resolve()
         phase = "write_success_report"
         out.mkdir(parents=True, exist_ok=False)

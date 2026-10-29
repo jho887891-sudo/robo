@@ -14,6 +14,7 @@ from diagnostics.r46_smoke_contract import (  # noqa: E402
     SELECTION_SOURCE_SHA,
     SamplePlanError,
     canonical_plan_sha256,
+    validate_smoke_report,
     validate_sample_plan,
 )
 
@@ -169,6 +170,45 @@ class SamplePlanTests(unittest.TestCase):
             plan["samples"][0]["t"] += 1
             with self.assertRaisesRegex(SamplePlanError, "plan SHA256"):
                 self.validate(plan, splits, manifest, split_sha, manifest_sha, root)
+
+
+class SmokeReportSchemaTests(unittest.TestCase):
+    def fixture_report(self):
+        latency = {key: 0.01 for key in (
+            "hdf5_read_s", "jpeg_preprocess_s", "state_label_s", "host_to_gpu_s",
+            "forward_s", "backward_s", "optimizer_s", "end_to_end_s",
+        )}
+        memory = {"peak_allocated_gib": 1.0, "peak_reserved_gib": 1.5}
+        return {
+            "schema": "r46-openvla-five-sample-smoke/v1", "status": "PASS_SMOKE",
+            "optimizer_steps_executed": 5, "warmup_count": 1, "measured_count": 4,
+            "throughput_scope": "preliminary_smoke_only_not_stable_training_throughput",
+            "smoke_interval_samples_per_second_excludes_model_load_and_warmup": 1.0,
+            "throughput_excludes_model_load": True, "throughput_excludes_warmup_sample": True,
+            "weights_exported": False, "checkpoint_exported": False,
+            "optimizer_state_exported": False, "formal_training": False,
+            "samples": [
+                {"role": "warmup" if index == 0 else "measured", "exit_status": "PASS_STEP",
+                 "latency": dict(latency), "memory": dict(memory), "loss": 1.0, "grad_norm": 0.5}
+                for index in range(5)
+            ],
+        }
+
+    def test_accepts_synthetic_cpu_fixture_with_five_step_scope(self):
+        # This validates JSON structure only; it never runs or claims a GPU smoke.
+        checked = validate_smoke_report(self.fixture_report())
+        self.assertEqual(checked["sample_count"], 5)
+        self.assertEqual(checked["status"], "CPU_REPORT_SCHEMA_VALID")
+
+    def test_rejects_incomplete_or_semantically_expanded_smoke_report(self):
+        report = self.fixture_report()
+        report["optimizer_steps_executed"] = 4
+        with self.assertRaisesRegex(SamplePlanError, "exactly five"):
+            validate_smoke_report(report)
+        report = self.fixture_report()
+        report["formal_training"] = True
+        with self.assertRaisesRegex(SamplePlanError, "disposable smoke"):
+            validate_smoke_report(report)
 
 
 if __name__ == "__main__":
