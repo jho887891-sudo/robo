@@ -1,0 +1,449 @@
+{
+  "contract": {
+    "action_dim": 14,
+    "action_target": "joint_delta_v1",
+    "camera_order": [
+      "cam_head",
+      "cam_left_wrist",
+      "cam_right_wrist"
+    ],
+    "lora": {
+      "alpha": 16,
+      "dropout": 0.0,
+      "r": 32,
+      "target_modules": [
+        "q_proj",
+        "v_proj"
+      ]
+    },
+    "model": "OpenVLA-7B",
+    "optimizer_steps": 5,
+    "processor_output_shape": [
+      1,
+      18,
+      224,
+      224
+    ],
+    "proprio_dim": 42,
+    "roles": [
+      "warmup",
+      "measured",
+      "measured",
+      "measured",
+      "measured"
+    ],
+    "stop_token_id": 2
+  },
+  "manifest_sha256": "a220bd45e49c623c3a9f77dcf7460c95f8305909c05122e2d2a0556bff522ead",
+  "sample_count": 5,
+  "sample_plan_sha256": "67458ab3c6b23518c8616ec229ff62ed9af51d3d6bc817d54b21cdd109937d4f",
+  "samples": [
+    {
+      "action_token_ids": [
+        31871,
+        31883,
+        31873,
+        31895,
+        31868,
+        31873,
+        31871,
+        31818,
+        31881,
+        31872,
+        31890,
+        31899,
+        31832,
+        31871
+      ],
+      "camera_order": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "cpu_decoded_rgb_shapes": [
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ]
+      ],
+      "cpu_reader_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "cpu_reader_timing": {
+        "cache_hit": false,
+        "cpu_tensor_preparation_s": 0.04036522563546896,
+        "cpu_to_gpu_s": 0.0,
+        "hdf5_read_s": 0.002167633268982172,
+        "jpeg_preprocess_s": 0.492522228974849,
+        "timing_kind": "host_wall_no_cuda_event",
+        "transfer_device": "cpu"
+      },
+      "episode": "episode_0000003.hdf5",
+      "hdf5_sha256": "a12f3b2836465fbb3d0d5453ddf9c902730563554390219b282220114634061f",
+      "image_colorspace": "RGB",
+      "image_dtype": "uint8",
+      "image_shape": [
+        480,
+        640,
+        3
+      ],
+      "order_index": 0,
+      "processor_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "prompt_labels_ignored": true,
+      "proprio_shape": [
+        1,
+        42
+      ],
+      "role": "warmup",
+      "stop_token_id": 2,
+      "t": 121,
+      "task": "push_T"
+    },
+    {
+      "action_token_ids": [
+        31871,
+        31883,
+        31873,
+        31895,
+        31868,
+        31873,
+        31871,
+        31873,
+        31883,
+        31873,
+        31899,
+        31870,
+        31863,
+        31871
+      ],
+      "camera_order": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "cpu_decoded_rgb_shapes": [
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ]
+      ],
+      "cpu_reader_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "cpu_reader_timing": {
+        "cache_hit": false,
+        "cpu_tensor_preparation_s": 0.04125579632818699,
+        "cpu_to_gpu_s": 0.0,
+        "hdf5_read_s": 0.0021917326375842094,
+        "jpeg_preprocess_s": 0.39642150001600385,
+        "timing_kind": "host_wall_no_cuda_event",
+        "transfer_device": "cpu"
+      },
+      "episode": "episode_0000000.hdf5",
+      "hdf5_sha256": "12c098bb1f5d4d184909f2a9580b5ce36af89b276c4a56bd46e8978051b3ccaf",
+      "image_colorspace": "RGB",
+      "image_dtype": "uint8",
+      "image_shape": [
+        480,
+        640,
+        3
+      ],
+      "order_index": 1,
+      "processor_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "prompt_labels_ignored": true,
+      "proprio_shape": [
+        1,
+        42
+      ],
+      "role": "measured",
+      "stop_token_id": 2,
+      "t": 313,
+      "task": "push_T"
+    },
+    {
+      "action_token_ids": [
+        31800,
+        31897,
+        31895,
+        31893,
+        31855,
+        31843,
+        31871,
+        31870,
+        31887,
+        31875,
+        31901,
+        31873,
+        31867,
+        31871
+      ],
+      "camera_order": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "cpu_decoded_rgb_shapes": [
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ]
+      ],
+      "cpu_reader_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "cpu_reader_timing": {
+        "cache_hit": false,
+        "cpu_tensor_preparation_s": 0.04129107017070055,
+        "cpu_to_gpu_s": 0.0,
+        "hdf5_read_s": 0.001992677804082632,
+        "jpeg_preprocess_s": 0.4331414829939604,
+        "timing_kind": "host_wall_no_cuda_event",
+        "transfer_device": "cpu"
+      },
+      "episode": "episode_0000036.hdf5",
+      "hdf5_sha256": "fae8fb67757d76b13ccc6f19988ae564ef68d8adfaf748b037977c8a0b6b4078",
+      "image_colorspace": "RGB",
+      "image_dtype": "uint8",
+      "image_shape": [
+        480,
+        640,
+        3
+      ],
+      "order_index": 2,
+      "processor_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "prompt_labels_ignored": true,
+      "proprio_shape": [
+        1,
+        42
+      ],
+      "role": "measured",
+      "stop_token_id": 2,
+      "t": 49,
+      "task": "push_T"
+    },
+    {
+      "action_token_ids": [
+        31818,
+        31867,
+        31873,
+        31905,
+        31814,
+        31801,
+        31871,
+        31870,
+        31887,
+        31875,
+        31901,
+        31873,
+        31867,
+        31871
+      ],
+      "camera_order": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "cpu_decoded_rgb_shapes": [
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ]
+      ],
+      "cpu_reader_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "cpu_reader_timing": {
+        "cache_hit": false,
+        "cpu_tensor_preparation_s": 0.046614880207926035,
+        "cpu_to_gpu_s": 0.0,
+        "hdf5_read_s": 0.002298917155712843,
+        "jpeg_preprocess_s": 0.43469498213380575,
+        "timing_kind": "host_wall_no_cuda_event",
+        "transfer_device": "cpu"
+      },
+      "episode": "episode_0000044.hdf5",
+      "hdf5_sha256": "de1a63ab5482a7fbef757be56fe8b1931298258189f56dd74db0bca5747746c0",
+      "image_colorspace": "RGB",
+      "image_dtype": "uint8",
+      "image_shape": [
+        480,
+        640,
+        3
+      ],
+      "order_index": 3,
+      "processor_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "prompt_labels_ignored": true,
+      "proprio_shape": [
+        1,
+        42
+      ],
+      "role": "measured",
+      "stop_token_id": 2,
+      "t": 58,
+      "task": "push_T"
+    },
+    {
+      "action_token_ids": [
+        31812,
+        31909,
+        31924,
+        31891,
+        31854,
+        31815,
+        31871,
+        31870,
+        31887,
+        31875,
+        31901,
+        31873,
+        31867,
+        31871
+      ],
+      "camera_order": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "cpu_decoded_rgb_shapes": [
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ],
+        [
+          480,
+          640,
+          3
+        ]
+      ],
+      "cpu_reader_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "cpu_reader_timing": {
+        "cache_hit": false,
+        "cpu_tensor_preparation_s": 0.03279191115871072,
+        "cpu_to_gpu_s": 0.0,
+        "hdf5_read_s": 0.0023230277001857758,
+        "jpeg_preprocess_s": 0.45372849330306053,
+        "timing_kind": "host_wall_no_cuda_event",
+        "transfer_device": "cpu"
+      },
+      "episode": "episode_0000032.hdf5",
+      "hdf5_sha256": "dadde4b632a990a1440157c3186398dacf9edafcf7d079ec7386dce2d0500722",
+      "image_colorspace": "RGB",
+      "image_dtype": "uint8",
+      "image_shape": [
+        480,
+        640,
+        3
+      ],
+      "order_index": 4,
+      "processor_output_shape": [
+        1,
+        18,
+        224,
+        224
+      ],
+      "prompt_labels_ignored": true,
+      "proprio_shape": [
+        1,
+        42
+      ],
+      "role": "measured",
+      "stop_token_id": 2,
+      "t": 74,
+      "task": "push_T"
+    }
+  ],
+  "schema": "r46-smoke-samples/v1",
+  "seed": 0,
+  "selection_algorithm": "sha256('0|push_T|episode') order; frame index from sha256('0|push_T|episode') modulo valid TRAIN time indices",
+  "selection_tool_sha256": "bd703b5e6548d964cf81bb49b74dab6ef6008ff1c01afd54bdcb89cf3f58cf0f",
+  "source_sha": "ba563d0f8c638b089f588027dd0af41ff290e1f4",
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "task": "push_T"
+}
