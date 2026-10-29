@@ -1,15 +1,17 @@
 {
   "schema": "r46-r47-r48-spec-status-template/v1",
   "purpose": "CPU_IMPLEMENTATION_EVIDENCE_ONLY",
-  "source_sha": "75b6a1f84d4af513472f20df5548117a5e908066",
-  "implementation_commit_sha": "75b6a1f84d4af513472f20df5548117a5e908066",
+  "source_sha": "b7b32790ece97c560b1164eb96b472aa26c9dbde",
+  "implementation_commit_sha": "b7b32790ece97c560b1164eb96b472aa26c9dbde",
   "sample_plan_sha256": "67458ab3c6b23518c8616ec229ff62ed9af51d3d6bc817d54b21cdd109937d4f",
   "cpu_gate": {
     "status": "PASS_CPU_ONLY",
-    "commands": 11,
+    "commands": 12,
     "command_failures": 0,
-    "tests_passed": 88,
-    "evidence": "evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f"
+    "tests_passed": 93,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "evidence": "evidence/r46-cpu-20261029/linux-final-b7b3279"
   },
   "r45_mnp_cpu_gate": "PASS_FROM_EXISTING_EVIDENCE",
   "stages": {
@@ -34,14 +36,14 @@
     "R46-D": {
       "status": "VERIFIED",
       "exit_code": 0,
-      "evidence": "evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f",
-      "decision": "CPU_GATE_11_COMMANDS_88_TESTS_PASS"
+      "evidence": "evidence/r46-cpu-20261029/linux-final-b7b3279",
+      "decision": "FINAL_LINUX_CPU_GATE_12_COMMANDS_93_TESTS_PASS"
     },
     "R46-E": {
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "exit_code": 0,
-      "evidence": "evidence/r46-cpu-20261029/review-fixes-beca55e",
-      "decision": "GPU_PID_AND_APPROVAL_WINDOW_CPU_REGRESSIONS_PASS_LINUX_GATE_PENDING",
+      "evidence": "evidence/r46-cpu-20261029/linux-final-b7b3279",
+      "decision": "REVIEW_FIXES_AND_FINAL_LINUX_CPU_GATE_PASS",
       "pr": "https://github.com/jho887891-sudo/robo/pull/53"
     },
     "R47-1": {
@@ -103,11 +105,26 @@
   },
   "latest_cpu_fix": {
     "commit": "beca55e633c27fea152d3db4aac0eb9ab2ba2c2a",
-    "commands": 5,
+    "commands": 12,
     "command_failures": 0,
-    "tests_passed": 25,
+    "tests_passed": 93,
     "posix_only_skipped": 11,
-    "evidence": "evidence/r46-cpu-20261029/review-fixes-beca55e",
-    "linux_server": "BLOCKED_SSH_TIMEOUT"
+    "evidence": "evidence/r46-cpu-20261029/linux-final-b7b3279",
+    "linux_server": "PASS",
+    "linux_gate_sha": "b7b32790ece97c560b1164eb96b472aa26c9dbde",
+    "tests_skipped": 0,
+    "status": "PASS_CPU_ONLY"
+  },
+  "final_linux_gate": {
+    "code_sha": "b7b32790ece97c560b1164eb96b472aa26c9dbde",
+    "worktree": "/tmp/robo-r46-gate-b7b3279",
+    "commands": 12,
+    "exit_code": 0,
+    "tests_passed": 93,
+    "tests_skipped": 0,
+    "cuda_visible_devices": "",
+    "gpu_smoke": "NOT_RUN",
+    "training": "NOT_RUN",
+    "source_hashes_verified": 10
   }
 }

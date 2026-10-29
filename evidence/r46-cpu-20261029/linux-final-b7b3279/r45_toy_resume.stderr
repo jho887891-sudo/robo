@@ -1,0 +1,8 @@
+test_resume_at_mid_epoch_matches_uninterrupted_optimizer_and_weights (test_r45_toy_resume.TestToyStopResume) ... ok
+test_resume_rejects_changed_normalizer (test_r45_toy_resume.TestToyStopResume) ... ok
+test_tail_batch_produces_optimizer_step_and_valid_checkpoint (test_r45_toy_resume.TestToyStopResume) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 23.299s
+
+OK

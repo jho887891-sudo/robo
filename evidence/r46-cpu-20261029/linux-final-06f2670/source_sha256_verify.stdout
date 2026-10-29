@@ -1,0 +1,8 @@
+diagnostics/r46_smoke_supervisor.py: OK
+diagnostics/r46_smoke_contract.py: OK
+diagnostics/r46_openvla_smoke.py: OK
+diagnostics/r46_freeze_samples.py: OK
+tests/test_r46_smoke_supervisor.py: OK
+tests/test_r46_smoke_contract.py: OK
+tests/test_r46_freeze_samples.py: OK
+config/r46_smoke_samples.json: OK

@@ -1,0 +1,62 @@
+test_bench_refuses_without_approval (test_r45_pipeline.TestBudgetGuard) ... ok
+test_guard_expires (test_r45_pipeline.TestBudgetGuard) ... ok
+test_cache_is_bounded (test_r45_pipeline.TestDataset) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:23: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/robo-r46-gate-b7b3279/data/m2_splits.json' mode='r' encoding='UTF-8'>
+  doc = json.load(open(SPLITS))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_item_contract (test_r45_pipeline.TestDataset) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:23: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/robo-r46-gate-b7b3279/data/m2_splits.json' mode='r' encoding='UTF-8'>
+  doc = json.load(open(SPLITS))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_order_is_deterministic_and_epoch_dependent (test_r45_pipeline.TestDataset) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:23: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/robo-r46-gate-b7b3279/data/m2_splits.json' mode='r' encoding='UTF-8'>
+  doc = json.load(open(SPLITS))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_single_worker_equals_multi_worker (test_r45_pipeline.TestDataset) ... ok
+test_formal_r44_entry_uses_r45_runtime_reader_and_phase_timing (test_r45_pipeline.TestFormalEntryIntegration) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:202: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/robo-r46-gate-b7b3279/training/r44_train.py' mode='r' encoding='utf-8'>
+  source = open(os.path.join(ROOT, "training", "r44_train.py"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_dev_entries_are_disjoint_from_train (test_r45_pipeline.TestIndex) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:49: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/robo-r46-gate-b7b3279/data/m2_splits.json' mode='r' encoding='UTF-8'>
+  doc = json.load(open(SPLITS))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_index_covers_the_frozen_window_exactly_once (test_r45_pipeline.TestIndex) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:23: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/robo-r46-gate-b7b3279/data/m2_splits.json' mode='r' encoding='UTF-8'>
+  doc = json.load(open(SPLITS))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+/tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:132: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/robo-r46-gate-b7b3279/data/m2_splits.json' mode='r' encoding='UTF-8'>
+  doc = json.load(open(SPLITS))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:134: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/r45-trainer-test/splits.json' mode='w' encoding='UTF-8'>
+  json.dump({"splits": {t: {"train": doc["splits"][t]["train"][:1],
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:140: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/r45-trainer-test/normalizer.json' mode='w' encoding='UTF-8'>
+  json.dump(payload, open(cls.norm, "w"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_end_to_end_then_resume_from_epoch_boundary (test_r45_pipeline.TestTrainerCheckpointResume) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:163: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/r45-trainer-test/run1/run_summary.json' mode='r' encoding='UTF-8'>
+  summary = json.load(open(os.path.join(out, "run_summary.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:167: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/r45-trainer-test/run1/checkpoints/epoch001_cursor000000_epoch_end/meta.json' mode='r' encoding='UTF-8'>
+  meta = json.load(open(os.path.join(ckpt, "meta.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:173: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/r45-trainer-test/run2/run_summary.json' mode='r' encoding='UTF-8'>
+  s2 = json.load(open(os.path.join(self.tmp, "run2", "run_summary.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_max_steps_writes_a_stopped_checkpoint (test_r45_pipeline.TestTrainerCheckpointResume) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:183: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/r45-trainer-test/run5/run_summary.json' mode='r' encoding='UTF-8'>
+  s = json.load(open(os.path.join(out, "run_summary.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_resume_rejects_a_tampered_cursor (test_r45_pipeline.TestTrainerCheckpointResume) ... /tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:191: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/r45-trainer-test/run3/checkpoints/epoch001_cursor000000_epoch_end/meta.json' mode='r' encoding='UTF-8'>
+  meta = json.load(open(os.path.join(ckpt, "meta.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/robo-r46-gate-b7b3279/tests/test_r45_pipeline.py:193: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/r45-trainer-test/run3/checkpoints/epoch001_cursor000000_epoch_end/meta.json' mode='w' encoding='UTF-8'>
+  json.dump(meta, open(os.path.join(ckpt, "meta.json"), "w"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 31.132s
+
+OK

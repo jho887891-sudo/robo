@@ -1,0 +1,9 @@
+git_head=b7b32790ece97c560b1164eb96b472aa26c9dbde
+git_status=# branch.oid b7b32790ece97c560b1164eb96b472aa26c9dbde;# branch.head (detached);
+python 3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]
+numpy 1.26.4
+torch 2.5.1+cu124
+transformers 4.46.3
+peft 0.13.2
+h5py 3.16.0
+opencv 4.13.0
