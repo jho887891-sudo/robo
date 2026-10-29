@@ -7,5 +7,25 @@
     "credentials"
   ],
   "files": [],
-  "schema": "r45-mnp-redaction/v1"
+  "latest_additional_evidence": "cpu-gate-rerun-20261029/redaction_manifest.json",
+  "manifest_correspondence": {
+    "all_embedded_HDF5_SHA256_values_unchanged": true,
+    "example_path_mapping": {
+      "published": "<REDACTED_LOCAL_PATH>/push_T/arx_x5/data/episode_0000000.hdf5",
+      "source": "<server-local HDF5 root>/push_T/arx_x5/data/episode_0000000.hdf5"
+    },
+    "file_entries": 300,
+    "path_redactions": 300,
+    "preserved_source_SHA256SUMS_copy_sha256": "15a591a657cc8127c6d1bdb2f914e09ad0ba6c769c0b1600de0e4c8573ad59a3",
+    "published_SHA256SUMS_check_exit_code": 0,
+    "published_SHA256SUMS_file_sha256": "58584641f4cbe156cf28b1bd439317a0814f1d62089a9345b8955eb33a9c7826",
+    "published_redacted_manifest_sha256": "d031308b3c9615a375d6d5c6008983a03fd110865a4cf5591e1f46a42eed6a84",
+    "published_redacted_report_sha256": "c4755b029d6f985f8c5493f0fc292254d87f2e4199b0ec89ae17f3a8e57f5502",
+    "reason": "Server-local absolute paths were redacted. Source and published artifact byte SHA256 values are paired above.",
+    "schema": "r45-manifest-redaction-correspondence/v1",
+    "source_SHA256SUMS_file_sha256": "15a591a657cc8127c6d1bdb2f914e09ad0ba6c769c0b1600de0e4c8573ad59a3",
+    "source_manifest_sha256": "a220bd45e49c623c3a9f77dcf7460c95f8305909c05122e2d2a0556bff522ead",
+    "source_report_sha256": "ccf6df412e4d68b901403d50065f21fd527ccd34eb4a25bffc03687a44f590bb"
+  },
+  "schema": "r45-mnp-redaction/v2"
 }

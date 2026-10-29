@@ -1,7 +1,15 @@
-# Standard OpenVLA runtime compatibility finding
+# Standard OpenVLA runtime compatibility
 
-The requested training target remains standard OpenVLA-7B + LoRA + the existing 42D projector. No alternative model was loaded.
+## Current verification
 
-At fixed source SHA `d5be4de94ea37f1d5a715d5d47b7ebb16e07b097`, `training/r44_train.py` requires `--oft-root`, validates that directory, adds it and `vla-scripts` to `sys.path`, then imports `prismatic` modules in `build_model()` for standard OpenVLA config/processor registration. `scripts/r45_server_cpu_gate.sh` requires `R44_OFT_ROOT` and passes `--oft-root`. The model directory contains three indexed safetensors and its dynamic config, but the separate offline source checkout is not a viable `prismatic` package root. The repository has three frozen dynamic module files; the current loader still imports the broader `prismatic` runtime.
+At code SHA d5be4de94ea37f1d5a715d5d47b7ebb16e07b097, the unified CPU interpreter imported the Prismatic symbols used by the trainer, registered the standard OpenVLA config/image-processor/processor classes, loaded the local config as model_type=openvla, constructed AutoProcessor from the model directory, and dynamically imported OpenVLAForActionPrediction.
 
-Thus N01 historical OFT provenance can be removed as a model-selection gate, but an OFT-compatible Prismatic runtime package remains a current code dependency. The fixed SHA formal CPU Gate was interrupted while rehashing HDF5 before this compatibility path could be exercised. No source change was made in this evidence run.
+The active dynamic modeling_prismatic.py SHA256 exactly matched the repository frozen reference. ARX runtime constants were ACTION_DIM=14 and PROPRIO_DIM=14. torch.cuda.is_initialized() was false. The 7B weight tensors were not loaded.
+
+The existing CLI variable R44_OFT_ROOT was supplied only to expose the Prismatic runtime package required by the current code. This is a runtime API compatibility check; no OFT model/checkpoint or historical OFT provenance gate was used.
+
+The complete CPU Gate subsequently passed, including the mandatory rehash of all 300 HDF5 files. Logs are in cpu-gate-rerun-20261029/.
+
+## Limits
+
+The earlier compatibility note was an interim finding before this rerun and is superseded here. No GPU weight load, forward/backward pass, optimizer step, CUDA compatibility, memory fit, or GPU throughput has been verified.

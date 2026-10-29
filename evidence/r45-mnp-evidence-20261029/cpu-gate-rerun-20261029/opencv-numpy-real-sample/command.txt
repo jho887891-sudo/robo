@@ -1,0 +1,1 @@
+CPU-only real TRAIN sample: push_T/episode_0000000.hdf5, t=2, cameras=cam_head/cam_left_wrist/cam_right_wrist

@@ -20,6 +20,10 @@ gate/r45_toy_resume.stdout: OK
 gate.exit_code: OK
 gate.stderr: OK
 gate.stdout: OK
+opencv-numpy-real-sample/command.txt: OK
+opencv-numpy-real-sample/exit_code: OK
+opencv-numpy-real-sample/stderr.txt: OK
+opencv-numpy-real-sample/stdout.json: OK
 python_path.txt: OK
 redaction_manifest.json: OK
 runtime-compat/compat.exit_code: OK

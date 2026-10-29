@@ -1,36 +1,54 @@
 {
-  "schema": "r45-mnp-stage-status/v1",
-  "snapshot_utc": "2026-10-29T06:00:00Z",
+  "schema": "r45-mnp-stage-status/v2",
+  "snapshot_utc": "2026-10-29T13:06:30Z",
   "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097",
   "stages": {
     "E01": {
+      "detail": "Latest report and evidence indexes refreshed; older report/status are labeled interim snapshots; Manifest source/public hash mapping recorded.",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    "GPU_SMOKE": {
+      "detail": "GPU_SMOKE_PLAN.md describes bounded smoke only; no CUDA/GPU command executed.",
       "exit_code": null,
-      "status": "IN_PROGRESS"
+      "status": "PLAN_READY_NOT_AUTHORIZED"
     },
     "M01": {
-      "detail": "CPU_MANIFEST_REATTEST_PASS; 300 full HDF5 hashes; TRAIN108780 DEV28268; delta payload SHA exact match.",
+      "detail": "300 HDF5 SHA256 re-attested; TRAIN=108780 DEV=28268; joint_delta_v1 payload SHA match.",
       "exit_code": 0,
       "status": "PASS"
     },
     "N01": {
-      "detail": "No historical OFT source identity gate required. Runtime compatibility finding recorded separately.",
+      "detail": "No historical OFT provenance/model-selection gate.",
       "exit_code": null,
       "status": "REMOVED_BY_ARCHITECTURE_DECISION"
     },
     "N02": {
-      "detail": "Three safetensors SHA/index/config inventory verified; provenance remains unchecked.",
+      "detail": "Config/index/three shard identities verified; upstream provenance unknown.",
       "exit_code": 0,
       "status": "PARTIAL_PASS_PROVENANCE_UNKNOWN"
     },
+    "OPENCV_NUMPY": {
+      "detail": "Three real TRAIN JPEGs decoded under NumPy1.26.4/OpenCV4.13 to RGB uint8 contiguous 480x640x3. Package metadata still says NumPy>=2.",
+      "exit_code": 0,
+      "status": "PASS_CPU_REAL_SAMPLE"
+    },
     "P01": {
-      "detail": "Formal Gate interrupted during repeat full HDF5 SHA read; only packages child completed; subsequent tests did not run.",
-      "exit_code": 130,
-      "status": "BLOCKED_STORAGE_IO"
+      "detail": "Current Gate rehashed all 300 HDF5 files; CPU_CONTRACTS_PASS; all six command stages exit 0. No GPU/training.",
+      "exit_code": 0,
+      "status": "PASS_CPU_GATE_ONLY"
+    },
+    "RUNTIME_COMPAT": {
+      "detail": "OpenVLA config/processor/dynamic class API passed; frozen modeling SHA matches; no weights loaded or CUDA initialized.",
+      "exit_code": 0,
+      "status": "PASS_CPU_ONLY"
     },
     "S00": {
-      "detail": "Python3.10.12, NumPy1.26.4, h5py3.16.0 isolated environment verified; torch/transformers/peft missing there. Gate shell selected system Python packages NumPy2.2.6, Torch2.5.1+cu124, Transformers4.46.3, PEFT0.13.2.",
-      "exit_code": null,
-      "status": "BLOCKED_ENVIRONMENT"
+      "detail": "Python3.10.12; NumPy1.26.4, Torch2.5.1+cu124, Transformers4.46.3, PEFT0.13.2, h5py3.16.0 in one interpreter.",
+      "exit_code": 0,
+      "status": "PASS"
     }
-  }
+  },
+  "supersedes_commit": "d37da9023319a887a8f0cba4a5ccb1fa242dcbcc",
+  "supersedes_note": "The FINAL_REPORT.md and stage_status.json at that commit were intermediate snapshots before CPU Gate rerun; their contents remain in Git history."
 }

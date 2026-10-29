@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "python": "3.10.12",
+  "numpy": "1.26.4",
+  "opencv": "4.13.0",
+  "sample": "push_T/episode_0000000.hdf5 t=2",
+  "frames": [
+    {
+      "camera": "cam_head",
+      "raw_bytes": 81132,
+      "shape": [
+        480,
+        640,
+        3
+      ],
+      "dtype": "uint8",
+      "rgb_contiguous": true,
+      "pixel_min": 0,
+      "pixel_max": 252
+    },
+    {
+      "camera": "cam_left_wrist",
+      "raw_bytes": 63931,
+      "shape": [
+        480,
+        640,
+        3
+      ],
+      "dtype": "uint8",
+      "rgb_contiguous": true,
+      "pixel_min": 0,
+      "pixel_max": 195
+    },
+    {
+      "camera": "cam_right_wrist",
+      "raw_bytes": 68449,
+      "shape": [
+        480,
+        640,
+        3
+      ],
+      "dtype": "uint8",
+      "rgb_contiguous": true,
+      "pixel_min": 0,
+      "pixel_max": 254
+    }
+  ]
+}
+cuda_context_initialized=False

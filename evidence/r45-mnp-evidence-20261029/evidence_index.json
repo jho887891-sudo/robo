@@ -2,7 +2,11 @@
   "artifacts": [
     {
       "path": "FINAL_REPORT.md",
-      "sha256": "4c8fbc92628556e5af4cced11de5ea5f4874739d01b0844901fbe589f2e92ea2"
+      "sha256": "4fd7319e0a95f3518510f12bd3eb5aff1533317ba386383a9b82de300251adee"
+    },
+    {
+      "path": "GPU_SMOKE_PLAN.md",
+      "sha256": "e2bd4a9e2d5b7c1406a0cfdaa039afa05d43b538255c7c3fe5a337edda52a97a"
     },
     {
       "path": "commands/m01.command.txt",
@@ -79,18 +83,6 @@
     {
       "path": "cpu-gate-rerun-20261029/REPORT.md",
       "sha256": "2a102e3924f1ab3f34a073e9860ab5fd0b1619ef86e6a1da861a6b6eff003898"
-    },
-    {
-      "path": "cpu-gate-rerun-20261029/SHA256SUMS.verify.exit_code",
-      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
-    },
-    {
-      "path": "cpu-gate-rerun-20261029/SHA256SUMS.verify.stderr",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "path": "cpu-gate-rerun-20261029/SHA256SUMS.verify.stdout",
-      "sha256": "94ad3ea80ce77531f5bfb7ea27a347ac5e819d6eab1c8d8732292abae0059c0e"
     },
     {
       "path": "cpu-gate-rerun-20261029/command.txt",
@@ -175,6 +167,22 @@
     {
       "path": "cpu-gate-rerun-20261029/gate.stdout",
       "sha256": "62a86cd1052cbcbfa61f57846b9e81ae4d6c78069ea38ec994ece75b307e4f56"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/opencv-numpy-real-sample/command.txt",
+      "sha256": "6c472a284c77c8a5d8c5c3898c99eadf5cc61b492846c0ef24357bf16fb6c867"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/opencv-numpy-real-sample/exit_code",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/opencv-numpy-real-sample/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cpu-gate-rerun-20261029/opencv-numpy-real-sample/stdout.json",
+      "sha256": "9ec9202a08d03e73f873a8169cde5e76443c26b571b631a912a405b1e70c26b7"
     },
     {
       "path": "cpu-gate-rerun-20261029/python_path.txt",
@@ -281,6 +289,10 @@
       "sha256": "216d4fb00f638d5dbf38ba50ad5efcc56a89420f24964efcbe6459a5c8221cfe"
     },
     {
+      "path": "manifest/manifest-reattest/SHA256SUMS.original.txt",
+      "sha256": "15a591a657cc8127c6d1bdb2f914e09ad0ba6c769c0b1600de0e4c8573ad59a3"
+    },
+    {
       "path": "manifest/manifest-reattest/r44_dataset_manifest.json",
       "sha256": "d031308b3c9615a375d6d5c6008983a03fd110865a4cf5591e1f46a42eed6a84"
     },
@@ -322,17 +334,18 @@
     },
     {
       "path": "redaction_manifest.json",
-      "sha256": "af0cd10017ec363ab6e38e9dcf171b440c69f383851b2808577ae3cf0e35cb69"
+      "sha256": "368dccf5fb747f2c1cb51aa4695e4ba5e6e42b08d1b38eb83d5b3667506c75d2"
     },
     {
       "path": "runtime_compatibility_finding.md",
-      "sha256": "7eb35811964f2e0844cf5683acd2d9a28c946940314d7e66b1ca4c18fe0d5dab"
+      "sha256": "903aff8a90b94a583d1d3c5ccab13019543a61909119dea863553622b0d07948"
     },
     {
       "path": "stage_status.json",
-      "sha256": "e8eaa78e50157f36acb7bf47a8a58f824a6994866da22143cc21dd9d092bb848"
+      "sha256": "4eb3a3ae9eb45b1b1f40d20ed72efa922ebd22d7312afe5c6f53d50b80fc88a2"
     }
   ],
-  "schema": "r45-mnp-evidence-index/v1",
+  "schema": "r45-mnp-evidence-index/v2",
+  "snapshot_utc": "2026-10-29T13:06:30Z",
   "source_sha": "d5be4de94ea37f1d5a715d5d47b7ebb16e07b097"
 }

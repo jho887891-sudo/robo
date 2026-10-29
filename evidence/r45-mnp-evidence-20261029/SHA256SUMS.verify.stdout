@@ -1,4 +1,5 @@
 FINAL_REPORT.md: OK
+GPU_SMOKE_PLAN.md: OK
 commands/m01.command.txt: OK
 commands/m01.stderr: OK
 commands/m01.stdout: OK
@@ -18,9 +19,6 @@ commands/p01.exit_code: OK
 commands/p01.stderr: OK
 commands/p01.stdout: OK
 cpu-gate-rerun-20261029/REPORT.md: OK
-cpu-gate-rerun-20261029/SHA256SUMS.verify.exit_code: OK
-cpu-gate-rerun-20261029/SHA256SUMS.verify.stderr: OK
-cpu-gate-rerun-20261029/SHA256SUMS.verify.stdout: OK
 cpu-gate-rerun-20261029/command.txt: OK
 cpu-gate-rerun-20261029/gate/code_sha.txt: OK
 cpu-gate-rerun-20261029/gate/exit_codes.txt: OK
@@ -42,6 +40,10 @@ cpu-gate-rerun-20261029/gate/r45_toy_resume.stdout: OK
 cpu-gate-rerun-20261029/gate.exit_code: OK
 cpu-gate-rerun-20261029/gate.stderr: OK
 cpu-gate-rerun-20261029/gate.stdout: OK
+cpu-gate-rerun-20261029/opencv-numpy-real-sample/command.txt: OK
+cpu-gate-rerun-20261029/opencv-numpy-real-sample/exit_code: OK
+cpu-gate-rerun-20261029/opencv-numpy-real-sample/stderr.txt: OK
+cpu-gate-rerun-20261029/opencv-numpy-real-sample/stdout.json: OK
 cpu-gate-rerun-20261029/python_path.txt: OK
 cpu-gate-rerun-20261029/redaction_manifest.json: OK
 cpu-gate-rerun-20261029/runtime-compat/compat.exit_code: OK
@@ -69,6 +71,7 @@ gate/r45-f-cpu/packages.json: OK
 gate/r45-f-cpu/r44_real_data_preflight.stderr: OK
 gate/r45-f-cpu/r44_real_data_preflight.stdout: OK
 gate/status.txt: OK
+manifest/manifest-reattest/SHA256SUMS.original.txt: OK
 manifest/manifest-reattest/r44_dataset_manifest.json: OK
 manifest/manifest-reattest/report.json: OK
 manifest/status.txt: OK
