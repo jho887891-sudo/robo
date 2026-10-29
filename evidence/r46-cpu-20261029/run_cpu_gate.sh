@@ -5,7 +5,8 @@ set -u
 cd "$R46_CPU_WORKTREE"
 E=/tmp/r46-cpu-gate-final-20261029T$(date -u +%H%M%S)Z
 mkdir -m 700 "$E"
-printf '%s\n' "$E" > /tmp/r46-cpu-gate-final-evidence-dir
+POINTER=${R46_CPU_EVIDENCE_POINTER:-/tmp/r46-cpu-gate-final-evidence-dir}
+printf '%s\n' "$E" > "$POINTER"
 export CUDA_VISIBLE_DEVICES=
 export PYTHONDONTWRITEBYTECODE=1
 PY=$R46_CPU_PYTHON
