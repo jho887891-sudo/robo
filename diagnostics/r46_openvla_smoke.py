@@ -25,6 +25,17 @@ def _read_json(path: str) -> dict:
     return value
 
 
+def _build_r44_argv(forwarded: list[str], *, manifest_path: Path,
+                    output_path: Path, approved_gpu_uuid: str) -> list[str]:
+    """Build only options accepted by R44; the wall limit belongs to this child."""
+    return list(forwarded) + [
+        "--dataset-manifest", str(manifest_path),
+        "--gpu-window-confirmed",
+        "--out", str(output_path),
+        "--expected-gpu-uuid", approved_gpu_uuid,
+    ]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--approval-file", required=True)
@@ -96,11 +107,12 @@ def main(argv=None) -> int:
         if str(REPO / "training") not in sys.path:
             sys.path.insert(0, str(REPO / "training"))
         import r44_train as R44
-        args = R44.parse_args(forwarded + ["--dataset-manifest", str(manifest_path),
-                                           "--gpu-window-confirmed",
-                                           "--out", str(Path(outer.out).resolve()),
-                                           "--max-wall-seconds", str(outer.max_wall_seconds),
-                                           "--expected-gpu-uuid", outer.approved_gpu_uuid])
+        args = R44.parse_args(_build_r44_argv(
+            forwarded,
+            manifest_path=manifest_path,
+            output_path=Path(outer.out).resolve(),
+            approved_gpu_uuid=outer.approved_gpu_uuid,
+        ))
         if args.cams != 3 or not args.base_model or not args.dataset_manifest:
             raise ValueError("R44 runtime args must supply the base model, strict manifest, and 3 cameras")
         if args.seed != 0 or args.include_task_token or args.gradient_checkpointing \

@@ -30,6 +30,7 @@ on:
       - 'tests/test_r46_smoke_supervisor.py'
       - 'tests/test_r46_smoke_contract.py'
       - 'tests/test_r46_freeze_samples.py'
+      - 'tests/test_r46_openvla_smoke_args.py'
       - 'config/r46_smoke_samples.json'
       - '.github/workflows/r45-runtime-cpu.yml'
   workflow_dispatch:
@@ -63,7 +64,7 @@ jobs:
           fi
           grep -q 'R45_EXPECTED_SHA' /tmp/r45-refusal.log
       - name: Syntax check
-        run: python -m py_compile training/r44_train.py training/r45_data.py training/r45_train.py training/r45_contract.py diagnostics/r45_gpu_bench.py diagnostics/r44_gpu_smoke.py tests/test_r45_runtime_gate.py diagnostics/r45_cpu_io_profile.py tests/test_r45_cpu_io_profile.py diagnostics/r45_discover_data_root.py tests/test_r45_discover_data_root.py diagnostics/r45_reattest_r44_manifest.py diagnostics/r45_delta_payload_diff.py diagnostics/r45_diagnose_delta_fast.py tests/test_r45_diagnose_delta_fast.py diagnostics/r45_quantile_fingerprint.py tests/test_r45_quantile_fingerprint.py diagnostics/r45_audit_oft_candidates.py tests/test_r45_reattest_manifest.py diagnostics/r46_smoke_supervisor.py diagnostics/r46_smoke_contract.py diagnostics/r46_openvla_smoke.py diagnostics/r46_freeze_samples.py tests/test_r46_smoke_supervisor.py tests/test_r46_smoke_contract.py tests/test_r46_freeze_samples.py
+        run: python -m py_compile training/r44_train.py training/r45_data.py training/r45_train.py training/r45_contract.py diagnostics/r45_gpu_bench.py diagnostics/r44_gpu_smoke.py tests/test_r45_runtime_gate.py diagnostics/r45_cpu_io_profile.py tests/test_r45_cpu_io_profile.py diagnostics/r45_discover_data_root.py tests/test_r45_discover_data_root.py diagnostics/r45_reattest_r44_manifest.py diagnostics/r45_delta_payload_diff.py diagnostics/r45_diagnose_delta_fast.py tests/test_r45_diagnose_delta_fast.py diagnostics/r45_quantile_fingerprint.py tests/test_r45_quantile_fingerprint.py diagnostics/r45_audit_oft_candidates.py tests/test_r45_reattest_manifest.py diagnostics/r46_smoke_supervisor.py diagnostics/r46_smoke_contract.py diagnostics/r46_openvla_smoke.py diagnostics/r46_freeze_samples.py tests/test_r46_smoke_supervisor.py tests/test_r46_smoke_contract.py tests/test_r46_freeze_samples.py tests/test_r46_openvla_smoke_args.py
       - name: Regression gate (no CUDA, no HDF5 dataset)
         run: python -m unittest discover -s tests -p 'test_r45_runtime_gate.py' -v
       - name: R46 approval, process supervisor, and sample contract (CPU only)
@@ -71,6 +72,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_r46_smoke_contract.py' -v
           python -m unittest discover -s tests -p 'test_r46_smoke_supervisor.py' -v
           python -m unittest discover -s tests -p 'test_r46_freeze_samples.py' -v
+          python -m unittest discover -s tests -p 'test_r46_openvla_smoke_args.py' -v
       - name: Retest R44 delta and R45 frozen contract
         run: |
           python tests/test_r44_delta_v1.py
