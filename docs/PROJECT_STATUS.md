@@ -5,6 +5,18 @@
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
+## R45-MNP 正式 CPU Gate 已完成（2026-10-29，现场证据审计 PASS）
+
+- **证据固定提交**：[`evidence/r45-mnp-cpu-20261029@d37da9023319a887a8f0cba4a5ccb1fa242dcbcc`](https://github.com/jho887891-sudo/robo/tree/d37da9023319a887a8f0cba4a5ccb1fa242dcbcc/evidence/r45-mnp-evidence-20261029/cpu-gate-rerun-20261029)。**执行源码完整 SHA**：`d5be4de94ea37f1d5a715d5d47b7ebb16e07b097`（从 clean detached worktree 的 `git_head.txt` / `code_sha.txt` 读取）；本次新提交是 evidence，并非训练源码变更。
+- **正式 Gate 实际 PASS**：新证据 `gate.exit_code=0`、`gate.stdout` 有 `STATUS=PASS_CPU_GATE_ONLY`，`gate/exit_codes.txt` 六项均为 0（`packages`、`r44_real_data_preflight`、`r45_runtime`、`r45_toy_resume`、`r44_delta`、`r45_contract`），各测试原始 stderr 分别显示 **9/9、3/3、15/15、4/4，全计31/31**；preflight JSON `CPU_CONTRACTS_PASS`、重新核验全部 300 HDF5、TRAIN=108780、DEV=28268，`dataset_manifest_sha256=a220bd45e49c623c3a9f77dcf7460c95f8305909c05122e2d2a0556bff522ead` 对应服务器**未脱敏原始** Manifest，非 GitHub 发布脱敏版本。
+- **环境统一、标准 OpenVLA 接口静态验证**：同一 Python 3.10.12、NumPy 1.26.4、h5py 3.16.0、Torch 2.5.1+cu124、Transformers 4.46.3、PEFT 0.13.2；本地 OpenVLA `model_type=openvla`、`PrismaticProcessor` 构造、`OpenVLAForActionPrediction` 动态类导入与 ARX 14D/14D/25 通过；`configuration_prismatic.py`、`modeling_prismatic.py`、`processing_prismatic.py` 的 runtime SHA 与冻结仓库参考逐项一致，**没有加载 7B 权重**。`--oft-root` 在固定旧训练脚本中仅作为 Prismatic 运行源码路径；**当前模型明确是标准 OpenVLA-7B + LoRA + 42D projector，不是 OFT**；不必调查五个候选的历史训练身份。
+- **静态模型身份边界**：上一证据提交 `dc4fd308` 的 `model_identity.json` 已列出 3 个 safetensors 的 SHA 与索引覆盖，但历史上游权重来源仍 `FILE_IDENTITY_VERIFIED_PROVENANCE_UNCHECKED`。CPU Gate 没有权重装载/前向、CUDA 上下文、GPU Smoke、显存与 samples/s、optimizer step 或完整 5 Epoch 训练，**不得升格为 GPU_READY 或 TRAINING_VERIFIED**。CPU preflight 中的时间预算是估算，非实测。
+- **依赖残留风险**：OpenCV 4.13 可在 NumPy 1.26.4 环境下导入，但包元数据要求 NumPy >=2；静态导入成功不等于所有图像解码和实际模型训练稳定。这一风险在后续独立 GPU Smoke 方案内核查，不改变当前 CPU Gate PASS。
+- **证据记录待整理，不阻断已确证的 Gate PASS**：`cpu-gate-rerun-20261029/` 有单独的 SHA256SUMS、原始/发布件脱敏记录与服务端校验 exit 0。旧根目录 `FINAL_REPORT.md`、`stage_status.json`、若干 `status.txt` 仍描述前几次 BLOCKED，**属于历史快照，不能覆盖本次正式 Gate PASS**；旧根 `redaction_manifest.json` 对早期发布脱敏 Manifest 的原件/发布件映射仍不完整，应补充可追溯说明而非改写旧运行结果。服务器上完整原始 Manifest 仍应保留，公开版含路径占位符，不能作为训练器输入。
+- **下一步只在单独批准后进行**：先完成证据汇总状态修正和后续 GPU Smoke 规范（权重实际加载/前向、显存峰值、分辨率/相机、速度与 OpenCV/NumPy 兼容性、可靠停止），再由负责人单独授权真实 GPU 运行。**未授权 GPU，正式 5 Epoch 训练仍 BLOCKED**，且 `main` 不变。
+
+> 本节为当前 R45-MNP CPU Gate 的**最新权威进展**，覆盖以下旧小节“CPU Gate BLOCKED / 尚缺数据 Manifest / OFT 历史溯源”的过时状态，旧小节保留以记录当时的证据快照。
+
 ## R45-MNP 最新现场证据交叉审计（2026-10-29，覆盖下方旧待办状态）
 
 **最新 evidence 分支 SHA：[`dc4fd308ae050988c5ab3c93120fa6f8524cf019`](https://github.com/jho887891-sudo/robo/tree/dc4fd308ae050988c5ab3c93120fa6f8524cf019/evidence/r45-mnp-evidence-20261029)**；执行固定代码 SHA `d5be4de94ea37f1d5a715d5d47b7ebb16e07b097`（PR #51）。已直接读取 `FINAL_REPORT.md`、`stage_status.json`、M01 的 `report.json`/严格 Manifest、N02 模型身份报告和 P01 的原始 traceback；**未独立读取/重算服务器上 300 个 HDF5 原始字节**。
