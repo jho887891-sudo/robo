@@ -1,0 +1,19 @@
+R45-F CPU execution summary
+code_sha=5ddddc1b4b926cb9ee467c1fa7305aff935e2314
+worktree=<REDACTED_WORKTREE_PATH> (detached, clean)
+dataset_root=<REDACTED_LOCAL_DATA_PATH>
+discovery_exit=0; profile_exit=0; profile_status=CPU_IO_PROXY_PASS
+inventory train=240/240 episodes; dev=60/60 episodes; indexed_train_samples=108780
+profile selected=120 (40/task), repeats=2, measured_rows=240, seed=45
+pixel parity: all old-path vs R45 CPU tensors equal
+aggregate mean seconds/sample: legacy=0.051220; R45=0.024602; HDF5 byte read=0.001259; JPEG+identity transform=0.013303; tensor prep=0.007488
+aggregate median seconds/sample: legacy=0.044040; R45=0.020677
+cache hits=0/240; retained=268185600 bytes / cap=268435456 bytes
+120 decoded RGB tensors require 331776000 bytes, above the 268435456-byte cache cap; LRU churn explains zero repeat hits.
+push_T n=80 legacy_median_s=0.044223 r45_median_s=0.022493 hdf5_mean_s=0.001266 jpeg_mean_s=0.013410 cache_hits=0
+stack_bowls n=80 legacy_median_s=0.045066 r45_median_s=0.020605 hdf5_mean_s=0.001300 jpeg_mean_s=0.013460 cache_hits=0
+sweep_blocks n=80 legacy_median_s=0.043222 r45_median_s=0.019310 hdf5_mean_s=0.001211 jpeg_mean_s=0.013038 cache_hits=0
+workers=1 n=120 wall_including_startup_s=2.240005 proxy_samples_s=53.571
+workers=2 n=120 wall_including_startup_s=0.971359 proxy_samples_s=123.538
+workers=4 n=120 wall_including_startup_s=0.763126 proxy_samples_s=157.248
+Scope: CPU proxy only. Identity transform; excludes production resize/normalize, CUDA transfer, OpenVLA-7B forward/backward, optimizer, training samples/sec. Worker proxy decodes JPEG and includes pool startup.

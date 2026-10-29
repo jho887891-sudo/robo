@@ -1,0 +1,88 @@
+{
+  "cache": {
+    "cache_cap_bytes": 268435456,
+    "image_cache_bytes": 268185600,
+    "open_handles_at_end": 24
+  },
+  "cache_hits": 0,
+  "cache_total": 240,
+  "code_sha256": "b65a6b368ba1958a090c727d7c5e2d64fde6331f0c1bd9d5037da5229cd34ec4",
+  "dataset_root": "<REDACTED_LOCAL_DATA_PATH>",
+  "excluded": [
+    "production image resize/normalize",
+    "CPU->CUDA",
+    "7B model",
+    "training optimizer",
+    "training samples/sec"
+  ],
+  "index_n": 108780,
+  "limitations": "Proxy benchmark is not a fair end-to-end GPU A/B; OS page cache, processor cost and worker startup affect measured wall time.",
+  "per_task": 40,
+  "phase": {
+    "cpu_tensor_preparation_s": {
+      "mean_s": 0.007488346742078041,
+      "median_s": 0.0031622429378330708,
+      "n": 240,
+      "p95_s": 0.03158380091190338,
+      "sum_s": 1.7972032180987298
+    },
+    "hdf5_read_s": {
+      "mean_s": 0.0012593085955207547,
+      "median_s": 0.0012242733500897884,
+      "n": 240,
+      "p95_s": 0.0014829128049314022,
+      "sum_s": 0.3022340629249811
+    },
+    "jpeg_preprocess_s": {
+      "mean_s": 0.01330294306972064,
+      "median_s": 0.012969706440344453,
+      "n": 240,
+      "p95_s": 0.015063682105392218,
+      "sum_s": 3.192706336732954
+    },
+    "legacy_cpu_s": {
+      "mean_s": 0.0512198765121866,
+      "median_s": 0.04403958888724446,
+      "n": 240,
+      "p95_s": 0.07756380783393979,
+      "sum_s": 12.292770362924784
+    },
+    "r45_cpu_s": {
+      "mean_s": 0.024601895649296542,
+      "median_s": 0.020676928339526057,
+      "n": 240,
+      "p95_s": 0.047433374915272,
+      "sum_s": 5.90445495583117
+    }
+  },
+  "repeats": 2,
+  "sample_manifest_sha256": "f150fd6629c13ea4bd520ee21e44f9706c79d1b700ea556c59e440f393b875f2",
+  "schema": "r45-cpu-train-io-profile/v1",
+  "scope": "real TRAIN HDF5, 3-camera JPEG, identity CPU transform, no model/GPU",
+  "seed": 45,
+  "selected_n": 120,
+  "source_code_sha": "5ddddc1b4b926cb9ee467c1fa7305aff935e2314",
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "status": "CPU_IO_PROXY_PASS",
+  "total_profile_s": 22.52186976838857,
+  "worker_runs": [
+    {
+      "decoded_pixel_count": 331776000,
+      "samples": 120,
+      "total_wall_s_including_startup": 2.2400047150440514,
+      "workers": 1
+    },
+    {
+      "decoded_pixel_count": 331776000,
+      "samples": 120,
+      "total_wall_s_including_startup": 0.9713591979816556,
+      "workers": 2
+    },
+    {
+      "decoded_pixel_count": 331776000,
+      "samples": 120,
+      "total_wall_s_including_startup": 0.7631257977336645,
+      "workers": 4
+    }
+  ]
+}

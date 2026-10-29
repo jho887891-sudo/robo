@@ -1,0 +1,24 @@
+{
+  "candidates": [
+    {
+      "candidate": "<REDACTED_LOCAL_DATA_PATH>",
+      "complete": true,
+      "exists": true,
+      "expected_dev": 60,
+      "expected_train": 240,
+      "inventory_sha256": "733138e9c37c47aed3b21d13dc9e44bb9503af4970534d386d44ee70d6242385",
+      "is_symlink": false,
+      "missing_count": 0,
+      "missing_examples": [],
+      "present_dev": 60,
+      "present_train": 240,
+      "source": "data/README.md / R44 script historical path"
+    }
+  ],
+  "chosen_root": "<REDACTED_LOCAL_DATA_PATH>",
+  "complete_candidate_count": 1,
+  "limitations": "File presence/size are checked read-only. Contents, HDF5 metadata, SHA256 identity and correct mount provenance remain unverified. Missing mount does not prove deletion.",
+  "schema": "r45-dataset-path-discovery/v1",
+  "splits_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "status": "DISCOVERED_CANDIDATE_NEEDS_HDF5_GATE"
+}

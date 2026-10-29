@@ -1,0 +1,1 @@
+python3 diagnostics/r45_cpu_io_profile.py --splits data/m2_splits.json --hdf5-root <REDACTED_LOCAL_DATA_PATH> --per-task 40 --repeats 2 --workers 1,2,4 --out <REDACTED_EVIDENCE_PATH>/profile-20261028T075000Z
