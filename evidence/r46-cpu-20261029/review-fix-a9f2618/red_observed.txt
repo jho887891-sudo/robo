@@ -1,0 +1,5 @@
+RED reproduction (captured before implementation)
+Command: python -m unittest tests.test_r46_openvla_smoke_args -v
+Exit code: 1
+Failure: ImportError: cannot import name '_build_r44_argv' from 'diagnostics.r46_openvla_smoke'
+This demonstrates the regression test could not pass before adding the tested argument bridge.

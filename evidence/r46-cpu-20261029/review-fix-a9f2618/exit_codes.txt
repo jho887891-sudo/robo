@@ -1,0 +1,5 @@
+py_compile=0
+arg_bridge=0
+smoke_contract=0
+supervisor=0
+freeze_samples=0

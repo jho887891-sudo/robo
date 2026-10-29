@@ -1,0 +1,8 @@
+test_episode_order_is_deterministic_and_unique (test_r46_freeze_samples.FreezeSampleSelectionTests.test_episode_order_is_deterministic_and_unique) ... ok
+test_sample_time_is_deterministic_and_inside_train_history_range (test_r46_freeze_samples.FreezeSampleSelectionTests.test_sample_time_is_deterministic_and_inside_train_history_range) ... ok
+test_too_short_episode_fails_closed (test_r46_freeze_samples.FreezeSampleSelectionTests.test_too_short_episode_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK

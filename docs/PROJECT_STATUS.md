@@ -7,11 +7,13 @@
 
 ## R46 CPU-only Smoke 安全准备（2026-10-29，最新状态）
 
-- **实现分支**：`codex/r46-smoke-supervisor-20261029`，分支最新提交为 `777bab1b8cb511a29545773a65cb7a96ed899dd9`（实现代码在精确 Linux CPU Gate 提交 `75b6a1f84d4af513472f20df5548117a5e908066` 验证），基于 PR #51 head `ba563d0f8c638b089f588027dd0af41ff290e1f4`。已创建草稿 [PR #53](https://github.com/jho887891-sudo/robo/pull/53)，目标分支 `audit/r45-e-unified-cpu-profile-20261028`。
+- **实现分支**：`codex/r46-smoke-supervisor-20261029`，原始实现 CPU Gate SHA `75b6a1f84d4af513472f20df5548117a5e908066`；PR #53 参数桥接修复提交 `a9f2618cd9ec2707a71dde43e07096c99ce9c3ea`。基于 PR #51 head `ba563d0f8c638b089f588027dd0af41ff290e1f4`。草稿 [PR #53](https://github.com/jho887891-sudo/robo/pull/53)，目标分支 `audit/r45-e-unified-cpu-profile-20261028`。
 - **VERIFIED CPU Gate**：在该精确提交的干净 Linux worktree 上，11/11 命令 exit 0，88/88 R44/R45/R46 CPU tests 通过。环境 Python 3.10.12、NumPy 1.26.4、Torch 2.5.1+cu124、Transformers 4.46.3、PEFT 0.13.2、h5py 3.16.0、OpenCV 4.13.0。证据：`evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f/`。
 - **真实样本计划**：固定 5 个真实 push_T TRAIN episode（1 warm-up + 4 measured），CPU reader/processor 输出 `[1,18,224,224]`、42D 特征、14 action token + STOP、HDF5 SHA 与严格 Manifest 一致；计划 SHA `67458ab3c6b23518c8616ec229ff62ed9af51d3d6bc817d54b21cdd109937d4f`。证据：`sample-freeze-final/`。该结果不是 GPU smoke 或吞吐验证。
 - **IMPLEMENTED**：外部审批校验、父进程 1800 秒硬上限、Linux 自有 session 信号清理、GPU UUID/资源独占准入、CUDA 前 OpenVLA 模型文件与索引重哈希、固定样本 runner 及 CPU 回归已实现。发现的 PDEATHSIG 与实际模型哈希缺口均保留 RED 日志并修复后通过。
 - **STOP_WAIT_GPU_APPROVAL**：现有审批 JSON 仍是 `template_only=true/approved=false`；没有 CUDA context、GPU Smoke/benchmark、正式训练或部署。7B 权重加载、forward/backward、显存及 GPU throughput 仍 UNKNOWN。R45 stable benchmark 仍 `BLOCKED_NOT_IMPLEMENTED`；R48 `NOT_RUN`。
+- **PR #53 review 修复**：复核发现 smoke 子进程把 wrapper 的 `--max-wall-seconds` 错传给不支持该参数的 `R44.parse_args()`。已从参数桥接中移除该选项，并新增 `test_r46_openvla_smoke_args.py`，直接将生成参数交给正式 R44 parser 验证；RED→GREEN，R46 相关本地测试通过。此修复尚未运行更新后的完整 Linux CPU Gate，故 **R47 仍未达到 GPU 执行就绪**；GPU 未启动。
+- 参数桥接修复提交 `a9f2618cd9ec2707a71dde43e07096c99ce9c3ea` 的 Windows CPU 回归证据：`evidence/r46-cpu-20261029/review-fix-a9f2618/`，5/5 命令 exit 0，新增 bridge 测试 1/1；R46 关联测试共 32 项，21 项通过、11 项因 Windows 不执行 POSIX process-group 场景而跳过。Linux 更新版 supervisor/全量 CPU Gate 尚未运行。
 - **交付**：完整报告见 [`evidence/r46-cpu-20261029/AUDIT_REPORT.md`](../evidence/r46-cpu-20261029/AUDIT_REPORT.md)。此状态由本分支更新，未改 main。
 
 ## R45-MNP 正式收官历史摘要（2026-10-29，证据 `705e186d`）
