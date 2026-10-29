@@ -4,21 +4,88 @@
   "source_sha": "75b6a1f84d4af513472f20df5548117a5e908066",
   "implementation_commit_sha": "75b6a1f84d4af513472f20df5548117a5e908066",
   "sample_plan_sha256": "67458ab3c6b23518c8616ec229ff62ed9af51d3d6bc817d54b21cdd109937d4f",
-  "cpu_gate": {"status": "PASS_CPU_ONLY", "commands": 11, "command_failures": 0, "tests_passed": 88, "evidence": "evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f"},
+  "cpu_gate": {
+    "status": "PASS_CPU_ONLY",
+    "commands": 11,
+    "command_failures": 0,
+    "tests_passed": 88,
+    "evidence": "evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f"
+  },
   "r45_mnp_cpu_gate": "PASS_FROM_EXISTING_EVIDENCE",
   "stages": {
-    "R46-A": {"status": "VERIFIED", "exit_code": 0, "evidence": "evidence/r46-cpu-20261029/AUDIT_REPORT.md", "decision": "CPU_SOURCE_AUDIT_COMPLETE"},
-    "R46-B": {"status": "VERIFIED", "exit_code": 0, "evidence": "evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f/r46_supervisor.stderr", "decision": "POSIX_SUPERVISOR_CPU_TESTS_PASS"},
-    "R46-C": {"status": "VERIFIED", "exit_code": 0, "evidence": "config/r46_smoke_samples.json", "decision": "REAL_TRAIN_SAMPLE_SET_AND_REPORT_SCHEMA_VALID"},
-    "R46-D": {"status": "VERIFIED", "exit_code": 0, "evidence": "evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f", "decision": "CPU_GATE_11_COMMANDS_88_TESTS_PASS"},
-    "R46-E": {"status": "IMPLEMENTED", "exit_code": null, "evidence": "evidence/r46-cpu-20261029/AUDIT_REPORT.md", "decision": "DRAFT_PR_PENDING"},
-    "R47-1": {"status": "NOT_RUN", "exit_code": null, "evidence": null, "decision": "STOP_WAIT_GPU_APPROVAL"},
-    "R47-2": {"status": "NOT_RUN", "exit_code": null, "evidence": null, "decision": "STOP_WAIT_GPU_APPROVAL"},
-    "R47-3": {"status": "NOT_RUN", "exit_code": null, "evidence": null, "decision": "STOP_WAIT_GPU_APPROVAL"},
-    "R47-4": {"status": "NOT_RUN", "exit_code": null, "evidence": null, "decision": "STOP_WAIT_GPU_APPROVAL"},
-    "R48-1": {"status": "NOT_RUN", "exit_code": null, "evidence": null, "decision": "REQUIRES_R47_GPU_EVIDENCE"},
-    "R48-2": {"status": "NOT_RUN", "exit_code": null, "evidence": null, "decision": "REQUIRES_R47_GPU_EVIDENCE"},
-    "R48-3": {"status": "NOT_RUN", "exit_code": null, "evidence": null, "decision": "REQUIRES_R47_GPU_EVIDENCE"}
+    "R46-A": {
+      "status": "VERIFIED",
+      "exit_code": 0,
+      "evidence": "evidence/r46-cpu-20261029/AUDIT_REPORT.md",
+      "decision": "CPU_SOURCE_AUDIT_COMPLETE"
+    },
+    "R46-B": {
+      "status": "VERIFIED",
+      "exit_code": 0,
+      "evidence": "evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f/r46_supervisor.stderr",
+      "decision": "POSIX_SUPERVISOR_CPU_TESTS_PASS"
+    },
+    "R46-C": {
+      "status": "VERIFIED",
+      "exit_code": 0,
+      "evidence": "config/r46_smoke_samples.json",
+      "decision": "REAL_TRAIN_SAMPLE_SET_AND_REPORT_SCHEMA_VALID"
+    },
+    "R46-D": {
+      "status": "VERIFIED",
+      "exit_code": 0,
+      "evidence": "evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f",
+      "decision": "CPU_GATE_11_COMMANDS_88_TESTS_PASS"
+    },
+    "R46-E": {
+      "status": "VERIFIED",
+      "exit_code": null,
+      "evidence": "evidence/r46-cpu-20261029/AUDIT_REPORT.md",
+      "decision": "DRAFT_PR_53_OPEN",
+      "pr": "https://github.com/jho887891-sudo/robo/pull/53"
+    },
+    "R47-1": {
+      "status": "NOT_RUN",
+      "exit_code": null,
+      "evidence": null,
+      "decision": "STOP_WAIT_GPU_APPROVAL"
+    },
+    "R47-2": {
+      "status": "NOT_RUN",
+      "exit_code": null,
+      "evidence": null,
+      "decision": "STOP_WAIT_GPU_APPROVAL"
+    },
+    "R47-3": {
+      "status": "NOT_RUN",
+      "exit_code": null,
+      "evidence": null,
+      "decision": "STOP_WAIT_GPU_APPROVAL"
+    },
+    "R47-4": {
+      "status": "NOT_RUN",
+      "exit_code": null,
+      "evidence": null,
+      "decision": "STOP_WAIT_GPU_APPROVAL"
+    },
+    "R48-1": {
+      "status": "NOT_RUN",
+      "exit_code": null,
+      "evidence": null,
+      "decision": "REQUIRES_R47_GPU_EVIDENCE"
+    },
+    "R48-2": {
+      "status": "NOT_RUN",
+      "exit_code": null,
+      "evidence": null,
+      "decision": "REQUIRES_R47_GPU_EVIDENCE"
+    },
+    "R48-3": {
+      "status": "NOT_RUN",
+      "exit_code": null,
+      "evidence": null,
+      "decision": "REQUIRES_R47_GPU_EVIDENCE"
+    }
   },
   "authorization": {
     "r47_gpu_approved": false,

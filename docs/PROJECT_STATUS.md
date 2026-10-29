@@ -7,7 +7,7 @@
 
 ## R46 CPU-only Smoke 安全准备（2026-10-29，最新状态）
 
-- **实现分支**：`codex/r46-smoke-supervisor-20261029`，提交 `75b6a1f84d4af513472f20df5548117a5e908066`，基于 PR #51 head `ba563d0f8c638b089f588027dd0af41ff290e1f4`。代码已推送；状态与证据汇总在当前工作树，草稿 PR 待创建。
+- **实现分支**：`codex/r46-smoke-supervisor-20261029`，分支最新提交为 `777bab1b8cb511a29545773a65cb7a96ed899dd9`（实现代码在精确 Linux CPU Gate 提交 `75b6a1f84d4af513472f20df5548117a5e908066` 验证），基于 PR #51 head `ba563d0f8c638b089f588027dd0af41ff290e1f4`。已创建草稿 [PR #53](https://github.com/jho887891-sudo/robo/pull/53)，目标分支 `audit/r45-e-unified-cpu-profile-20261028`。
 - **VERIFIED CPU Gate**：在该精确提交的干净 Linux worktree 上，11/11 命令 exit 0，88/88 R44/R45/R46 CPU tests 通过。环境 Python 3.10.12、NumPy 1.26.4、Torch 2.5.1+cu124、Transformers 4.46.3、PEFT 0.13.2、h5py 3.16.0、OpenCV 4.13.0。证据：`evidence/r46-cpu-20261029/cpu-gate-commit-75b6a1f/`。
 - **真实样本计划**：固定 5 个真实 push_T TRAIN episode（1 warm-up + 4 measured），CPU reader/processor 输出 `[1,18,224,224]`、42D 特征、14 action token + STOP、HDF5 SHA 与严格 Manifest 一致；计划 SHA `67458ab3c6b23518c8616ec229ff62ed9af51d3d6bc817d54b21cdd109937d4f`。证据：`sample-freeze-final/`。该结果不是 GPU smoke 或吞吐验证。
 - **IMPLEMENTED**：外部审批校验、父进程 1800 秒硬上限、Linux 自有 session 信号清理、GPU UUID/资源独占准入、CUDA 前 OpenVLA 模型文件与索引重哈希、固定样本 runner 及 CPU 回归已实现。发现的 PDEATHSIG 与实际模型哈希缺口均保留 RED 日志并修复后通过。
