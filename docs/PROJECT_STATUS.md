@@ -5,6 +5,17 @@
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。
 > 只讨论此仓库的 RoboDojo/OpenVLA 项目，其他机器人/CAD/羽毛球项目不混入。
 
+## R49 正式训练直接执行授权（2026-10-30，启动状态 UNKNOWN）
+
+- **用户最新明确指示**：直接进行标准 OpenVLA-7B 正式训练，不再先做 R47 GPU Smoke 或额外 Benchmark。训练由 DeepSeek 在真实 Linux/GPU 服务器执行，ChatGPT 负责 GitHub 工单和核验；**创建工单不代表服务器进程已启动**。
+- **正式执行入口**：[Issue #54 R49 直接启动现有 R44 正式训练器](https://github.com/jho887891-sudo/robo/issues/54)。冻结训练源码 SHA `d5be4de94ea37f1d5a715d5d47b7ebb16e07b097`、完整 TRAIN 108780/轮、DEV 28268/轮、5 Epoch、标准 OpenVLA-7B 冻结基座 + LoRA r32/alpha16(q_proj/v_proj) + 42D projector；不改模型、不做 OFT 模型训练。
+- **授权范围**：允许按已有训练器实际可用的 GPU 资源和可恢复训练路径**尝试启动正式训练**；跳过可选的 R47 Smoke/R48 Benchmark，不跳过训练器内置文件、资源锁、数据与安全停止保护；也不意味着 GPU 时间窗口、无限小时数或新硬件已分配。
+- **预算关键阻塞风险**：R44 当前参数默认预算估算约 `635.7025 GPU-hours`（对5轮基于非实测样本秒数的估算，**不是当前真实训练吞吐**），代码要求 `--gpu-budget-hours >= required_budget_hours`；且必须确实确认 `--gpu-window-confirmed`。严禁虚构已授权 636 小时窗口以绕过 `BLOCKED_BUDGET`。若真实资源不足，执行者直接回报 BLOCKED 和原始 stdout/stderr/退出码，不再另设多余诊断流程。
+- **证据与状态边界**：截至本状态写回**尚没有**服务器 PID、首个 optimizer step、CUDA 成功或 checkpoint，因此 `TRAINING_STATUS=NOT_CONFIRMED_STARTED`。一旦 DeepSeek 实际启动，按 Issue #54 上传独立 evidence 的小型脱敏开始记录、source SHA、首步计数、日志/检查点标识与状态。**不得从 CPU Gate PASS 推断训练运行成功。**
+- **旧 R46/R47 状态**：R46 新版 Linux CPU Gate 12/12、93/93 有既有证据；PR #53 Draft 文档合并冲突仍单独存在，但 **R47 Smoke 不再作为正式训练前置**。R48 额外 Benchmark 被用户选择跳过。
+
+> 此条是最新研究决策，覆盖以下关于“必须等待 R47 Smoke 后再决定训练”的旧计划；历史记录仍保留。
+
 ## R46 PR #53 一轮修复核对（2026-10-30，已关闭 P0-A，仍不具备 R47 就绪条件）
 
 - **PR HEAD**：[`codex/r46-smoke-supervisor-20261029@0c7dc144a0e7dc1c79cceb36e4df6e4c6257f85a`](https://github.com/jho887891-sudo/robo/pull/53)，仍为 Draft。修复源码提交 `a9f2618cd9ec2707a71dde43e07096c99ce9c3ea`。
