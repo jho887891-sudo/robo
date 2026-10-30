@@ -20,6 +20,10 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 TRAINING = REPO / "training"
+# Direct invocation (python diagnostics/r44_gpu_smoke.py) otherwise sets
+# sys.path[0]=diagnostics and cannot import training.r45_data from R44.
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
 if str(TRAINING) not in sys.path:
     sys.path.insert(0, str(TRAINING))
 
@@ -141,6 +145,7 @@ def main(argv=None) -> int:
         "max_process_memory_gb": args.max_process_memory_gb,
     }
     gpu_lock = None
+    r45_reader = None
     smoke_start = time.monotonic()
     try:
         if report["source_sha"] == "UNKNOWN_RUNTIME_SHA":
@@ -212,7 +217,11 @@ def main(argv=None) -> int:
         lab, _delta = R44.build_runtime_labels(
             prompt_ids[task], state_vec, action_vec, task, plan["delta_payload"], modules,
         )
-        pixel_values = R44.episode_images(proc, episode_path, int(t), args.cams, modules)
+        # Exercise the same R45 3-camera reader and cache policy as formal TRAIN.
+        r45_reader = R44.R45DATA.RuntimeReader(cache_bytes=0)
+        pixel_values, image_timing = r45_reader.load_images(
+            proc, episode_path, int(t), args.cams, M2.CAMERA_ORDER,
+        )
         proprio = torch.from_numpy(np.asarray(row["features"], dtype=np.float32)).reshape(1, 42).to("cuda")
         input_ids = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
         labels = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
@@ -271,6 +280,7 @@ def main(argv=None) -> int:
             "trainable_lora_parameter_count": sum(p.numel() for p in trainable_lora),
             "projector_parameter_count": sum(p.numel() for p in projector.parameters()),
             "data_and_preprocess_seconds": prepare_seconds,
+            "image_data_timing": image_timing,
             "forward_backward_optimizer_seconds": step_seconds,
             "measured_peak_allocated_gb": peak_allocated_gb,
             "measured_peak_reserved_gb": peak_reserved_gb,
@@ -326,6 +336,8 @@ def main(argv=None) -> int:
             return 130
         return 3
     finally:
+        if r45_reader is not None:
+            r45_reader.close()
         if gpu_lock is not None:
             gpu_lock.__exit__(None, None, None)
 

@@ -47,74 +47,45 @@ def _sig(signum, _frame):
 
 
 def main():
+    """Fail closed until a REAL OpenVLA forward/backward/optimizer benchmark exists.
+
+    This entrypoint must never report samples/sec or PASS from a placeholder timer.
+    The --approve-hours option only records a requested future budget; it does NOT
+    grant research-lead authorization or enable CUDA work in this version.
+    """
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", required=True)
     ap.add_argument("--approve-hours", type=float, default=0.0)
-    ap.add_argument("--configs", default="[]", help="JSON list of {name, micro_batch, attn}")
+    ap.add_argument("--configs", default="[]")
     ap.add_argument("--steps-per-config", type=int, default=20)
     args = ap.parse_args()
 
-    if not (args.approve_hours > 0):
-        print("BLOCKED: no approved GPU budget (--approve-hours must be > 0). "
-              "R45 requires explicit research-lead approval before any GPU benchmark.",
+    import math
+    if not math.isfinite(args.approve_hours) or args.approve_hours <= 0:
+        print("BLOCKED_AUTHORIZATION: explicit research-lead GPU approval is required.",
               file=sys.stderr)
         return 2
-    if args.approve_hours > 2.0:
-        print("BLOCKED: requested budget %.2f h exceeds the 2 h benchmark ceiling" %
-              args.approve_hours, file=sys.stderr)
+    if args.approve_hours > 0.5:
+        print("BLOCKED_BUDGET: 30-minute single-GPU benchmark ceiling exceeded.",
+              file=sys.stderr)
         return 2
-    out = os.path.abspath(args.out)
-    if os.path.exists(out):
-        print("BLOCKED: output directory exists: " + out, file=sys.stderr)
+    if args.steps_per_config < 1:
+        print("BLOCKED_CONTRACT: steps-per-config must be positive.", file=sys.stderr)
         return 2
-    os.makedirs(out, exist_ok=True)
-    signal.signal(signal.SIGTERM, _sig)
-    signal.signal(signal.SIGINT, _sig)
-    with open(os.path.join(out, "bench.pid"), "w") as fh:
-        fh.write("%d\n" % os.getpid())
-
-    guard = BudgetGuard(args.approve_hours * 3600.0)
-    configs = json.loads(args.configs)
-    report = {"schema": "r45-gpu-bench/v1", "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ",
-                                                                 time.gmtime()),
-              "pid": os.getpid(), "approved_hours": args.approve_hours,
-              "cap_seconds": guard.max_seconds, "configs": [], "status": "RUNNING"}
-    exit_code = 1
     try:
-        for cfg in configs:
-            if guard.expired():
-                report["stopped_early"] = guard.reason
-                break
-            row = {"config": cfg, "steps": [], "status": "NOT_RUN"}
-            report["configs"].append(row)
-            for step in range(args.steps_per_config):
-                if guard.expired():
-                    row["status"] = "TRUNCATED"
-                    break
-                t0 = time.perf_counter()
-                time.sleep(0.001)                     # placeholder for one real training step
-                row["steps"].append(time.perf_counter() - t0)
-            if row["steps"]:
-                warm = row["steps"][: max(1, len(row["steps"]) // 5)]
-                steady = row["steps"][len(warm):] or row["steps"]
-                row["warmup_s"] = sum(warm) / len(warm)
-                row["steady_s"] = sum(steady) / len(steady)
-                row["samples_per_s"] = (cfg.get("micro_batch", 1) / row["steady_s"]
-                                        if row["steady_s"] else None)
-                row["status"] = "OK"
-        report["status"] = "PASS"
-        exit_code = 0
-    except Exception as exc:                              # pragma: no cover
-        report["status"] = "ERROR"
-        report["error"] = repr(exc)
-        exit_code = 1
-    finally:
-        report["elapsed_s"] = guard.elapsed()
-        with open(os.path.join(out, "bench_report.json"), "w", encoding="utf-8") as fh:
-            json.dump(report, fh, indent=2, sort_keys=True)
-            fh.write("\n")
-    print("STATUS=%s elapsed=%.1fs out=%s" % (report["status"], report["elapsed_s"], out))
-    return exit_code
+        configurations = json.loads(args.configs)
+        if not isinstance(configurations, list) or not configurations:
+            raise ValueError("nonempty configuration list required")
+    except (ValueError, TypeError) as exc:
+        print("BLOCKED_CONTRACT: %s" % exc, file=sys.stderr)
+        return 2
+    if os.path.exists(os.path.abspath(args.out)):
+        print("BLOCKED_OUTPUT: output directory already exists.", file=sys.stderr)
+        return 2
+    print("BLOCKED_NOT_IMPLEMENTED: no real OpenVLA model forward/backward/optimizer "
+          "measurement is wired. No GPU/CUDA access and no output created.",
+          file=sys.stderr)
+    return 3
 
 
 if __name__ == "__main__":

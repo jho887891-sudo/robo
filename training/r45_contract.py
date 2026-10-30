@@ -16,7 +16,7 @@ class R45Config:
     cameras: tuple = field(default=("cam_head", "cam_left_wrist", "cam_right_wrist"))
     lora_r: int = 32
     lora_alpha: int = 16
-    lora_targets: str = "all-linear"
+    lora_targets: str = "q_proj/v_proj"
     epochs: int = 5
     train_samples: int = 108780
     dev_samples: int = 28268
@@ -38,7 +38,7 @@ class R45Config:
             raise ContractError("camera order must be the approved three-camera order")
         if self.lora_r != 32 or self.lora_alpha != 16:
             raise ContractError("LoRA must use r=32 and alpha=16")
-        if self.lora_targets not in ("all-linear", "q_proj/v_proj"):
+        if self.lora_targets != "q_proj/v_proj":
             raise ContractError("LoRA target set must be explicit")
         if self.epochs != 5:
             raise ContractError("formal training must use five epochs")
