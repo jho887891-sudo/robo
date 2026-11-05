@@ -1,0 +1,26 @@
+{
+  "status": "PASS_CPU_PARITY",
+  "code_sha": "b67ca4082b74da275830899a14a98a7abbad2178",
+  "samples": 120,
+  "visits": 360,
+  "baseline_cat": {
+    "n": 360,
+    "mean_ms": 0.7700457172985706,
+    "median_ms": 0.7364130578935146,
+    "p95_ms": 0.9282128885388374
+  },
+  "candidate_preallocate_bf16": {
+    "n": 360,
+    "mean_ms": 0.4373715220329662,
+    "median_ms": 0.4176835063844919,
+    "p95_ms": 0.5450579337775707
+  },
+  "assembly_mean_gain_fraction": 0.43201875913637,
+  "preprocess": {
+    "n": 360,
+    "mean_ms": 40.091313256157775,
+    "median_ms": 39.34951778501272,
+    "p95_ms": 42.11129900068045
+  },
+  "limits": "Assembly only; processor and HDF5 still run on CPU; no 7B throughput"
+}

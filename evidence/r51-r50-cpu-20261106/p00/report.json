@@ -1,0 +1,52 @@
+{
+  "cache_hits": 0,
+  "code_sha": "b67ca4082b74da275830899a14a98a7abbad2178",
+  "comparison_pairs_per_s": 10.317718698539363,
+  "comparison_wall_s": 23.2609559353441,
+  "gpu_utilization": null,
+  "hdf5": {
+    "mean_ms": 14.083376810109863,
+    "median_ms": 1.4097229577600956,
+    "n": 240,
+    "total_s": 3.3800104344263673
+  },
+  "jpeg": {
+    "mean_ms": 10.493649831429744,
+    "median_ms": 10.288291610777378,
+    "n": 240,
+    "total_s": 2.5184759595431387
+  },
+  "legacy_wall": {
+    "mean_ms": 53.39338410024842,
+    "median_ms": 42.44055598974228,
+    "n": 240,
+    "total_s": 12.81441218405962
+  },
+  "limitations": "CPU only; serial old-then-new order can favor the latter via OS cache; no 7B throughput",
+  "peak_rss_kib": 740636,
+  "process_cpu_cores_used": 0.7943589064163996,
+  "process_cpu_s": 18.477545047,
+  "processor": {
+    "mean_ms": 24.226556182838976,
+    "median_ms": 23.4711030498147,
+    "n": 240,
+    "total_s": 5.814373483881354
+  },
+  "reader_serial_samples_per_s": 25.191707548347598,
+  "reader_wall": {
+    "mean_ms": 39.695602137362584,
+    "median_ms": 39.29896792396903,
+    "n": 240,
+    "total_s": 9.52694451296702
+  },
+  "samples": 120,
+  "status": "PASS_CPU_ONLY",
+  "tensor": {
+    "mean_ms": 1.4531989038611453,
+    "median_ms": 0.8218651637434959,
+    "n": 240,
+    "total_s": 0.34876773692667484
+  },
+  "visits": 240,
+  "vram": null
+}

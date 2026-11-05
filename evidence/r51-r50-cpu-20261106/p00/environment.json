@@ -1,0 +1,28 @@
+{
+  "code_sha": "b67ca4082b74da275830899a14a98a7abbad2178",
+  "versions": {
+    "python": "3.10.12",
+    "numpy": "1.26.4",
+    "torch": "2.5.1+cu124",
+    "transformers": "4.46.3",
+    "peft": "0.13.2",
+    "h5py": "3.16.0",
+    "opencv": "4.13.0"
+  },
+  "selected_sha256": "33fa331a314ad30a69c9409e4d98c132d071b52e25ddb986aa0c8aa7b59e9d07",
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "processor_sha256": "bd024783fb785cbdfe35b710b621c5e8678d4c157a9ba625675e67d40d1757da",
+  "camera_order": [
+    "cam_head",
+    "cam_left_wrist",
+    "cam_right_wrist"
+  ],
+  "repeats": 2,
+  "batch_assembly": "cat",
+  "threads": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "scope": "CPU production processor; no CUDA/model weights/training"
+}
