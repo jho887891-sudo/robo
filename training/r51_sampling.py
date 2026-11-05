@@ -52,8 +52,11 @@ def draw_epoch(entries, *, base_seed: int, epoch: int, mode: str = "replacement"
     else:
         p_first = len(indexed[TASKS[0]]) / n if task_mix == "proportional" else 0.5
         choices = rng.random(n) < p_first
-        draws = [int(rng.choice(eligible[TASKS[0] if use_first else TASKS[1]]))
-                 for use_first in choices]
+        draws_array = np.empty(n, dtype=np.int64)
+        for task, mask in ((TASKS[0], choices), (TASKS[1], ~choices)):
+            candidates = np.asarray(eligible[task], dtype=np.int64)
+            draws_array[mask] = candidates[rng.integers(len(candidates), size=int(mask.sum()))]
+        draws = draws_array.tolist()
     unique = len(set(draws))
     counts = Counter(entries[i][0] for i in draws)
     serialized = json.dumps(draws, separators=(",", ":")).encode()
