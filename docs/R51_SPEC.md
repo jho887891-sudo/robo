@@ -11,7 +11,7 @@
 
 ## 采样与 Epoch 定义
 
-令 `N_two_task_TRAIN` 为两任务有效 TRAIN 样本总数。每个 Epoch 固定执行 `N_draws = N_two_task_TRAIN` 次抽样。默认研究有放回随机抽样，允许同一 Epoch 重复样本；另设全量无放回随机打乱基线。每轮种子由固定基础种子及 Epoch 编号确定。每轮记录抽样序列 SHA256、唯一样本数、重复数与重复率、两任务分布、有效 Batch、优化器更新数和学习率调度。重复访问不计作新增数据。比较 5、10、20 Epoch；同一对照使用相同 Batch Size 与每轮优化器更新数。末尾批次和断点恢复必须保持抽样序列与已提交游标一致。
+现场冻结索引给出两任务 TRAIN `72,922`（push_T `25,313`、sweep_blocks `47,609`），DEV `19,552`（`6,691`、`12,861`）。每个 Epoch 固定执行 `N_draws = N_two_task_TRAIN = 72,922` 次抽样。默认研究有放回随机抽样，允许同一 Epoch 重复样本；另设全量无放回随机打乱基线。每轮种子由固定基础种子及 Epoch 编号确定。每轮记录抽样序列 SHA256、唯一样本数、重复数与重复率、两任务分布、有效 Batch、优化器更新数和学习率调度。重复访问不计作新增数据。比较 5、10、20 Epoch；同一对照使用相同 Batch Size 与每轮优化器更新数。末尾批次和断点恢复必须保持抽样序列与已提交游标一致。
 
 ## G：Sampling-aware Data Pipeline Optimization
 
@@ -62,7 +62,7 @@ P04、P06 的真实 GPU 执行须另行批准。D 按先前指示不实施离线
 
 ## 数据和归一化 Gate
 
-必须验证冻结 Manifest 对两任务子集及 DEV 子集的映射、42D Feature Normalizer 的任务独立选择、`joint_delta_v1` 的任务独立归一化、任务 prompt 编码以及 Reader 对 `stack_bowls` 的排除。核对每任务 TRAIN 行数和 normalizer fit provenance。若原冻结 payload 可以逐任务安全选取，保留原文件并记录完整文件 SHA 与所选任务键；若必须重新拟合，只用两任务 TRAIN 生成独立版本，保存来源与 SHA，不覆盖三任务文件。任一契约不符时标记 BLOCKED，停止受影响的训练与 GPU 运行。
+必须验证冻结 Manifest 对两任务子集及 DEV 子集的映射、42D Feature Normalizer 的任务独立选择、`joint_delta_v1` 的任务独立归一化、任务 prompt 编码以及 Reader 对 `stack_bowls` 的排除。核对每任务 TRAIN 行数和 normalizer fit provenance。现有三任务 normalizer 在完整冻结 split 上通过校验，push_T / sweep_blocks 块独立存储且 TRAIN 行数匹配；Feature 文件 SHA256 `7c404f08e32fe3ead3b2bc17eca97f9106aff74107fd173d03cf8adfca4e4d13`，Delta 文件 SHA256 `795052b0e6716d374488296b52befdbb012bd1840a7ccca57dfbf4df9e07383f`。可选择这两个块而保留完整历史文件身份；正式训练器的两任务 Manifest、prompt 和恢复契约仍需单独 Gate。若必须重新拟合，只用两任务 TRAIN 生成独立版本，保存来源与 SHA，不覆盖三任务文件。任一契约不符时标记 BLOCKED，停止受影响的训练与 GPU 运行。
 
 ## 交付边界
 
