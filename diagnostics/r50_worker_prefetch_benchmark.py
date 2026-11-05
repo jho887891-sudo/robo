@@ -141,8 +141,7 @@ def main():
         dev = {Path(x).name for x in split[task]["dev"]}
         if episode not in train or episode in dev or int(frame) < 2:
             raise ValueError(f"not frozen TRAIN: {task}/{episode} t={frame}")
-    if len(selected) != len(set(map(tuple, selected))):
-        raise ValueError("duplicate fixed sample")
+    # Each list position is a draw; replacement sampling may repeat identities.
     import torch
     from training.r50_data_pipeline import R50WorkerDataset
     roots = (str(args.hdf5_root), str(args.base_model), str(args.oft_root))

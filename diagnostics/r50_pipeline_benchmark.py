@@ -123,8 +123,7 @@ def main() -> int:
             raise ValueError(f"TRAIN/DEV overlap: {task}/{episode}")
         if not isinstance(frame, int) or frame < 2:
             raise ValueError("invalid frame index")
-    if len(selected) != len(set(tuple(x) for x in selected)):
-        raise ValueError("duplicate selected sample")
+    # R51 replacement draws intentionally repeat some sample identities.
     args.out.mkdir(parents=True, mode=0o700)
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     config = {"code_sha": head, "versions": versions, "selected_sha256": digest(args.selected),
