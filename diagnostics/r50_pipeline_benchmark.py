@@ -78,6 +78,8 @@ def main() -> int:
     ap.add_argument("--selected", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--repeats", type=int, default=2)
+    ap.add_argument("--batch-assembly", choices=("cat", "preallocate_bf16"),
+                    default="cat")
     args = ap.parse_args()
     if args.out.exists():
         raise FileExistsError(args.out)
@@ -129,11 +131,12 @@ def main() -> int:
               "split_sha256": digest(args.splits),
               "processor_sha256": digest(args.base_model / "preprocessor_config.json"),
               "camera_order": list(CAMERAS), "repeats": args.repeats,
+              "batch_assembly": args.batch_assembly,
               "threads": {k: os.environ.get(k) for k in
                           ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS")},
               "scope": "CPU production processor; no CUDA/model weights/training"}
     (args.out / "environment.json").write_text(json.dumps(config, indent=2) + "\n")
-    reader = RuntimeReader(cache_bytes=0)
+    reader = RuntimeReader(cache_bytes=0, batch_assembly=args.batch_assembly)
     records = []
     wall_start = time.perf_counter()
     cpu_start = time.process_time()

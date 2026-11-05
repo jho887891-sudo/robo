@@ -195,11 +195,15 @@ def feature42(history, contract):
 class RuntimeReader:
     """Formal-entry reader: worker/process-local HDF5 handles, bounded image cache, phase timing."""
 
-    def __init__(self, cache_bytes=256 * 1024 * 1024, max_open_handles=24):
+    def __init__(self, cache_bytes=256 * 1024 * 1024, max_open_handles=24,
+                 batch_assembly="cat"):
         self.cache_bytes = int(cache_bytes)
         self.max_open_handles = int(max_open_handles)
         if self.cache_bytes < 0 or self.max_open_handles < 1:
             raise ValueError("cache_bytes must be >= 0 and max_open_handles must be >= 1")
+        if batch_assembly not in ("cat", "preallocate_bf16"):
+            raise ValueError("batch_assembly must be cat or preallocate_bf16")
+        self.batch_assembly = batch_assembly
         self._handles = OrderedDict()
         self._images = OrderedDict()
         self._cache_bytes = 0
@@ -273,7 +277,11 @@ class RuntimeReader:
                     _, old_tiles = self._images.popitem(last=False)
                     self._cache_bytes -= sum(int(x.numel() * x.element_size()) for x in old_tiles)
         transfer_start = time.perf_counter()
-        pixel_values = torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to(device)
+        if self.batch_assembly == "cat":
+            pixel_values = torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to(device)
+        else:
+            from training.r50_batch_builder import assemble_camera_tiles
+            pixel_values = assemble_camera_tiles(tiles, self.batch_assembly).to(device)
         transfer_s = time.perf_counter() - transfer_start
         self.totals["hdf5_read_s"] += read_s
         self.totals["jpeg_preprocess_s"] += jpeg_s
