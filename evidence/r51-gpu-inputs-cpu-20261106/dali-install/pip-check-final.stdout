@@ -1,0 +1,1 @@
+opencv-python 4.13.0.92 has requirement numpy>=2; python_version >= "3.9", but you have numpy 1.26.4.

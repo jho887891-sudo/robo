@@ -1,0 +1,39 @@
+Requirement already satisfied: nvidia-dali-cuda120==2.4.0 in <ISOLATED_VENV>/lib/python3.10/site-packages (2.4.0)
+Collecting nvidia-libnvcomp-cu12==5.3.0.16
+  Downloading nvidia_libnvcomp_cu12-5.3.0.16-py3-none-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (41.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 41.5/41.5 MB 13.7 MB/s eta 0:00:00
+Collecting astunparse<=1.6.3,>=1.6.0
+  Downloading astunparse-1.6.3-py2.py3-none-any.whl (12 kB)
+Collecting nvidia-nvimgcodec-cu12[all]<0.10.0,>=0.9.0
+  Downloading nvidia_nvimgcodec_cu12-0.9.0.20-py3-none-manylinux_2_28_x86_64.whl (32.1 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 32.1/32.1 MB 11.6 MB/s eta 0:00:00
+Collecting nvtx
+  Downloading nvtx-0.2.17-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.0 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.0/3.0 MB 58.2 MB/s eta 0:00:00
+Requirement already satisfied: packaging<=26.3 in <USER_SITE> (from nvidia-dali-cuda120==2.4.0) (25.0)
+Collecting gast<=0.7.0,>=0.3.3
+  Downloading gast-0.7.0-py3-none-any.whl (22 kB)
+Requirement already satisfied: numpy in <ISOLATED_VENV>/lib/python3.10/site-packages (from nvidia-dali-cuda120==2.4.0) (1.26.4)
+Collecting makefun
+  Downloading makefun-1.16.0-py2.py3-none-any.whl (22 kB)
+Collecting libcst~=1.8
+  Downloading libcst-1.9.0-cp310-cp310-manylinux_2_28_x86_64.whl (2.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.3/2.3 MB 58.6 MB/s eta 0:00:00
+Requirement already satisfied: six<=1.17,>=1.16 in /usr/lib/python3/dist-packages (from nvidia-dali-cuda120==2.4.0) (1.16.0)
+Collecting optree
+  Downloading optree-0.20.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (452 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 452.5/452.5 KB 69.5 MB/s eta 0:00:00
+Requirement already satisfied: wheel<1.0,>=0.23.0 in /usr/lib/python3/dist-packages (from astunparse<=1.6.3,>=1.6.0->nvidia-dali-cuda120==2.4.0) (0.37.1)
+Requirement already satisfied: pyyaml>=5.2 in <USER_SITE> (from libcst~=1.8->nvidia-dali-cuda120==2.4.0) (6.0.3)
+Collecting nvidia-nvjpeg-cu12
+  Downloading nvidia_nvjpeg_cu12-12.4.0.76-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.3/5.3 MB 19.6 MB/s eta 0:00:00
+Collecting nvidia-nvjpeg2k-cu12
+  Downloading nvidia_nvjpeg2k_cu12-0.12.0.58-py3-none-manylinux2014_x86_64.whl (9.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.6/9.6 MB 13.8 MB/s eta 0:00:00
+Collecting nvidia-nvtiff-cu12>=0.8.0
+  Downloading nvidia_nvtiff_cu12-0.9.0.86-py3-none-manylinux2014_x86_64.whl (4.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.3/4.3 MB 17.2 MB/s eta 0:00:00
+Requirement already satisfied: typing-extensions>=4.10.0 in <USER_SITE> (from optree->nvidia-dali-cuda120==2.4.0) (4.15.0)
+Installing collected packages: nvidia-libnvcomp-cu12, makefun, optree, nvtx, nvidia-nvtiff-cu12, nvidia-nvjpeg2k-cu12, nvidia-nvjpeg-cu12, nvidia-nvimgcodec-cu12, libcst, gast, astunparse
+Successfully installed astunparse-1.6.3 gast-0.7.0 libcst-1.9.0 makefun-1.16.0 nvidia-libnvcomp-cu12-5.3.0.16 nvidia-nvimgcodec-cu12-0.9.0.20 nvidia-nvjpeg-cu12-12.4.0.76 nvidia-nvjpeg2k-cu12-0.12.0.58 nvidia-nvtiff-cu12-0.9.0.86 nvtx-0.2.17 optree-0.20.0

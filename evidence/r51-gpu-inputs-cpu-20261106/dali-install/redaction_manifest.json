@@ -1,0 +1,77 @@
+{
+  "schema": "r51-dali-install-redaction/v1",
+  "files": [
+    {
+      "path": "install.stdout",
+      "original_sha256": "9895a987754f182465ae1325281f7b4f67254d66fa725f6ab5ef4cabb51fcaa2",
+      "published_sha256": "13b8568bfbd933be3879aaa5704e4cc383718bfa3dfa84a20c05a580c56cf367",
+      "changed": true
+    },
+    {
+      "path": "install.stderr",
+      "original_sha256": "2d2ebb866aef0a89fdeb2f8a7938847d33b03b0d0b9ce54febe80a9b325a5405",
+      "published_sha256": "02dd5ee4803d88304282b326c1ae0465ad031659549eed664c738e72d6f50b7a",
+      "changed": true
+    },
+    {
+      "path": "install.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "published_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "changed": false
+    },
+    {
+      "path": "deps.stdout",
+      "original_sha256": "7be84056272560bc99b41345f88d6f3a06028039a1221d7fae7b642c2ff46c67",
+      "published_sha256": "cf89c3295255c79645fae2680dbda94227721ef81558815d1913f8d8e386fdc1",
+      "changed": true
+    },
+    {
+      "path": "deps.stderr",
+      "original_sha256": "d234c4d82a7e1915d9f447710a9e72347af5cf9dfe207b7edbe5f6773377eabb",
+      "published_sha256": "0e077401655b5d9d31d698041f0bf6351ea5f7c014ea094499200d38c9ab1e15",
+      "changed": true
+    },
+    {
+      "path": "deps.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "published_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "changed": false
+    },
+    {
+      "path": "versions.stdout",
+      "original_sha256": "4339e95a35cf7bbc95829d476581cef12c4679c22b91ac542401502c5447c45b",
+      "published_sha256": "4339e95a35cf7bbc95829d476581cef12c4679c22b91ac542401502c5447c45b",
+      "changed": false
+    },
+    {
+      "path": "versions.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "changed": false
+    },
+    {
+      "path": "versions.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "published_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "changed": false
+    },
+    {
+      "path": "pip-check-final.stdout",
+      "original_sha256": "c84300a5352fbe0e429766e4404c1f271ddb4dc6d02468a0290385b7f2b074cf",
+      "published_sha256": "c84300a5352fbe0e429766e4404c1f271ddb4dc6d02468a0290385b7f2b074cf",
+      "changed": false
+    },
+    {
+      "path": "pip-check-final.stderr",
+      "original_sha256": "3d7d472ed81b7dc18ec7644d945faf99fec01c682c0222865b2ec50af17419f4",
+      "published_sha256": "d15bede88c5d338e364d5aa0dbd4c49b48fb41dd9ffe680347b06a625998e215",
+      "changed": true
+    },
+    {
+      "path": "pip-check-final.exit",
+      "original_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "published_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "changed": false
+    }
+  ]
+}

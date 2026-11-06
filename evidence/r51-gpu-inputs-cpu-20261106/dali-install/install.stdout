@@ -1,0 +1,12 @@
+Collecting numpy==1.26.4
+  Downloading numpy-1.26.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.2/18.2 MB 18.9 MB/s eta 0:00:00
+Collecting nvidia-dali-cuda120==2.4.0
+  Downloading nvidia_dali_cuda120-2.4.0-py3-none-manylinux_2_28_x86_64.whl (424.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 424.5/424.5 MB 18.3 MB/s eta 0:00:00
+Installing collected packages: nvidia-dali-cuda120, numpy
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.2.6
+    Not uninstalling numpy at <USER_SITE>, outside environment <ISOLATED_VENV>
+    Can't uninstall 'numpy'. No files were found to uninstall.
+Successfully installed numpy-1.26.4 nvidia-dali-cuda120-2.4.0
