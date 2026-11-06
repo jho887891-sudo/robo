@@ -1,0 +1,35 @@
+{
+  "benchmark_task_draws": {
+    "push_T": 353,
+    "sweep_blocks": 647
+  },
+  "benchmark_window_draws": 1000,
+  "benchmark_window_duplicate_ratio": 0.375,
+  "benchmark_window_unique": 625,
+  "code_sha": "c00277ea2c3a986ab23ec41fa35041dee44e177e",
+  "full_epoch": {
+    "draws": 72922,
+    "duplicate_draws": 71922,
+    "duplicate_ratio": 0.9862867173143908,
+    "epoch": 0,
+    "mode": "replacement",
+    "order_sha256": "a566d41852d2decc0ebd1e4e622220667253035b68d9d509cd7c5c6bea985547",
+    "pool_sha256": "b0520d8bce6b572d7a3dacdd6ca0743760db4dc853155ad44f0e45d473b059ee",
+    "pool_size": 1000,
+    "seed": 51,
+    "task_draws": {
+      "push_T": 25304,
+      "sweep_blocks": 47618
+    },
+    "task_mix": "proportional",
+    "unique_samples": 1000
+  },
+  "schema": "r51-benchmark-selection/v1",
+  "scope": "CPU benchmark window from complete R51 draw plan; no training",
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "status": "PASS_CPU_SELECTION",
+  "tasks": [
+    "push_T",
+    "sweep_blocks"
+  ]
+}
