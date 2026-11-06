@@ -877,6 +877,10 @@ def parse_args(argv=None):
     ap.add_argument("--r51-cache-kind", choices=("none", "jpeg", "rgb", "processed"),
                     default="none")
     ap.add_argument("--r51-cache-mib", type=int, default=0)
+    ap.add_argument("--r51-workers", type=int, default=0,
+                    help="0 retains synchronous R44 image reader; 1/2/4 use spawned workers")
+    ap.add_argument("--r51-prefetch", type=int, default=2)
+    ap.add_argument("--r51-pin-memory", action="store_true")
     ap.add_argument("--min-epochs", type=int, default=2)
     ap.add_argument("--early-stopping-patience", type=int, default=0,
                     help="0 disables early stopping; formal default is all 5 full epochs")
@@ -950,7 +954,39 @@ def r51_config(args):
     return {"tasks": ["push_T", "sweep_blocks"], "mode": args.r51_sampling,
             "task_mix": args.r51_task_mix, "active_pool": args.r51_active_pool,
             "draws_per_epoch": 72922, "cache_kind": args.r51_cache_kind,
-            "cache_mib": args.r51_cache_mib}
+            "cache_mib": args.r51_cache_mib, "workers": args.r51_workers,
+            "prefetch": args.r51_prefetch, "pin_memory": args.r51_pin_memory}
+
+
+def make_r51_image_loader(args, plan, order, cursor):
+    """Create an ordered CPU-only image stream from the committed draw cursor."""
+    if not args.r51_two_task or args.r51_workers == 0:
+        raise ValueError("R51 worker loader requires explicit worker mode")
+    if not 0 <= cursor < plan["n_train"] or len(order) != plan["n_train"]:
+        raise ValueError("invalid R51 loader cursor or draw order")
+    from training.r50_data_pipeline import R50WorkerDataset, create_loader
+    selected = [plan["train_samples"][int(i)] for i in order[cursor:]]
+    if any(task not in ("push_T", "sweep_blocks") for task, _, _ in selected):
+        raise ValueError("R51 worker stream contains a non-training task")
+    dataset = R50WorkerDataset(
+        selected, plan["hdf5_root"], args.base_model, args.oft_root,
+        cache_bytes=args.r51_cache_mib * 1024**2 // args.r51_workers,
+        cache_kind=args.r51_cache_kind,
+    )
+    loader = create_loader(dataset, args.r51_workers, args.r51_prefetch,
+                           args.r51_pin_memory)
+    return loader, iter(loader)
+
+
+def close_r51_image_loader(loader):
+    if loader is None:
+        return
+    iterator = getattr(loader, "_iterator", None)
+    if iterator is not None:
+        iterator._shutdown_workers()
+    dataset = getattr(loader, "dataset", None)
+    if dataset is not None and hasattr(dataset, "close"):
+        dataset.close()
 
 
 def main(argv=None) -> int:
@@ -969,9 +1005,12 @@ def main(argv=None) -> int:
             raise SystemExit("R51 cache cap must be 0, 128, 256 or 512 MiB")
         if (args.r51_cache_kind == "none") != (args.r51_cache_mib == 0):
             raise SystemExit("R51 cache kind and cap must be enabled together")
+        if args.r51_workers not in (0, 1, 2, 4) or args.r51_prefetch not in (1, 2, 4):
+            raise SystemExit("R51 workers must be 0/1/2/4 and prefetch 1/2/4")
     elif (not 1 <= args.epochs <= 5 or args.r51_active_pool is not None
           or args.r51_task_mix != "proportional" or args.r51_sampling != "replacement"
-          or args.r51_cache_kind != "none" or args.r51_cache_mib != 0):
+          or args.r51_cache_kind != "none" or args.r51_cache_mib != 0
+          or args.r51_workers != 0 or args.r51_prefetch != 2 or args.r51_pin_memory):
         raise SystemExit("R44 preflight epochs must be 1..5; R51 flags require --r51-two-task")
     if args.min_epochs < 1 or args.min_epochs > args.epochs:
         raise SystemExit("min-epochs must be within 1..epochs")
@@ -1141,8 +1180,8 @@ def main(argv=None) -> int:
     # tensors that cannot improve unique-sample throughput. Keep HDF5 handles.
     # Re-evaluate caching separately if a future sampler repeats images.
     r45_reader = R45DATA.RuntimeReader(
-        cache_bytes=args.r51_cache_mib * 1024**2 if args.r51_two_task else 0,
-        cache_kind=args.r51_cache_kind if args.r51_two_task else "none",
+        cache_bytes=args.r51_cache_mib * 1024**2 if args.r51_two_task and args.r51_workers == 0 else 0,
+        cache_kind=args.r51_cache_kind if args.r51_two_task and args.r51_workers == 0 else "none",
     )
     state_cache = r45_reader.load_state_cache(plan, TC)
     stop_controller = R44StopController(
@@ -1280,6 +1319,9 @@ def main(argv=None) -> int:
         last_checkpoint = str(save_checkpoint(out_dir, state, suffix="initial"))
         save_run_state(out_dir, {**run_state, "status": "RUNNING", "last_checkpoint": last_checkpoint})
     status = "RUNNING"
+    image_loader = None
+    image_iterator = None
+    image_cursor_start = 0
     try:
         vla.train()
         projector.train()
@@ -1334,6 +1376,9 @@ def main(argv=None) -> int:
                 if epoch >= args.epochs:
                     status = "COMPLETED"
                     break
+                close_r51_image_loader(image_loader)
+                image_loader = None
+                image_iterator = None
                 cursor = 0
                 order = epoch_order(args, plan, epoch, D)
                 vla.train()
@@ -1376,10 +1421,36 @@ def main(argv=None) -> int:
             action_vec = np.asarray(actions[int(t)], dtype=np.float32)
             lab, _delta = build_runtime_labels(prompt_ids[task], state_vec, action_vec, task,
                                                plan["delta_payload"], modules)
-            pv, data_timing = r45_reader.load_images(
-                proc, plan["episode_paths"][f"{task}/{episode}"], int(t),
-                args.cams, M2.CAMERA_ORDER,
-            )
+            if args.r51_two_task and args.r51_workers:
+                if image_loader is None:
+                    image_cursor_start = cursor
+                    image_loader, image_iterator = make_r51_image_loader(
+                        args, plan, order, cursor,
+                    )
+                wait_start = time.perf_counter()
+                image_item = next(image_iterator)
+                wait_s = time.perf_counter() - wait_start
+                if int(image_item["index"].item()) != cursor - image_cursor_start:
+                    raise RuntimeError("R51 prefetched image order differs from committed draw cursor")
+                transfer_start = time.perf_counter()
+                pv = image_item["pixels"].to("cuda", non_blocking=args.r51_pin_memory)
+                torch.cuda.synchronize()
+                transfer_s = time.perf_counter() - transfer_start
+                if tuple(pv.shape) != (1, 18, 224, 224) or pv.dtype != torch.bfloat16:
+                    raise RuntimeError("R51 worker image shape/dtype mismatch")
+                data_timing = {
+                    "hdf5_read_s": float(image_item["hdf5_s"].item()),
+                    "jpeg_preprocess_s": float(image_item["jpeg_preprocess_s"].item()),
+                    "cpu_to_gpu_s": transfer_s, "data_wait_s": wait_s,
+                    "cache_hit": bool(image_item["cache_hit"].item()),
+                    "worker_pid": int(image_item["worker_pid"].item()),
+                    "timing_kind": "cuda_synchronized_transfer",
+                }
+            else:
+                pv, data_timing = r45_reader.load_images(
+                    proc, plan["episode_paths"][f"{task}/{episode}"], int(t),
+                    args.cams, M2.CAMERA_ORDER,
+                )
             pr = torch.from_numpy(np.asarray(row["features"], dtype=np.float32)).reshape(1, 42).to("cuda")
             inp = torch.tensor([lab["input_ids"]], dtype=torch.long, device="cuda")
             tgt = torch.tensor([lab["labels"]], dtype=torch.long, device="cuda")
@@ -1490,6 +1561,7 @@ def main(argv=None) -> int:
         })
         return 0 if status in ("COMPLETED", "EARLY_STOPPED", "STOPPED_SAFE") else 3
     finally:
+        close_r51_image_loader(image_loader)
         r45_reader.close()
         stop_controller.restore_signal_handlers()
         gpu_lock.__exit__(None, None, None)

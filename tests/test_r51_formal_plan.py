@@ -97,6 +97,40 @@ class FormalPlanTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             r51_train.main(["--r51-two-task"])
 
+    def test_worker_loader_receives_remaining_draws_and_total_cache_cap(self):
+        from training import r44_train
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        plan = two_task_plan(self.full)
+        plan["hdf5_root"] = "/synthetic/hdf5"
+        args = SimpleNamespace(r51_two_task=True, r51_workers=2, r51_prefetch=2,
+                               r51_pin_memory=False, r51_cache_mib=128,
+                               r51_cache_kind="jpeg", base_model="/synthetic/openvla",
+                               oft_root="/synthetic/prismatic")
+        class FakeDataset:
+            def __init__(self, selected, root, base, source, *, cache_bytes, cache_kind):
+                self.selected = selected
+                self.cache_bytes = cache_bytes
+                self.cache_kind = cache_kind
+            def close(self):
+                self.closed = True
+        class FakeLoader:
+            def __init__(self, dataset):
+                self.dataset = dataset
+                self._iterator = None
+            def __iter__(self):
+                return iter(self.dataset.selected)
+        with patch("training.r50_data_pipeline.R50WorkerDataset", FakeDataset), \
+             patch("training.r50_data_pipeline.create_loader",
+                   side_effect=lambda ds, *_: FakeLoader(ds)):
+            loader, iterator = r44_train.make_r51_image_loader(
+                args, plan, [3, 2, 1, 0] + list(range(4, plan["n_train"])), 1)
+        self.assertEqual(next(iterator), plan["train_samples"][2])
+        self.assertEqual(loader.dataset.cache_bytes, 64 * 1024**2)
+        self.assertEqual(loader.dataset.cache_kind, "jpeg")
+        r44_train.close_r51_image_loader(loader)
+        self.assertTrue(loader.dataset.closed)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -71,3 +71,11 @@ CPU-only P03 的 120-draw 短窗口第二遍重复了完全相同的抽样序列
 ## 交付边界
 
 所有阶段分别记录代码 SHA、命令、环境、固定样本、原始 stdout/stderr、退出码、指标和 SHA256SUMS。区分 CPU 数据准备、GPU 图像处理、模型训练吞吐与五 Epoch 总成本。未经独立批准不启动 GPU Smoke、GPU Benchmark、正式训练或机器人部署。
+
+## 下一道 GPU Gate 申请草案（未获批准，不执行）
+
+1. 先使用既有 R46 supervisor 的独立审批 JSON，对**标准 OpenVLA-7B** 固定五样本 Smoke 申请单卡最多 30 分钟；该阶段只验证真实权重、LoRA `r32/alpha16/q_proj,v_proj`、42D、三相机、前向反向及峰值显存。沿用 R46 的 GPU UUID、剩余审批时间、其他进程占用和父进程硬停止检查。审批文件必须绑定执行时完整代码 SHA、模型身份、样本计划与 Manifest 哈希；任何不符在 CUDA 前拒绝。此项不授权正式训练。
+2. Smoke PASS 且取得**另一独立预算**后，才比较冻结两任务 120 draw 窗口的生产 PIL、C 混合路径；F 仅在独立兼容环境安装 DALI、完成与 OpenCV RGB 的逐像素/尺寸/顺序核验后进入矩阵。每组先预热 16 draw，再进行 3 次有界重复；记录数据等待、HDF5/JPEG/PIL/传输/设备处理分时、完整 samples/sec、显存峰值、每样本 digest 和错误。纯 tensor bicubic 路径已因 0/10 精确匹配而排除。所有组必须固定同一批任务、样本次序、模型和优化器步数。
+3. R51 两任务正式训练的 Manifest 子集、断点恢复、DEV、优化器步数和采样契约须在最终代码 SHA 做 CPU Gate。没有真实 7B 模型训练吞吐和 DEV 效果前，不选择最终生产流水线。
+
+R51 入口随后已实现为 `training/r51_train.py`，通过显式模式复用 R44 完整 Manifest 校验、标准 OpenVLA 模型与检查点安全机制，然后筛选两任务并按固定抽样序列训练。正式路径可选 Worker 0/1/2/4、预取 1/2/4、有界缓存；Worker=0 是原同步 A/B 基线。每轮 72,922 次 draw、有效 Batch 1、72,922 次优化器更新，不将抽样重复计算为新增数据。该实现的 CPU 测试和现场 preflight 必须在最终 SHA 上核对；未完成 GPU/DEV 实测前不选生产配置。
