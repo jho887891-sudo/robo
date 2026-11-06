@@ -132,6 +132,11 @@ def validate_resume_compatibility(run_meta: dict, args, plan: dict, base_identit
     for key, value in expected.items():
         if run_meta.get(key) != value:
             raise ValueError(f"resume contract mismatch for run_meta.{key}")
+    if r51_config(args) is not None:
+        if run_meta.get("tasks") != list(plan["tasks"]):
+            raise ValueError("resume contract mismatch for R51 tasks")
+        if run_meta.get("r51_sampling") != r51_config(args):
+            raise ValueError("resume contract mismatch for R51 sampling")
     old_model = run_meta.get("model_info") or {}
     for key in ("modeling_sha256", "lora_config", "target_module_count",
                 "trainable_lora_parameter_count", "projector_parameter_count",
@@ -719,7 +724,7 @@ def evaluate_dev(
         "pred_delta_abs_sum": 0.0, "gt_delta_abs_sum": 0.0,
         "pred_delta_sq_sum": 0.0, "gt_delta_sq_sum": 0.0,
         "zero_delta_count": 0, "direction_cosine_sum": 0.0, "direction_cosine_n": 0,
-    } for t in TASKS}
+    } for t in prompts}
     with torch.no_grad():
         for i, (task, episode, t) in enumerate(plan["dev_samples"]):
             if i % 100 == 0:
@@ -828,7 +833,7 @@ def export_final(out_dir: Path, vla, projector, plan: dict, model_info: dict, pr
             "dev_samples_sha256": plan["dev_samples_sha256"],
             "instruction_sha256": plan["instruction_sha256"],
             "prompts": prompts,
-            "prompt_token_ids_sha256": {t: sha256_json(prompt_ids[t]) for t in TASKS},
+            "prompt_token_ids_sha256": {t: sha256_json(prompt_ids[t]) for t in prompts},
             "model_info": model_info,
             "adapter_sha256": sha256_file(adapter_path),
             "projector_sha256": sha256_file(projector_path),
@@ -862,6 +867,16 @@ def parse_args(argv=None):
     ap.add_argument("--resume-from", default="")
     ap.add_argument("--run-id", default="")
     ap.add_argument("--epochs", type=int, default=5)
+    ap.add_argument("--r51-two-task", action="store_true",
+                    help="Explicit push_T+sweep_blocks training; R44 defaults stay unchanged")
+    ap.add_argument("--r51-sampling", choices=("replacement", "without_replacement"),
+                    default="replacement")
+    ap.add_argument("--r51-task-mix", choices=("proportional", "balanced"),
+                    default="proportional")
+    ap.add_argument("--r51-active-pool", type=int, default=None)
+    ap.add_argument("--r51-cache-kind", choices=("none", "jpeg", "rgb", "processed"),
+                    default="none")
+    ap.add_argument("--r51-cache-mib", type=int, default=0)
     ap.add_argument("--min-epochs", type=int, default=2)
     ap.add_argument("--early-stopping-patience", type=int, default=0,
                     help="0 disables early stopping; formal default is all 5 full epochs")
@@ -898,10 +913,68 @@ def parse_args(argv=None):
     return ap.parse_args(argv)
 
 
+def epoch_order(args, plan, epoch, D):
+    if not args.r51_two_task:
+        return D.EpochSampler(plan["n_train"], args.seed, epoch).order
+    from training.r51_formal_plan import epoch_draws
+    import numpy as np
+    draws, _summary = epoch_draws(
+        plan, seed=args.seed, epoch=epoch, mode=args.r51_sampling,
+        task_mix=args.r51_task_mix, pool_size=args.r51_active_pool,
+    )
+    return np.asarray(draws, dtype=np.int64)
+
+
+def r51_epoch_summary(args, plan, epoch, order):
+    if not args.r51_two_task:
+        return None
+    from training.r51_formal_plan import epoch_draws, validate_resume_cursor
+    draws, summary = epoch_draws(
+        plan, seed=args.seed, epoch=epoch, mode=args.r51_sampling,
+        task_mix=args.r51_task_mix, pool_size=args.r51_active_pool,
+    )
+    if list(order) != draws:
+        raise RuntimeError("R51 epoch order changed before DEV evaluation")
+    summary["committed_draw_sha256"] = validate_resume_cursor(
+        plan, draws, cursor=len(draws),
+        committed_steps=(epoch + 1) * plan["n_train"], epoch=epoch,
+    )
+    summary["effective_batch"] = 1
+    summary["optimizer_steps"] = len(draws)
+    return summary
+
+
+def r51_config(args):
+    if not getattr(args, "r51_two_task", False):
+        return None
+    return {"tasks": ["push_T", "sweep_blocks"], "mode": args.r51_sampling,
+            "task_mix": args.r51_task_mix, "active_pool": args.r51_active_pool,
+            "draws_per_epoch": 72922, "cache_kind": args.r51_cache_kind,
+            "cache_mib": args.r51_cache_mib}
+
+
 def main(argv=None) -> int:
     args = parse_args(argv)
-    if args.epochs < 1 or args.epochs > 5 or args.min_epochs < 1 or args.min_epochs > args.epochs:
-        raise SystemExit("epochs must be 1..5 and min-epochs must be within 1..epochs")
+    if args.r51_two_task:
+        if args.epochs not in (5, 10, 20):
+            raise SystemExit("R51 epochs must be 5, 10 or 20")
+        if args.early_stopping_patience != 0:
+            raise SystemExit("R51 comparisons require all configured Epochs")
+        if args.r51_active_pool not in (None, 500, 1000, 2000, 5000, 72922):
+            raise SystemExit("R51 active pool is outside the frozen candidate matrix")
+        if (args.r51_sampling == "without_replacement" and
+                (args.r51_active_pool is not None or args.r51_task_mix != "proportional")):
+            raise SystemExit("R51 no-replacement baseline cannot use active pool or balanced mix")
+        if args.r51_cache_mib not in (0, 128, 256, 512):
+            raise SystemExit("R51 cache cap must be 0, 128, 256 or 512 MiB")
+        if (args.r51_cache_kind == "none") != (args.r51_cache_mib == 0):
+            raise SystemExit("R51 cache kind and cap must be enabled together")
+    elif (not 1 <= args.epochs <= 5 or args.r51_active_pool is not None
+          or args.r51_task_mix != "proportional" or args.r51_sampling != "replacement"
+          or args.r51_cache_kind != "none" or args.r51_cache_mib != 0):
+        raise SystemExit("R44 preflight epochs must be 1..5; R51 flags require --r51-two-task")
+    if args.min_epochs < 1 or args.min_epochs > args.epochs:
+        raise SystemExit("min-epochs must be within 1..epochs")
     float_args = {
         "gpu-budget-hours": args.gpu_budget_hours,
         "runtime-stop-margin-seconds": args.runtime_stop_margin_seconds,
@@ -941,6 +1014,10 @@ def main(argv=None) -> int:
     modules = load_runtime_modules(args)
     R11, R, TC, M2, TN, D = modules
     plan = load_and_validate_cpu_plan(args, modules)
+    if args.r51_two_task:
+        from training.r51_formal_plan import two_task_plan
+        plan = two_task_plan(plan)
+    run_tasks = tuple(plan.get("tasks", TASKS))
     budget = estimate_budget_hours(
         plan["n_train"], plan["n_dev"], args.epochs,
         args.seconds_per_train_sample, args.seconds_per_dev_sample,
@@ -959,6 +1036,7 @@ def main(argv=None) -> int:
         "instruction_sha256": plan["instruction_sha256"],
         "budget": budget,
         "epochs_max": args.epochs, "min_epochs": args.min_epochs,
+        "r51_sampling": r51_config(args), "tasks": list(run_tasks),
         "resource_mode": args.resource_mode,
         "training_started": False, "cuda_context_created": False,
     }
@@ -966,7 +1044,7 @@ def main(argv=None) -> int:
     if args.preflight_only:
         return 0
 
-    if args.epochs != 5:
+    if not args.r51_two_task and args.epochs != 5:
         print("BLOCKED_EPOCH_COUNT: formal R44 requires exactly 5 epochs; smaller runs are not formal training", flush=True)
         return 2
 
@@ -1049,12 +1127,12 @@ def main(argv=None) -> int:
     torch.cuda.manual_seed_all(args.seed)
 
     proc, vla, projector, model_info = build_model(args, modules)
-    prompts = {t: M2.TASK_PROMPTS[t] for t in TASKS}
-    prompt_ids = {t: build_prompt_ids(proc, t, modules, args.include_task_token) for t in TASKS}
+    prompts = {t: M2.TASK_PROMPTS[t] for t in run_tasks}
+    prompt_ids = {t: build_prompt_ids(proc, t, modules, args.include_task_token) for t in run_tasks}
     prompt_texts = {t: f"What action should the robot take to {M2.build_prompt(t, include_token=args.include_task_token)['prompt']}?"
-                    for t in TASKS}
-    model_info["prompt_text_sha256"] = {t: hashlib.sha256(prompt_texts[t].encode()).hexdigest() for t in TASKS}
-    model_info["prompt_token_ids_sha256"] = {t: sha256_json(prompt_ids[t]) for t in TASKS}
+                    for t in run_tasks}
+    model_info["prompt_text_sha256"] = {t: hashlib.sha256(prompt_texts[t].encode()).hexdigest() for t in run_tasks}
+    model_info["prompt_token_ids_sha256"] = {t: sha256_json(prompt_ids[t]) for t in run_tasks}
     model_info["memory_cap"] = memory_cap_info
     total_steps = plan["n_train"] * args.epochs
     optimizer, scheduler, scheduler_info = make_optimizer_and_scheduler(vla, projector, args, total_steps)
@@ -1062,7 +1140,10 @@ def main(argv=None) -> int:
     # TRAIN sample is visited once per full epoch. Avoid retaining CPU image
     # tensors that cannot improve unique-sample throughput. Keep HDF5 handles.
     # Re-evaluate caching separately if a future sampler repeats images.
-    r45_reader = R45DATA.RuntimeReader(cache_bytes=0)
+    r45_reader = R45DATA.RuntimeReader(
+        cache_bytes=args.r51_cache_mib * 1024**2 if args.r51_two_task else 0,
+        cache_kind=args.r51_cache_kind if args.r51_two_task else "none",
+    )
     state_cache = r45_reader.load_state_cache(plan, TC)
     stop_controller = R44StopController(
         out_dir / "STOP", min_free_gpu_gb=args.min_free_gpu_gb,
@@ -1071,7 +1152,7 @@ def main(argv=None) -> int:
     stop_controller.install_signal_handlers()
     run_state = load_run_state(out_dir)
     global_step, epoch, cursor = 0, 0, 0
-    order = D.EpochSampler(plan["n_train"], args.seed, epoch).order
+    order = epoch_order(args, plan, epoch, D)
     last_checkpoint = None
     resumed = False
 
@@ -1105,10 +1186,12 @@ def main(argv=None) -> int:
         optimizer.load_state_dict(state["optimizer_state"])
         scheduler.load_state_dict(state["scheduler_state"])
         global_step, epoch, cursor = int(state["global_step"]), int(state["epoch"]), int(state["cursor"])
+        if args.r51_two_task and global_step != epoch * plan["n_train"] + cursor:
+            raise RuntimeError("R51 checkpoint optimizer step/cursor mismatch")
         run_state = state.get("run_state", disk_run_state)
         run_state = {**run_state, "global_step": global_step, "last_checkpoint": str(ckpt_path)}
         order = np.asarray(state["order"], dtype=np.int64)
-        expected_order = D.EpochSampler(plan["n_train"], args.seed, epoch).order
+        expected_order = epoch_order(args, plan, epoch, D)
         if not np.array_equal(order, expected_order):
             raise RuntimeError("checkpoint epoch order differs from deterministic sampler; refusing resume")
         if hashlib.sha256(order.tobytes()).hexdigest() != state["order_sha256"]:
@@ -1126,7 +1209,8 @@ def main(argv=None) -> int:
         atomic_json(out_dir / "run_meta.json", {
             "schema": "r44-run-meta/v1", "run_id": args.run_id or f"r44-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
             "utc_start": utcnow(), "source_sha": source_sha,
-            "tasks": list(TASKS), "epochs_max": args.epochs, "min_epochs": args.min_epochs,
+            "tasks": list(run_tasks), "r51_sampling": r51_config(args),
+            "epochs_max": args.epochs, "min_epochs": args.min_epochs,
             "early_stopping_patience": args.early_stopping_patience,
             "checkpoint_every_steps": args.checkpoint_every_steps,
             "target_representation": "joint_delta_v1", "train_samples_per_epoch": plan["n_train"],
@@ -1220,15 +1304,17 @@ def main(argv=None) -> int:
                                                  "global_step": global_step})
                         break
                     total_abs = sum(eval_result["by_task"][t]["action_mae"] *
-                                    eval_result["by_task"][t]["n"] * 14 for t in TASKS)
-                    total_n = sum(eval_result["by_task"][t]["n"] for t in TASKS)
+                                    eval_result["by_task"][t]["n"] * 14 for t in run_tasks)
+                    total_n = sum(eval_result["by_task"][t]["n"] for t in run_tasks)
                     dev_mae = float(total_abs / max(1, total_n * 14))
                     improved = run_state.get("best_dev_mae") is None or dev_mae < float(run_state["best_dev_mae"])
                     stale = 0 if improved else int(run_state.get("stale_epochs", 0)) + 1
                     best = dev_mae if improved else float(run_state["best_dev_mae"])
                     rec = {"epoch_completed": epoch + 1, "global_step": global_step,
                            "dev_mae": dev_mae, "improved": improved, "stale_epochs": stale,
-                           "metrics": eval_result, "utc": utcnow()}
+                           "metrics": eval_result,
+                           "sampling": r51_epoch_summary(args, plan, epoch, order),
+                           "utc": utcnow()}
                     append_jsonl(dev_path, rec)
                     run_state = {**run_state, "dev_history": list(run_state.get("dev_history", [])) + [rec],
                                  "best_dev_mae": best, "stale_epochs": stale,
@@ -1249,7 +1335,7 @@ def main(argv=None) -> int:
                     status = "COMPLETED"
                     break
                 cursor = 0
-                order = D.EpochSampler(plan["n_train"], args.seed, epoch).order
+                order = epoch_order(args, plan, epoch, D)
                 vla.train()
                 projector.train()
                 continue
