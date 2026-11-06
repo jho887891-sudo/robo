@@ -1,0 +1,10 @@
+{
+  "schema": "r51-gpu-candidate-cpu-parity/v1",
+  "status": "NUMERIC_MISMATCH_CPU",
+  "samples": 10,
+  "exact_samples": 0,
+  "max_abs_error": 0.078125,
+  "selected_sha256": "5b3dddb78fda9ef0dc052a56fed60f91f9c7466b29a24cfbf4a12fd44807180a",
+  "processor_sha256": "bd024783fb785cbdfe35b710b621c5e8678d4c157a9ba625675e67d40d1757da",
+  "limits": "CPU emulation only; no CUDA, GPU timing or 7B model training"
+}

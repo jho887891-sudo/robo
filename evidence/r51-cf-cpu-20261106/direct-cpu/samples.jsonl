@@ -1,0 +1,10 @@
+{"different_elements": 117738, "element_count": 903168, "episode": "episode_0000074.hdf5", "exact": false, "frame": 211, "max_abs_error": 0.046875, "mean_abs_error": 0.0016445929650217295, "task": "sweep_blocks"}
+{"different_elements": 112812, "element_count": 903168, "episode": "episode_0000045.hdf5", "exact": false, "frame": 152, "max_abs_error": 0.046875, "mean_abs_error": 0.001576111651957035, "task": "push_T"}
+{"different_elements": 114352, "element_count": 903168, "episode": "episode_0000059.hdf5", "exact": false, "frame": 301, "max_abs_error": 0.0390625, "mean_abs_error": 0.0015989893581718206, "task": "push_T"}
+{"different_elements": 112050, "element_count": 903168, "episode": "episode_0000049.hdf5", "exact": false, "frame": 86, "max_abs_error": 0.078125, "mean_abs_error": 0.0015652322908863425, "task": "push_T"}
+{"different_elements": 117266, "element_count": 903168, "episode": "episode_0000045.hdf5", "exact": false, "frame": 767, "max_abs_error": 0.046875, "mean_abs_error": 0.00163804751355201, "task": "sweep_blocks"}
+{"different_elements": 119176, "element_count": 903168, "episode": "episode_0000069.hdf5", "exact": false, "frame": 33, "max_abs_error": 0.03125, "mean_abs_error": 0.0016657959204167128, "task": "push_T"}
+{"different_elements": 111682, "element_count": 903168, "episode": "episode_0000096.hdf5", "exact": false, "frame": 286, "max_abs_error": 0.046875, "mean_abs_error": 0.0015603355132043362, "task": "sweep_blocks"}
+{"different_elements": 113706, "element_count": 903168, "episode": "episode_0000095.hdf5", "exact": false, "frame": 297, "max_abs_error": 0.0625, "mean_abs_error": 0.0015902972081676126, "task": "sweep_blocks"}
+{"different_elements": 118120, "element_count": 903168, "episode": "episode_0000051.hdf5", "exact": false, "frame": 659, "max_abs_error": 0.046875, "mean_abs_error": 0.0016510931309312582, "task": "sweep_blocks"}
+{"different_elements": 111500, "element_count": 903168, "episode": "episode_0000040.hdf5", "exact": false, "frame": 529, "max_abs_error": 0.0625, "mean_abs_error": 0.0015620060730725527, "task": "sweep_blocks"}

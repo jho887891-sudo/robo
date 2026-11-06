@@ -1,0 +1,12 @@
+test_all_cache_types_match_uncached_and_obey_cap (test_r51_cache_types.CacheTypeTests) ... ok
+test_dali_dependency_fails_before_pipeline_or_cuda (test_r51_gpu_candidates.CandidateTests) ... ok
+test_hybrid_keeps_camera_and_tower_order (test_r51_gpu_candidates.CandidateTests) ... ok
+test_shape_and_processor_drift_fail_closed (test_r51_gpu_candidates.CandidateTests) ... ok
+test_no_replacement_visits_every_entry_once (test_r51_sampling.SamplingTests) ... ok
+test_replacement_is_reproducible_and_epoch_length_fixed (test_r51_sampling.SamplingTests) ... ok
+test_third_task_rejected (test_r51_sampling.SamplingTests) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.062s
+
+OK
