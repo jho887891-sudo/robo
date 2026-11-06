@@ -1,0 +1,19 @@
+test_all_cache_types_match_uncached_and_obey_cap (test_r51_cache_types.CacheTypeTests) ... ok
+test_contract_drift_rejected (test_r51_formal_plan.FormalPlanTests) ... ok
+test_formal_entry_uses_r51_draws_and_fails_unsafe_flags_before_cuda (test_r51_formal_plan.FormalPlanTests) ... ok
+test_formal_r44_default_preserves_no_replacement_order (test_r51_formal_plan.FormalPlanTests) ... ok
+test_r51_entry_forwards_explicit_mode_once (test_r51_formal_plan.FormalPlanTests) ... ok
+test_replacement_resume_uses_draw_cursor (test_r51_formal_plan.FormalPlanTests) ... ok
+test_two_task_subset_preserves_source_and_dev_isolation (test_r51_formal_plan.FormalPlanTests) ... ok
+test_worker_loader_receives_remaining_draws_and_total_cache_cap (test_r51_formal_plan.FormalPlanTests) ... ok
+test_dali_dependency_fails_before_pipeline_or_cuda (test_r51_gpu_candidates.CandidateTests) ... ok
+test_hybrid_keeps_camera_and_tower_order (test_r51_gpu_candidates.CandidateTests) ... ok
+test_shape_and_processor_drift_fail_closed (test_r51_gpu_candidates.CandidateTests) ... ok
+test_no_replacement_visits_every_entry_once (test_r51_sampling.SamplingTests) ... ok
+test_replacement_is_reproducible_and_epoch_length_fixed (test_r51_sampling.SamplingTests) ... ok
+test_third_task_rejected (test_r51_sampling.SamplingTests) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 1.030s
+
+OK

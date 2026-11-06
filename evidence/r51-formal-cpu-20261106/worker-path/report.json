@@ -1,0 +1,12 @@
+{
+  "status": "PASS_CPU_WORKER_PATH",
+  "samples": 5,
+  "train_draws_per_epoch": 72922,
+  "resume_cursor": 731,
+  "worker_pids": [
+    2147986,
+    2148019
+  ],
+  "gpu": "disabled",
+  "limits": "five real image draws only; no model training"
+}

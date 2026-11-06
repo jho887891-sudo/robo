@@ -79,3 +79,5 @@ CPU-only P03 的 120-draw 短窗口第二遍重复了完全相同的抽样序列
 3. R51 两任务正式训练的 Manifest 子集、断点恢复、DEV、优化器步数和采样契约须在最终代码 SHA 做 CPU Gate。没有真实 7B 模型训练吞吐和 DEV 效果前，不选择最终生产流水线。
 
 R51 入口随后已实现为 `training/r51_train.py`，通过显式模式复用 R44 完整 Manifest 校验、标准 OpenVLA 模型与检查点安全机制，然后筛选两任务并按固定抽样序列训练。正式路径可选 Worker 0/1/2/4、预取 1/2/4、有界缓存；Worker=0 是原同步 A/B 基线。每轮 72,922 次 draw、有效 Batch 1、72,922 次优化器更新，不将抽样重复计算为新增数据。该实现的 CPU 测试和现场 preflight 必须在最终 SHA 上核对；未完成 GPU/DEV 实测前不选生产配置。
+
+最终代码 SHA `3fe7723d85295d968277dd8bb92d1ae399612c2c` 的真实 Linux CPU preflight 已对完整 300 文件 Manifest 再校验并 exit 0，R44–R51 受影响测试 115/115；Worker=2 的恢复游标五样本图像路径也与同步 Reader 逐位一致。该结果只消除了 CPU 数据/配置 Gate，不替代真实 OpenVLA GPU Smoke、GPU 吞吐或 DEV 模型效果。
