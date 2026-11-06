@@ -1,0 +1,4 @@
+e74052ecfbddc59e35fbed7978c49fd3fbac77adc5f11f3a08dd38e7767dceb0  ./code_sha.txt
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  ./preflight.exit
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./preflight.stderr
+1a03571e3977f89b55b88bd2574812c9bb1ff72a4cce84d330e436ec0ca48368  ./preflight.stdout

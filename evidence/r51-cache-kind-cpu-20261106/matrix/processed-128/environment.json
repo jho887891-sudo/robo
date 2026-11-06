@@ -1,0 +1,16 @@
+{
+  "code_sha": "10b6f154272b4a9791a4b7d4b198906ac3071603",
+  "selected_sha256": "33fa331a314ad30a69c9409e4d98c132d071b52e25ddb986aa0c8aa7b59e9d07",
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "processor_sha256": "bd024783fb785cbdfe35b710b621c5e8678d4c157a9ba625675e67d40d1757da",
+  "torch": "2.5.1+cu124",
+  "numpy": "1.26.4",
+  "thread_settings": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "gpu": "disabled",
+  "sample_count": 120,
+  "sample_digest_sha256": "a0b961eccc63f0db570924317e8e9e7253213d5d5e63e7cb70ca6574932f75ca"
+}

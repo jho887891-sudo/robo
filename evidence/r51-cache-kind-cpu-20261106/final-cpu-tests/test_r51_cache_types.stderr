@@ -1,0 +1,6 @@
+test_all_cache_types_match_uncached_and_obey_cap (test_r51_cache_types.CacheTypeTests) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.043s
+
+OK

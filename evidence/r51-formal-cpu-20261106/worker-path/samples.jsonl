@@ -1,0 +1,5 @@
+{"draw_position": 731, "episode": "episode_0000038.hdf5", "frame": 89, "pixel_sha256": "8837d322be0101d747ea8592a8c8b5ab5200dcec22ab4ac51dd45f8d40ee3b4c", "task": "push_T", "worker_pid": 2147986}
+{"draw_position": 732, "episode": "episode_0000065.hdf5", "frame": 155, "pixel_sha256": "2ef47c131a443fcec8a2dc78b5565a32bf9130228f5c4a3dede7a37bba18712e", "task": "push_T", "worker_pid": 2148019}
+{"draw_position": 733, "episode": "episode_0000050.hdf5", "frame": 633, "pixel_sha256": "2368b8cf375fa476f7b09464147eb9ed57e837aa3c75a2c67047e004b1c9d9cb", "task": "sweep_blocks", "worker_pid": 2147986}
+{"draw_position": 734, "episode": "episode_0000043.hdf5", "frame": 633, "pixel_sha256": "28a8c780b7616cf36238cba43700189e4456dced5d8cb143c91156136fb2e300", "task": "sweep_blocks", "worker_pid": 2148019}
+{"draw_position": 735, "episode": "episode_0000062.hdf5", "frame": 485, "pixel_sha256": "4868bfae7aa83a9e46dde973cf3dea4e6fcac790f45c21ba3cc7a186e440c973", "task": "sweep_blocks", "worker_pid": 2147986}

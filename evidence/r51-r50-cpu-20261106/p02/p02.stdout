@@ -1,0 +1,7 @@
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+{"assembly_mean_gain_fraction": 0.43201875913637, "baseline_cat": {"mean_ms": 0.7700457172985706, "median_ms": 0.7364130578935146, "n": 360, "p95_ms": 0.9282128885388374}, "candidate_preallocate_bf16": {"mean_ms": 0.4373715220329662, "median_ms": 0.4176835063844919, "n": 360, "p95_ms": 0.5450579337775707}, "code_sha": "b67ca4082b74da275830899a14a98a7abbad2178", "limits": "Assembly only; processor and HDF5 still run on CPU; no 7B throughput", "preprocess": {"mean_ms": 40.091313256157775, "median_ms": 39.34951778501272, "n": 360, "p95_ms": 42.11129900068045}, "samples": 120, "status": "PASS_CPU_PARITY", "visits": 360}

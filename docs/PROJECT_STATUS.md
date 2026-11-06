@@ -1,5 +1,21 @@
 # RoboDojo / OpenVLA 项目状态（唯一日常交接入口）
 
+## R51 两任务提速实验场景（2026-11-06，CPU-only）
+
+- **最终现场 CPU Gate VERIFIED**：代码 SHA `3fe7723d85295d968277dd8bb92d1ae399612c2c` 的正式 `training/r51_train.py --preflight-only --r51-workers 2 --r51-prefetch 2` 在真实完整三任务 Manifest（300 HDF5 重算）上 exit 0，报告 `CPU_CONTRACTS_PASS`、两任务 TRAIN=72,922、DEV=19,552、`cuda_context_created=false`。同一 SHA 的 R44/R45/R46/R50/R51 CPU 测试 49+9+36+7+14=115/115；真实两任务恢复游标 731 开始的 5 个 Worker 图像与串行 Reader 像素 SHA 一致，两个独立 Worker，exit 0。原始日志、退出码和 SHA256 清单见 `evidence/r51-formal-cpu-20261106/`。此 Gate 不证明 GPU 模型训练或最终吞吐。
+- 正式两任务默认有放回抽样每轮 72,922 draw，Batch 1 则每轮 72,922 个优化器 step；5 Epoch 为 364,610 step。CPU preflight 按旧每样本预算参数估计五轮需 426.48 GPU 小时，**只是未测量的保守估算**，不是 R51 加速后的预计真实用时。GPU Smoke 与正式训练分别需要研究负责人独立授权。
+- C/F CPU candidate gate：候选代码 SHA `65046e39d77cf032940ac805d2581e8308e1232f`，7/7 CPU 测试通过。在 10 个真实两任务 TRAIN 样本上，纯张量 bicubic 缩放与冻结 OpenVLA PIL Processor **0/10 精确匹配**（最大 BF16 误差 0.078125），故拒绝接入训练；保留 PIL resize/crop、将归一化和组装移至设备端的混合候选在 CPU 上 **10/10 逐位匹配**。DALI/nvJPEG 适配器及缺依赖的 fail-closed CPU 测试通过，但服务器未安装 `nvidia.dali`，真实解码/显存/吞吐仍 UNKNOWN。两者均未接正式训练入口，也未启动 CUDA；原始诊断见 `evidence/r51-cf-cpu-20261106/`。
+- 正式入口现在新增显式 `training/r51_train.py`，保留 R44 默认三任务路径；先验证完整三任务冻结 Manifest，再筛选两任务并按固定抽样序列训练。Worker=0 是同步 A/B 基线；可选 spawned Worker 1/2/4、预取和总容量受控的缓存。CPU 模拟测试已通过，但最终 SHA 的完整真实 HDF5 preflight、GPU/DEV 及中断训练实测必须各自核对；不能将 CPU 候选称为真实训练提速。`docs/R51_SPEC.md` 列明分离的 R46 标准 7B 五样本 GPU Smoke 与后续 C/F 单变量吞吐 Gate；两者须分别批准。只读 `nvidia-smi` 现场显示该卡存在其他计算进程和高利用率，不构成可用 GPU 窗口。
+- 新增真实 120-draw、2-worker、三次重复的缓存类型矩阵：none/JPEG/RGB/processed × 128/256/512 MiB（none 仅 128），10/10 配置退出码 0，原始日志与 SHA256 见 `evidence/r51-cache-kind-cpu-20261106/matrix/`。第二遍重复相同窗口时无缓存 45.59、JPEG 256 MiB 51.89、RGB 512 MiB 69.37、processed 512 MiB 157.63 draws/s；后两者第二遍 100% 命中，只证明短窗口 CPU 准备，不能外推完整 Epoch、GPU 训练或 DEV 效果。首遍四者分别为 41.96、41.18、40.58、44.14 draws/s，未证明稳定首遍收益。
+- 有界 D 成本原型：100 个真实两任务样本的最终 BF16 `[1,18,224,224]` 输入写入后逐位回读，exit 0；单样本 1,806,336 bytes，外推两任务 TRAIN+DEV 约 167.0 GB（十进制），未执行全量离线转换。证据仅发布报告、逐样本摘要和日志，不发布 173 MiB 派生图像二进制。D 仍非生产实现。
+- 四种缓存类型的合成 HDF5 输出等价、命中与容量回归已通过；真实矩阵逐样本 digest 与无缓存串行参考一致。C GPU 预处理、F DALI/NVJPEG、端到端 7B 训练收益及 DEV 模型指标仍 BLOCKED/UNKNOWN，须单独批准 GPU 窗口。
+- 正式目标任务改为 `push_T + sweep_blocks`。冻结索引 TRAIN=72,922、DEV=19,552；完整有放回 Epoch 固定 72,922 次访问。三任务历史仍作为对照，不覆盖。
+- `docs/R51_SPEC.md` 固定两任务、5/10/20 Epoch、G 采样/缓存和 A–F 对照。R50 的 P00/B/E CPU 工具现可接受有放回抽样的重复样本位置；新增固定种子两任务样本选择器和总 Worker 缓存上限记录。
+- 真实两任务 500 样本池的固定 120 次抽样窗口：P00/P01/P02 CPU 命令均 exit 0；1/2/4 Worker 稳定 CPU 准备吞吐均值 23.77/44.44/80.11 draws/s。128 MiB 总缓存的 500 池命中率 4.2%，稳定吞吐未见可靠改善，暂不设为生产默认。证据见 `evidence/r51-r50-cpu-20261106/`。
+- GPU 图像预处理、DALI、7B 模型训练吞吐、DEV 模型效果和正式两任务训练入口仍 UNKNOWN/BLOCKED。方案 D 按用户先前指示不实施离线全量转换。没有 GPU 或正式训练授权。
+
+
+
 > 状态快照：2026-10-29。此文档是**项目索引**，不是无需核验的最新运行结果。
 > 仓库：[`jho887891-sudo/robo`](https://github.com/jho887891-sudo/robo)。
 > 每次接手先读取本文件及根目录 `AGENTS.md`，随后通过 GitHub 获取分支最新完整 SHA；以实际代码、原始日志和可复算证据为准。

@@ -1,0 +1,54 @@
+test_out_of_range_values_are_clipped_not_extrapolated (test_r44_delta_v1.TestCodec) ... ok
+test_recover_action_adds_state_not_velocity (test_r44_delta_v1.TestCodec) ... ok
+test_roundtrip_and_legal_tokens (test_r44_delta_v1.TestCodec) ... ok
+test_degenerate_dimension_is_rejected (test_r44_delta_v1.TestNormalizer) ... ok
+test_fit_is_train_only_and_hashed (test_r44_delta_v1.TestNormalizer) ... ok
+test_legacy_residual_payload_is_refused (test_r44_delta_v1.TestNormalizer) ... ok
+test_refuse_legacy_checkpoint_metadata (test_r44_delta_v1.TestNormalizer) ... ok
+test_tampering_breaks_the_hash (test_r44_delta_v1.TestNormalizer) ... ok
+test_too_few_rows_rejected (test_r44_delta_v1.TestNormalizer) ... ok
+test_wrong_schema_and_token_window_are_rejected_even_with_recomputed_hash (test_r44_delta_v1.TestNormalizer) ... ok
+test_deterministic_and_epoch_dependent (test_r44_delta_v1.TestSampler) ... ok
+test_epoch_is_a_complete_permutation (test_r44_delta_v1.TestSampler) ... ok
+test_delta_is_action_minus_state (test_r44_delta_v1.TestTarget) ... ok
+test_non_finite_rejected (test_r44_delta_v1.TestTarget) ... ok
+test_step_contract_requires_bit_exact (test_r44_delta_v1.TestTarget) ... ok
+test_budget_block_is_distinct_from_data_failure (test_r44_preflight_contract.R44PreflightContractTests) ... ok
+test_contract_failure_cannot_be_overridden_by_budget (test_r44_preflight_contract.R44PreflightContractTests) ... ok
+test_ready_requires_all_contract_checks_and_budget (test_r44_preflight_contract.R44PreflightContractTests) ... ok
+test_stable_file_hash_contains_content_sha_and_path (test_r44_preflight_contract.R44PreflightContractTests) ... ok
+test_training_manifest_pins_split_normalizers_files_and_instruction (test_r44_preflight_contract.R44PreflightContractTests) ... ok
+test_training_manifest_rejects_instruction_hash_tampering (test_r44_preflight_contract.R44PreflightContractTests) ... ok
+test_atomic_save_commits_new_file (test_r44_safe_stop.SafeStopTests) ... ok
+test_atomic_save_replaces_only_after_success (test_r44_safe_stop.SafeStopTests) ... ok
+test_cuda_probe_applies_memory_guard (test_r44_safe_stop.SafeStopTests) ... ok
+test_cuda_probe_failure_requests_safe_stop (test_r44_safe_stop.SafeStopTests) ... ok
+test_invalid_gpu_memory_sample_requests_stop (test_r44_safe_stop.SafeStopTests) ... ok
+test_low_gpu_memory_requires_configured_consecutive_samples (test_r44_safe_stop.SafeStopTests) ... ok
+test_manual_request_is_idempotent (test_r44_safe_stop.SafeStopTests) ... ok
+test_memory_fraction_configures_only_allocator (test_r44_safe_stop.SafeStopTests) ... ok
+test_memory_fraction_disabled_by_default (test_r44_safe_stop.SafeStopTests) ... ok
+test_memory_fraction_rejects_over_device_capacity (test_r44_safe_stop.SafeStopTests) ... ok
+test_no_stop_does_not_write_checkpoint (test_r44_safe_stop.SafeStopTests) ... ok
+test_signal_handler_only_marks_request_until_safe_poll (test_r44_safe_stop.SafeStopTests) ... ok
+test_stop_boundary_saves_once_and_returns_true (test_r44_safe_stop.SafeStopTests) ... ok
+test_stop_file_requests_stop (test_r44_safe_stop.SafeStopTests) ... ok
+test_budget_includes_train_dev_load_and_margin (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_budget_rejects_invalid_counts (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_budget_rejects_negative_margin (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_budget_rejects_nonfinite_timing_values (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_formal_defaults_are_five_epochs_and_early_stopping_disabled (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_frozen_lora_hyperparameters_match_project_contract (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_gpu_smoke_requires_explicit_authorization_before_any_runtime_setup (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_label_block_masks_prompt_and_supervises_14_tokens_plus_stop (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_label_block_rejects_illegal_token (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_label_block_rejects_wrong_action_length (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_multitask_image_loader_uses_frozen_three_camera_order (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_resume_contract_pins_source_data_and_schedule (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_task_episode_names_preserves_task_qualification (test_r44_train_core.R44TrainerCoreTests) ... ok
+test_verify_files_unchanged_detects_content_change_with_same_size_and_mtime (test_r44_train_core.R44TrainerCoreTests) ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 0.173s
+
+OK

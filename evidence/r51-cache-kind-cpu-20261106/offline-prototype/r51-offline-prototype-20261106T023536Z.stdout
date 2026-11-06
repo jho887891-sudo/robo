@@ -1,0 +1,7 @@
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+{"conversion_wall_s": 4.828341380227357, "limits": "Prototype only; warm OS cache, no GPU/model training or full conversion", "mapped_read_verify_wall_s": 0.20020892098546028, "processor_sha256": "bd024783fb785cbdfe35b710b621c5e8678d4c157a9ba625675e67d40d1757da", "projected_two_task_train_dev_bytes": 167039115264.0, "samples": 100, "schema": "r51-offline-prototype/v1", "selected_sha256": "5b3dddb78fda9ef0dc052a56fed60f91f9c7466b29a24cfbf4a12fd44807180a", "shard_bytes": 180633600, "shard_sha256": "beb947e974551b7a7599486cae1fb11641ba5ec0959dc64c7b547b2b2f200b9e", "status": "PASS_CPU_BITS"}

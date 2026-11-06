@@ -1,0 +1,9 @@
+{
+  "status": "PASS_CPU_ONLY",
+  "code_sha": "10b6f154272b4a9791a4b7d4b198906ac3071603",
+  "configurations": 3,
+  "repeats_per_config": 3,
+  "samples_per_epoch": 120,
+  "epochs_per_repeat": 2,
+  "limits": "DataLoader CPU preparation only; pin_memory may be unavailable with CUDA hidden"
+}

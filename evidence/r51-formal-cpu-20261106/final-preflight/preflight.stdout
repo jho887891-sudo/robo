@@ -1,0 +1,54 @@
+{
+  "budget": {
+    "base_total_hours_estimate": 406.16974777777784,
+    "dev_hours_estimate": 9.776,
+    "dev_samples_per_epoch": 19552,
+    "epochs_max": 5,
+    "is_estimate_not_measurement": true,
+    "margin_fraction": 0.05,
+    "model_load_hours_estimate": 0.03229361111111111,
+    "optimizer_steps_max": 364610,
+    "required_budget_hours": 426.47823516666676,
+    "train_hours_estimate": 396.3614541666667,
+    "train_samples_per_epoch": 72922
+  },
+  "cuda_context_created": false,
+  "dataset_manifest_sha256": "a220bd45e49c623c3a9f77dcf7460c95f8305909c05122e2d2a0556bff522ead",
+  "delta_normalizer_sha256": "795052b0e6716d374488296b52befdbb012bd1840a7ccca57dfbf4df9e07383f",
+  "dev_samples": 19552,
+  "dev_samples_sha256": "05dfeac1d9dfc5d52443c74dd822580e19d93a2256e87eed38fffa42ab7f445a",
+  "epochs_max": 5,
+  "feature_normalizer_sha256": "7c404f08e32fe3ead3b2bc17eca97f9106aff74107fd173d03cf8adfca4e4d13",
+  "instruction_sha256": {
+    "push_T": "364fa384d0e0487c56cbf22a2cff75898499120aaec1afa70ae6d230cb590996",
+    "sweep_blocks": "149d04cd0e1b723f2858a51ead0d5091dec7b38b157211ff07ceade64ca5b4e3"
+  },
+  "min_epochs": 2,
+  "r51_sampling": {
+    "active_pool": null,
+    "cache_kind": "none",
+    "cache_mib": 0,
+    "draws_per_epoch": 72922,
+    "mode": "replacement",
+    "pin_memory": false,
+    "prefetch": 2,
+    "task_mix": "proportional",
+    "tasks": [
+      "push_T",
+      "sweep_blocks"
+    ],
+    "workers": 2
+  },
+  "resource_mode": "time-window",
+  "schema": "r44-preflight/v1",
+  "split_sha256": "0c0c65eb1aeae17a177ea5cef9c868de25442d55649c3b87f45b0583ac515218",
+  "status": "CPU_CONTRACTS_PASS",
+  "tasks": [
+    "push_T",
+    "sweep_blocks"
+  ],
+  "train_samples": 72922,
+  "train_samples_sha256": "aa517b8a6e5970eea8a266b86cd6bfb08a2794352a757f5b55e825ee24af4928",
+  "training_started": false,
+  "utc": "2026-11-06T03:37:35Z"
+}

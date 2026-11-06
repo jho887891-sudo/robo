@@ -187,8 +187,14 @@ class TestR45ZeroHitPolicy(unittest.TestCase):
         self.assertEqual(len(reader_constructors), 1)
         cache_kw = next(k.value for k in reader_constructors[0].keywords
                         if k.arg == "cache_bytes")
-        self.assertIsInstance(cache_kw, ast.Constant)
-        self.assertEqual(cache_kw.value, 0)
+        self.assertIsInstance(cache_kw, ast.IfExp)
+        self.assertIsInstance(cache_kw.orelse, ast.Constant)
+        self.assertEqual(cache_kw.orelse.value, 0)
+        from training import r44_train
+        defaults = r44_train.parse_args(["--out", "/tmp/r44-default-contract"])
+        self.assertFalse(defaults.r51_two_task)
+        self.assertEqual(defaults.r51_cache_mib, 0)
+        self.assertEqual(defaults.r51_cache_kind, "none")
 
     def test_smoke_uses_real_formal_reader_and_closes_it(self):
         parsed = tree("diagnostics/r44_gpu_smoke.py")
