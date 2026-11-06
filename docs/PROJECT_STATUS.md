@@ -2,6 +2,7 @@
 
 ## R51 两任务提速实验场景（2026-11-06，CPU-only）
 
+- C/F CPU candidate gate：在 10 个真实两任务 TRAIN 样本上，纯张量 bicubic 缩放与冻结 OpenVLA PIL Processor **0/10 精确匹配**（最大 BF16 误差 0.078125），故拒绝接入训练；保留 PIL resize/crop、将归一化和组装移至设备端的混合候选在 CPU 上 **10/10 逐位匹配**。DALI/nvJPEG 适配器及缺依赖的 fail-closed CPU 测试通过，但服务器未安装 `nvidia.dali`，真实解码/显存/吞吐仍 UNKNOWN。两者均未接正式训练入口，也未启动 CUDA；原始诊断见 `evidence/r51-cf-cpu-20261106/`。
 - 新增真实 120-draw、2-worker、三次重复的缓存类型矩阵：none/JPEG/RGB/processed × 128/256/512 MiB（none 仅 128），10/10 配置退出码 0，原始日志与 SHA256 见 `evidence/r51-cache-kind-cpu-20261106/matrix/`。第二遍重复相同窗口时无缓存 45.59、JPEG 256 MiB 51.89、RGB 512 MiB 69.37、processed 512 MiB 157.63 draws/s；后两者第二遍 100% 命中，只证明短窗口 CPU 准备，不能外推完整 Epoch、GPU 训练或 DEV 效果。首遍四者分别为 41.96、41.18、40.58、44.14 draws/s，未证明稳定首遍收益。
 - 有界 D 成本原型：100 个真实两任务样本的最终 BF16 `[1,18,224,224]` 输入写入后逐位回读，exit 0；单样本 1,806,336 bytes，外推两任务 TRAIN+DEV 约 167.0 GB（十进制），未执行全量离线转换。证据仅发布报告、逐样本摘要和日志，不发布 173 MiB 派生图像二进制。D 仍非生产实现。
 - 四种缓存类型的合成 HDF5 输出等价、命中与容量回归已通过；真实矩阵逐样本 digest 与无缓存串行参考一致。C GPU 预处理、F DALI/NVJPEG、端到端 7B 训练收益及 DEV 模型指标仍 BLOCKED/UNKNOWN，须单独批准 GPU 窗口。
