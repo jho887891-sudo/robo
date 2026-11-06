@@ -51,11 +51,12 @@ def rss_bytes():
 
 
 def one_run(selected, roots, expected, workers, prefetch, pin, warmup,
-            cache_total_bytes=0):
+            cache_total_bytes=0, cache_kind="processed"):
     import torch
     from training.r50_data_pipeline import R50WorkerDataset, create_loader
     dataset = R50WorkerDataset(selected, *roots,
-                               cache_bytes=cache_total_bytes // workers)
+                               cache_bytes=cache_total_bytes // workers,
+                               cache_kind=cache_kind)
     start = time.perf_counter()
     loader = create_loader(dataset, workers, prefetch, pin)
     startup = None
@@ -69,6 +70,7 @@ def one_run(selected, roots, expected, workers, prefetch, pin, warmup,
             jpeg_preprocess = 0.0
             pinned = 0
             cache_hits = 0
+            evictions_by_worker = {}
             since = time.perf_counter()
             steady_start = None
             for index in range(len(selected)):
@@ -90,6 +92,8 @@ def one_run(selected, roots, expected, workers, prefetch, pin, warmup,
                 jpeg_preprocess += float(item["jpeg_preprocess_s"].item())
                 pinned += int(pixels.is_pinned())
                 cache_hits += int(item["cache_hit"].item())
+                evictions_by_worker[int(item["worker_pid"].item())] = int(
+                    item["cache_evictions"].item())
                 if (index + 1) == warmup:
                     steady_start = time.perf_counter()
                 if index % 8 == 0:
@@ -108,6 +112,7 @@ def one_run(selected, roots, expected, workers, prefetch, pin, warmup,
                            "pinned_batches": pinned})
             epochs[-1]["cache_hits"] = cache_hits
             epochs[-1]["cache_hit_rate"] = cache_hits / len(selected)
+            epochs[-1]["cache_evictions_cumulative"] = sum(evictions_by_worker.values())
     finally:
         iterator_obj = getattr(loader, "_iterator", None)
         if iterator_obj is not None:
@@ -118,6 +123,7 @@ def one_run(selected, roots, expected, workers, prefetch, pin, warmup,
     if torch.cuda.is_initialized():
         raise RuntimeError("CUDA context initialized by CPU DataLoader")
     return {"workers": workers, "prefetch": prefetch, "pin_memory_requested": pin,
+            "cache_kind": cache_kind,
             "cache_total_cap_bytes": cache_total_bytes,
             "cache_per_worker_cap_bytes": cache_total_bytes // workers,
             "persistent_workers": True, "startup_first_batch_s": startup,
@@ -138,6 +144,8 @@ def main():
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--warmup", type=int, default=16)
     ap.add_argument("--cache-total-mib", type=int, default=0)
+    ap.add_argument("--cache-kind", choices=("none", "processed", "rgb", "jpeg"),
+                    default="processed")
     args = ap.parse_args()
     if args.out.exists():
         raise FileExistsError(args.out)
@@ -180,7 +188,7 @@ def main():
                     for repeat in range(args.repeats):
                         result = one_run(selected, roots, expected, count, factor,
                                          bool(pin), args.warmup,
-                                         args.cache_total_mib * 1024**2)
+                                         args.cache_total_mib * 1024**2, args.cache_kind)
                         result["repeat"] = repeat
                         results.append(result)
                         stream.write(json.dumps(result, sort_keys=True) + "\n")

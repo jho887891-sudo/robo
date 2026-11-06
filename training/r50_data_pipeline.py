@@ -29,12 +29,14 @@ def load_openvla_processor(base_model: str, oft_root: str):
 class R50WorkerDataset:
     """Map dataset whose reader and processor are worker-local and lazily made."""
 
-    def __init__(self, selected, hdf5_root, base_model, oft_root, cache_bytes=0):
+    def __init__(self, selected, hdf5_root, base_model, oft_root,
+                 cache_bytes=0, cache_kind="processed"):
         self.selected = [tuple(item) for item in selected]
         self.hdf5_root = str(hdf5_root)
         self.base_model = str(base_model)
         self.oft_root = str(oft_root)
         self.cache_bytes = int(cache_bytes)
+        self.cache_kind = cache_kind
         if self.cache_bytes < 0:
             raise ValueError("cache_bytes must be nonnegative")
         self._pid = None
@@ -65,7 +67,8 @@ class R50WorkerDataset:
         pid = os.getpid()
         if self._pid != pid:
             self.close()
-            self._reader = RuntimeReader(cache_bytes=self.cache_bytes)
+            self._reader = RuntimeReader(cache_bytes=self.cache_bytes,
+                                         cache_kind=self.cache_kind)
             self._processor = load_openvla_processor(self.base_model, self.oft_root)
             self._pid = pid
         return self._reader, self._processor
@@ -77,9 +80,11 @@ class R50WorkerDataset:
         pixels, timing = reader.load_images(processor, path, int(frame), 3, CAMERAS,
                                             device="cpu")
         return {"index": int(index), "pixels": pixels.squeeze(0),
+                "worker_pid": os.getpid(),
                 "hdf5_s": timing["hdf5_read_s"],
                 "jpeg_preprocess_s": timing["jpeg_preprocess_s"],
-                "cache_hit": bool(timing["cache_hit"])}
+                "cache_hit": bool(timing["cache_hit"]),
+                "cache_evictions": int(timing["cache_evictions"])}
 
 
 def create_loader(dataset, workers: int, prefetch: int, pin_memory: bool):

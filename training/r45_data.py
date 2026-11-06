@@ -196,14 +196,18 @@ class RuntimeReader:
     """Formal-entry reader: worker/process-local HDF5 handles, bounded image cache, phase timing."""
 
     def __init__(self, cache_bytes=256 * 1024 * 1024, max_open_handles=24,
-                 batch_assembly="cat"):
+                 batch_assembly="cat", cache_kind="processed"):
         self.cache_bytes = int(cache_bytes)
         self.max_open_handles = int(max_open_handles)
         if self.cache_bytes < 0 or self.max_open_handles < 1:
             raise ValueError("cache_bytes must be >= 0 and max_open_handles must be >= 1")
         if batch_assembly not in ("cat", "preallocate_bf16"):
             raise ValueError("batch_assembly must be cat or preallocate_bf16")
+        if cache_kind not in ("none", "processed", "jpeg", "rgb"):
+            raise ValueError("invalid cache_kind")
         self.batch_assembly = batch_assembly
+        self.cache_kind = cache_kind
+        self.cache_evictions = 0
         self._handles = OrderedDict()
         self._images = OrderedDict()
         self._cache_bytes = 0
@@ -247,35 +251,55 @@ class RuntimeReader:
         if cams != 3:
             raise ValueError("R45 reader requires exactly 3 cameras")
         key = (os.fspath(path), int(t), tuple(camera_order[:cams]))
-        tiles = self._images.get(key)
+        cached = None if self.cache_kind == "none" else self._images.get(key)
         read_s = 0.0
         jpeg_s = 0.0
-        cache_hit = tiles is not None
+        cache_hit = cached is not None
         if cache_hit:
             self._images.move_to_end(key)
+            cached = cached[0]
+        if self.cache_kind == "processed" and cache_hit:
+            tiles = cached
         else:
-            h = self._handle(path)
-            tiles = []
-            for cam in camera_order[:cams]:
-                read_start = time.perf_counter()
-                raw = h["vision/" + cam + "/colors"][int(t)]
-                read_s += time.perf_counter() - read_start
-                decode_start = time.perf_counter()
-                img = cv2.imdecode(np.frombuffer(bytes(raw), np.uint8), cv2.IMREAD_COLOR)
-                if img is None:
-                    raise ValueError("JPEG decode failed for %s t=%d cam=%s" % (path, t, cam))
-                img = img[..., ::-1]
-                tiles.append(proc.image_processor.apply_transform(
-                    Image.fromarray(np.ascontiguousarray(img))
-                ))
-                jpeg_s += time.perf_counter() - decode_start
-            size = sum(int(x.numel() * x.element_size()) for x in tiles)
-            if size <= self.cache_bytes:
-                self._images[key] = tiles
-                self._cache_bytes += size
-                while self._cache_bytes > self.cache_bytes and self._images:
-                    _, old_tiles = self._images.popitem(last=False)
-                    self._cache_bytes -= sum(int(x.numel() * x.element_size()) for x in old_tiles)
+            tiles, encoded, rgb = [], [], []
+            for cam_index, cam in enumerate(camera_order[:cams]):
+                if self.cache_kind == "rgb" and cache_hit:
+                    img = cached[cam_index]
+                else:
+                    if self.cache_kind == "jpeg" and cache_hit:
+                        raw = cached[cam_index]
+                    else:
+                        read_start = time.perf_counter()
+                        raw = bytes(self._handle(path)["vision/" + cam + "/colors"][int(t)])
+                        read_s += time.perf_counter() - read_start
+                    encoded.append(raw)
+                    decode_start = time.perf_counter()
+                    bgr = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_COLOR)
+                    if bgr is None:
+                        raise ValueError("JPEG decode failed for %s t=%d cam=%s" % (path, t, cam))
+                    img = np.ascontiguousarray(bgr[..., ::-1])
+                    jpeg_s += time.perf_counter() - decode_start
+                rgb.append(img)
+                transform_start = time.perf_counter()
+                tiles.append(proc.image_processor.apply_transform(Image.fromarray(img)))
+                jpeg_s += time.perf_counter() - transform_start
+            if not cache_hit and self.cache_kind != "none":
+                if self.cache_kind == "processed":
+                    value = tiles
+                    size = sum(int(x.numel() * x.element_size()) for x in value)
+                elif self.cache_kind == "jpeg":
+                    value = encoded
+                    size = sum(len(x) for x in value)
+                else:
+                    value = rgb
+                    size = sum(int(x.nbytes) for x in value)
+                if size <= self.cache_bytes:
+                    self._images[key] = (value, size)
+                    self._cache_bytes += size
+                    while self._cache_bytes > self.cache_bytes:
+                        _, (_, old_size) = self._images.popitem(last=False)
+                        self._cache_bytes -= old_size
+                        self.cache_evictions += 1
         transfer_start = time.perf_counter()
         if self.batch_assembly == "cat":
             pixel_values = torch.cat(tiles, dim=0).unsqueeze(0).to(torch.bfloat16).to(device)
@@ -297,6 +321,9 @@ class RuntimeReader:
             "cpu_tensor_preparation_s": 0.0 if is_cuda else transfer_s,
             "transfer_device": str(device),
             "cache_hit": cache_hit,
+            "cache_kind": self.cache_kind,
+            "cache_evictions": self.cache_evictions,
+            "cache_bytes": self._cache_bytes,
             "timing_kind": "host_wall_no_cuda_event",
         }
 
