@@ -1,0 +1,8 @@
+test_invalid_memory_or_prefetch_is_rejected (test_r50_data_pipeline.R50DataPipelineTests) ... ok
+test_reader_is_not_serialized_into_worker (test_r50_data_pipeline.R50DataPipelineTests) ... ok
+test_spawn_loader_preserves_exact_order_and_uses_workers (test_r50_data_pipeline.R50DataPipelineTests) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 3.245s
+
+OK

@@ -1,0 +1,8 @@
+test_no_replacement_visits_every_entry_once (test_r51_sampling.SamplingTests) ... ok
+test_replacement_is_reproducible_and_epoch_length_fixed (test_r51_sampling.SamplingTests) ... ok
+test_third_task_rejected (test_r51_sampling.SamplingTests) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK
